@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>B&B Admin - Panel de Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f1f5f9;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+        .header {
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header__container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header__logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            text-decoration: none;
+        }
+        .header__logo span { color: #2980b9; }
+        .header__user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header__user .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1a1a2e;
+        }
+        .header__user button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .header__user button:hover { text-decoration: underline; }
+
+        .main-content { display: flex; gap: 30px; margin-top: 30px; }
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+        .sidebar__title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1a1a2e;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+        }
+        .sidebar__nav ul { list-style: none; }
+        .sidebar__nav li { margin-bottom: 6px; }
+        .sidebar__nav a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .sidebar__nav a:hover,
+        .sidebar__nav a.active {
+            background-color: #f1f5f9;
+            color: #2980b9;
+            font-weight: 500;
+        }
+
+        .content { flex: 1; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .filters {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .filters label { font-weight: 500; font-size: 0.9rem; color: #1a1a2e; }
+        .filters input, .filters select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: white;
+        }
+        .filters input:focus, .filters select:focus { border-color: #2980b9; }
+        .filters button {
+            padding: 8px 20px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filters button:hover { background: #1f6da9; }
+        .filters .btn-clear { background: #94a3b8; }
+        .filters .btn-clear:hover { background: #64748b; }
+        .filters .btn-success { background: #059669; }
+        .filters .btn-success:hover { background: #047857; }
+
+        .list-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .list-item:hover { background: #f8fafc; }
+        .list-item:last-child { border-bottom: none; }
+        .list-item .left { flex: 1; min-width: 150px; }
+        .list-item .left .title { font-weight: 600; }
+        .list-item .left .sub {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .list-item .center {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .list-item .right {
+            text-align: right;
+            font-weight: 600;
+            color: #2980b9;
+        }
+        .list-item .right .small { font-size: 0.8rem; font-weight: 400; color: #64748b; }
+        .estado-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .estado-pendiente { background: #fef3c7; color: #d97706; }
+        .estado-en-camino { background: #dbeafe; color: #2563eb; }
+        .estado-entregado { background: #d1fae5; color: #059669; }
+
+        .estado-select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+            background: white;
+            cursor: pointer;
+            outline: none;
+        }
+        .estado-select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-whatsapp:hover { background: #1da851; }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid #f1f5f9;
+            transition: 0.2s;
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .product-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+        .product-card h4 {
+            font-size: 0.9rem;
+            margin: 8px 0 4px;
+            color: #1a1a2e;
+        }
+        .product-card .price {
+            font-weight: 700;
+            color: #2980b9;
+            font-size: 1rem;
+        }
+        .product-card .stock {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .product-card .category {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+        .product-card .actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        .product-card .actions button {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .product-card .actions .btn-edit {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .product-card .actions .btn-edit:hover { background: #bfdbfe; }
+        .product-card .actions .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .product-card .actions .btn-delete:hover { background: #fecaca; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        .modal .close-modal:hover { color: #1a1a2e; }
+        .modal h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+        .modal .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .modal .detail-row:last-child { border-bottom: none; }
+        .modal .detail-row .label { font-weight: 500; color: #64748b; }
+        .modal .detail-row .value { font-weight: 600; color: #1a1a2e; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: #1a1a2e;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #2980b9;
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-group .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group .file-input-wrapper input[type="file"] { flex: 1; }
+        .form-group .file-input-wrapper .file-name {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .btn-primary {
+            padding: 10px 24px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-primary:hover { background: #1f6da9; }
+        .btn-danger {
+            padding: 10px 24px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-success {
+            padding: 10px 24px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-success:hover { background: #047857; }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+        .login-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 380px;
+        }
+        .login-box h1 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #1a1a2e;
+        }
+        .login-box h1 span { color: #2980b9; }
+        .login-box .form-group { margin-bottom: 16px; }
+        .login-box .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #1a1a2e;
+        }
+        .login-box .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .login-box .form-group input:focus { border-color: #2980b9; }
+        .login-box .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-box .btn-primary:hover { background: #1f6da9; }
+        .login-box .error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+        .login-box .error.show { display: block; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { flex-direction: column; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .filters { flex-direction: column; align-items: stretch; }
+            .header__container { flex-wrap: wrap; }
+            .form-row { grid-template-columns: 1fr; }
+            .list-item { flex-direction: column; align-items: stretch; }
+            .list-item .center { justify-content: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .product-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        .loading .spinner {
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid #2980b9;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== LOGIN ========== -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-box">
+            <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="admin@email.com" />
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" />
+            </div>
+            <div id="loginError" class="error"></div>
+            <button class="btn-primary" id="loginBtn">Acceder</button>
+        </div>
+    </div>
+
+    <!-- ========== PANEL PRINCIPAL ========== -->
+    <div id="appContainer" style="display:none;">
+        <header class="header">
+            <div class="container header__container">
+                <a href="#" class="header__logo">B<span>&amp;</span>B <span style="font-size:0.9rem; color:#64748b;">Admin</span></a>
+                <div class="header__user">
+                    <span class="user-name" id="adminUserName">Administrador</span>
+                    <button id="logoutBtn">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container main-content">
+            <aside class="sidebar">
+                <div class="sidebar__title">Menú</div>
+                <nav class="sidebar__nav">
+                    <ul>
+                        <li><a class="active" data-tab="dashboard">📊 Dashboard</a></li>
+                        <li><a data-tab="inventario">📦 Inventario</a></li>
+                        <li><a data-tab="ventas">💰 Ventas</a></li>
+                        <li><a data-tab="domicilios">🛵 Domicilios</a></li>
+                        <li><a data-tab="reportes">📈 Reportes</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            <section class="content">
+                <!-- DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content active">
+                    <h2 style="margin-bottom:20px;">📊 Resumen General</h2>
+                    <div class="stats-grid" id="dashboardStats">
+                        <div class="stat-card"><div class="number" id="statVentas">-</div><div class="label">Ventas totales</div></div>
+                        <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">Ingresos totales</div></div>
+                        <div class="stat-card"><div class="number" id="statGanancia">-</div><div class="label">Ganancia total</div></div>
+                        <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
+                    </div>
+                    <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom:10px;">Últimas ventas</h3>
+                        <div id="ultimasVentas"></div>
+                    </div>
+                </div>
+
+                <!-- INVENTARIO -->
+                <div id="tab-inventario" class="tab-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+                        <h2 style="margin:0;">📦 Inventario</h2>
+                        <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
+                    </div>
+                    <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px;" />
+                        <select id="invCategory" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px;">
+                            <option value="Todas">Todas las categorías</option>
+                        </select>
+                        <button id="invRefreshBtn" style="padding:8px 20px; background:#2980b9; color:white; border:none; border-radius:8px; cursor:pointer;">🔄 Refrescar</button>
+                    </div>
+                    <div class="list-container" id="inventarioContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando productos...</div>
+                    </div>
+                </div>
+
+                <!-- VENTAS -->
+                <div id="tab-ventas" class="tab-content">
+                    <h2 style="margin-bottom:15px;">💰 Ventas</h2>
+                    <div class="filters">
+                        <div><label>Desde:</label> <input type="date" id="ventasFechaDesde" /></div>
+                        <div><label>Hasta:</label> <input type="date" id="ventasFechaHasta" /></div>
+                        <div><label>Tipo:</label>
+                            <select id="ventasTipo">
+                                <option value="Todos">Todos</option>
+                                <option value="Local">Local</option>
+                                <option value="Domicilio">Domicilio</option>
+                            </select>
+                        </div>
+                        <button id="ventasFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="ventasLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="ventasContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando ventas...</div>
+                    </div>
+                </div>
+
+                <!-- DOMICILIOS -->
+                <div id="tab-domicilios" class="tab-content">
+                    <h2 style="margin-bottom:15px;">🛵 Domicilios</h2>
+                    <div class="filters">
+                        <div><label>Estado:</label>
+                            <select id="domFiltroEstado">
+                                <option value="Todos">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En camino">En camino</option>
+                                <option value="Entregado">Entregado</option>
+                            </select>
+                        </div>
+                        <button id="domFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="domLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="domiciliosContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando domicilios...</div>
+                    </div>
+                </div>
+
+                <!-- REPORTES -->
+                <div id="tab-reportes" class="tab-content">
+                    <h2 style="margin-bottom:15px;">📈 Reportes de Ventas</h2>
+                    <div class="filters">
+                        <div><label>Desde:</label> <input type="date" id="repFechaDesde" /></div>
+                        <div><label>Hasta:</label> <input type="date" id="repFechaHasta" /></div>
+                        <div><label>Tipo:</label>
+                            <select id="repTipo">
+                                <option value="Todos">Todos</option>
+                                <option value="Local">Local</option>
+                                <option value="Domicilio">Domicilio</option>
+                            </select>
+                        </div>
+                        <button id="repFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="display:flex; gap:30px; flex-wrap:wrap;">
+                            <div><strong>Total ventas:</strong> <span id="repTotalVentas">$0.00</span></div>
+                            <div><strong>Ganancia total:</strong> <span id="repGananciaTotal">$0.00</span></div>
+                            <div><strong>N° ventas:</strong> <span id="repCount">0</span></div>
+                        </div>
+                    </div>
+                    <div class="list-container" id="reportesContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando reportes...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DETALLE ========== -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <button class="close-modal" id="closeDetailModal">✕</button>
+            <div id="detailContent">
+                <h2>Detalle</h2>
+                <div id="detailBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL PRODUCTO ========== -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal" style="max-width:650px;">
+            <button class="close-modal" id="closeProductModal">✕</button>
+            <h2 id="productModalTitle">Nuevo Producto</h2>
+            <form id="productForm" enctype="multipart/form-data">
+                <input type="hidden" id="productId" value="" />
+                <div class="form-group">
+                    <label>Nombre *</label>
+                    <input type="text" id="prodNombre" required />
+                </div>
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="prodCategoria" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Código de Barras</label>
+                    <input type="text" id="prodCodigo" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio Costo *</label>
+                        <input type="number" id="prodCosto" step="0.01" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Venta *</label>
+                        <input type="number" id="prodVenta" step="0.01" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Precio Oferta (opcional)</label>
+                    <input type="number" id="prodOferta" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label>Stock *</label>
+                    <input type="number" id="prodStock" required />
+                </div>
+                <div class="form-group">
+                    <label>Detalles (descripción)</label>
+                    <textarea id="prodDetalles" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Foto</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodFoto" accept="image/*" />
+                        <span class="file-name" id="prodFotoNombre">Ningún archivo seleccionado</span>
+                    </div>
+                    <div id="prodFotoPreview" style="margin-top:8px; display:none;">
+                        <img id="prodFotoImg" style="max-width:100px; max-height:100px; border-radius:8px;" />
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
+                    <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
+                    <button type="button" class="btn-clear" id="productCancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ====================== JAVASCRIPT =========================== -->
+    <!-- ============================================================ -->
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const POCKETBASE_URL = "https://tienditabyb.onrender.com";
+        let authToken = null;
+        let userData = null;
+        let productosCache = [];
+        let ventasCache = [];
+        let domiciliosCache = [];
+        let categoriasCache = [];
+
+        // ============================================================
+        // AUTH
+        // ============================================================
+        async function login(email, password) {
+            try {
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identity: email, password })
+                });
+                if (!resp.ok) {
+                    const error = await resp.json();
+                    throw new Error(error.message || 'Credenciales incorrectas');
+                }
+                const data = await resp.json();
+                authToken = data.token;
+                userData = data.record;
+                localStorage.setItem('admin_token', authToken);
+                localStorage.setItem('admin_user', JSON.stringify(userData));
+                return true;
+            } catch (e) {
+                throw e;
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            userData = null;
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            const user = localStorage.getItem('admin_user');
+            if (token && user) {
+                authToken = token;
+                userData = JSON.parse(user);
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Admin';
+                initApp();
+                return true;
+            }
+            return false;
+        }
+
+        // ============================================================
+        // PETICIONES CON AUTENTICACIÓN
+        // ============================================================
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+            };
+            const config = {
+                ...options,
+                headers: { ...headers, ...(options.headers || {}) }
+            };
+            const resp = await fetch(url, config);
+            if (resp.status === 401) {
+                logout();
+                throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+            }
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.message || `Error ${resp.status}`);
+            }
+            return resp.json();
+        }
+
+        // ============================================================
+        // CARGAR DATOS
+        // ============================================================
+        async function cargarCategorias() {
+            try {
+                const data = await apiRequest('Categoria/records');
+                categoriasCache = data.items.map(c => c.nombre).filter(Boolean);
+                return categoriasCache;
+            } catch (e) {
+                console.error('Error cargando categorías:', e);
+                return [];
+            }
+        }
+
+        async function cargarProductos() {
+            try {
+                const data = await apiRequest('productos/records?perPage=200');
+                productosCache = data.items;
+                return productosCache;
+            } catch (e) {
+                console.error('Error cargando productos:', e);
+                return [];
+            }
+        }
+
+        async function cargarVentas() {
+            try {
+                const data = await apiRequest('Ventas/records?sort=-created&perPage=200');
+                ventasCache = data.items;
+                return ventasCache;
+            } catch (e) {
+                console.error('Error cargando ventas:', e);
+                return [];
+            }
+        }
+
+        async function cargarDomicilios() {
+            try {
+                const data = await apiRequest('domicilios/records?sort=-created&perPage=200');
+                domiciliosCache = data.items;
+                return domiciliosCache;
+            } catch (e) {
+                console.error('Error cargando domicilios:', e);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // NORMALIZACIÓN (para ganancias)
+        // ============================================================
+        function normalizarNombre(nombre) {
+            if (!nombre) return "";
+            let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
+            return limpio.toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function extraerNombresProductos(texto) {
+            if (!texto) return [];
+            return texto.split(',').map(p => p.trim()).filter(Boolean);
+        }
+
+        function calcularGananciaVenta(venta) {
+            const total = parseFloat(venta.total || 0);
+            const productosStr = venta.productos_json || '';
+            const nombres = extraerNombresProductos(productosStr);
+            let sumaCostos = 0;
+            for (let nombre of nombres) {
+                const clave = normalizarNombre(nombre);
+                const prod = productosCache.find(p => normalizarNombre(p.Nombre) === clave);
+                if (prod) {
+                    const costo = parseFloat(prod.Precio_Costo || 0);
+                    sumaCostos += costo;
+                }
+            }
+            return total - sumaCostos;
+        }
+
+        // ============================================================
+        // RENDERIZAR DASHBOARD
+        // ============================================================
+        function renderDashboard(ventas, domicilios) {
+            const totalVentas = ventas.length;
+            const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
+            let gananciaTotal = 0;
+            for (const v of ventas) {
+                gananciaTotal += calcularGananciaVenta(v);
+            }
+            const pendientes = domicilios.filter(d => d.Estado === 'Pendiente').length;
+
+            document.getElementById('statVentas').textContent = totalVentas;
+            document.getElementById('statTotal').textContent = `$${ingresos.toFixed(2)}`;
+            document.getElementById('statGanancia').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('statDomicilios').textContent = pendientes;
+
+            const ultimas = ventas.slice(0, 5);
+            const container = document.getElementById('ultimasVentas');
+            if (ultimas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas recientes.</div>';
+                return;
+            }
+            let html = '';
+            for (const v of ultimas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${v.Tipo || 'Local'}</div>
+                        </div>
+                        <div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDERIZAR INVENTARIO
+        // ============================================================
+        function renderInventario(productos, categoriaFiltro = 'Todas', busqueda = '') {
+            const container = document.getElementById('inventarioContainer');
+            let filtrados = productos;
+            if (categoriaFiltro !== 'Todas') {
+                filtrados = filtrados.filter(p => (p.Categoria || 'General') === categoriaFiltro);
+            }
+            if (busqueda) {
+                const q = busqueda.toLowerCase();
+                filtrados = filtrados.filter(p => (p.Nombre || '').toLowerCase().includes(q) || (p.Codigo_de_Barras || '').includes(q));
+            }
+
+            if (filtrados.length === 0) {
+                container.innerHTML = '<div class="empty">No se encontraron productos.</div>';
+                return;
+            }
+
+            let html = '<div class="product-grid">';
+            for (const p of filtrados) {
+                const fotoUrl = p.Foto ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto}` : '';
+                const precio = parseFloat(p.Precio_Venta || 0);
+                const oferta = parseFloat(p.Precio_Oferta || 0);
+                const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
+                const stock = parseInt(p.Stock || 0);
+                html += `
+                    <div class="product-card">
+                        <img src="${fotoUrl}" alt="${p.Nombre || 'Producto'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'" />
+                        <h4>${p.Nombre || 'Sin nombre'}</h4>
+                        <div class="price">$${precioFinal.toFixed(2)}</div>
+                        <div class="stock">📦 ${stock} uds</div>
+                        <div class="category">${p.Categoria || 'General'}</div>
+                        <div class="actions">
+                            <button class="btn-edit" onclick="editarProducto('${p.id}')">✏️ Editar</button>
+                            <button class="btn-delete" onclick="eliminarProducto('${p.id}')">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDERIZAR VENTAS
+        // ============================================================
+        function renderVentas(ventas) {
+            const container = document.getElementById('ventasContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas.</div>';
+                return;
+            }
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDERIZAR DOMICILIOS (con corrección para tipo de teléfono)
+        // ============================================================
+        function renderDomicilios(domicilios) {
+            const container = document.getElementById('domiciliosContainer');
+            if (domicilios.length === 0) {
+                container.innerHTML = '<div class="empty">No hay domicilios.</div>';
+                return;
+            }
+            let html = '';
+            for (const d of domicilios) {
+                const estado = d.Estado || 'Pendiente';
+                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
+                                   estado === 'En camino' ? 'estado-en-camino' : 'estado-entregado';
+                const fecha = d.created ? new Date(d.created).toLocaleString('es-ES') : 'Sin fecha';
+                // Convertir teléfono a string para mostrarlo
+                let telefono = d.Telefono;
+                if (telefono === null || telefono === undefined) telefono = '';
+                telefono = String(telefono);
+                const isEntregado = (estado === 'Entregado');
+
+                html += `
+                    <div class="list-item" id="dom-item-${d.id}">
+                        <div class="left">
+                            <div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div>
+                            <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div>
+                            <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <select class="estado-select" id="estado-select-${d.id}" 
+                                    onchange="cambiarEstadoDomicilio('${d.id}', this.value)"
+                                    ${isEntregado ? 'disabled' : ''}>
+                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
+                                <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                            </select>
+                            <button class="btn-whatsapp" onclick="enviarWhatsApp('${d.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // CAMBIAR ESTADO DOMICILIO (siempre pregunta por WhatsApp)
+        // ============================================================
+        async function cambiarEstadoDomicilio(id, nuevoEstado) {
+            try {
+                const domActual = domiciliosCache.find(d => d.id === id);
+                if (!domActual) {
+                    alert('Domicilio no encontrado.');
+                    return;
+                }
+
+                if (domActual.Estado === 'Entregado') {
+                    alert('Este domicilio ya fue entregado y no se puede modificar.');
+                    const select = document.getElementById(`estado-select-${id}`);
+                    if (select) select.value = 'Entregado';
+                    return;
+                }
+
+                await apiRequest(`domicilios/records/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ Estado: nuevoEstado })
+                });
+
+                domActual.Estado = nuevoEstado;
+                await cargarDomicilios();
+                renderDomicilios(domiciliosCache);
+                renderDashboard(ventasCache, domiciliosCache);
+
+                const enviar = confirm(`✅ Estado actualizado a "${nuevoEstado}".\n¿Deseas notificar al cliente por WhatsApp?`);
+                if (enviar) {
+                    enviarWhatsApp(id);
+                }
+
+            } catch (e) {
+                alert('Error al cambiar estado: ' + e.message);
+                const select = document.getElementById(`estado-select-${id}`);
+                if (select) {
+                    const dom = domiciliosCache.find(d => d.id === id);
+                    if (dom) select.value = dom.Estado;
+                }
+            }
+        }
+
+        // ============================================================
+        // ENVIAR WHATSAPP (corregido: convertir teléfono a string)
+        // ============================================================
+        function enviarWhatsApp(id) {
+            const dom = domiciliosCache.find(d => d.id === id);
+            if (!dom) {
+                alert('Domicilio no encontrado.');
+                return;
+            }
+            // Convertir a string y validar
+            let telefono = dom.Telefono;
+            if (telefono === null || telefono === undefined) {
+                alert('❌ El cliente no tiene número de teléfono registrado.');
+                return;
+            }
+            telefono = String(telefono).trim();
+            if (telefono === '') {
+                alert('❌ El número de teléfono está vacío.');
+                return;
+            }
+            const cliente = dom.Cliente_Nombre || 'Cliente';
+            const estado = dom.Estado || 'Pendiente';
+            const pedidoId = dom.id.slice(-6);
+
+            let mensaje = `Hola ${cliente} 👋\n`;
+            mensaje += `Tu pedido #${pedidoId} ha cambiado de estado a: *${estado}*.\n`;
+            if (estado === 'Pendiente') {
+                mensaje += 'Estamos preparando tu pedido. 📦\n';
+            } else if (estado === 'En camino') {
+                mensaje += 'Tu pedido está en camino. 🚚\n';
+            } else if (estado === 'Entregado') {
+                mensaje += 'Tu pedido ha sido entregado. ¡Disfrútalo! 🎉\n';
+            }
+            mensaje += '\nGracias por comprar en B&B. 🙌';
+
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        // ============================================================
+        // RENDERIZAR REPORTES
+        // ============================================================
+        function renderReportes(ventas) {
+            const container = document.getElementById('reportesContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
+                return;
+            }
+            let totalIngresos = 0;
+            let gananciaTotal = 0;
+            for (const v of ventas) {
+                totalIngresos += parseFloat(v.total || 0);
+                gananciaTotal += calcularGananciaVenta(v);
+            }
+            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('repCount').textContent = ventas.length;
+
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // DETALLES (MODAL)
+        // ============================================================
+        async function verDetalleVenta(id) {
+            try {
+                const data = await apiRequest(`Ventas/records/${id}`);
+                const productos = data.productos_json || 'Sin productos';
+                const total = parseFloat(data.total || 0);
+                const fecha = data.fecha ? new Date(data.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = data.Tipo || 'Local';
+                const ganancia = calcularGananciaVenta(data);
+
+                let body = `
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Tipo</span><span class="value">${tipo}</span></div>
+                    <div class="detail-row"><span class="label">Productos</span><span class="value">${productos}</span></div>
+                    <div class="detail-row"><span class="label">Total</span><span class="value">$${total.toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Ganancia</span><span class="value">$${ganancia.toFixed(2)}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        async function verDetalleDomicilio(id) {
+            try {
+                const data = await apiRequest(`domicilios/records/${id}`);
+                const cliente = data.Cliente_Nombre || 'Sin nombre';
+                const direccion = data.Direccion_Entrega || 'Sin dirección';
+                const telefono = data.Telefono || 'Sin teléfono';
+                const estado = data.Estado || 'Pendiente';
+                const detalles = data.Detalles || 'Sin detalles';
+                const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
+
+                let body = `
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${cliente}</span></div>
+                    <div class="detail-row"><span class="label">Dirección</span><span class="value">${direccion}</span></div>
+                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${telefono}</span></div>
+                    <div class="detail-row"><span class="label">Estado</span><span class="value">${estado}</span></div>
+                    <div class="detail-row"><span class="label">Detalles</span><span class="value">${detalles}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        document.getElementById('closeDetailModal').addEventListener('click', () => {
+            document.getElementById('detailModal').classList.remove('active');
+        });
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('detailModal').classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        // CRUD PRODUCTOS
+        // ============================================================
+        function abrirModalProducto(producto = null) {
+            const modal = document.getElementById('productModal');
+            const form = document.getElementById('productForm');
+            form.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('prodFotoPreview').style.display = 'none';
+            document.getElementById('productDeleteBtn').style.display = 'none';
+
+            const catSelect = document.getElementById('prodCategoria');
+            catSelect.innerHTML = '';
+            for (const cat of categoriasCache) {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                catSelect.appendChild(opt);
+            }
+
+            if (producto) {
+                document.getElementById('productModalTitle').textContent = '✏️ Editar Producto';
+                document.getElementById('productId').value = producto.id;
+                document.getElementById('prodNombre').value = producto.Nombre || '';
+                if (producto.Categoria && categoriasCache.includes(producto.Categoria)) {
+                    document.getElementById('prodCategoria').value = producto.Categoria;
+                }
+                document.getElementById('prodCodigo').value = producto.Codigo_de_Barras || '';
+                document.getElementById('prodCosto').value = producto.Precio_Costo || '';
+                document.getElementById('prodVenta').value = producto.Precio_Venta || '';
+                document.getElementById('prodOferta').value = producto.Precio_Oferta || '';
+                document.getElementById('prodStock').value = producto.Stock || '';
+                document.getElementById('prodDetalles').value = producto.Detalles || '';
+                document.getElementById('productDeleteBtn').style.display = 'inline-block';
+                if (producto.Foto) {
+                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto}`;
+                    document.getElementById('prodFotoImg').src = url;
+                    document.getElementById('prodFotoPreview').style.display = 'block';
+                }
+            } else {
+                document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function cerrarModalProducto() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
+        document.getElementById('productCancelBtn').addEventListener('click', cerrarModalProducto);
+        document.getElementById('productModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) cerrarModalProducto();
+        });
+
+        document.getElementById('prodFoto').addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (file) {
+                document.getElementById('prodFotoNombre').textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('prodFotoImg').src = ev.target.result;
+                    document.getElementById('prodFotoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
+                document.getElementById('prodFotoPreview').style.display = 'none';
+            }
+        });
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('productId').value;
+            const nombre = document.getElementById('prodNombre').value.trim();
+            const categoria = document.getElementById('prodCategoria').value;
+            const codigo = document.getElementById('prodCodigo').value.trim();
+            const costo = document.getElementById('prodCosto').value;
+            const venta = document.getElementById('prodVenta').value;
+            const oferta = document.getElementById('prodOferta').value || '0';
+            const stock = document.getElementById('prodStock').value;
+            const detalles = document.getElementById('prodDetalles').value.trim();
+            const fotoFile = document.getElementById('prodFoto').files[0];
+
+            if (!nombre || !categoria || !costo || !venta || stock === '') {
+                alert('Por favor completa todos los campos obligatorios.');
+                return;
+            }
+
+            const data = {
+                Nombre: nombre,
+                Categoria: categoria,
+                Codigo_de_Barras: codigo,
+                Precio_Costo: costo,
+                Precio_Venta: venta,
+                Precio_Oferta: oferta,
+                Stock: stock,
+                Detalles: detalles
+            };
+
+            try {
+                let response;
+                if (id) {
+                    if (fotoFile) {
+                        const formData = new FormData();
+                        for (const key in data) formData.append(key, data[key]);
+                        formData.append('Foto', fotoFile);
+                        response = await apiRequest(`productos/records/${id}`, {
+                            method: 'PATCH',
+                            body: formData,
+                            headers: {}
+                        });
+                    } else {
+                        response = await apiRequest(`productos/records/${id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(data)
+                        });
+                    }
+                } else {
+                    if (fotoFile) {
+                        const formData = new FormData();
+                        for (const key in data) formData.append(key, data[key]);
+                        formData.append('Foto', fotoFile);
+                        response = await apiRequest('productos/records', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {}
+                        });
+                    } else {
+                        response = await apiRequest('productos/records', {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        });
+                    }
+                }
+                alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
+                cerrarModalProducto();
+                await cargarProductos();
+                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            }
+        });
+
+        async function eliminarProducto(id) {
+            if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+            try {
+                await apiRequest(`productos/records/${id}`, { method: 'DELETE' });
+                alert('Producto eliminado.');
+                await cargarProductos();
+                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+            } catch (e) {
+                alert('Error al eliminar: ' + e.message);
+            }
+        }
+
+        function editarProducto(id) {
+            const producto = productosCache.find(p => p.id === id);
+            if (producto) {
+                abrirModalProducto(producto);
+            } else {
+                alert('Producto no encontrado.');
+            }
+        }
+
+        document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
+
+        // ============================================================
+        // INICIALIZACIÓN Y EVENTOS
+        // ============================================================
+        async function initApp() {
+            try {
+                await cargarCategorias();
+                await cargarProductos();
+                await cargarVentas();
+                await cargarDomicilios();
+
+                renderDashboard(ventasCache, domiciliosCache);
+                renderInventario(productosCache);
+
+                const catSelectInv = document.getElementById('invCategory');
+                catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                for (const cat of categoriasCache) {
+                    catSelectInv.innerHTML += `<option value="${cat}">${cat}</option>`;
+                }
+
+                renderVentas(ventasCache);
+                renderDomicilios(domiciliosCache);
+                renderReportes(ventasCache);
+
+                document.querySelectorAll('.sidebar__nav a').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const tab = this.dataset.tab;
+                        document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
+                        this.classList.add('active');
+                        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                        document.getElementById(`tab-${tab}`).classList.add('active');
+                    });
+                });
+
+                document.getElementById('invSearch').addEventListener('input', function() {
+                    renderInventario(productosCache, document.getElementById('invCategory').value, this.value);
+                });
+                document.getElementById('invCategory').addEventListener('change', function() {
+                    renderInventario(productosCache, this.value, document.getElementById('invSearch').value);
+                });
+                document.getElementById('invRefreshBtn').addEventListener('click', async function() {
+                    await cargarProductos();
+                    renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+                });
+
+                document.getElementById('ventasFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosVentas();
+                });
+                document.getElementById('ventasLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('ventasFechaDesde').value = '';
+                    document.getElementById('ventasFechaHasta').value = '';
+                    document.getElementById('ventasTipo').value = 'Todos';
+                    renderVentas(ventasCache);
+                });
+
+                function aplicarFiltrosVentas() {
+                    let filtradas = [...ventasCache];
+                    const desde = document.getElementById('ventasFechaDesde').value;
+                    const hasta = document.getElementById('ventasFechaHasta').value;
+                    const tipo = document.getElementById('ventasTipo').value;
+                    if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
+                    if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+                    if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
+                    renderVentas(filtradas);
+                }
+
+                document.getElementById('domFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosDomicilios();
+                });
+                document.getElementById('domLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('domFiltroEstado').value = 'Todos';
+                    renderDomicilios(domiciliosCache);
+                });
+
+                function aplicarFiltrosDomicilios() {
+                    const estado = document.getElementById('domFiltroEstado').value;
+                    let filtrados = [...domiciliosCache];
+                    if (estado !== 'Todos') filtrados = filtrados.filter(d => (d.Estado || 'Pendiente') === estado);
+                    renderDomicilios(filtrados);
+                }
+
+                document.getElementById('repFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosReportes();
+                });
+                document.getElementById('repLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('repFechaDesde').value = '';
+                    document.getElementById('repFechaHasta').value = '';
+                    document.getElementById('repTipo').value = 'Todos';
+                    renderReportes(ventasCache);
+                });
+
+                function aplicarFiltrosReportes() {
+                    let filtradas = [...ventasCache];
+                    const desde = document.getElementById('repFechaDesde').value;
+                    const hasta = document.getElementById('repFechaHasta').value;
+                    const tipo = document.getElementById('repTipo').value;
+                    if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
+                    if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+                    if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
+                    renderReportes(filtradas);
+                }
+
+            } catch (e) {
+                console.error('Error inicializando app:', e);
+                alert('Error al cargar datos: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            errorEl.classList.remove('show');
+            errorEl.textContent = '';
+            if (!email || !password) {
+                errorEl.textContent = 'Ingresa email y contraseña.';
+                errorEl.classList.add('show');
+                return;
+            }
+            try {
+                await login(email, password);
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Admin';
+                initApp();
+            } catch (e) {
+                errorEl.textContent = e.message || 'Error al iniciar sesión.';
+                errorEl.classList.add('show');
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+        document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // ============================================================
+        // INICIO - VERIFICAR SESIÓN
+        // ============================================================
+        if (!checkAuth()) {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
