@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* (Mismo CSS que tenías, no lo repito para ahorrar espacio, pero inclúyelo completo) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -16,7 +17,6 @@
             min-height: 100vh;
         }
         .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
-
         .header {
             background: #ffffff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -58,7 +58,6 @@
             font-size: 0.9rem;
         }
         .header__user button:hover { text-decoration: underline; }
-
         .main-content { display: flex; gap: 30px; margin-top: 30px; }
         .sidebar {
             width: 220px;
@@ -97,9 +96,7 @@
             color: #2980b9;
             font-weight: 500;
         }
-
         .content { flex: 1; }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -123,7 +120,6 @@
             color: #64748b;
             margin-top: 4px;
         }
-
         .filters {
             background: white;
             padding: 15px 20px;
@@ -160,7 +156,6 @@
         .filters .btn-clear:hover { background: #64748b; }
         .filters .btn-success { background: #059669; }
         .filters .btn-success:hover { background: #047857; }
-
         .list-container {
             background: white;
             border-radius: 12px;
@@ -182,21 +177,9 @@
         .list-item:last-child { border-bottom: none; }
         .list-item .left { flex: 1; min-width: 150px; }
         .list-item .left .title { font-weight: 600; }
-        .list-item .left .sub {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        .list-item .center {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .list-item .right {
-            text-align: right;
-            font-weight: 600;
-            color: #2980b9;
-        }
+        .list-item .left .sub { font-size: 0.85rem; color: #64748b; }
+        .list-item .center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .list-item .right { text-align: right; font-weight: 600; color: #2980b9; }
         .list-item .right .small { font-size: 0.8rem; font-weight: 400; color: #64748b; }
         .estado-badge {
             display: inline-block;
@@ -209,7 +192,6 @@
         .estado-pendiente { background: #fef3c7; color: #d97706; }
         .estado-en-camino { background: #dbeafe; color: #2563eb; }
         .estado-entregado { background: #d1fae5; color: #059669; }
-
         .estado-select {
             padding: 4px 8px;
             border-radius: 6px;
@@ -219,10 +201,7 @@
             cursor: pointer;
             outline: none;
         }
-        .estado-select:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .estado-select:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-whatsapp {
             background: #25D366;
             color: white;
@@ -238,7 +217,6 @@
             gap: 4px;
         }
         .btn-whatsapp:hover { background: #1da851; }
-
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -263,30 +241,11 @@
             border-radius: 8px;
             background: #f1f5f9;
         }
-        .product-card h4 {
-            font-size: 0.9rem;
-            margin: 8px 0 4px;
-            color: #1a1a2e;
-        }
-        .product-card .price {
-            font-weight: 700;
-            color: #2980b9;
-            font-size: 1rem;
-        }
-        .product-card .stock {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-        .product-card .category {
-            font-size: 0.7rem;
-            color: #94a3b8;
-        }
-        .product-card .actions {
-            margin-top: 8px;
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-        }
+        .product-card h4 { font-size: 0.9rem; margin: 8px 0 4px; color: #1a1a2e; }
+        .product-card .price { font-weight: 700; color: #2980b9; font-size: 1rem; }
+        .product-card .stock { font-size: 0.75rem; color: #64748b; }
+        .product-card .category { font-size: 0.7rem; color: #94a3b8; }
+        .product-card .actions { margin-top: 8px; display: flex; gap: 6px; justify-content: center; }
         .product-card .actions button {
             padding: 4px 12px;
             border: none;
@@ -296,17 +255,10 @@
             font-weight: 600;
             transition: 0.2s;
         }
-        .product-card .actions .btn-edit {
-            background: #dbeafe;
-            color: #2563eb;
-        }
+        .product-card .actions .btn-edit { background: #dbeafe; color: #2563eb; }
         .product-card .actions .btn-edit:hover { background: #bfdbfe; }
-        .product-card .actions .btn-delete {
-            background: #fee2e2;
-            color: #dc2626;
-        }
+        .product-card .actions .btn-delete { background: #fee2e2; color: #dc2626; }
         .product-card .actions .btn-delete:hover { background: #fecaca; }
-
         .modal-overlay {
             display: none;
             position: fixed;
@@ -342,11 +294,7 @@
             color: #94a3b8;
         }
         .modal .close-modal:hover { color: #1a1a2e; }
-        .modal h2 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #1a1a2e;
-        }
+        .modal h2 { font-size: 1.5rem; margin-bottom: 15px; color: #1a1a2e; }
         .modal .detail-row {
             display: flex;
             justify-content: space-between;
@@ -356,7 +304,6 @@
         .modal .detail-row:last-child { border-bottom: none; }
         .modal .detail-row .label { font-weight: 500; color: #64748b; }
         .modal .detail-row .value { font-weight: 600; color: #1a1a2e; }
-
         .form-group { margin-bottom: 14px; }
         .form-group label {
             display: block;
@@ -374,9 +321,7 @@
             outline: none;
             font-family: inherit;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #2980b9;
-        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2980b9; }
         .form-group textarea { resize: vertical; min-height: 60px; }
         .form-group .file-input-wrapper {
             display: flex;
@@ -384,15 +329,8 @@
             gap: 10px;
         }
         .form-group .file-input-wrapper input[type="file"] { flex: 1; }
-        .form-group .file-input-wrapper .file-name {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+        .form-group .file-input-wrapper .file-name { font-size: 0.85rem; color: #64748b; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .btn-primary {
             padding: 10px 24px;
             background: #2980b9;
@@ -426,7 +364,6 @@
             transition: 0.3s;
         }
         .btn-success:hover { background: #047857; }
-
         .login-container {
             display: flex;
             align-items: center;
@@ -486,7 +423,6 @@
             text-align: center;
         }
         .login-box .error.show { display: block; }
-
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main-content { flex-direction: column; }
@@ -502,10 +438,8 @@
             .stats-grid { grid-template-columns: 1fr; }
             .product-grid { grid-template-columns: 1fr 1fr; }
         }
-
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         .loading {
             text-align: center;
             padding: 40px;
@@ -521,7 +455,6 @@
             margin: 0 auto 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .empty {
             text-align: center;
             padding: 40px;
@@ -679,58 +612,32 @@
         </div>
     </div>
 
-    <!-- ========== MODAL DETALLE ========== -->
+    <!-- ========== MODALES ========== -->
+    <!-- Modal Detalle -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="close-modal" id="closeDetailModal">✕</button>
-            <div id="detailContent">
-                <h2>Detalle</h2>
-                <div id="detailBody"></div>
-            </div>
+            <div id="detailContent"><h2>Detalle</h2><div id="detailBody"></div></div>
         </div>
     </div>
 
-    <!-- ========== MODAL PRODUCTO ========== -->
+    <!-- Modal Producto -->
     <div class="modal-overlay" id="productModal">
         <div class="modal" style="max-width:650px;">
             <button class="close-modal" id="closeProductModal">✕</button>
             <h2 id="productModalTitle">Nuevo Producto</h2>
             <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId" value="" />
-                <div class="form-group">
-                    <label>Nombre *</label>
-                    <input type="text" id="prodNombre" required />
-                </div>
-                <div class="form-group">
-                    <label>Categoría *</label>
-                    <select id="prodCategoria" required></select>
-                </div>
-                <div class="form-group">
-                    <label>Código de Barras</label>
-                    <input type="text" id="prodCodigo" />
-                </div>
+                <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
+                <div class="form-group"><label>Categoría *</label><select id="prodCategoria" required></select></div>
+                <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Precio Costo *</label>
-                        <input type="number" id="prodCosto" step="0.01" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Precio Venta *</label>
-                        <input type="number" id="prodVenta" step="0.01" required />
-                    </div>
+                    <div class="form-group"><label>Precio Costo *</label><input type="number" id="prodCosto" step="0.01" required /></div>
+                    <div class="form-group"><label>Precio Venta *</label><input type="number" id="prodVenta" step="0.01" required /></div>
                 </div>
-                <div class="form-group">
-                    <label>Precio Oferta (opcional)</label>
-                    <input type="number" id="prodOferta" step="0.01" />
-                </div>
-                <div class="form-group">
-                    <label>Stock *</label>
-                    <input type="number" id="prodStock" required />
-                </div>
-                <div class="form-group">
-                    <label>Detalles (descripción)</label>
-                    <textarea id="prodDetalles" rows="2"></textarea>
-                </div>
+                <div class="form-group"><label>Precio Oferta (opcional)</label><input type="number" id="prodOferta" step="0.01" /></div>
+                <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
+                <div class="form-group"><label>Detalles (descripción)</label><textarea id="prodDetalles" rows="2"></textarea></div>
                 <div class="form-group">
                     <label>Foto</label>
                     <div class="file-input-wrapper">
@@ -766,7 +673,7 @@
         let categoriasCache = [];
 
         // ============================================================
-        // AUTH
+        // AUTH CON VALIDACIÓN DE CORREO
         // ============================================================
         async function login(email, password) {
             try {
@@ -780,6 +687,10 @@
                     throw new Error(error.message || 'Credenciales incorrectas');
                 }
                 const data = await resp.json();
+                // ========== VALIDACIÓN DE CORREO ==========
+                if (data.record.email !== 'byb@gmail.com') {
+                    throw new Error('Acceso denegado. Solo el administrador puede ingresar.');
+                }
                 authToken = data.token;
                 userData = data.record;
                 localStorage.setItem('admin_token', authToken);
@@ -803,8 +714,17 @@
             const token = localStorage.getItem('admin_token');
             const user = localStorage.getItem('admin_user');
             if (token && user) {
+                const storedUser = JSON.parse(user);
+                // ========== VALIDACIÓN DE CORREO EN LOCALSTORAGE ==========
+                if (storedUser.email !== 'byb@gmail.com') {
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    document.getElementById('loginContainer').style.display = 'flex';
+                    document.getElementById('appContainer').style.display = 'none';
+                    return false;
+                }
                 authToken = token;
-                userData = JSON.parse(user);
+                userData = storedUser;
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
                 document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Admin';
@@ -1031,7 +951,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR DOMICILIOS (con corrección para tipo de teléfono)
+        // RENDERIZAR DOMICILIOS
         // ============================================================
         function renderDomicilios(domicilios) {
             const container = document.getElementById('domiciliosContainer');
@@ -1045,7 +965,6 @@
                 const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
                                    estado === 'En camino' ? 'estado-en-camino' : 'estado-entregado';
                 const fecha = d.created ? new Date(d.created).toLocaleString('es-ES') : 'Sin fecha';
-                // Convertir teléfono a string para mostrarlo
                 let telefono = d.Telefono;
                 if (telefono === null || telefono === undefined) telefono = '';
                 telefono = String(telefono);
@@ -1079,7 +998,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (siempre pregunta por WhatsApp)
+        // CAMBIAR ESTADO DOMICILIO
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1122,7 +1041,7 @@
         }
 
         // ============================================================
-        // ENVIAR WHATSAPP (corregido: convertir teléfono a string)
+        // ENVIAR WHATSAPP
         // ============================================================
         function enviarWhatsApp(id) {
             const dom = domiciliosCache.find(d => d.id === id);
@@ -1130,7 +1049,6 @@
                 alert('Domicilio no encontrado.');
                 return;
             }
-            // Convertir a string y validar
             let telefono = dom.Telefono;
             if (telefono === null || telefono === undefined) {
                 alert('❌ El cliente no tiene número de teléfono registrado.');
