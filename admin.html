@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ===== ESTILOS BASE (igual que antes) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -656,7 +657,8 @@
             <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="Correo electrónico" />
+                <!-- Placeholder genérico, sin mostrar el email -->
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="off" />
             </div>
             <div class="form-group">
                 <label>Contraseña</label>
@@ -859,7 +861,7 @@
         // CONFIGURACIÓN
         // ============================================================
         const POCKETBASE_URL = "https://tienditabyb.onrender.com";
-        const ADMIN_EMAIL = "byb@gmail.com";
+        const ADMIN_EMAIL = "byb@gmail.com"; // Email autorizado (en minúsculas)
         let authToken = null;
         let userData = null;
         let productosCache = [];
@@ -872,6 +874,8 @@
         // ============================================================
         async function login(email, password) {
             try {
+                // Limpiar espacios y convertir a minúsculas para comparación
+                const emailTrim = email.trim().toLowerCase();
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -883,9 +887,9 @@
                 }
                 const data = await resp.json();
                 const user = data.record;
-                if (user.email !== ADMIN_EMAIL) {
-                    // === MENSAJE DE ERROR GENÉRICO (sin revelar el email autorizado) ===
-                    throw new Error('Acceso denegado');
+                // Comparar en minúsculas y sin espacios
+                if (user.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                    throw new Error('Acceso denegado'); // Mensaje genérico sin mostrar el email
                 }
                 authToken = data.token;
                 userData = user;
@@ -914,7 +918,8 @@
             if (token && user) {
                 try {
                     const parsedUser = JSON.parse(user);
-                    if (parsedUser.email !== ADMIN_EMAIL) {
+                    // Verificar email en minúsculas
+                    if (parsedUser.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
                         logout();
                         return false;
                     }
@@ -922,7 +927,7 @@
                     userData = parsedUser;
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('appContainer').style.display = 'block';
-                    document.getElementById('adminUserName').textContent = 'Administrador';
+                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
                     initApp();
                     return true;
                 } catch (e) {
@@ -1649,10 +1654,11 @@
                 await login(email, password);
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('adminUserName').textContent = 'Administrador';
+                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
                 initApp();
             } catch (e) {
-                errorEl.textContent = e.message || 'Acceso denegado';
+                // Mostrar solo "Acceso denegado" o el mensaje de error original
+                errorEl.textContent = e.message || 'Error al iniciar sesión.';
                 errorEl.classList.add('show');
             }
         });
@@ -1676,3 +1682,4 @@
     </script>
 </body>
 </html>
+
