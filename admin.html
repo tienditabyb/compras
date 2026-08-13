@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* ===== ESTILOS BASE (igual que antes) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -657,7 +656,6 @@
             <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
             <div class="form-group">
                 <label>Email</label>
-                <!-- AQUÍ ESTÁ EL CAMBIO: ya no muestra "byb@gmail.com" -->
                 <input type="email" id="loginEmail" placeholder="Correo electrónico" />
             </div>
             <div class="form-group">
@@ -886,7 +884,8 @@
                 const data = await resp.json();
                 const user = data.record;
                 if (user.email !== ADMIN_EMAIL) {
-                    throw new Error(`Acceso denegado. Solo el usuario "${ADMIN_EMAIL}" puede acceder al panel.`);
+                    // === MENSAJE DE ERROR GENÉRICO (sin revelar el email autorizado) ===
+                    throw new Error('Acceso denegado');
                 }
                 authToken = data.token;
                 userData = user;
@@ -923,7 +922,7 @@
                     userData = parsedUser;
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('appContainer').style.display = 'block';
-                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Admin';
+                    document.getElementById('adminUserName').textContent = 'Administrador';
                     initApp();
                     return true;
                 } catch (e) {
@@ -1650,10 +1649,10 @@
                 await login(email, password);
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Admin';
+                document.getElementById('adminUserName').textContent = 'Administrador';
                 initApp();
             } catch (e) {
-                errorEl.textContent = e.message || 'Error al iniciar sesión.';
+                errorEl.textContent = e.message || 'Acceso denegado';
                 errorEl.classList.add('show');
             }
         });
