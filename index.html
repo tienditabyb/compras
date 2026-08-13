@@ -468,7 +468,6 @@
             font-weight: 600;
         }
 
-        /* Estilo para la selección de WhatsApp */
         .whatsapp-selector {
             display: flex;
             gap: 20px;
@@ -481,7 +480,6 @@
             gap: 8px;
             font-weight: 500;
             color: #1a1a2e;
-            cursor: pointer;
         }
         .whatsapp-selector input[type="radio"] {
             accent-color: #2980b9;
@@ -824,9 +822,9 @@
                 <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
             </div>
 
-            <!-- SELECCIÓN DE WHATSAPP CON NOMBRES -->
             <div class="form-group">
-                <label>📱 Elige a quién quieres enviar el pedido:</label>
+                <label>📱 Elige el número para recibir el pedido:</label>
+                <!-- ========== CAMBIO: NOMBRES A LOS NÚMEROS ========== -->
                 <div class="whatsapp-selector">
                     <label>
                         <input type="radio" name="whatsappNumber" value="5358388494" checked>
@@ -899,7 +897,7 @@
     </div>
 
     <!-- ========== FOOTER ========== -->
-    <footer class="footer"><p>© 2025 B&amp;B. Todos los derechos reservados.</p></footer>
+    <footer class="footer"><p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p></footer>
 
     <!-- ============================================================ -->
     <!-- ====================== JAVASCRIPT =========================== -->
@@ -922,6 +920,9 @@
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
         let estrellaSeleccionada = 0;
+
+        // Mostrar año dinámico en el footer
+        document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================================
         //  AUTH
