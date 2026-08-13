@@ -50,7 +50,6 @@
             font-weight: 500;
             font-size: 0.9rem;
             color: #1a1a2e;
-            display: none; /* Oculto en móvil, se muestra en desktop */
         }
         .header__user button {
             background: none;
@@ -62,17 +61,22 @@
         }
         .header__user button:hover { text-decoration: underline; }
 
-        /* Botón hamburguesa (visible solo en móviles) */
+        /* Botón hamburguesa MEJORADO */
         .menu-toggle {
             display: none;
-            background: none;
+            background: #f1f5f9;
             border: none;
             font-size: 1.8rem;
             cursor: pointer;
             color: #1a1a2e;
-            padding: 4px 8px;
+            border-radius: 8px;
+            padding: 6px 14px;
+            transition: 0.2s;
         }
-        .menu-toggle:hover { color: #2980b9; }
+        .menu-toggle:hover {
+            background: #e2e8f0;
+            color: #2980b9;
+        }
 
         /* SIDEBAR */
         .main-content { display: flex; gap: 30px; margin-top: 30px; position: relative; }
@@ -117,14 +121,13 @@
 
         .content { flex: 1; }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            /* Ocultar sidebar por defecto, mostrar con toggle */
+        /* ===== RESPONSIVE - NUEVO BREAKPOINT 992px ===== */
+        @media (max-width: 992px) {
             .sidebar {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 260px;
+                width: 280px;
                 height: 100vh;
                 border-radius: 0;
                 padding: 20px;
@@ -134,14 +137,28 @@
                 overflow-y: auto;
                 background: white;
                 transition: transform 0.3s ease;
+                margin-top: 0;
                 top: 0;
                 position: fixed;
-                margin-top: 0;
+                padding-top: 60px; /* Espacio para el botón cerrar */
             }
             .sidebar.open {
                 transform: translateX(0);
             }
-            /* Overlay oscuro al abrir menú */
+            /* Botón cerrar dentro del sidebar (opcional) */
+            .sidebar .close-sidebar {
+                display: block;
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 1.8rem;
+                cursor: pointer;
+                color: #94a3b8;
+            }
+            .sidebar .close-sidebar:hover { color: #1a1a2e; }
+
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -160,7 +177,7 @@
                 display: inline-block;
             }
             .header__user .user-name {
-                display: none; /* Ocultar en móvil */
+                display: none;
             }
             .main-content {
                 margin-top: 15px;
@@ -190,10 +207,6 @@
             .list-item .center {
                 justify-content: flex-start;
             }
-            /* Ajustes para el botón de logout en móvil */
-            .header__user button {
-                font-size: 0.8rem;
-            }
             .modal {
                 max-width: 95%;
                 padding: 20px;
@@ -203,9 +216,10 @@
             .stats-grid { grid-template-columns: 1fr; }
             .product-grid { grid-template-columns: 1fr 1fr; }
             .header__logo { font-size: 1.4rem; }
+            .sidebar { width: 260px; }
         }
 
-        /* Overlay para móvil */
+        /* Overlay para móvil (definido aquí también) */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -219,8 +233,17 @@
         .sidebar-overlay.active {
             display: block;
         }
+        /* Botón cerrar dentro del sidebar (visible solo en móvil) */
+        .sidebar .close-sidebar {
+            display: none;
+        }
+        @media (max-width: 992px) {
+            .sidebar .close-sidebar {
+                display: block;
+            }
+        }
 
-        /* El resto de estilos son iguales que antes */
+        /* ===== RESTO DE ESTILOS (igual que antes) ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -632,7 +655,6 @@
             padding: 40px;
             color: #94a3b8;
         }
-        /* Overlay y sidebar en móvil (ya definidos arriba) */
     </style>
 </head>
 <body>
@@ -659,7 +681,6 @@
         <header class="header">
             <div class="container header__container">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <!-- Botón hamburguesa (visible en móvil) -->
                     <button class="menu-toggle" id="menuToggle">☰</button>
                     <a href="#" class="header__logo">B<span>&amp;</span>B <span style="font-size:0.9rem; color:#64748b;">Admin</span></a>
                 </div>
@@ -670,12 +691,11 @@
             </div>
         </header>
 
-        <!-- Overlay para cerrar menú al hacer clic fuera -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <div class="container main-content">
-            <!-- SIDEBAR -->
             <aside class="sidebar" id="sidebar">
+                <button class="close-sidebar" id="closeSidebarBtn">✕</button>
                 <div class="sidebar__title">Menú</div>
                 <nav class="sidebar__nav">
                     <ul>
@@ -794,8 +814,7 @@
         </div>
     </div>
 
-    <!-- ========== MODALES (Detail, Product) ========== -->
-    <!-- Modal Detalle -->
+    <!-- ========== MODALES ========== -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="close-modal" id="closeDetailModal">✕</button>
@@ -806,7 +825,6 @@
         </div>
     </div>
 
-    <!-- Modal Producto -->
     <div class="modal-overlay" id="productModal">
         <div class="modal" style="max-width:650px;">
             <button class="close-modal" id="closeProductModal">✕</button>
@@ -1012,7 +1030,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones (igual que antes)
+        // RENDERIZAR funciones (completas)
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1484,11 +1502,12 @@
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
         // ============================================================
-        // MENÚ MÓVIL (TOGGLE)
+        // MENÚ MÓVIL (TOGGLE) con botón de cerrar dentro del sidebar
         // ============================================================
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
 
         function toggleMenu() {
             sidebar.classList.toggle('open');
@@ -1502,11 +1521,12 @@
 
         menuToggle.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', closeMenu);
+        closeSidebarBtn.addEventListener('click', closeMenu);
 
         // Cerrar menú al hacer clic en un enlace del sidebar (en móvil)
         document.querySelectorAll('.sidebar__nav a').forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
+                if (window.innerWidth <= 992) {
                     closeMenu();
                 }
             });
