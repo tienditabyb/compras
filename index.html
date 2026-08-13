@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* ========== ESTILOS (se mantienen igual) ========== */
+        /* ========== ESTILOS ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -71,7 +71,7 @@
         .header__actions {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
         .header__actions .user-info {
             display: flex;
@@ -83,14 +83,16 @@
             font-size: 0.9rem;
             color: #1a1a2e;
         }
-        .header__actions a {
+        .header__actions a, .header__actions button {
             color: #1a1a2e;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
             cursor: pointer;
+            background: none;
+            border: none;
         }
-        .header__actions a:hover { color: #2980b9; }
+        .header__actions a:hover, .header__actions button:hover { color: #2980b9; }
         .cart-btn {
             position: relative;
             background: none;
@@ -303,7 +305,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            max-width: 420px;
+            max-width: 480px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -382,7 +384,26 @@
         }
         .modal .error-msg.show { display: block; }
 
-        /* MODAL ENTREGA */
+        /* Estilos para el historial en modal */
+        .history-item {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 0;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .order-date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .history-item .order-products {
+            font-weight: 500;
+            margin: 4px 0;
+        }
+        .history-item .order-total {
+            font-weight: 700;
+            color: #2980b9;
+        }
+
+        /* Estilos para modal de entrega */
         .delivery-modal .delivery-options {
             display: flex;
             flex-direction: column;
@@ -447,7 +468,6 @@
             font-weight: 600;
         }
 
-        /* Estilo para la selección de WhatsApp */
         .whatsapp-selector {
             display: flex;
             gap: 20px;
@@ -563,7 +583,7 @@
         .cart-sidebar .checkout-btn:hover { background: #1f6da9; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* DETALLE PRODUCTO */
+        /* ========== DETALLE PRODUCTO ========== */
         .detail-overlay {
             display: none;
             position: fixed;
@@ -678,31 +698,7 @@
         .detail-modal .calificar-section .btn-calificar:hover { background: #1f6da9; }
         .detail-modal .calificar-section .btn-calificar:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* PERFIL */
-        .profile-section {
-            display: none;
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-top: 20px;
-        }
-        .profile-section.active { display: block; }
-        .profile-section h2 {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            color: #1a1a2e;
-        }
-        .profile-section .order-item {
-            border: 1px solid #f1f5f9;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-        }
-        .profile-section .order-item .order-date { font-size: 0.85rem; color: #64748b; }
-        .profile-section .order-item .order-products { font-weight: 500; margin: 4px 0; }
-        .profile-section .order-item .order-total { font-weight: 700; color: #2980b9; }
-
+        /* ========== FOOTER ========== */
         .footer {
             text-align: center;
             padding: 30px 20px;
@@ -712,6 +708,7 @@
             font-size: 0.85rem;
         }
 
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .header__search { order: 3; flex: 1 1 100%; max-width: 100%; }
@@ -725,6 +722,7 @@
         @media (max-width: 480px) {
             .products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .product-card img { height: 120px; }
+            .modal { padding: 20px; max-width: 100%; }
         }
     </style>
 </head>
@@ -742,8 +740,8 @@
                 <div class="user-info" id="userInfo">
                     <span class="user-name" id="userNameDisplay"></span>
                     <a id="authLink" onclick="abrirModalLogin()">Iniciar sesión</a>
-                    <a id="logoutLink" style="display:none;" onclick="cerrarSesion()">Cerrar sesión</a>
-                    <a id="profileLink" style="display:none;" onclick="mostrarPerfil()">📋 Mi perfil</a>
+                    <button id="logoutLink" style="display:none;" onclick="cerrarSesion()">Cerrar sesión</button>
+                    <button id="historyLink" style="display:none;" onclick="abrirHistoryModal()">📋 Mis pedidos</button>
                 </div>
                 <button class="cart-btn" id="openCartBtn">
                     🛒
@@ -753,7 +751,7 @@
         </div>
     </header>
 
-    <!-- ========== CONTENIDO ========== -->
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="container main-content">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">Categorías</div>
@@ -775,15 +773,21 @@
             </div>
             <div class="products-grid" id="productsGrid"></div>
             <div class="pagination" id="pagination"></div>
-            <div class="profile-section" id="profileSection">
-                <h2>📋 Mi Historial de Pedidos</h2>
-                <div id="orderHistory"></div>
-                <div id="historyError" class="error-msg" style="display:none;"></div>
-            </div>
         </section>
     </div>
 
-    <!-- ========== CARRITO ========== -->
+    <!-- ========== MODAL DE HISTORIAL ========== -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
+            <h2>📋 Mi Historial de Pedidos</h2>
+            <div id="historyContent">
+                <p style="color:#94a3b8; text-align:center;">Cargando historial...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CARRITO (sidebar) ========== -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h2>🛒 Tu Carrito</h2>
@@ -794,7 +798,7 @@
         <button class="checkout-btn" id="checkoutBtn">✅ Finalizar pedido</button>
     </div>
 
-    <!-- ========== MODAL ENTREGA CON SELECCIÓN DE WHATSAPP ========== -->
+    <!-- ========== MODAL ENTREGA Y SELECCIÓN DE WHATSAPP ========== -->
     <div class="modal-overlay delivery-modal" id="deliveryModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarDeliveryModal()">✕</button>
@@ -812,25 +816,17 @@
                 </button>
             </div>
 
-            <!-- Resumen del pedido -->
             <div class="resumen-pedido" id="resumenPedido">
                 <div class="linea"><span>Subtotal</span> <span id="resumenSubtotal">$0.00</span></div>
                 <div class="linea envio" id="resumenEnvio"><span>Envío</span> <span id="resumenEnvioMonto">$0.00</span></div>
                 <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
             </div>
 
-            <!-- Selección del número de WhatsApp -->
             <div class="form-group">
                 <label>📱 Elige el número para recibir el pedido:</label>
                 <div class="whatsapp-selector">
-                    <label>
-                        <input type="radio" name="whatsappNumber" value="5358388494" checked>
-                        +53 58388494
-                    </label>
-                    <label>
-                        <input type="radio" name="whatsappNumber" value="5353803134">
-                        +53 53803134
-                    </label>
+                    <label><input type="radio" name="whatsappNumber" value="5358388494" checked> +53 58388494</label>
+                    <label><input type="radio" name="whatsappNumber" value="5353803134"> +53 53803134</label>
                 </div>
             </div>
 
@@ -869,38 +865,18 @@
             <h2 id="authTitle">Iniciar sesión</h2>
             <div id="authForm">
                 <div id="registerFields" style="display:none;">
-                    <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" id="regNombre" placeholder="Tu nombre" />
-                    </div>
-                    <div class="form-group">
-                        <label>Apellidos *</label>
-                        <input type="text" id="regApellidos" placeholder="Tus apellidos" />
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono *</label>
-                        <input type="tel" id="regTelefono" placeholder="Ej: 3001234567" />
-                    </div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" placeholder="Tu nombre" /></div>
+                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" placeholder="Tus apellidos" /></div>
+                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" placeholder="Ej: 3001234567" /></div>
                 </div>
-                <div class="form-group">
-                    <label>Correo electrónico *</label>
-                    <input type="email" id="authEmail" placeholder="tu@email.com" />
-                </div>
-                <div class="form-group">
-                    <label>Contraseña *</label>
-                    <input type="password" id="authPassword" placeholder="Mínimo 8 caracteres" />
-                </div>
+                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" placeholder="tu@email.com" /></div>
+                <div class="form-group"><label>Contraseña *</label><input type="password" id="authPassword" placeholder="Mínimo 8 caracteres" /></div>
                 <div id="registerPasswordConfirm" style="display:none;">
-                    <div class="form-group">
-                        <label>Confirmar contraseña *</label>
-                        <input type="password" id="authPasswordConfirm" placeholder="Repite tu contraseña" />
-                    </div>
+                    <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" placeholder="Repite tu contraseña" /></div>
                 </div>
                 <div id="authError" class="error-msg"></div>
                 <button class="btn-primary" id="authSubmitBtn" onclick="handleAuth()">Iniciar sesión</button>
-                <div class="switch-auth">
-                    <span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span>
-                </div>
+                <div class="switch-auth"><span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span></div>
             </div>
         </div>
     </div>
@@ -923,7 +899,6 @@
         // ============================================================
         //  CONFIGURACIÓN
         // ============================================================
-        // ---------- CAMBIO IMPORTANTE: URL DE POCKETBASE EN LA NUBE ----------
         const POCKETBASE_URL = "https://tienditabyb.onrender.com";
         const PRODUCTOS_POR_PAGINA = 10;
         const ENVIO_COSTO = 1.00;
@@ -937,23 +912,16 @@
         let authToken = null;
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
+        let estrellaSeleccionada = 0;
 
         // ============================================================
-        //  AUTH (igual)
+        //  AUTH
         // ============================================================
         function setAuthToken(token) {
-            if (token) {
-                localStorage.setItem('pb_token', token);
-                authToken = token;
-            } else {
-                localStorage.removeItem('pb_token');
-                authToken = null;
-            }
+            if (token) { localStorage.setItem('pb_token', token); authToken = token; }
+            else { localStorage.removeItem('pb_token'); authToken = null; }
         }
-
-        function getAuthToken() {
-            return localStorage.getItem('pb_token') || null;
-        }
+        function getAuthToken() { return localStorage.getItem('pb_token') || null; }
 
         function getCurrentUserFromToken() {
             const token = getAuthToken();
@@ -963,82 +931,46 @@
                 const stored = localStorage.getItem('bb_user_data');
                 if (stored) {
                     const userData = JSON.parse(stored);
-                    if (userData.id === payload.id) {
-                        return userData;
-                    }
+                    if (userData.id === payload.id) return userData;
                 }
-                return {
-                    id: payload.id,
-                    email: payload.email,
-                    name: payload.name || payload.email,
-                };
-            } catch (e) {
-                console.error('Error al decodificar token:', e);
-                return null;
-            }
+                return { id: payload.id, email: payload.email, name: payload.name || payload.email };
+            } catch (e) { return null; }
         }
 
         function guardarUsuarioLocal(user) {
-            if (user) {
-                localStorage.setItem('bb_user_data', JSON.stringify(user));
-                usuarioActual = user;
-            } else {
-                localStorage.removeItem('bb_user_data');
-                usuarioActual = null;
-            }
+            if (user) { localStorage.setItem('bb_user_data', JSON.stringify(user)); usuarioActual = user; }
+            else { localStorage.removeItem('bb_user_data'); usuarioActual = null; }
         }
 
         async function login(email, password) {
             try {
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ identity: email, password })
                 });
-                if (!resp.ok) {
-                    const error = await resp.json();
-                    throw new Error(error.message || 'Credenciales incorrectas');
-                }
+                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Credenciales incorrectas'); }
                 const data = await resp.json();
                 setAuthToken(data.token);
                 guardarUsuarioLocal(data.record);
                 actualizarUIUsuario();
                 return { success: true };
-            } catch (e) {
-                return { success: false, error: e.message };
-            }
+            } catch (e) { return { success: false, error: e.message }; }
         }
 
         async function registrar(nombre, apellidos, email, telefono, password, passwordConfirm) {
             try {
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: nombreCompleto,
-                        email: email,
-                        password: password,
-                        passwordConfirm: passwordConfirm,
-                        telefono: telefono
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nombreCompleto, email, password, passwordConfirm, telefono })
                 });
-                if (!resp.ok) {
-                    const error = await resp.json();
-                    throw new Error(error.message || 'Error al registrar');
-                }
+                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al registrar'); }
                 return await login(email, password);
-            } catch (e) {
-                return { success: false, error: e.message };
-            }
+            } catch (e) { return { success: false, error: e.message }; }
         }
 
         function cerrarSesion() {
-            setAuthToken(null);
-            guardarUsuarioLocal(null);
-            actualizarUIUsuario();
-            document.getElementById('profileSection').classList.remove('active');
-            cerrarModal();
+            setAuthToken(null); guardarUsuarioLocal(null); actualizarUIUsuario();
             renderizarProductos();
         }
 
@@ -1047,25 +979,24 @@
             const userNameDisplay = document.getElementById('userNameDisplay');
             const authLink = document.getElementById('authLink');
             const logoutLink = document.getElementById('logoutLink');
-            const profileLink = document.getElementById('profileLink');
-
+            const historyLink = document.getElementById('historyLink');
             if (user) {
                 userNameDisplay.textContent = user.name || user.email;
                 authLink.style.display = 'none';
                 logoutLink.style.display = 'inline';
-                profileLink.style.display = 'inline';
+                historyLink.style.display = 'inline';
                 usuarioActual = user;
             } else {
                 userNameDisplay.textContent = '';
                 authLink.style.display = 'inline';
                 logoutLink.style.display = 'none';
-                profileLink.style.display = 'none';
+                historyLink.style.display = 'none';
                 usuarioActual = null;
             }
         }
 
         // ============================================================
-        //  MODAL AUTH (igual)
+        //  MODAL AUTH
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1098,9 +1029,7 @@
             document.getElementById('authError').classList.remove('show');
         }
 
-        function cerrarModal() {
-            document.getElementById('authModal').classList.remove('active');
-        }
+        function cerrarModal() { document.getElementById('authModal').classList.remove('active'); }
 
         async function handleAuth() {
             const email = document.getElementById('authEmail').value.trim();
@@ -1110,8 +1039,7 @@
 
             if (!email || !password) {
                 errorEl.textContent = 'Completa todos los campos obligatorios.';
-                errorEl.classList.add('show');
-                return;
+                errorEl.classList.add('show'); return;
             }
 
             if (modoRegistro) {
@@ -1121,41 +1049,77 @@
                 const passwordConfirm = document.getElementById('authPasswordConfirm').value;
                 if (!nombre || !apellidos || !telefono) {
                     errorEl.textContent = 'Nombre, apellidos y teléfono son obligatorios.';
-                    errorEl.classList.add('show');
-                    return;
+                    errorEl.classList.add('show'); return;
                 }
                 if (password !== passwordConfirm) {
                     errorEl.textContent = 'Las contraseñas no coinciden.';
-                    errorEl.classList.add('show');
-                    return;
+                    errorEl.classList.add('show'); return;
                 }
                 if (password.length < 8) {
                     errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.';
-                    errorEl.classList.add('show');
-                    return;
+                    errorEl.classList.add('show'); return;
                 }
                 const result = await registrar(nombre, apellidos, email, telefono, password, passwordConfirm);
                 if (result.success) {
-                    cerrarModal();
-                    actualizarUIUsuario();
-                    renderizarProductos();
+                    cerrarModal(); actualizarUIUsuario(); renderizarProductos();
                     alert('✅ Registro exitoso. ¡Bienvenido!');
                 } else {
-                    errorEl.textContent = result.error;
-                    errorEl.classList.add('show');
+                    errorEl.textContent = result.error; errorEl.classList.add('show');
                 }
             } else {
                 const result = await login(email, password);
                 if (result.success) {
-                    cerrarModal();
-                    actualizarUIUsuario();
-                    renderizarProductos();
+                    cerrarModal(); actualizarUIUsuario(); renderizarProductos();
                 } else {
-                    errorEl.textContent = result.error;
-                    errorEl.classList.add('show');
+                    errorEl.textContent = result.error; errorEl.classList.add('show');
                 }
             }
         }
+
+        // ============================================================
+        //  MODAL HISTORIAL
+        // ============================================================
+        async function abrirHistoryModal() {
+            if (!usuarioActual) {
+                alert('Debes iniciar sesión para ver tu historial.');
+                abrirModalLogin(); return;
+            }
+            const modal = document.getElementById('historyModal');
+            const content = document.getElementById('historyContent');
+            content.innerHTML = '<p style="color:#94a3b8; text-align:center;">Cargando historial...</p>';
+            modal.classList.add('active');
+
+            try {
+                const filter = `usuario_id="${usuarioActual.id}"`;
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records?filter=${encodeURIComponent(filter)}&sort=-fecha`);
+                if (!resp.ok) throw new Error('Error al obtener el historial');
+                const data = await resp.json();
+                const pedidos = data.items;
+                if (pedidos.length === 0) {
+                    content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos realizados aún.</p>';
+                    return;
+                }
+                let html = '';
+                pedidos.forEach(p => {
+                    const fecha = new Date(p.fecha).toLocaleDateString('es-ES', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                    html += `
+                        <div class="history-item">
+                            <div class="order-date">📅 ${fecha}</div>
+                            <div class="order-products">📦 ${p.productos_json || 'Sin productos'}</div>
+                            <div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div>
+                            <div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div>
+                        </div>
+                    `;
+                });
+                content.innerHTML = html;
+            } catch (e) {
+                content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`;
+            }
+        }
+
+        function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
         //  API
@@ -1168,7 +1132,7 @@
                     return data.items.filter(p => parseInt(p.Stock || 0) > 0);
                 }
                 return [];
-            } catch (e) { console.error('Error al obtener productos:', e); return []; }
+            } catch (e) { return []; }
         }
 
         async function obtenerCategorias() {
@@ -1179,7 +1143,7 @@
                     return data.items.map(c => c.nombre).filter(Boolean);
                 }
                 return [];
-            } catch (e) { console.error('Error al obtener categorías:', e); return []; }
+            } catch (e) { return []; }
         }
 
         async function obtenerCalificaciones(productoId) {
@@ -1193,42 +1157,15 @@
             } catch (e) { return []; }
         }
 
-        async function obtenerHistorialPedidos(usuarioId) {
-            try {
-                const filter = `usuario_id="${usuarioId}"`;
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records?filter=${encodeURIComponent(filter)}&sort=-fecha`);
-                if (!resp.ok) {
-                    const error = await resp.json();
-                    return { success: false, error: error.message || 'Error al obtener el historial' };
-                }
-                const data = await resp.json();
-                return { success: true, items: data.items };
-            } catch (e) {
-                return { success: false, error: e.message };
-            }
-        }
-
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        producto_id: productoId,
-                        usuario_id: usuarioId,
-                        puntuacion,
-                        comentario: comentario || '',
-                        fecha: new Date().toISOString()
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ producto_id: productoId, usuario_id: usuarioId, puntuacion, comentario: comentario || '', fecha: new Date().toISOString() })
                 });
-                if (!resp.ok) {
-                    const error = await resp.json();
-                    throw new Error(error.message || 'Error al calificar');
-                }
+                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al calificar'); }
                 return { success: true };
-            } catch (e) {
-                return { success: false, error: e.message };
-            }
+            } catch (e) { return { success: false, error: e.message }; }
         }
 
         async function verificarCompra(usuarioId, productoId) {
@@ -1334,9 +1271,7 @@
                     let precioHtml = `<span class="price">`;
                     if (tieneOferta) {
                         precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
-                    } else {
-                        precioHtml += `$${venta.toFixed(2)}`;
-                    }
+                    } else { precioHtml += `$${venta.toFixed(2)}`; }
                     precioHtml += `</span>`;
 
                     const stock = parseInt(prod.Stock || 0);
@@ -1347,20 +1282,49 @@
                         'https://via.placeholder.com/300x200/f1f5f9/94a3b8?text=Sin+foto';
 
                     html += `
-                        <div class="product-card" data-id="${prod.id}" onclick="abrirDetalle('${prod.id}')">
+                        <div class="product-card" data-id="${prod.id}">
                             <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" loading="lazy" />
                             <h3>${prod.Nombre || 'Sin nombre'}</h3>
                             ${precioHtml}
                             <div class="stock">📦 ${stockText}</div>
-                            <button class="btn-add" onclick="event.stopPropagation(); agregarAlCarrito('${prod.id}')" ${!usuarioActual ? 'disabled title="Inicia sesión para comprar"' : ''}>
-                                ${usuarioActual ? '➕ Agregar' : '🔒 Inicia sesión'}
-                            </button>
+                            <button class="btn-add" data-id="${prod.id}">➕ Agregar</button>
                         </div>
                     `;
                 }
                 grid.innerHTML = html;
             }
 
+            // Eventos para el botón "Agregar" (sin abrir carrito)
+            document.querySelectorAll('.btn-add').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    if (!usuarioActual) {
+                        alert('Debes iniciar sesión para agregar productos al carrito.');
+                        abrirModalLogin();
+                        return;
+                    }
+                    agregarAlCarrito(id);
+                    const originalText = this.textContent;
+                    this.textContent = '✅ Agregado';
+                    this.disabled = true;
+                    setTimeout(() => {
+                        this.textContent = '➕ Agregar';
+                        this.disabled = false;
+                    }, 1500);
+                });
+            });
+
+            // Evento para abrir detalle al hacer clic en la tarjeta (excepto en el botón)
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    const id = this.dataset.id;
+                    abrirDetalle(id);
+                });
+            });
+
+            // Paginación
             const pagContainer = document.getElementById('pagination');
             if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
             let pagHtml = '';
@@ -1396,26 +1360,16 @@
         }
 
         function agregarAlCarrito(productId) {
-            if (!usuarioActual) {
-                alert('Debes iniciar sesión para agregar productos al carrito.');
-                abrirModalLogin();
-                return;
-            }
             const prod = productos.find(p => p.id === productId);
             if (!prod) return;
             const existente = carrito.find(item => item.id === productId);
             if (existente) {
                 existente.cantidad = (existente.cantidad || 1) + 1;
             } else {
-                carrito.push({
-                    id: prod.id,
-                    nombre: prod.Nombre || 'Producto',
-                    precio: precioFinal(prod),
-                    cantidad: 1
-                });
+                carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
             }
             guardarCarritoLocal();
-            abrirCarrito();
+            // NO abrimos el carrito aquí
         }
 
         function eliminarDelCarrito(index) { carrito.splice(index, 1); guardarCarritoLocal(); }
@@ -1475,7 +1429,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO CON ENVÍO Y SELECCIÓN DE WHATSAPP
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -1488,19 +1442,15 @@
                 return;
             }
 
-            // Calcular subtotal
             let subtotal = 0;
-            carrito.forEach(item => {
-                subtotal += item.precio * (item.cantidad || 1);
-            });
+            carrito.forEach(item => { subtotal += item.precio * (item.cantidad || 1); });
             window.subtotalCarrito = subtotal;
 
-            // Mostrar modal
             document.getElementById('deliveryModal').classList.add('active');
             document.getElementById('deliveryForm').classList.remove('active');
             document.getElementById('confirmarPedidoBtn').style.display = 'none';
             document.getElementById('domDireccionGroup').style.display = 'none';
-            // Precargar datos del usuario
+
             if (usuarioActual) {
                 let nombre = usuarioActual.name || '';
                 let apellidos = '';
@@ -1517,7 +1467,6 @@
                 document.getElementById('domTelefono').value = usuarioActual.telefono || '';
             }
 
-            // Mostrar resumen inicial (sin envío)
             const subtotalEl = document.getElementById('resumenSubtotal');
             const envioMontoEl = document.getElementById('resumenEnvioMonto');
             const totalEl = document.getElementById('resumenTotal');
@@ -1528,9 +1477,7 @@
             tipoEntregaSeleccionado = null;
         }
 
-        function cerrarDeliveryModal() {
-            document.getElementById('deliveryModal').classList.remove('active');
-        }
+        function cerrarDeliveryModal() { document.getElementById('deliveryModal').classList.remove('active'); }
 
         function seleccionarEntrega(tipo) {
             tipoEntregaSeleccionado = tipo;
@@ -1541,7 +1488,6 @@
             form.classList.add('active');
             confirmBtn.style.display = 'block';
 
-            // Actualizar resumen con el costo de envío
             const subtotal = window.subtotalCarrito || 0;
             const envio = (tipo === 'Domicilio') ? ENVIO_COSTO : 0;
             const total = subtotal + envio;
@@ -1584,7 +1530,6 @@
                 return;
             }
 
-            // Obtener el número de WhatsApp seleccionado
             const whatsappSelected = document.querySelector('input[name="whatsappNumber"]:checked');
             if (!whatsappSelected) {
                 alert('Por favor, selecciona un número de WhatsApp para el pedido.');
@@ -1595,19 +1540,14 @@
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
 
-            // Calcular total con envío
             let subtotal = 0;
-            carrito.forEach(item => {
-                subtotal += item.precio * (item.cantidad || 1);
-            });
+            carrito.forEach(item => { subtotal += item.precio * (item.cantidad || 1); });
             const envio = (tipoEntregaSeleccionado === 'Domicilio') ? ENVIO_COSTO : 0;
             const totalFinal = subtotal + envio;
-
             const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad || 1}`).join(', ');
             const fecha = new Date().toISOString();
 
             try {
-                // 1. Guardar en Ventas
                 const ventaData = {
                     productos_json: productosStr,
                     total: totalFinal,
@@ -1616,8 +1556,7 @@
                     usuario_id: usuarioActual.id
                 };
                 const respVenta = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(ventaData)
                 });
                 if (!respVenta.ok) {
@@ -1626,7 +1565,6 @@
                 }
                 const ventaId = (await respVenta.json()).id;
 
-                // 2. Si es domicilio, guardar en Domicilios
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
@@ -1638,27 +1576,23 @@
                         venta_id: ventaId
                     };
                     await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(domData)
                     });
                 }
 
-                // 3. Actualizar stock
                 for (const item of carrito) {
                     const prod = productos.find(p => p.id === item.id);
                     if (prod) {
                         const nuevoStock = Math.max(0, parseInt(prod.Stock || 0) - (item.cantidad || 1));
                         await fetch(`${POCKETBASE_URL}/api/collections/productos/records/${prod.id}`, {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
+                            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ Stock: nuevoStock })
                         });
                         prod.Stock = nuevoStock;
                     }
                 }
 
-                // 4. Enviar WhatsApp al número seleccionado
                 let mensaje = `*Nuevo pedido*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
@@ -1666,9 +1600,7 @@
                 mensaje += `📦 Tipo de entrega: *${tipoEntregaSeleccionado}*\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     mensaje += `📍 Dirección: ${direccion}\n`;
-                    if (referencias) {
-                        mensaje += `📝 Referencias: ${referencias}\n`;
-                    }
+                    if (referencias) { mensaje += `📝 Referencias: ${referencias}\n`; }
                     mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
                 }
                 mensaje += `\n📋 Productos:\n`;
@@ -1676,21 +1608,17 @@
                     mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad || 1} = $${(item.precio * (item.cantidad || 1)).toFixed(2)}\n`;
                 });
                 mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
-                if (tipoEntregaSeleccionado === 'Domicilio') {
-                    mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
-                }
+                if (tipoEntregaSeleccionado === 'Domicilio') { mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`; }
                 mensaje += `💵 Total: $${totalFinal.toFixed(2)}`;
                 mensaje += `\n\n¡Gracias por tu compra! 🏪`;
 
                 const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, '_blank');
 
-                // 5. Limpiar carrito
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
-                // 6. Recargar productos
                 productos = await obtenerProductos();
                 renderizarProductos();
 
@@ -1713,8 +1641,7 @@
 
             const calificaciones = await obtenerCalificaciones(productoId);
             const promedio = calificaciones.length > 0 ?
-                calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length :
-                0;
+                calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
 
             const fotoUrl = prod.Foto ?
                 `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
@@ -1779,8 +1706,6 @@
 
         function cerrarDetalle() { document.getElementById('detailOverlay').classList.remove('active'); }
 
-        let estrellaSeleccionada = 0;
-
         function seleccionarEstrella(valor) {
             estrellaSeleccionada = valor;
             const spans = document.querySelectorAll('#starsInput span');
@@ -1808,61 +1733,6 @@
             } else {
                 alert('Error al calificar: ' + result.error);
             }
-        }
-
-        // ============================================================
-        //  PERFIL - HISTORIAL
-        // ============================================================
-        async function mostrarPerfil() {
-            if (!usuarioActual) {
-                alert('Debes iniciar sesión para ver tu perfil.');
-                abrirModalLogin();
-                return;
-            }
-
-            const section = document.getElementById('profileSection');
-            const container = document.getElementById('orderHistory');
-            const errorEl = document.getElementById('historyError');
-
-            if (section.classList.contains('active')) {
-                section.classList.remove('active');
-                return;
-            }
-
-            section.classList.add('active');
-            container.innerHTML = '<p style="color:#94a3b8;">Cargando historial...</p>';
-            errorEl.style.display = 'none';
-
-            const resultado = await obtenerHistorialPedidos(usuarioActual.id);
-            if (!resultado.success) {
-                errorEl.textContent = '❌ ' + (resultado.error || 'Error al cargar el historial. Intenta de nuevo.');
-                errorEl.style.display = 'block';
-                container.innerHTML = '';
-                return;
-            }
-
-            const pedidos = resultado.items;
-            if (pedidos.length === 0) {
-                container.innerHTML = '<p style="color:#94a3b8;">No tienes pedidos realizados aún.</p>';
-                return;
-            }
-
-            let html = '';
-            pedidos.forEach(p => {
-                const fecha = new Date(p.fecha).toLocaleDateString('es-ES', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-                html += `
-                    <div class="order-item">
-                        <div class="order-date">📅 ${fecha}</div>
-                        <div class="order-products">📦 ${p.productos_json || 'Sin productos'}</div>
-                        <div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div>
-                        <div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
         }
 
         // ============================================================
