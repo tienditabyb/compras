@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Librería SheetJS para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ===== ESTILOS BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -386,17 +388,19 @@
         }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ===== PRODUCTOS ===== */
+        /* ====================================================
+            NUEVOS ESTILOS PARA TARJETAS MÁS PEQUEÑAS
+        ==================================================== */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            padding: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            padding: 10px;
         }
         .product-card {
             background: white;
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 8px;            /* antes 12px */
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
             text-align: center;
             border: 1px solid #f1f5f9;
@@ -406,40 +410,46 @@
         .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .product-card img {
             width: 100%;
-            height: 120px;
+            height: 90px;            /* antes 120px */
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #f1f5f9;
         }
         .product-card h4 {
-            font-size: 0.9rem;
-            margin: 8px 0 4px;
+            font-size: 0.8rem;       /* antes 0.9rem */
+            margin: 6px 0 2px;
             color: #1a1a2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .product-card .price {
             font-weight: 700;
             color: #2980b9;
-            font-size: 1rem;
+            font-size: 0.9rem;       /* antes 1rem */
         }
         .product-card .stock {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #64748b;
         }
         .product-card .category {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .product-card .actions {
-            margin-top: 8px;
+            margin-top: 6px;
             display: flex;
-            gap: 6px;
+            gap: 4px;
             justify-content: center;
         }
         .product-card .actions button {
-            padding: 4px 12px;
+            padding: 3px 8px;
             border: none;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
             cursor: pointer;
             font-weight: 600;
             transition: 0.2s;
@@ -741,7 +751,11 @@
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0;">📦 Inventario</h2>
-                        <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <!-- Botón Exportar Excel -->
+                            <button class="btn-success" id="btnExportarExcel">📊 Exportar Excel</button>
+                            <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
+                        </div>
                     </div>
                     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
                         <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px;" />
@@ -880,8 +894,8 @@
         // ============================================================
         // CONFIGURACIÓN
         // ============================================================
-        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";  // ✅ ACTUALIZADO
-        const ADMIN_EMAIL = "byb@gmail.com"; // Email autorizado (en minúsculas)
+        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
+        const ADMIN_EMAIL = "byb@gmail.com";
         let authToken = null;
         let userData = null;
         let productosCache = [];
@@ -900,15 +914,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ identity: email, password })
                 });
-                // Obtener la respuesta como JSON siempre
                 const data = await resp.json();
                 if (!resp.ok) {
-                    // Mostrar el mensaje de error de PocketBase
                     const errorMsg = data.message || 'Error de autenticación';
                     throw new Error(errorMsg);
                 }
                 const user = data.record;
-                // Comparar en minúsculas
                 if (user.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
                     throw new Error('Acceso denegado');
                 }
@@ -1044,6 +1055,51 @@
                 }
             }
             return total - sumaCostos;
+        }
+
+        // ============================================================
+        // EXPORTAR INVENTARIO A EXCEL
+        // ============================================================
+        function exportarInventarioExcel() {
+            if (!productosCache || productosCache.length === 0) {
+                alert('No hay productos para exportar.');
+                return;
+            }
+
+            const data = [];
+            data.push(['Nombre', 'Categoría', 'Código de Barras', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Stock', 'Detalles']);
+
+            let totalCosto = 0;
+            let totalVenta = 0;
+
+            for (const p of productosCache) {
+                const nombre = p.Nombre || '';
+                const categoria = p.Categoria || 'General';
+                const codigo = p.Codigo_de_Barras || '';
+                const costo = parseFloat(p.Precio_Costo || 0);
+                const venta = parseFloat(p.Precio_Venta || 0);
+                const oferta = parseFloat(p.Precio_Oferta || 0);
+                const stock = parseInt(p.Stock || 0);
+                const detalles = p.Detalles || '';
+
+                data.push([nombre, categoria, codigo, costo, venta, oferta, stock, detalles]);
+
+                totalCosto += costo;
+                totalVenta += venta;
+            }
+
+            data.push(['TOTALES', '', '', totalCosto, totalVenta, '', '', '']);
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            ws['!cols'] = [
+                { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 15 },
+                { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 30 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+
+            const fecha = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `inventario_${fecha}.xlsx`);
         }
 
         // ============================================================
@@ -1517,6 +1573,7 @@
         }
 
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
+        document.getElementById('btnExportarExcel').addEventListener('click', exportarInventarioExcel);
 
         // ============================================================
         // MENÚ MÓVIL
