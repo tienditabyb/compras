@@ -7,8 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Librería SheetJS para exportar a Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ===== ESTILOS BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -812,8 +810,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0;">📦 Inventario</h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <!-- Botón Exportar Excel -->
-                            <button class="btn-success" id="btnExportarExcel">📊 Exportar Excel</button>
+                            <!-- Solo botón Nuevo Producto (se eliminó Exportar Excel) -->
                             <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
                         </div>
                     </div>
@@ -1115,51 +1112,6 @@
                 }
             }
             return total - sumaCostos;
-        }
-
-        // ============================================================
-        // EXPORTAR INVENTARIO A EXCEL
-        // ============================================================
-        function exportarInventarioExcel() {
-            if (!productosCache || productosCache.length === 0) {
-                alert('No hay productos para exportar.');
-                return;
-            }
-
-            const data = [];
-            data.push(['Nombre', 'Categoría', 'Código de Barras', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Stock', 'Detalles']);
-
-            let totalCosto = 0;
-            let totalVenta = 0;
-
-            for (const p of productosCache) {
-                const nombre = p.Nombre || '';
-                const categoria = p.Categoria || 'General';
-                const codigo = p.Codigo_de_Barras || '';
-                const costo = parseFloat(p.Precio_Costo || 0);
-                const venta = parseFloat(p.Precio_Venta || 0);
-                const oferta = parseFloat(p.Precio_Oferta || 0);
-                const stock = parseInt(p.Stock || 0);
-                const detalles = p.Detalles || '';
-
-                data.push([nombre, categoria, codigo, costo, venta, oferta, stock, detalles]);
-
-                totalCosto += costo;
-                totalVenta += venta;
-            }
-
-            data.push(['TOTALES', '', '', totalCosto, totalVenta, '', '', '']);
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            ws['!cols'] = [
-                { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 15 },
-                { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 30 }
-            ];
-            XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
-
-            const fecha = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `inventario_${fecha}.xlsx`);
         }
 
         // ============================================================
@@ -1633,7 +1585,6 @@
         }
 
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
-        document.getElementById('btnExportarExcel').addEventListener('click', exportarInventarioExcel);
 
         // ============================================================
         // MENÚ MÓVIL
