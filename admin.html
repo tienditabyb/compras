@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>B&B Admin - Panel de Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -216,71 +216,25 @@
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px;
             }
-            /* Ajustes de tarjetas en móvil (más pequeñas) */
-            .product-card {
-                padding: 6px !important;
-                border-radius: 10px !important;
-            }
-            .product-card .foto-principal {
-                border-radius: 6px !important;
-                margin-bottom: 4px !important;
-            }
-            .product-card h4 {
-                font-size: 0.7rem !important;
-                margin: 2px 0 1px !important;
-            }
-            .product-card .price {
-                font-size: 0.8rem !important;
-            }
-            .product-card .price .old {
-                font-size: 0.6rem !important;
-            }
-            .product-card .stock {
-                font-size: 0.55rem !important;
-            }
-            .product-card .category {
-                font-size: 0.55rem !important;
-            }
-            .product-card .actions button {
-                font-size: 0.55rem !important;
-                padding: 2px 6px !important;
-                border-radius: 12px !important;
-            }
         }
-
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
             .product-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 6px !important;
+                gap: 8px;
             }
             .product-card {
-                padding: 4px !important;
-                border-radius: 8px !important;
+                padding: 8px !important;
             }
             .product-card h4 {
-                font-size: 0.65rem !important;
-            }
-            .product-card .price {
                 font-size: 0.75rem !important;
             }
-            .product-card .price .old {
-                font-size: 0.55rem !important;
-            }
-            .product-card .stock {
-                font-size: 0.5rem !important;
-            }
-            .product-card .category {
-                font-size: 0.5rem !important;
-            }
-            .product-card .actions button {
-                font-size: 0.5rem !important;
-                padding: 2px 4px !important;
+            .product-card .price {
+                font-size: 0.8rem !important;
             }
         }
-
         @media (min-width: 1400px) {
             .product-grid {
                 grid-template-columns: repeat(6, 1fr) !important;
@@ -448,7 +402,9 @@
         }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ===== TARJETAS DE PRODUCTOS (estilo tienda) ===== */
+        /* ====================================================
+            ESTILOS PARA TARJETAS DE PRODUCTOS (como en tienda)
+        ==================================================== */
         .product-grid {
             display: grid;
             gap: 16px;
@@ -463,6 +419,9 @@
             transition: 0.3s;
             text-align: center;
             border: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         .product-card:hover {
             transform: translateY(-4px);
@@ -475,13 +434,15 @@
             background: #f1f5f9;
             border-radius: 10px;
             cursor: pointer;
+            margin-bottom: 6px;
         }
         .product-card .fotos-extra {
             display: flex;
             gap: 4px;
-            margin-top: 6px;
+            margin-top: 4px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 4px;
         }
         .product-card .fotos-extra img {
             width: 32px;
@@ -500,7 +461,7 @@
         .product-card h4 {
             font-size: 0.9rem;
             font-weight: 600;
-            margin: 8px 0 4px;
+            margin: 4px 0 2px;
             color: #1e272e;
             white-space: nowrap;
             overflow: hidden;
@@ -528,6 +489,9 @@
             gap: 6px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid #f1f5f9;
         }
         .product-card .actions button {
             padding: 4px 12px;
@@ -624,118 +588,34 @@
             border-color: #2980b9;
         }
         .form-group textarea { resize: vertical; min-height: 60px; }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        /* ===== GESTIÓN DE FOTOS ===== */
-        .fotos-gestion {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 12px;
-            background: #f8fafc;
-        }
-        .fotos-gestion .fotos-lista {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
-        .fotos-gestion .foto-item {
-            position: relative;
-            display: inline-block;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            background: white;
-            width: 80px;
-            height: 80px;
-        }
-        .fotos-gestion .foto-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .fotos-gestion .foto-item .btn-eliminar-foto {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: 0.2s;
-        }
-        .fotos-gestion .foto-item .btn-eliminar-foto:hover {
-            background: #b91c1c;
-            transform: scale(1.1);
-        }
-        .fotos-gestion .fotos-preview-nuevas {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .fotos-gestion .fotos-preview-nuevas .foto-item {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            background: white;
-        }
-        .fotos-gestion .fotos-preview-nuevas .foto-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .fotos-gestion .fotos-preview-nuevas .foto-item .btn-quitar-nueva {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: 0.2s;
-        }
-        .fotos-gestion .fotos-preview-nuevas .foto-item .btn-quitar-nueva:hover {
-            background: #b91c1c;
-            transform: scale(1.1);
-        }
-        .fotos-gestion .file-input-wrapper {
+        .form-group .file-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 8px;
         }
-        .fotos-gestion .file-input-wrapper input[type="file"] {
-            flex: 1;
-            min-width: 120px;
-        }
-        .fotos-gestion .file-input-wrapper .file-count {
+        .form-group .file-input-wrapper input[type="file"] { flex: 1; min-width: 120px; }
+        .form-group .file-input-wrapper .file-count {
             font-size: 0.85rem;
             color: #64748b;
+        }
+        .form-group .file-preview-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .form-group .file-preview-grid img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         /* ===== BOTONES ===== */
@@ -874,24 +754,6 @@
             text-align: center;
             padding: 40px;
             color: #94a3b8;
-        }
-
-        /* ===== FOOTER (corregido) ===== */
-        .footer {
-            background-color: #1a252f;
-            color: #b0c4d9;
-            text-align: center;
-            padding: 16px 20px;
-            margin-top: 30px;
-            font-size: 0.85rem;
-            width: 100%;
-        }
-        .footer p {
-            margin: 0;
-            color: #b0c4d9;
-        }
-        .footer a {
-            color: #74b9ff;
         }
     </style>
 </head>
@@ -1082,20 +944,14 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- Gestión de fotos -->
-                <div class="form-group fotos-gestion">
+                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
+                <div class="form-group">
                     <label>Fotos del producto</label>
-                    <div id="fotosExistentes">
-                        <!-- Se llena con JS -->
-                    </div>
-                    <div id="fotosPreviewNuevas" class="fotos-preview-nuevas"></div>
                     <div class="file-input-wrapper">
-                        <input type="file" id="prodFotosInput" accept="image/*" multiple />
+                        <input type="file" id="prodFotos" accept="image/*" multiple />
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
-                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
-                        Puedes seleccionar varias fotos a la vez o añadirlas una por una.
-                    </div>
+                    <div class="file-preview-grid" id="prodFotosPreview"></div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
@@ -1281,7 +1137,7 @@
         }
 
         // ============================================================
-        // OBTENER FOTOS DE UN PRODUCTO (array)
+        // OBTENER LISTA DE FOTOS (para renderizar)
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1628,76 +1484,46 @@
 
         function renderFotosExistentes() {
             const container = document.getElementById('fotosExistentes');
-            if (fotosActuales.length === 0) {
-                container.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem;">No hay fotos guardadas.</p>';
-                return;
-            }
-            const productoId = document.getElementById('productId').value;
-            let html = '<div class="fotos-lista">';
-            fotosActuales.forEach((f, index) => {
-                const url = `${POCKETBASE_URL}/api/files/productos/${productoId}/${f}`;
-                html += `
-                    <div class="foto-item">
-                        <img src="${url}" alt="${f}" />
-                        <button class="btn-eliminar-foto" data-index="${index}" title="Eliminar foto">✕</button>
-                        <div class="nombre-foto">${f}</div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-
-            container.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const index = parseInt(this.dataset.index);
-                    if (confirm('¿Eliminar esta foto?')) {
-                        fotosActuales.splice(index, 1);
-                        renderFotosExistentes();
-                    }
-                });
-            });
+            if (!container) return;
+            // Esta función se usa en la versión anterior, pero con el nuevo campo múltiple
+            // ya no la necesitamos, la reemplazamos con la previsualización de nuevas.
         }
 
         function renderFotosNuevas() {
-            const container = document.getElementById('fotosPreviewNuevas');
+            const container = document.getElementById('prodFotosPreview');
+            if (!container) return;
             if (nuevasFotos.length === 0) {
                 container.innerHTML = '';
                 return;
             }
-            let html = '<div class="fotos-lista">';
+            let html = '';
             nuevasFotos.forEach((file, index) => {
                 const url = URL.createObjectURL(file);
                 html += `
-                    <div class="foto-item">
-                        <img src="${url}" alt="${file.name}" />
-                        <button class="btn-quitar-nueva" data-index="${index}" title="Quitar foto">✕</button>
-                        <div class="nombre-foto">${file.name}</div>
+                    <div style="position:relative; display:inline-block;">
+                        <img src="${url}" alt="${file.name}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;" />
+                        <button type="button" onclick="quitarFotoNueva(${index})" style="position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
                     </div>
                 `;
             });
-            html += '</div>';
             container.innerHTML = html;
+        }
 
-            container.querySelectorAll('.btn-quitar-nueva').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const index = parseInt(this.dataset.index);
-                    nuevasFotos.splice(index, 1);
-                    renderFotosNuevas();
-                    actualizarContadorFotos();
-                });
-            });
+        function quitarFotoNueva(index) {
+            nuevasFotos.splice(index, 1);
+            renderFotosNuevas();
+            actualizarContadorFotos();
         }
 
         function actualizarContadorFotos() {
-            const input = document.getElementById('prodFotosInput');
+            const input = document.getElementById('prodFotos');
             const count = nuevasFotos.length;
             document.getElementById('prodFotosCount').textContent = count > 0 ? `${count} archivo(s) seleccionado(s)` : 'Seleccionar archivos';
             input.value = '';
         }
 
-        document.getElementById('prodFotosInput').addEventListener('change', function(e) {
+        // Manejar la selección de archivos
+        document.getElementById('prodFotos').addEventListener('change', function(e) {
             const files = Array.from(this.files);
             if (files.length === 0) return;
             nuevasFotos = nuevasFotos.concat(files);
@@ -1706,12 +1532,10 @@
         });
 
         function resetFotosState() {
-            fotosActuales = [];
             nuevasFotos = [];
-            renderFotosExistentes();
             renderFotosNuevas();
             document.getElementById('prodFotosCount').textContent = 'Seleccionar archivos';
-            document.getElementById('prodFotosInput').value = '';
+            document.getElementById('prodFotos').value = '';
         }
 
         // ============================================================
@@ -1750,10 +1574,45 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                fotosActuales = obtenerFotosProducto(producto);
-                renderFotosExistentes();
+                // Mostrar fotos existentes
+                const fotos = obtenerFotosProducto(producto);
+                if (fotos.length > 0) {
+                    const previewContainer = document.getElementById('prodFotosPreview');
+                    previewContainer.innerHTML = '';
+                    fotos.forEach(f => {
+                        const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${f}`;
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Foto';
+                        img.style.cssText = 'width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;';
+                        // Botón para eliminar foto existente (se marca para eliminar)
+                        const wrapper = document.createElement('div');
+                        wrapper.style.position = 'relative';
+                        wrapper.style.display = 'inline-block';
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = '✕';
+                        btn.style.cssText = 'position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;';
+                        btn.onclick = function() {
+                            // Marcar esta foto para eliminar (la quitamos de la lista de fotos actuales)
+                            const index = fotos.indexOf(f);
+                            if (index > -1) {
+                                fotos.splice(index, 1);
+                                wrapper.remove();
+                            }
+                        };
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(btn);
+                        previewContainer.appendChild(wrapper);
+                    });
+                    // Guardamos las fotos actuales en una variable global para saber cuáles mantener
+                    window._fotosActuales = fotos;
+                } else {
+                    window._fotosActuales = [];
+                }
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
+                window._fotosActuales = [];
             }
             modal.classList.add('active');
         }
@@ -1802,9 +1661,15 @@
                 for (const key in data) {
                     formData.append(key, data[key]);
                 }
-                fotosActuales.forEach(f => {
-                    formData.append('Fotos', f);
-                });
+
+                // Fotos existentes (las que no se eliminaron)
+                if (window._fotosActuales) {
+                    window._fotosActuales.forEach(f => {
+                        formData.append('Fotos', f);
+                    });
+                }
+
+                // Nuevas fotos
                 nuevasFotos.forEach(file => {
                     formData.append('Fotos', file);
                 });
@@ -2036,8 +1901,5 @@
             document.getElementById('appContainer').style.display = 'none';
         }
     </script>
-
-    <!-- ========== FOOTER ========== -->
-    <footer class="footer"><p>© <span id="yearAdmin"></span> B&amp;B Admin. Todos los derechos reservados.</p></footer>
 </body>
 </html>
