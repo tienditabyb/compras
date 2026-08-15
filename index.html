@@ -83,7 +83,6 @@
             gap: 12px;
             flex-shrink: 0;
         }
-        /* Botón Mi cuenta (ícono) */
         .account-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
@@ -102,9 +101,7 @@
             background: rgba(255,255,255,0.25);
             border-color: rgba(255,255,255,0.4);
         }
-        .account-dropdown {
-            position: relative;
-        }
+        .account-dropdown { position: relative; }
         .account-dropdown-content {
             display: none;
             position: absolute;
@@ -300,16 +297,36 @@
             cursor: pointer;
         }
 
-        /* Grid de productos - 6 columnas en pantallas grandes */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         }
 
         @media (min-width: 1400px) {
             .products-grid {
                 grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        @media (max-width: 1399px) and (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 1023px) and (min-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 767px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .products-grid {
+                gap: 8px;
             }
         }
 
@@ -423,48 +440,6 @@
             font-size: 0.85rem;
             color: #64748b;
             padding: 0 10px;
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 1200px) {
-            .products-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        @media (max-width: 992px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { padding: 0 10px; }
-            .header__search { order: 3; flex: 1 1 100%; max-width: 100%; }
-            .header__logo { font-size: 1.4rem; }
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-            .section-header { flex-direction: column; align-items: stretch; gap: 6px; }
-            .section-header__sort { justify-content: flex-start; }
-            .cart-sidebar { width: 100%; right: -100%; }
-            .cart-sidebar.open { right: 0; }
-            .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
-            .account-btn { width: 34px; height: 34px; font-size: 1rem; }
-        }
-        @media (max-width: 480px) {
-            .products-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-            .product-card img { aspect-ratio: 1/1; }
-            .product-card { padding: 10px; }
-            .product-card h3 { font-size: 0.85rem; }
-            .product-card .product-desc { font-size: 0.75rem; }
-            .product-card .price { font-size: 1rem; }
-            .btn-add { font-size: 0.75rem; padding: 4px 12px; }
-            .modal { padding: 16px; max-width: 100%; }
-            .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
         }
 
         /* ========== FOOTER ========== */
@@ -805,7 +780,7 @@
         .detail-modal .calificar-section .btn-calificar:hover { background: #0f171e; }
         .detail-modal .calificar-section .btn-calificar:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* ========== MODALES DE ENTREGA ========== */
+        /* ===== DELIVERY ===== */
         .delivery-options {
             display: flex;
             flex-direction: column;
@@ -898,6 +873,25 @@
             padding: 40px 0;
             grid-column: 1 / -1;
         }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { padding: 0 10px; }
+            .header__search { order: 3; flex: 1 1 100%; max-width: 100%; }
+            .header__logo { font-size: 1.4rem; }
+            .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
+            .account-btn { width: 34px; height: 34px; font-size: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .product-card { padding: 10px; }
+            .product-card h3 { font-size: 0.85rem; }
+            .product-card .product-desc { font-size: 0.75rem; }
+            .product-card .price { font-size: 1rem; }
+            .btn-add { font-size: 0.75rem; padding: 4px 12px; }
+            .modal { padding: 16px; max-width: 100%; }
+            .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -931,7 +925,7 @@
 
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main-content">
-        <!-- ===== SIDEBAR ===== -->
+        <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
             <nav class="sidebar__nav">
@@ -945,7 +939,7 @@
             </div>
         </aside>
 
-        <!-- ===== SECCIÓN DE PRODUCTOS ===== -->
+        <!-- PRODUCTOS -->
         <section class="products-section">
             <div class="section-header">
                 <h2 id="productCountHeader"><span id="productCount">0</span> Productos</h2>
@@ -968,7 +962,175 @@
     </div>
 
     <!-- ========== MODALES ========== -->
-    <!-- (Todos los modales: addToCart, changePassword, contact, history, cartSidebar, delivery, auth, detail) -->
+    <!-- Add to Cart -->
+    <div class="modal-overlay" id="addToCartModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarAddToCartModal()">✕</button>
+            <h2>✅ Producto añadido</h2>
+            <p>El producto se ha añadido al carrito correctamente.</p>
+            <div class="add-cart-actions">
+                <button class="btn-primary" onclick="cerrarAddToCartModal()">Seguir comprando</button>
+                <button class="btn-primary green" onclick="cerrarAddToCartModal(); abrirCarrito();">Ver carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarChangePasswordModal()">✕</button>
+            <h2>🔑 Cambiar contraseña</h2>
+            <div id="changePassForm">
+                <div class="form-group">
+                    <label>Contraseña actual *</label>
+                    <input type="password" id="oldPassword" placeholder="Escribe tu contraseña actual" />
+                </div>
+                <div class="form-group">
+                    <label>Nueva contraseña *</label>
+                    <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" />
+                </div>
+                <div class="form-group">
+                    <label>Confirmar nueva contraseña *</label>
+                    <input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" />
+                </div>
+                <div id="passError" class="error-msg"></div>
+                <button class="btn-primary" onclick="cambiarPassword()">Actualizar contraseña</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contacto -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarContactModal()">✕</button>
+            <h2>📞 Contáctenos</h2>
+            <div class="contact-info">
+                <p><strong>Tiendita B&amp;B</strong></p>
+                <p>📱 Teléfonos:<br>
+                   +53 58388494 (Yoandy)<br>
+                   +53 53803134 (Carmen)</p>
+                <p>📧 Correo: <a href="mailto:bribry457@gmail.com">bribry457@gmail.com</a></p>
+                <p>📍 Dirección:<br>
+                   Paseo de la Paz #457 entre 2da y 3ra<br>
+                   Loma de Belén, Municipio Santa Clara<br>
+                   Provincia Villa Clara, Cuba</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
+            <h2>📋 Mi Historial de Pedidos</h2>
+            <div id="historyContent">
+                <p style="color:#94a3b8; text-align:center;">Cargando historial...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrito lateral -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>🛒 Tu Carrito</h2>
+            <button class="close-cart" id="closeCartBtn">✕</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-total" id="cartTotal">💰 Subtotal: $0.00</div>
+        <button class="checkout-btn" id="checkoutBtn">✅ Finalizar pedido</button>
+    </div>
+
+    <!-- Delivery -->
+    <div class="modal-overlay delivery-modal" id="deliveryModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarDeliveryModal()">✕</button>
+            <h2>📦 Elige tu método de entrega</h2>
+            <div class="delivery-options">
+                <button onclick="seleccionarEntrega('Domicilio')">
+                    <span class="icon">🚚</span>
+                    <span class="label">Domicilio</span>
+                    <span class="sub">(Envío a tu dirección)</span>
+                </button>
+                <button onclick="seleccionarEntrega('Local')">
+                    <span class="icon">🏪</span>
+                    <span class="label">Retiro en tienda</span>
+                    <span class="sub">(Pasas a buscar)</span>
+                </button>
+            </div>
+            <div class="resumen-pedido" id="resumenPedido">
+                <div class="linea"><span>Subtotal</span> <span id="resumenSubtotal">$0.00</span></div>
+                <div class="linea envio" id="resumenEnvio"><span>Envío</span> <span id="resumenEnvioMonto">$0.00</span></div>
+                <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
+            </div>
+            <div class="form-group">
+                <label>📱 Elige el número para recibir el pedido:</label>
+                <div class="whatsapp-selector">
+                    <label><input type="radio" name="whatsappNumber" value="5358388494" checked> Yoandy (+53 58388494)</label>
+                    <label><input type="radio" name="whatsappNumber" value="5353803134"> Carmen (+53 53803134)</label>
+                </div>
+            </div>
+            <div class="delivery-form" id="deliveryForm">
+                <div class="form-group">
+                    <label>Nombre *</label>
+                    <input type="text" id="domNombre" placeholder="Tu nombre" />
+                </div>
+                <div class="form-group">
+                    <label>Apellidos *</label>
+                    <input type="text" id="domApellidos" placeholder="Tus apellidos" />
+                </div>
+                <div class="form-group">
+                    <label>Teléfono *</label>
+                    <input type="tel" id="domTelefono" placeholder="Ej: 3001234567" />
+                </div>
+                <div id="domDireccionGroup">
+                    <div class="form-group">
+                        <label>Dirección completa *</label>
+                        <input type="text" id="domDireccion" placeholder="Calle, número, barrio, ciudad" />
+                    </div>
+                    <div class="form-group">
+                        <label>Referencias (opcional)</label>
+                        <textarea id="domReferencias" placeholder="Ej: Tocar timbre, portón azul, etc." rows="2"></textarea>
+                    </div>
+                </div>
+                <button class="btn-primary" id="confirmarPedidoBtn" onclick="confirmarPedidoFinal()">✅ Confirmar pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarModal()">✕</button>
+            <h2 id="authTitle">Iniciar sesión</h2>
+            <div id="authForm">
+                <div id="registerFields" style="display:none;">
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" placeholder="Tu nombre" /></div>
+                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" placeholder="Tus apellidos" /></div>
+                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" placeholder="Ej: 3001234567" /></div>
+                </div>
+                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" placeholder="tu@email.com" /></div>
+                <div class="form-group"><label>Contraseña *</label><input type="password" id="authPassword" placeholder="Mínimo 8 caracteres" /></div>
+                <div id="registerPasswordConfirm" style="display:none;">
+                    <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" placeholder="Repite tu contraseña" /></div>
+                </div>
+                <div id="authError" class="error-msg"></div>
+                <button class="btn-primary" id="authSubmitBtn" onclick="handleAuth()">Iniciar sesión</button>
+                <div class="switch-auth"><span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle producto -->
+    <div class="detail-overlay" id="detailOverlay">
+        <div class="detail-modal">
+            <button class="close-detail" onclick="cerrarDetalle()">✕</button>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer"><p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p></footer>
+
     <!-- ============================================================ -->
     <!-- ====================== JAVASCRIPT =========================== -->
     <!-- ============================================================ -->
@@ -977,7 +1139,7 @@
         //  CONFIGURACIÓN
         // ============================================================
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
-        const PRODUCTOS_POR_PAGINA = 12; // Para que en 6 columnas se vean 2 filas
+        const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
 
         let productos = [];
@@ -1091,7 +1253,7 @@
         });
 
         // ============================================================
-        //  MODALES AUTH, CONTACTO, HISTORIAL, CAMBIAR CONTRASEÑA, ETC.
+        //  MODALES
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1236,9 +1398,7 @@
             }
         }
 
-        function abrirContacto() {
-            document.getElementById('contactModal').classList.add('active');
-        }
+        function abrirContacto() { document.getElementById('contactModal').classList.add('active'); }
         function cerrarContactModal() { document.getElementById('contactModal').classList.remove('active'); }
 
         async function abrirHistoryModal() {
@@ -1960,179 +2120,5 @@
         init();
         console.log('🏪 B&B cargada correctamente.');
     </script>
-
-    <!-- ============================================================ -->
-    <!-- ====================== MODALES HTML ========================== -->
-    <!-- ============================================================ -->
-    <!-- (Los modales se mantienen igual que antes, solo los referencio para no repetir todo el código) -->
-    <!-- ====== MODALES (se incluyen todos los que ya estaban) ====== -->
-    <div class="modal-overlay" id="addToCartModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarAddToCartModal()">✕</button>
-            <h2>✅ Producto añadido</h2>
-            <p>El producto se ha añadido al carrito correctamente.</p>
-            <div class="add-cart-actions">
-                <button class="btn-primary" onclick="cerrarAddToCartModal()">Seguir comprando</button>
-                <button class="btn-primary green" onclick="cerrarAddToCartModal(); abrirCarrito();">Ver carrito</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="changePasswordModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarChangePasswordModal()">✕</button>
-            <h2>🔑 Cambiar contraseña</h2>
-            <div id="changePassForm">
-                <div class="form-group">
-                    <label>Contraseña actual *</label>
-                    <input type="password" id="oldPassword" placeholder="Escribe tu contraseña actual" />
-                </div>
-                <div class="form-group">
-                    <label>Nueva contraseña *</label>
-                    <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" />
-                </div>
-                <div class="form-group">
-                    <label>Confirmar nueva contraseña *</label>
-                    <input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" />
-                </div>
-                <div id="passError" class="error-msg"></div>
-                <button class="btn-primary" onclick="cambiarPassword()">Actualizar contraseña</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="contactModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarContactModal()">✕</button>
-            <h2>📞 Contáctenos</h2>
-            <div class="contact-info">
-                <p><strong>Tiendita B&amp;B</strong></p>
-                <p>📱 Teléfonos:<br>
-                   +53 58388494 (Yoandy)<br>
-                   +53 53803134 (Carmen)</p>
-                <p>📧 Correo: <a href="mailto:bribry457@gmail.com">bribry457@gmail.com</a></p>
-                <p>📍 Dirección:<br>
-                   Paseo de la Paz #457 entre 2da y 3ra<br>
-                   Loma de Belén, Municipio Santa Clara<br>
-                   Provincia Villa Clara, Cuba</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="historyModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
-            <h2>📋 Mi Historial de Pedidos</h2>
-            <div id="historyContent">
-                <p style="color:#94a3b8; text-align:center;">Cargando historial...</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2>🛒 Tu Carrito</h2>
-            <button class="close-cart" id="closeCartBtn">✕</button>
-        </div>
-        <div id="cartItems"></div>
-        <div class="cart-total" id="cartTotal">💰 Subtotal: $0.00</div>
-        <button class="checkout-btn" id="checkoutBtn">✅ Finalizar pedido</button>
-    </div>
-
-    <div class="modal-overlay delivery-modal" id="deliveryModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarDeliveryModal()">✕</button>
-            <h2>📦 Elige tu método de entrega</h2>
-            <div class="delivery-options">
-                <button onclick="seleccionarEntrega('Domicilio')">
-                    <span class="icon">🚚</span>
-                    <span class="label">Domicilio</span>
-                    <span class="sub">(Envío a tu dirección)</span>
-                </button>
-                <button onclick="seleccionarEntrega('Local')">
-                    <span class="icon">🏪</span>
-                    <span class="label">Retiro en tienda</span>
-                    <span class="sub">(Pasas a buscar)</span>
-                </button>
-            </div>
-
-            <div class="resumen-pedido" id="resumenPedido">
-                <div class="linea"><span>Subtotal</span> <span id="resumenSubtotal">$0.00</span></div>
-                <div class="linea envio" id="resumenEnvio"><span>Envío</span> <span id="resumenEnvioMonto">$0.00</span></div>
-                <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
-            </div>
-
-            <div class="form-group">
-                <label>📱 Elige el número para recibir el pedido:</label>
-                <div class="whatsapp-selector">
-                    <label>
-                        <input type="radio" name="whatsappNumber" value="5358388494" checked>
-                        Yoandy (+53 58388494)
-                    </label>
-                    <label>
-                        <input type="radio" name="whatsappNumber" value="5353803134">
-                        Carmen (+53 53803134)
-                    </label>
-                </div>
-            </div>
-
-            <div class="delivery-form" id="deliveryForm">
-                <div class="form-group">
-                    <label>Nombre *</label>
-                    <input type="text" id="domNombre" placeholder="Tu nombre" />
-                </div>
-                <div class="form-group">
-                    <label>Apellidos *</label>
-                    <input type="text" id="domApellidos" placeholder="Tus apellidos" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono *</label>
-                    <input type="tel" id="domTelefono" placeholder="Ej: 3001234567" />
-                </div>
-                <div id="domDireccionGroup">
-                    <div class="form-group">
-                        <label>Dirección completa *</label>
-                        <input type="text" id="domDireccion" placeholder="Calle, número, barrio, ciudad" />
-                    </div>
-                    <div class="form-group">
-                        <label>Referencias (opcional)</label>
-                        <textarea id="domReferencias" placeholder="Ej: Tocar timbre, portón azul, etc." rows="2"></textarea>
-                    </div>
-                </div>
-                <button class="btn-primary" id="confirmarPedidoBtn" onclick="confirmarPedidoFinal()">✅ Confirmar pedido</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="authModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarModal()">✕</button>
-            <h2 id="authTitle">Iniciar sesión</h2>
-            <div id="authForm">
-                <div id="registerFields" style="display:none;">
-                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" placeholder="Tu nombre" /></div>
-                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" placeholder="Tus apellidos" /></div>
-                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" placeholder="Ej: 3001234567" /></div>
-                </div>
-                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" placeholder="tu@email.com" /></div>
-                <div class="form-group"><label>Contraseña *</label><input type="password" id="authPassword" placeholder="Mínimo 8 caracteres" /></div>
-                <div id="registerPasswordConfirm" style="display:none;">
-                    <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" placeholder="Repite tu contraseña" /></div>
-                </div>
-                <div id="authError" class="error-msg"></div>
-                <button class="btn-primary" id="authSubmitBtn" onclick="handleAuth()">Iniciar sesión</button>
-                <div class="switch-auth"><span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="detail-overlay" id="detailOverlay">
-        <div class="detail-modal">
-            <button class="close-detail" onclick="cerrarDetalle()">✕</button>
-            <div id="detailContent"></div>
-        </div>
-    </div>
-
-    <footer class="footer"><p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p></footer>
 </body>
 </html>
