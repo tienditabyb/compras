@@ -1883,11 +1883,10 @@
         }
 
         // ============================================================
-        //  OBTENER LISTA DE FOTOS DE UN PRODUCTO
+        //  OBTENER LISTA DE FOTOS (SOLO DEL CAMPO Fotos - SIN FALLBACK)
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
-            // Intentar con el nuevo campo Fotos (array)
             if (prod.Fotos) {
                 if (Array.isArray(prod.Fotos)) {
                     fotos = prod.Fotos;
@@ -1897,12 +1896,6 @@
                         if (Array.isArray(parsed)) fotos = parsed;
                     } catch (e) {}
                 }
-            }
-            // Si no hay fotos en el nuevo campo, usar los antiguos
-            if (fotos.length === 0) {
-                if (prod.Foto) fotos.push(prod.Foto);
-                if (prod.Foto2) fotos.push(prod.Foto2);
-                if (prod.Foto3) fotos.push(prod.Foto3);
             }
             return fotos;
         }
@@ -2104,7 +2097,9 @@
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
-                        window.location.href = `?id=${id}`;
+                        // Cambiar la URL sin recargar la página (para el evento popstate)
+                        window.history.pushState({ productoId: id }, '', `?id=${id}`);
+                        mostrarDetalle(id);
                     });
                 });
 
@@ -2158,7 +2153,7 @@
                 const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
                 const nombresMap = await obtenerNombresUsuarios(userIds);
 
-                // Obtener todas las fotos
+                // Obtener todas las fotos (SOLO del campo Fotos)
                 const fotos = obtenerFotosProducto(prod);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
                 const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
@@ -2290,6 +2285,7 @@
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
+            // Limpiar el parámetro de la URL sin recargar
             window.history.pushState({}, document.title, window.location.pathname);
             renderizarProductos();
         }
@@ -2614,6 +2610,19 @@
         }
 
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
+
+        // ============================================================
+        //  MANEJO DEL BOTÓN "ATRÁS" DEL NAVEGADOR
+        // ============================================================
+        window.addEventListener('popstate', function(event) {
+            // Si no hay estado o no tiene productoId, volver a la lista
+            if (!event.state || !event.state.productoId) {
+                volverALista();
+            } else {
+                // Si tiene productoId, mostrar ese detalle (por si el usuario vuelve hacia adelante)
+                mostrarDetalle(event.state.productoId);
+            }
+        });
 
         // ============================================================
         //  INICIALIZACIÓN
