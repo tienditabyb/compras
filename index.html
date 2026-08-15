@@ -821,11 +821,11 @@
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
 
-            /* === AJUSTES DE PRODUCTOS EN MÓVIL (más pequeños y uniformes) === */
+            /* === CORRECCIÓN: 2 columnas exactas del mismo ancho === */
             .products-grid {
                 gap: 8px;
-                grid-template-columns: repeat(2, 1fr);
-                grid-auto-rows: 1fr; /* fuerza que todas las filas tengan la misma altura */
+                grid-template-columns: 1fr 1fr; /* fija 2 columnas iguales */
+                grid-auto-rows: 1fr;
                 align-items: stretch;
             }
             .product-card {
@@ -882,6 +882,7 @@
         @media (max-width: 480px) {
             .products-grid {
                 gap: 6px;
+                grid-template-columns: 1fr 1fr;
             }
             .product-card {
                 padding: 4px;
