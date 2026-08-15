@@ -8,39 +8,49 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* ===== ESTILOS BASE ===== */
+        /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            background: #f1f5f9;
-            color: #1a1a2e;
+            background-color: #f5f6fa;
+            color: #1e272e;
             min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; font-family: inherit; }
 
-        /* HEADER */
+        /* ===== HEADER (oscuro, como en la tienda) ===== */
         .header {
-            background: #ffffff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 12px 0;
+            background-color: #1a252f;
+            padding: 10px 15px;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            width: 100%;
         }
         .header__container {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
         .header__logo {
             font-size: 1.8rem;
             font-weight: 800;
-            color: #1a1a2e;
-            text-decoration: none;
+            color: #ffffff;
+            letter-spacing: -0.5px;
         }
-        .header__logo span { color: #2980b9; }
+        .header__logo span { color: #74b9ff; }
+        .header__logo .admin-badge {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #b0c4d9;
+            margin-left: 6px;
+        }
         .header__user {
             display: flex;
             align-items: center;
@@ -49,77 +59,100 @@
         .header__user .user-name {
             font-weight: 500;
             font-size: 0.9rem;
-            color: #1a1a2e;
+            color: #ffffff;
         }
         .header__user button {
-            background: none;
-            border: none;
-            color: #e74c3c;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 6px 16px;
+            color: #ffffff;
             font-weight: 600;
+            font-size: 0.85rem;
             cursor: pointer;
-            font-size: 0.9rem;
+            transition: 0.3s;
         }
-        .header__user button:hover { text-decoration: underline; }
+        .header__user button:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.4);
+        }
 
-        /* BOTÓN HAMBURGUESA */
+        /* ===== BOTÓN HAMBURGUESA ===== */
         .menu-toggle {
             display: none;
-            background: #f1f5f9;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #1a1a2e;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
             border-radius: 8px;
-            padding: 6px 14px;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: #ffffff;
+            padding: 4px 14px;
             transition: 0.2s;
         }
         .menu-toggle:hover {
-            background: #e2e8f0;
-            color: #2980b9;
+            background: rgba(255,255,255,0.25);
         }
 
-        /* SIDEBAR */
-        .main-content { display: flex; gap: 30px; margin-top: 30px; position: relative; }
+        /* ===== SIDEBAR ===== */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-top: 25px;
+            padding: 0 15px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
         .sidebar {
             width: 220px;
             flex-shrink: 0;
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 20px 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             height: fit-content;
             position: sticky;
-            top: 100px;
+            top: 90px;
             transition: transform 0.3s ease;
         }
         .sidebar__title {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            margin-bottom: 16px;
-            color: #1a1a2e;
+            color: #1e272e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
         }
-        .sidebar__nav ul { list-style: none; }
-        .sidebar__nav li { margin-bottom: 6px; }
-        .sidebar__nav a {
+        .sidebar__nav ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sidebar__nav li a {
             display: block;
             padding: 8px 12px;
             border-radius: 8px;
             color: #64748b;
-            text-decoration: none;
             font-size: 0.9rem;
+            font-weight: 500;
             transition: 0.2s;
             cursor: pointer;
         }
-        .sidebar__nav a:hover,
-        .sidebar__nav a.active {
-            background-color: #f1f5f9;
+        .sidebar__nav li a:hover {
+            background: #f1f5f9;
+            color: #1e272e;
+        }
+        .sidebar__nav li a.active {
+            background: #e6f0fa;
             color: #2980b9;
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .content { flex: 1; }
+        .content { flex: 1; min-width: 0; }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 992px) {
@@ -139,8 +172,8 @@
                 transition: transform 0.3s ease;
                 margin-top: 0;
                 top: 0;
-                position: fixed;
                 padding-top: 60px;
+                position: fixed;
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -156,7 +189,7 @@
                 cursor: pointer;
                 color: #94a3b8;
             }
-            .sidebar .close-sidebar:hover { color: #1a1a2e; }
+            .sidebar .close-sidebar:hover { color: #1e272e; }
 
             .sidebar-overlay {
                 display: none;
@@ -168,129 +201,53 @@
                 background: rgba(0,0,0,0.4);
                 z-index: 150;
             }
-            .sidebar-overlay.active {
-                display: block;
-            }
+            .sidebar-overlay.active { display: block; }
 
-            .menu-toggle {
-                display: inline-block;
-            }
-            .header__user .user-name {
-                display: none;
-            }
-            .main-content {
-                margin-top: 15px;
-                flex-direction: column;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .header__container {
-                flex-wrap: wrap;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            .list-item {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 6px;
-            }
-            .list-item .center {
-                justify-content: flex-start;
-            }
-            .modal {
-                max-width: 95%;
-                padding: 20px;
-            }
-
-            /* ===== AJUSTES PARA TABLET/MÓVIL EN INVENTARIO ===== */
+            .menu-toggle { display: inline-block; }
+            .header__user .user-name { display: none; }
+            .main-content { flex-direction: column; padding: 0 10px; margin-top: 15px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .form-row { grid-template-columns: 1fr; }
+            .list-item { flex-direction: column; align-items: stretch; gap: 6px; }
+            .list-item .center { justify-content: flex-start; }
+            .modal { max-width: 95%; padding: 20px; }
+            /* Grid productos en móvil */
             .product-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-                padding: 8px;
-            }
-            .product-card {
-                padding: 6px;
-                border-radius: 8px;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px;
             }
             .product-card img {
-                height: 70px;
-                border-radius: 4px;
-            }
-            .product-card h4 {
-                font-size: 0.7rem;
-                margin: 4px 0 2px;
-            }
-            .product-card .price {
-                font-size: 0.75rem;
-            }
-            .product-card .stock {
-                font-size: 0.6rem;
-            }
-            .product-card .category {
-                font-size: 0.55rem;
-            }
-            .product-card .actions button {
-                padding: 2px 6px;
-                font-size: 0.55rem;
+                height: 100px !important;
             }
         }
-
-        /* ===== MÓVILES MUY PEQUEÑOS (menos de 400px) ===== */
-        @media (max-width: 400px) {
-            .product-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 6px;
-                padding: 6px;
-            }
-            .product-card {
-                padding: 4px;
-            }
-            .product-card img {
-                height: 60px;
-            }
-            .product-card h4 {
-                font-size: 0.6rem;
-            }
-            .product-card .price {
-                font-size: 0.7rem;
-            }
-            .product-card .stock {
-                font-size: 0.5rem;
-            }
-            .product-card .category {
-                font-size: 0.5rem;
-            }
-            .product-card .actions button {
-                padding: 2px 4px;
-                font-size: 0.5rem;
-            }
-        }
-
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px;
+            }
+            .product-card {
+                padding: 8px !important;
+            }
+            .product-card img {
+                height: 80px !important;
+            }
+            .product-card h4 {
+                font-size: 0.75rem !important;
+            }
+            .product-card .price {
+                font-size: 0.8rem !important;
+            }
+        }
+        @media (min-width: 1400px) {
+            .product-grid {
+                grid-template-columns: repeat(6, 1fr) !important;
+            }
         }
 
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 150;
-        }
-        .sidebar-overlay.active {
-            display: block;
-        }
         .sidebar .close-sidebar {
             display: none;
         }
@@ -337,14 +294,19 @@
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .filters label { font-weight: 500; font-size: 0.9rem; color: #1a1a2e; }
+        .filters label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1e272e;
+        }
         .filters input, .filters select {
             padding: 8px 12px;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
             background: white;
+            color: #1e272e;
         }
         .filters input:focus, .filters select:focus { border-color: #2980b9; }
         .filters button {
@@ -356,6 +318,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
+            font-size: 0.85rem;
         }
         .filters button:hover { background: #1f6da9; }
         .filters .btn-clear { background: #94a3b8; }
@@ -384,7 +347,7 @@
         .list-item:hover { background: #f8fafc; }
         .list-item:last-child { border-bottom: none; }
         .list-item .left { flex: 1; min-width: 150px; }
-        .list-item .left .title { font-weight: 600; }
+        .list-item .left .title { font-weight: 600; color: #1e272e; }
         .list-item .left .sub {
             font-size: 0.85rem;
             color: #64748b;
@@ -447,44 +410,45 @@
         .btn-whatsapp:hover { background: #1da851; }
 
         /* ====================================================
-            ESTILOS PARA TARJETAS EN ESCRITORIO
+            ESTILOS PARA TARJETAS DE PRODUCTOS (como en tienda)
         ==================================================== */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            padding: 10px;
+            gap: 16px;
+            padding: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         }
         .product-card {
             background: white;
-            border-radius: 10px;
-            padding: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: 0.3s;
             text-align: center;
             border: 1px solid #f1f5f9;
-            transition: 0.2s;
-            position: relative;
         }
-        .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
         .product-card .foto-principal {
             width: 100%;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 6px;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
             background: #f1f5f9;
+            border-radius: 10px;
             cursor: pointer;
         }
-        /* Miniaturas de fotos adicionales */
         .product-card .fotos-extra {
             display: flex;
             gap: 4px;
-            margin-top: 4px;
+            margin-top: 6px;
             justify-content: center;
             flex-wrap: wrap;
         }
         .product-card .fotos-extra img {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             object-fit: cover;
             border-radius: 4px;
             background: #f1f5f9;
@@ -497,17 +461,18 @@
             border-color: #2980b9;
         }
         .product-card h4 {
-            font-size: 0.8rem;
-            margin: 6px 0 2px;
-            color: #1a1a2e;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 8px 0 4px;
+            color: #1e272e;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .product-card .price {
+            font-size: 1rem;
             font-weight: 700;
             color: #2980b9;
-            font-size: 0.9rem;
         }
         .product-card .stock {
             font-size: 0.7rem;
@@ -521,16 +486,17 @@
             text-overflow: ellipsis;
         }
         .product-card .actions {
-            margin-top: 6px;
+            margin-top: 8px;
             display: flex;
-            gap: 4px;
+            gap: 6px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .product-card .actions button {
-            padding: 3px 8px;
+            padding: 4px 12px;
             border: none;
-            border-radius: 4px;
-            font-size: 0.65rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
             cursor: pointer;
             font-weight: 600;
             transition: 0.2s;
@@ -581,11 +547,11 @@
             cursor: pointer;
             color: #94a3b8;
         }
-        .modal .close-modal:hover { color: #1a1a2e; }
+        .modal .close-modal:hover { color: #1e272e; }
         .modal h2 {
             font-size: 1.5rem;
             margin-bottom: 15px;
-            color: #1a1a2e;
+            color: #1e272e;
         }
         .modal .detail-row {
             display: flex;
@@ -595,7 +561,7 @@
         }
         .modal .detail-row:last-child { border-bottom: none; }
         .modal .detail-row .label { font-weight: 500; color: #64748b; }
-        .modal .detail-row .value { font-weight: 600; color: #1a1a2e; }
+        .modal .detail-row .value { font-weight: 600; color: #1e272e; }
 
         /* ===== FORMULARIO ===== */
         .form-group { margin-bottom: 14px; }
@@ -604,7 +570,7 @@
             font-weight: 500;
             font-size: 0.9rem;
             margin-bottom: 4px;
-            color: #1a1a2e;
+            color: #1e272e;
         }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
@@ -614,6 +580,8 @@
             font-size: 0.9rem;
             outline: none;
             font-family: inherit;
+            background: white;
+            color: #1e272e;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: #2980b9;
@@ -637,11 +605,11 @@
             flex-wrap: wrap;
         }
         .form-group .file-preview img {
-            max-width: 80px;
-            max-height: 80px;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            object-fit: cover;
         }
         .form-row {
             display: grid;
@@ -659,6 +627,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
+            font-size: 0.95rem;
         }
         .btn-primary:hover { background: #1f6da9; }
         .btn-danger {
@@ -670,6 +639,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
+            font-size: 0.95rem;
         }
         .btn-danger:hover { background: #b91c1c; }
         .btn-success {
@@ -681,9 +651,20 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
+            font-size: 0.95rem;
         }
         .btn-success:hover { background: #047857; }
-        .btn-clear { background: #94a3b8; }
+        .btn-clear {
+            padding: 10px 24px;
+            background: #94a3b8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
         .btn-clear:hover { background: #64748b; }
 
         /* ===== LOGIN ===== */
@@ -692,21 +673,21 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: #f1f5f9;
+            background: #1a252f;
         }
         .login-box {
             background: white;
             padding: 40px 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 380px;
         }
         .login-box h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             margin-bottom: 25px;
             text-align: center;
-            color: #1a1a2e;
+            color: #1e272e;
         }
         .login-box h1 span { color: #2980b9; }
         .login-box .form-group { margin-bottom: 16px; }
@@ -714,7 +695,7 @@
             display: block;
             font-weight: 500;
             margin-bottom: 4px;
-            color: #1a1a2e;
+            color: #1e272e;
         }
         .login-box .form-group input {
             width: 100%;
@@ -728,7 +709,7 @@
         .login-box .btn-primary {
             width: 100%;
             padding: 12px;
-            background: #2980b9;
+            background: #1a252f;
             color: white;
             border: none;
             border-radius: 8px;
@@ -737,7 +718,7 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .login-box .btn-primary:hover { background: #1f6da9; }
+        .login-box .btn-primary:hover { background: #0f171e; }
         .login-box .error {
             color: #e74c3c;
             font-size: 0.85rem;
@@ -773,41 +754,6 @@
             padding: 40px;
             color: #94a3b8;
         }
-
-        /* ===== PREVIEW DE FOTOS EN EL FORMULARIO ===== */
-        .file-preview-row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .file-preview-row .preview-item {
-            position: relative;
-            display: inline-block;
-        }
-        .file-preview-row .preview-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-        .file-preview-row .preview-item .remove-file {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 <body>
@@ -832,10 +778,10 @@
     <!-- ========== PANEL PRINCIPAL ========== -->
     <div id="appContainer" style="display:none;">
         <header class="header">
-            <div class="container header__container">
+            <div class="header__container">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button class="menu-toggle" id="menuToggle">☰</button>
-                    <a href="#" class="header__logo">B<span>&amp;</span>B <span style="font-size:0.9rem; color:#64748b;">Admin</span></a>
+                    <a href="#" class="header__logo">B<span>&amp;</span>B <span class="admin-badge">Admin</span></a>
                 </div>
                 <div class="header__user">
                     <span class="user-name" id="adminUserName">Administrador</span>
@@ -846,7 +792,7 @@
 
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <div class="container main-content">
+        <div class="main-content">
             <aside class="sidebar" id="sidebar">
                 <button class="close-sidebar" id="closeSidebarBtn">✕</button>
                 <div class="sidebar__title">Menú</div>
@@ -864,7 +810,7 @@
             <section class="content">
                 <!-- DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content active">
-                    <h2 style="margin-bottom:20px;">📊 Resumen General</h2>
+                    <h2 style="margin-bottom:20px; font-weight:600;">📊 Resumen General</h2>
                     <div class="stats-grid" id="dashboardStats">
                         <div class="stat-card"><div class="number" id="statVentas">-</div><div class="label">Ventas totales</div></div>
                         <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">Ingresos totales</div></div>
@@ -872,7 +818,7 @@
                         <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
                     </div>
                     <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-                        <h3 style="margin-bottom:10px;">Últimas ventas</h3>
+                        <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
                         <div id="ultimasVentas"></div>
                     </div>
                 </div>
@@ -880,17 +826,17 @@
                 <!-- INVENTARIO -->
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-                        <h2 style="margin:0;">📦 Inventario</h2>
+                        <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
                         </div>
                     </div>
                     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px;" />
-                        <select id="invCategory" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px;">
+                        <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px; font-size:0.9rem;" />
+                        <select id="invCategory" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;">
                             <option value="Todas">Todas las categorías</option>
                         </select>
-                        <button id="invRefreshBtn" style="padding:8px 20px; background:#2980b9; color:white; border:none; border-radius:8px; cursor:pointer;">🔄 Refrescar</button>
+                        <button id="invRefreshBtn" style="padding:8px 20px; background:#1a252f; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refrescar</button>
                     </div>
                     <div class="list-container" id="inventarioContainer">
                         <div class="loading"><div class="spinner"></div>Cargando productos...</div>
@@ -899,7 +845,7 @@
 
                 <!-- VENTAS -->
                 <div id="tab-ventas" class="tab-content">
-                    <h2 style="margin-bottom:15px;">💰 Ventas</h2>
+                    <h2 style="margin-bottom:15px; font-weight:600;">💰 Ventas</h2>
                     <div class="filters">
                         <div><label>Desde:</label> <input type="date" id="ventasFechaDesde" /></div>
                         <div><label>Hasta:</label> <input type="date" id="ventasFechaHasta" /></div>
@@ -920,7 +866,7 @@
 
                 <!-- DOMICILIOS -->
                 <div id="tab-domicilios" class="tab-content">
-                    <h2 style="margin-bottom:15px;">🛵 Domicilios</h2>
+                    <h2 style="margin-bottom:15px; font-weight:600;">🛵 Domicilios</h2>
                     <div class="filters">
                         <div><label>Estado:</label>
                             <select id="domFiltroEstado">
@@ -940,7 +886,7 @@
 
                 <!-- REPORTES -->
                 <div id="tab-reportes" class="tab-content">
-                    <h2 style="margin-bottom:15px;">📈 Reportes de Ventas</h2>
+                    <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
                         <div><label>Desde:</label> <input type="date" id="repFechaDesde" /></div>
                         <div><label>Hasta:</label> <input type="date" id="repFechaHasta" /></div>
@@ -1031,7 +977,7 @@
                     </div>
                 </div>
 
-                <div style="display:flex; gap:10px; margin-top:10px;">
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
                     <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
                     <button type="button" class="btn-clear" id="productCancelBtn">Cancelar</button>
@@ -1130,7 +1076,6 @@
             const headers = {
                 ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
             };
-            // Si el body es FormData, no establecer Content-Type (el navegador lo hará automáticamente)
             const isFormData = options.body instanceof FormData;
             if (!isFormData) {
                 headers['Content-Type'] = 'application/json';
@@ -1275,7 +1220,6 @@
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 const stock = parseInt(p.Stock || 0);
 
-                // Construir miniaturas de fotos adicionales
                 let extrasHtml = '';
                 const extras = [foto2Url, foto3Url].filter(u => u);
                 if (extras.length > 0) {
@@ -1543,7 +1487,6 @@
             const form = document.getElementById('productForm');
             form.reset();
             document.getElementById('productId').value = '';
-            // Resetear nombres de archivos y previsualizaciones
             document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
             document.getElementById('prodFotoPreview').style.display = 'none';
             document.getElementById('prodFoto2Nombre').textContent = 'Ningún archivo seleccionado';
@@ -1576,7 +1519,6 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                // Mostrar fotos existentes
                 if (producto.Foto) {
                     const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto}`;
                     document.getElementById('prodFotoImg').src = url;
@@ -1659,13 +1601,10 @@
             };
 
             try {
-                let response;
-                // Usar FormData para enviar archivos
                 const formData = new FormData();
                 for (const key in data) {
                     formData.append(key, data[key]);
                 }
-                // Agregar fotos si existen
                 const fotoFile = document.getElementById('prodFoto').files[0];
                 const foto2File = document.getElementById('prodFoto2').files[0];
                 const foto3File = document.getElementById('prodFoto3').files[0];
@@ -1673,12 +1612,12 @@
                 if (foto2File) formData.append('Foto2', foto2File);
                 if (foto3File) formData.append('Foto3', foto3File);
 
+                let response;
                 if (id) {
-                    // Editar: si no se seleccionan nuevas fotos, se mantienen las existentes
                     response = await apiRequest(`productos/records/${id}`, {
                         method: 'PATCH',
                         body: formData,
-                        headers: {} // Importante: sin Content-Type para que el navegador lo configure
+                        headers: {}
                     });
                 } else {
                     response = await apiRequest('productos/records', {
