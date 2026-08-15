@@ -19,7 +19,7 @@
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
 
-        /* ===== HEADER ===== */
+        /* ===== HEADER (oscuro, como tienda) ===== */
         .header {
             background-color: #1a252f;
             padding: 10px 15px;
@@ -403,7 +403,7 @@
         .btn-whatsapp:hover { background: #1da851; }
 
         /* ====================================================
-            ESTILOS PARA TARJETAS DE PRODUCTOS (como en tienda)
+            ESTILOS PARA TARJETAS DE PRODUCTOS (como tienda)
         ==================================================== */
         .product-grid {
             display: grid;
@@ -605,12 +605,32 @@
             flex-wrap: wrap;
             margin-top: 8px;
         }
-        .form-group .file-preview-grid img {
+        .form-group .file-preview-grid .foto-item {
+            position: relative;
+            display: inline-block;
+        }
+        .form-group .file-preview-grid .foto-item img {
             width: 80px;
             height: 80px;
             object-fit: cover;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+        }
+        .form-group .file-preview-grid .foto-item .btn-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .form-row {
             display: grid;
@@ -951,7 +971,12 @@
                         <input type="file" id="prodFotos" accept="image/*" multiple />
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
-                    <div class="file-preview-grid" id="prodFotosPreview"></div>
+                    <div class="file-preview-grid" id="prodFotosPreview">
+                        <!-- Se llena con JS (fotos existentes y nuevas) -->
+                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
+                        Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
+                    </div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
@@ -1137,7 +1162,7 @@
         }
 
         // ============================================================
-        // OBTENER LISTA DE FOTOS (para renderizar)
+        // OBTENER FOTOS DE UN PRODUCTO (ARRAY SEGURO)
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1148,7 +1173,10 @@
                     try {
                         const parsed = JSON.parse(prod.Fotos);
                         if (Array.isArray(parsed)) fotos = parsed;
-                    } catch (e) {}
+                    } catch (e) {
+                        // Si no se puede parsear, intentar dividir por comas
+                        fotos = prod.Fotos.split(',').map(s => s.trim()).filter(Boolean);
+                    }
                 }
             }
             return fotos;
@@ -1477,64 +1505,82 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN EL FORMULARIO
+        // GESTIÓN DE FOTOS EN FORMULARIO (CORREGIDA)
         // ============================================================
-        let fotosActuales = [];
-        let nuevasFotos = [];
+        let fotosExistentes = []; // nombres de archivos existentes
+        let fotosNuevas = []; // archivos File seleccionados
 
-        function renderFotosExistentes() {
-            const container = document.getElementById('fotosExistentes');
-            if (!container) return;
-            // Esta función se usa en la versión anterior, pero con el nuevo campo múltiple
-            // ya no la necesitamos, la reemplazamos con la previsualización de nuevas.
-        }
-
-        function renderFotosNuevas() {
+        function renderFotosFormulario() {
             const container = document.getElementById('prodFotosPreview');
-            if (!container) return;
-            if (nuevasFotos.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            let html = '';
-            nuevasFotos.forEach((file, index) => {
-                const url = URL.createObjectURL(file);
-                html += `
-                    <div style="position:relative; display:inline-block;">
-                        <img src="${url}" alt="${file.name}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;" />
-                        <button type="button" onclick="quitarFotoNueva(${index})" style="position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
+            container.innerHTML = '';
 
-        function quitarFotoNueva(index) {
-            nuevasFotos.splice(index, 1);
-            renderFotosNuevas();
+            // Mostrar fotos existentes (con botón eliminar)
+            fotosExistentes.forEach((f, index) => {
+                const productoId = document.getElementById('productId').value;
+                const url = `${POCKETBASE_URL}/api/files/productos/${productoId}/${f}`;
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `
+                    <img src="${url}" alt="${f}" />
+                    <button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>
+                `;
+                container.appendChild(div);
+            });
+
+            // Mostrar fotos nuevas (previsualización)
+            fotosNuevas.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `
+                    <img src="${url}" alt="${file.name}" />
+                    <button type="button" class="btn-remove" data-nuevo="${index}" title="Quitar foto">✕</button>
+                `;
+                container.appendChild(div);
+            });
+
+            // Eventos para eliminar fotos existentes
+            container.querySelectorAll('.foto-item .btn-remove[data-index]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.index);
+                    fotosExistentes.splice(idx, 1);
+                    renderFotosFormulario();
+                });
+            });
+
+            // Eventos para quitar fotos nuevas (solo previsualización)
+            container.querySelectorAll('.foto-item .btn-remove[data-nuevo]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.nuevo);
+                    fotosNuevas.splice(idx, 1);
+                    renderFotosFormulario();
+                    actualizarContadorFotos();
+                });
+            });
+
             actualizarContadorFotos();
         }
 
         function actualizarContadorFotos() {
-            const input = document.getElementById('prodFotos');
-            const count = nuevasFotos.length;
-            document.getElementById('prodFotosCount').textContent = count > 0 ? `${count} archivo(s) seleccionado(s)` : 'Seleccionar archivos';
-            input.value = '';
+            const total = fotosExistentes.length + fotosNuevas.length;
+            document.getElementById('prodFotosCount').textContent = total > 0 ? `${total} foto(s)` : 'Seleccionar archivos';
         }
 
-        // Manejar la selección de archivos
+        // Manejar selección de archivos
         document.getElementById('prodFotos').addEventListener('change', function(e) {
             const files = Array.from(this.files);
             if (files.length === 0) return;
-            nuevasFotos = nuevasFotos.concat(files);
-            renderFotosNuevas();
-            actualizarContadorFotos();
+            fotosNuevas = fotosNuevas.concat(files);
+            renderFotosFormulario();
+            this.value = ''; // limpiar input para permitir añadir más
         });
 
-        function resetFotosState() {
-            nuevasFotos = [];
-            renderFotosNuevas();
-            document.getElementById('prodFotosCount').textContent = 'Seleccionar archivos';
+        function resetFotosFormulario() {
+            fotosExistentes = [];
+            fotosNuevas = [];
+            renderFotosFormulario();
             document.getElementById('prodFotos').value = '';
         }
 
@@ -1547,6 +1593,7 @@
             form.reset();
             document.getElementById('productId').value = '';
             document.getElementById('productDeleteBtn').style.display = 'none';
+            resetFotosFormulario();
 
             const catSelect = document.getElementById('prodCategoria');
             catSelect.innerHTML = '';
@@ -1556,8 +1603,6 @@
                 opt.textContent = cat;
                 catSelect.appendChild(opt);
             }
-
-            resetFotosState();
 
             if (producto) {
                 document.getElementById('productModalTitle').textContent = '✏️ Editar Producto';
@@ -1574,52 +1619,18 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                // Mostrar fotos existentes
-                const fotos = obtenerFotosProducto(producto);
-                if (fotos.length > 0) {
-                    const previewContainer = document.getElementById('prodFotosPreview');
-                    previewContainer.innerHTML = '';
-                    fotos.forEach(f => {
-                        const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${f}`;
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.alt = 'Foto';
-                        img.style.cssText = 'width:80px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;';
-                        // Botón para eliminar foto existente (se marca para eliminar)
-                        const wrapper = document.createElement('div');
-                        wrapper.style.position = 'relative';
-                        wrapper.style.display = 'inline-block';
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = '✕';
-                        btn.style.cssText = 'position:absolute; top:-6px; right:-6px; background:#dc2626; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center;';
-                        btn.onclick = function() {
-                            // Marcar esta foto para eliminar (la quitamos de la lista de fotos actuales)
-                            const index = fotos.indexOf(f);
-                            if (index > -1) {
-                                fotos.splice(index, 1);
-                                wrapper.remove();
-                            }
-                        };
-                        wrapper.appendChild(img);
-                        wrapper.appendChild(btn);
-                        previewContainer.appendChild(wrapper);
-                    });
-                    // Guardamos las fotos actuales en una variable global para saber cuáles mantener
-                    window._fotosActuales = fotos;
-                } else {
-                    window._fotosActuales = [];
-                }
+                // Cargar fotos existentes
+                fotosExistentes = obtenerFotosProducto(producto);
+                renderFotosFormulario();
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
-                window._fotosActuales = [];
             }
             modal.classList.add('active');
         }
 
         function cerrarModalProducto() {
             document.getElementById('productModal').classList.remove('active');
-            resetFotosState();
+            resetFotosFormulario();
         }
 
         document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
@@ -1662,15 +1673,13 @@
                     formData.append(key, data[key]);
                 }
 
-                // Fotos existentes (las que no se eliminaron)
-                if (window._fotosActuales) {
-                    window._fotosActuales.forEach(f => {
-                        formData.append('Fotos', f);
-                    });
-                }
+                // Añadir fotos existentes (nombres de archivo)
+                fotosExistentes.forEach(f => {
+                    formData.append('Fotos', f);
+                });
 
-                // Nuevas fotos
-                nuevasFotos.forEach(file => {
+                // Añadir nuevas fotos (archivos)
+                fotosNuevas.forEach(file => {
                     formData.append('Fotos', file);
                 });
 
