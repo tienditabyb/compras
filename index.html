@@ -854,15 +854,16 @@
             .product-card .product-desc {
                 display: none;
             }
+            /* ===== PRECIO Y BOTÓN MÁS GRANDES ===== */
             .product-card .price {
-                font-size: 0.7rem;
+                font-size: 0.85rem; /* antes 0.7rem */
                 line-height: 1.2;
             }
             .product-card .price .old {
-                font-size: 0.55rem;
+                font-size: 0.7rem; /* antes 0.55rem */
             }
             .product-card .stock-badge {
-                font-size: 0.5rem;
+                font-size: 0.55rem;
                 line-height: 1.2;
             }
             .product-card .product-footer {
@@ -874,9 +875,9 @@
                 gap: 2px;
             }
             .btn-add {
-                font-size: 0.55rem;
-                padding: 2px 6px;
-                border-radius: 12px;
+                font-size: 0.7rem; /* antes 0.55rem */
+                padding: 3px 8px; /* antes 2px 6px */
+                border-radius: 16px;
             }
         }
 
@@ -893,17 +894,17 @@
                 font-size: 0.55rem;
             }
             .product-card .price {
-                font-size: 0.6rem;
+                font-size: 0.8rem; /* antes 0.6rem */
             }
             .product-card .price .old {
-                font-size: 0.5rem;
+                font-size: 0.6rem; /* antes 0.5rem */
             }
             .btn-add {
-                font-size: 0.5rem;
-                padding: 1px 5px;
+                font-size: 0.65rem; /* antes 0.5rem */
+                padding: 3px 6px; /* antes 1px 5px */
             }
             .product-card .stock-badge {
-                font-size: 0.45rem;
+                font-size: 0.5rem;
             }
             .product-card .product-footer {
                 padding-top: 1px;
@@ -1257,13 +1258,11 @@
 
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main-content" id="mainContent">
-        <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
             <nav class="sidebar__nav"><ul id="categoryList"></ul></nav>
         </aside>
 
-        <!-- PRODUCTOS -->
         <section class="products-section" id="productsSection">
             <div class="toolbar">
                 <div class="toolbar__left">
@@ -1292,7 +1291,6 @@
             <div class="pagination" id="pagination"></div>
         </section>
 
-        <!-- DETALLE -->
         <div class="detail-page" id="detailPage">
             <div class="detail-container" id="detailContainer">
                 <div class="detail-loading">🔄 Cargando detalles...</div>
@@ -1301,7 +1299,6 @@
     </div>
 
     <!-- ========== MODALES ========== -->
-    <!-- Add to Cart -->
     <div class="modal-overlay" id="addToCartModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarAddToCartModal()">✕</button>
@@ -1314,31 +1311,20 @@
         </div>
     </div>
 
-    <!-- Change Password -->
     <div class="modal-overlay" id="changePasswordModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarChangePasswordModal()">✕</button>
             <h2>🔑 Cambiar contraseña</h2>
             <div id="changePassForm">
-                <div class="form-group">
-                    <label>Contraseña actual *</label>
-                    <input type="password" id="oldPassword" placeholder="Escribe tu contraseña actual" />
-                </div>
-                <div class="form-group">
-                    <label>Nueva contraseña *</label>
-                    <input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" />
-                </div>
-                <div class="form-group">
-                    <label>Confirmar nueva contraseña *</label>
-                    <input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" />
-                </div>
+                <div class="form-group"><label>Contraseña actual *</label><input type="password" id="oldPassword" placeholder="Escribe tu contraseña actual" /></div>
+                <div class="form-group"><label>Nueva contraseña *</label><input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" /></div>
+                <div class="form-group"><label>Confirmar nueva contraseña *</label><input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" /></div>
                 <div id="passError" class="error-msg"></div>
                 <button class="btn-primary" onclick="cambiarPassword()">Actualizar contraseña</button>
             </div>
         </div>
     </div>
 
-    <!-- Contacto -->
     <div class="modal-overlay" id="contactModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarContactModal()">✕</button>
@@ -1352,7 +1338,6 @@
         </div>
     </div>
 
-    <!-- Historial -->
     <div class="modal-overlay" id="historyModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
@@ -1361,7 +1346,6 @@
         </div>
     </div>
 
-    <!-- Carrito lateral -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h2>🛒 Tu Carrito</h2>
@@ -1372,7 +1356,6 @@
         <button class="checkout-btn" id="checkoutBtn">✅ Finalizar pedido</button>
     </div>
 
-    <!-- Delivery -->
     <div class="modal-overlay delivery-modal" id="deliveryModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarDeliveryModal()">✕</button>
@@ -1410,7 +1393,6 @@
         </div>
     </div>
 
-    <!-- Auth -->
     <div class="modal-overlay" id="authModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarModal()">✕</button>
@@ -1433,7 +1415,6 @@
         </div>
     </div>
 
-    <!-- ========== FOOTER ========== -->
     <footer class="footer"><p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p></footer>
 
     <!-- ============================================================ -->
@@ -1617,7 +1598,7 @@
         });
 
         // ============================================================
-        //  MODALES (funciones abreviadas para ahorrar espacio)
+        //  MODALES
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1974,7 +1955,6 @@
                 ul.appendChild(li);
             });
 
-            // Dropdown móvil
             const dropdown = document.getElementById('categoriesDropdown');
             dropdown.innerHTML = '';
             const allLinkDrop = document.createElement('a');
@@ -2433,7 +2413,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO (abreviado, mismo que antes)
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
