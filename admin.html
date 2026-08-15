@@ -19,7 +19,7 @@
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
 
-        /* ===== HEADER (oscuro, como en la tienda) ===== */
+        /* ===== HEADER ===== */
         .header {
             background-color: #1a252f;
             padding: 10px 15px;
@@ -402,7 +402,7 @@
         }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ===== TARJETAS DE PRODUCTOS (estilo tienda) ===== */
+        /* ===== TARJETAS DE PRODUCTOS ===== */
         .product-grid {
             display: grid;
             gap: 16px;
@@ -578,35 +578,132 @@
             border-color: #2980b9;
         }
         .form-group textarea { resize: vertical; min-height: 60px; }
-        /* Input múltiple de fotos */
-        .form-group .file-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .form-group .file-input-wrapper input[type="file"] { flex: 1; min-width: 120px; }
-        .form-group .file-input-wrapper .file-count {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        .form-group .file-preview-grid {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .form-group .file-preview-grid img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+        }
+
+        /* ===== GESTIÓN DE FOTOS (MEJORADA) ===== */
+        .fotos-gestion {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            background: #f8fafc;
+        }
+        .fotos-gestion .fotos-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .fotos-gestion .foto-item {
+            position: relative;
+            display: inline-block;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: white;
+            width: 80px;
+            height: 80px;
+        }
+        .fotos-gestion .foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .fotos-gestion .foto-item .btn-eliminar-foto {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+        .fotos-gestion .foto-item .btn-eliminar-foto:hover {
+            background: #b91c1c;
+            transform: scale(1.1);
+        }
+        .fotos-gestion .foto-item .nombre-foto {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 0.55rem;
+            padding: 2px 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+        .fotos-gestion .fotos-preview-nuevas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .fotos-gestion .fotos-preview-nuevas .foto-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        .fotos-gestion .fotos-preview-nuevas .foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .fotos-gestion .fotos-preview-nuevas .foto-item .btn-quitar-nueva {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+        .fotos-gestion .fotos-preview-nuevas .foto-item .btn-quitar-nueva:hover {
+            background: #b91c1c;
+            transform: scale(1.1);
+        }
+        .fotos-gestion .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .fotos-gestion .file-input-wrapper input[type="file"] {
+            flex: 1;
+            min-width: 120px;
+        }
+        .fotos-gestion .file-input-wrapper .file-count {
+            font-size: 0.85rem;
+            color: #64748b;
         }
 
         /* ===== BOTONES ===== */
@@ -935,14 +1032,20 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
-                <div class="form-group">
+                <!-- ===== GESTIÓN DE FOTOS ===== -->
+                <div class="form-group fotos-gestion">
                     <label>Fotos del producto</label>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="prodFotos" accept="image/*" multiple />
-                        <span class="file-count" id="prodFotosCount">Ningún archivo seleccionado</span>
+                    <div id="fotosExistentes">
+                        <!-- Se llena con JS -->
                     </div>
-                    <div class="file-preview-grid" id="prodFotosPreview"></div>
+                    <div id="fotosPreviewNuevas" class="fotos-preview-nuevas"></div>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodFotosInput" accept="image/*" multiple />
+                        <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
+                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
+                        Puedes seleccionar varias fotos a la vez o añadirlas una por una.
+                    </div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
@@ -1037,7 +1140,7 @@
         }
 
         // ============================================================
-        // API REQUEST (CORREGIDA para FormData)
+        // API REQUEST
         // ============================================================
         async function apiRequest(endpoint, options = {}) {
             const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
@@ -1128,6 +1231,24 @@
         }
 
         // ============================================================
+        // OBTENER FOTOS DE UN PRODUCTO (array)
+        // ============================================================
+        function obtenerFotosProducto(prod) {
+            let fotos = [];
+            if (prod.Fotos) {
+                if (Array.isArray(prod.Fotos)) {
+                    fotos = prod.Fotos;
+                } else if (typeof prod.Fotos === 'string') {
+                    try {
+                        const parsed = JSON.parse(prod.Fotos);
+                        if (Array.isArray(parsed)) fotos = parsed;
+                    } catch (e) {}
+                }
+            }
+            return fotos;
+        }
+
+        // ============================================================
         // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
@@ -1180,26 +1301,10 @@
             }
             let html = '<div class="product-grid">';
             for (const p of filtrados) {
-                // Obtener lista de fotos (campo Fotos es un array de nombres de archivo)
-                let fotos = [];
-                if (p.Fotos) {
-                    if (Array.isArray(p.Fotos)) {
-                        fotos = p.Fotos;
-                    } else if (typeof p.Fotos === 'string') {
-                        try {
-                            const parsed = JSON.parse(p.Fotos);
-                            if (Array.isArray(parsed)) fotos = parsed;
-                        } catch (e) {}
-                    }
-                }
-                // Si no hay fotos en el nuevo campo, intentar con los antiguos (para compatibilidad)
-                if (fotos.length === 0) {
-                    if (p.Foto) fotos.push(p.Foto);
-                    if (p.Foto2) fotos.push(p.Foto2);
-                    if (p.Foto3) fotos.push(p.Foto3);
-                }
+                const fotos = obtenerFotosProducto(p);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
                 const fotosExtra = fotos.slice(1);
+                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
 
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
@@ -1215,8 +1320,6 @@
                     });
                     extrasHtml += `</div>`;
                 }
-
-                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
 
                 html += `
                     <div class="product-card">
@@ -1468,15 +1571,114 @@
         });
 
         // ============================================================
-        // CRUD PRODUCTOS (con múltiples fotos en un solo campo)
+        // GESTIÓN DE FOTOS EN EL FORMULARIO (MEJORADA)
+        // ============================================================
+        // Variables para gestionar fotos en el modal
+        let fotosActuales = []; // nombres de archivo existentes
+        let nuevasFotos = []; // archivos File seleccionados
+
+        function renderFotosExistentes() {
+            const container = document.getElementById('fotosExistentes');
+            if (fotosActuales.length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem;">No hay fotos guardadas.</p>';
+                return;
+            }
+            const productoId = document.getElementById('productId').value;
+            let html = '<div class="fotos-lista">';
+            fotosActuales.forEach((f, index) => {
+                const url = `${POCKETBASE_URL}/api/files/productos/${productoId}/${f}`;
+                html += `
+                    <div class="foto-item">
+                        <img src="${url}" alt="${f}" />
+                        <button class="btn-eliminar-foto" data-index="${index}" title="Eliminar foto">✕</button>
+                        <div class="nombre-foto">${f}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Eventos para eliminar fotos existentes
+            container.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const index = parseInt(this.dataset.index);
+                    if (confirm('¿Eliminar esta foto?')) {
+                        fotosActuales.splice(index, 1);
+                        renderFotosExistentes();
+                    }
+                });
+            });
+        }
+
+        function renderFotosNuevas() {
+            const container = document.getElementById('fotosPreviewNuevas');
+            if (nuevasFotos.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            let html = '<div class="fotos-lista">';
+            nuevasFotos.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                html += `
+                    <div class="foto-item">
+                        <img src="${url}" alt="${file.name}" />
+                        <button class="btn-quitar-nueva" data-index="${index}" title="Quitar foto">✕</button>
+                        <div class="nombre-foto">${file.name}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Eventos para quitar fotos nuevas (solo de la previsualización, no se suben)
+            container.querySelectorAll('.btn-quitar-nueva').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const index = parseInt(this.dataset.index);
+                    nuevasFotos.splice(index, 1);
+                    renderFotosNuevas();
+                    actualizarContadorFotos();
+                });
+            });
+        }
+
+        function actualizarContadorFotos() {
+            const input = document.getElementById('prodFotosInput');
+            const count = nuevasFotos.length;
+            document.getElementById('prodFotosCount').textContent = count > 0 ? `${count} archivo(s) seleccionado(s)` : 'Seleccionar archivos';
+            // Limpiar el input para que se pueda volver a seleccionar el mismo archivo si se quita
+            input.value = '';
+        }
+
+        // Manejar la selección de archivos
+        document.getElementById('prodFotosInput').addEventListener('change', function(e) {
+            const files = Array.from(this.files);
+            if (files.length === 0) return;
+            // Añadir los nuevos archivos a la lista de nuevas fotos
+            nuevasFotos = nuevasFotos.concat(files);
+            renderFotosNuevas();
+            actualizarContadorFotos();
+        });
+
+        // Función para resetear el estado de fotos al abrir el modal
+        function resetFotosState() {
+            fotosActuales = [];
+            nuevasFotos = [];
+            renderFotosExistentes();
+            renderFotosNuevas();
+            document.getElementById('prodFotosCount').textContent = 'Seleccionar archivos';
+            document.getElementById('prodFotosInput').value = '';
+        }
+
+        // ============================================================
+        // CRUD PRODUCTOS (con gestión de fotos mejorada)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
             const form = document.getElementById('productForm');
             form.reset();
             document.getElementById('productId').value = '';
-            document.getElementById('prodFotosCount').textContent = 'Ningún archivo seleccionado';
-            document.getElementById('prodFotosPreview').innerHTML = '';
             document.getElementById('productDeleteBtn').style.display = 'none';
 
             const catSelect = document.getElementById('prodCategoria');
@@ -1487,6 +1689,8 @@
                 opt.textContent = cat;
                 catSelect.appendChild(opt);
             }
+
+            resetFotosState();
 
             if (producto) {
                 document.getElementById('productModalTitle').textContent = '✏️ Editar Producto';
@@ -1503,35 +1707,9 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                // Mostrar fotos existentes (campo Fotos)
-                let fotos = [];
-                if (producto.Fotos) {
-                    if (Array.isArray(producto.Fotos)) {
-                        fotos = producto.Fotos;
-                    } else if (typeof producto.Fotos === 'string') {
-                        try {
-                            const parsed = JSON.parse(producto.Fotos);
-                            if (Array.isArray(parsed)) fotos = parsed;
-                        } catch (e) {}
-                    }
-                }
-                // Fallback a campos antiguos
-                if (fotos.length === 0) {
-                    if (producto.Foto) fotos.push(producto.Foto);
-                    if (producto.Foto2) fotos.push(producto.Foto2);
-                    if (producto.Foto3) fotos.push(producto.Foto3);
-                }
-                if (fotos.length > 0) {
-                    const previewContainer = document.getElementById('prodFotosPreview');
-                    fotos.forEach(f => {
-                        const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${f}`;
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.alt = 'Foto';
-                        previewContainer.appendChild(img);
-                    });
-                    document.getElementById('prodFotosCount').textContent = `${fotos.length} foto(s) actuales`;
-                }
+                // Cargar fotos existentes
+                fotosActuales = obtenerFotosProducto(producto);
+                renderFotosExistentes();
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
             }
@@ -1540,6 +1718,7 @@
 
         function cerrarModalProducto() {
             document.getElementById('productModal').classList.remove('active');
+            resetFotosState();
         }
 
         document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
@@ -1548,28 +1727,7 @@
             if (e.target === e.currentTarget) cerrarModalProducto();
         });
 
-        // Previsualización de múltiples fotos
-        document.getElementById('prodFotos').addEventListener('change', function(e) {
-            const files = this.files;
-            const container = document.getElementById('prodFotosPreview');
-            container.innerHTML = '';
-            if (files.length > 0) {
-                document.getElementById('prodFotosCount').textContent = `${files.length} archivo(s) seleccionado(s)`;
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const img = document.createElement('img');
-                        img.src = ev.target.result;
-                        img.alt = file.name;
-                        container.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            } else {
-                document.getElementById('prodFotosCount').textContent = 'Ningún archivo seleccionado';
-            }
-        });
-
+        // Enviar formulario (con fotos existentes + nuevas)
         document.getElementById('productForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const id = document.getElementById('productId').value;
@@ -1581,7 +1739,6 @@
             const oferta = document.getElementById('prodOferta').value || '0';
             const stock = document.getElementById('prodStock').value;
             const detalles = document.getElementById('prodDetalles').value.trim();
-            const fotosFiles = document.getElementById('prodFotos').files;
 
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
@@ -1604,10 +1761,16 @@
                 for (const key in data) {
                     formData.append(key, data[key]);
                 }
-                // Agregar todas las fotos con el mismo nombre "Fotos"
-                for (let i = 0; i < fotosFiles.length; i++) {
-                    formData.append('Fotos', fotosFiles[i]);
-                }
+
+                // Fotos existentes (nombres de archivo) - se envían como array
+                fotosActuales.forEach(f => {
+                    formData.append('Fotos', f);
+                });
+
+                // Nuevas fotos (archivos)
+                nuevasFotos.forEach(file => {
+                    formData.append('Fotos', file);
+                });
 
                 let response;
                 if (id) {
