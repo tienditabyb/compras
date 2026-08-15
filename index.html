@@ -362,6 +362,7 @@
             color: #1e272e;
         }
 
+        /* Botón categorías en móvil */
         .toolbar__categories {
             display: none;
             position: relative;
@@ -581,7 +582,7 @@
             padding: 0 10px;
         }
 
-        /* ========== DETALLE PRODUCTO ========== */
+        /* ========== DETALLE PRODUCTO (PÁGINA COMPLETA) ========== */
         .detail-page {
             display: none;
             width: 100%;
@@ -646,16 +647,16 @@
             font-size: 0.9rem;
             margin-bottom: 10px;
         }
-        /* === NUEVO: ESTILO PARA "DETALLES" === */
+        /* ===== CAMPO DETALLES ===== */
         .detail-page .detail-container .detail-detalles {
             background: #f8fafc;
             border-radius: 10px;
-            padding: 16px;
+            padding: 15px;
             margin: 15px 0;
             border-left: 4px solid #2980b9;
         }
         .detail-page .detail-container .detail-detalles h4 {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #1e272e;
             margin-bottom: 6px;
@@ -818,7 +819,94 @@
             color: #94a3b8;
         }
 
-        /* ===== MODALES ===== */
+        /* ===== DELIVERY ===== */
+        .delivery-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .delivery-options button {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .delivery-options button:hover {
+            border-color: #1a252f;
+            background: #f0f4f8;
+        }
+        .delivery-options button .icon { font-size: 1.3rem; }
+        .delivery-options button .sub { font-size: 0.75rem; font-weight: 400; color: #64748b; }
+        .delivery-form {
+            display: none;
+            margin-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+        }
+        .delivery-form.active { display: block; }
+        .resumen-pedido {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        .resumen-pedido .linea {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+        .resumen-pedido .linea.total {
+            font-weight: 700;
+            font-size: 1.05rem;
+            border-top: 2px solid #e2e8f0;
+            margin-top: 4px;
+            padding-top: 8px;
+            color: #1a252f;
+        }
+        .resumen-pedido .envio { color: #64748b; }
+        .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
+        .whatsapp-selector {
+            display: flex;
+            gap: 16px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+        .whatsapp-selector label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            color: #1e272e;
+            font-size: 0.9rem;
+        }
+        .whatsapp-selector input[type="radio"] {
+            accent-color: #1a252f;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .history-item {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 10px 0;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .order-date { font-size: 0.8rem; color: #94a3b8; }
+        .history-item .order-products { font-weight: 500; margin: 4px 0; }
+        .history-item .order-products ul { list-style: none; padding-left: 0; font-weight: 400; font-size: 0.85rem; }
+        .history-item .order-products ul li { padding: 2px 0; }
+        .history-item .order-total { font-weight: 700; color: #1a252f; }
+
+        /* ========== MODALES ========== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -1026,93 +1114,6 @@
         }
         .cart-sidebar .checkout-btn:hover { background: #0f171e; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
-
-        /* ===== DELIVERY ===== */
-        .delivery-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .delivery-options button {
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            background: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .delivery-options button:hover {
-            border-color: #1a252f;
-            background: #f0f4f8;
-        }
-        .delivery-options button .icon { font-size: 1.3rem; }
-        .delivery-options button .sub { font-size: 0.75rem; font-weight: 400; color: #64748b; }
-        .delivery-form {
-            display: none;
-            margin-top: 10px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 12px;
-        }
-        .delivery-form.active { display: block; }
-        .resumen-pedido {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 12px 0;
-            font-size: 0.9rem;
-        }
-        .resumen-pedido .linea {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-        }
-        .resumen-pedido .linea.total {
-            font-weight: 700;
-            font-size: 1.05rem;
-            border-top: 2px solid #e2e8f0;
-            margin-top: 4px;
-            padding-top: 8px;
-            color: #1a252f;
-        }
-        .resumen-pedido .envio { color: #64748b; }
-        .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
-        .whatsapp-selector {
-            display: flex;
-            gap: 16px;
-            margin: 8px 0;
-            flex-wrap: wrap;
-        }
-        .whatsapp-selector label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-            color: #1e272e;
-            font-size: 0.9rem;
-        }
-        .whatsapp-selector input[type="radio"] {
-            accent-color: #1a252f;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .history-item {
-            border-bottom: 1px solid #f1f5f9;
-            padding: 10px 0;
-        }
-        .history-item:last-child { border-bottom: none; }
-        .history-item .order-date { font-size: 0.8rem; color: #94a3b8; }
-        .history-item .order-products { font-weight: 500; margin: 4px 0; }
-        .history-item .order-products ul { list-style: none; padding-left: 0; font-weight: 400; font-size: 0.85rem; }
-        .history-item .order-products ul li { padding: 2px 0; }
-        .history-item .order-total { font-weight: 700; color: #1a252f; }
     </style>
 </head>
 <body>
@@ -1946,7 +1947,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (mostrar Detalles en lugar de Descripcion)
+        //  RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -1963,7 +1964,6 @@
                 if (busqueda) {
                     filtrados = filtrados.filter(p =>
                         (p.Nombre || '').toLowerCase().includes(busqueda) ||
-                        (p.Detalles || '').toLowerCase().includes(busqueda) ||
                         (p.Descripcion || '').toLowerCase().includes(busqueda)
                     );
                 }
@@ -2006,15 +2006,13 @@
                             'https://via.placeholder.com/300x300/f1f5f9/94a3b8?text=Sin+foto';
 
                         const esEncargo = prod.Categoria && prod.Categoria.toLowerCase().includes('encargo');
-                        // Usar Detalles en lugar de Descripcion
-                        const desc = prod.Detalles || prod.Descripcion || '';
 
                         html += `
                             <div class="product-card" data-id="${prod.id}">
                                 <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" loading="lazy" />
                                 ${esEncargo ? '<div class="product-tag">Solo por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
-                                <div class="product-desc">${desc.substring(0, 80)}${desc.length > 80 ? '...' : ''}</div>
+                                <div class="product-desc">${prod.Descripcion || ''}</div>
                                 <div class="product-footer">
                                     ${precioHtml}
                                     <button class="btn-add" data-id="${prod.id}">Agregar</button>
@@ -2044,6 +2042,7 @@
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
+                        // Redirigir a la página de detalle con el id
                         window.location.href = `?id=${id}`;
                     });
                 });
@@ -2068,18 +2067,20 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (con campo Detalles)
+        //  PÁGINA DE DETALLE (CORREGIDA: muestra campo Detalles)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
             const detailPage = document.getElementById('detailPage');
             const container = document.getElementById('detailContainer');
 
+            // Ocultar lista y mostrar detalle con carga
             productsSection.style.display = 'none';
             detailPage.classList.add('active');
             container.innerHTML = '<div class="detail-loading">🔄 Cargando detalles del producto...</div>';
 
             try {
+                // Buscar producto en la lista ya cargada
                 const prod = productos.find(p => p.id === productoId);
                 if (!prod) {
                     container.innerHTML = `
@@ -2091,6 +2092,7 @@
                     return;
                 }
 
+                // Obtener calificaciones
                 const calificaciones = await obtenerCalificaciones(productoId);
                 const promedio = calificaciones.length > 0 ?
                     calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
@@ -2123,10 +2125,19 @@
                     ${precioHtml}
                     <div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>
                     <div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>
-                    <div class="detail-detalles">
-                        <h4>📋 Detalles del producto</h4>
-                        <p>${prod.Detalles || prod.Descripcion || 'Sin información adicional disponible.'}</p>
-                    </div>
+                `;
+
+                // ===== CAMPO DETALLES =====
+                if (prod.Detalles) {
+                    html += `
+                        <div class="detail-detalles">
+                            <h4>📋 Detalles del producto</h4>
+                            <p>${prod.Detalles}</p>
+                        </div>
+                    `;
+                }
+
+                html += `
                     <div class="detail-stars">${estrellas}</div>
                     <div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>
                     <button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>
@@ -2134,6 +2145,7 @@
                     </button>
                 `;
 
+                // Sección de calificar
                 if (usuarioActual) {
                     const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
                     const haComprado = await verificarCompra(usuarioActual.id, prod.id);
@@ -2160,6 +2172,7 @@
                     }
                 }
 
+                // Comentarios con nombres reales
                 html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
                 if (calificaciones.length === 0) {
                     html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
@@ -2183,6 +2196,10 @@
                 html += `</div>`;
 
                 container.innerHTML = html;
+                // Restaurar la selección de estrellas si es necesario
+                if (document.getElementById('starsInput')) {
+                    estrellaSeleccionada = 0;
+                }
 
             } catch (error) {
                 console.error('Error al cargar detalle:', error);
@@ -2316,7 +2333,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO (sin cambios)
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2531,6 +2548,7 @@
             productos = await obtenerProductos();
             await renderizarCategorias();
 
+            // Verificar si hay parámetro id en la URL
             const params = new URLSearchParams(window.location.search);
             const productoId = params.get('id');
 
