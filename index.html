@@ -491,7 +491,7 @@
             background: #f1f5f9;
             border-radius: 10px;
             margin-bottom: 8px;
-            cursor: pointer;
+            /* Ya no tiene onclick para abrir imagen en nueva pestaña */
         }
         .product-card .product-tag {
             font-size: 0.7rem;
@@ -2000,7 +2000,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (SOLO FOTO PRINCIPAL)
+        //  RENDERIZAR PRODUCTOS (AHORA LA IMAGEN NO TIENE EVENTO PROPIO)
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2063,8 +2063,7 @@
                         html += `
                             <div class="product-card" data-id="${prod.id}">
                                 <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
-                                     alt="${prod.Nombre || 'Producto'}" 
-                                     onclick="event.stopPropagation(); window.open('${fotoUrl || ''}','_blank')" />
+                                     alt="${prod.Nombre || 'Producto'}" />
                                 ${esEncargo ? '<div class="product-tag">Solo por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
@@ -2097,7 +2096,6 @@
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
-                        // Cambiar la URL sin recargar la página (para el evento popstate)
                         window.history.pushState({ productoId: id }, '', `?id=${id}`);
                         mostrarDetalle(id);
                     });
@@ -2153,7 +2151,7 @@
                 const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
                 const nombresMap = await obtenerNombresUsuarios(userIds);
 
-                // Obtener todas las fotos (SOLO del campo Fotos)
+                // Obtener todas las fotos
                 const fotos = obtenerFotosProducto(prod);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
                 const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
@@ -2285,7 +2283,6 @@
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
-            // Limpiar el parámetro de la URL sin recargar
             window.history.pushState({}, document.title, window.location.pathname);
             renderizarProductos();
         }
@@ -2615,11 +2612,9 @@
         //  MANEJO DEL BOTÓN "ATRÁS" DEL NAVEGADOR
         // ============================================================
         window.addEventListener('popstate', function(event) {
-            // Si no hay estado o no tiene productoId, volver a la lista
             if (!event.state || !event.state.productoId) {
                 volverALista();
             } else {
-                // Si tiene productoId, mostrar ese detalle (por si el usuario vuelve hacia adelante)
                 mostrarDetalle(event.state.productoId);
             }
         });
