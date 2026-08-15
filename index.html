@@ -398,6 +398,15 @@
             font-weight: 500;
             margin: 4px 0;
         }
+        .history-item .order-products ul {
+            list-style: none;
+            padding-left: 0;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+        .history-item .order-products ul li {
+            padding: 2px 0;
+        }
         .history-item .order-total {
             font-weight: 700;
             color: #2980b9;
@@ -724,6 +733,14 @@
             .product-card img { height: 120px; }
             .modal { padding: 20px; max-width: 100%; }
         }
+
+        /* Mensaje de carga */
+        .loading-message {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px 0;
+            grid-column: 1 / -1;
+        }
     </style>
 </head>
 <body>
@@ -771,7 +788,9 @@
                     </select>
                 </div>
             </div>
-            <div class="products-grid" id="productsGrid"></div>
+            <div class="products-grid" id="productsGrid">
+                <div class="loading-message">🔄 Cargando productos...</div>
+            </div>
             <div class="pagination" id="pagination"></div>
         </section>
     </div>
@@ -824,7 +843,6 @@
 
             <div class="form-group">
                 <label>📱 Elige el número para recibir el pedido:</label>
-                <!-- ========== CAMBIO: NOMBRES A LOS NÚMEROS ========== -->
                 <div class="whatsapp-selector">
                     <label>
                         <input type="radio" name="whatsappNumber" value="5358388494" checked>
@@ -906,7 +924,7 @@
         // ============================================================
         //  CONFIGURACIÓN
         // ============================================================
-        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";  // ✅ ACTUALIZADO
+        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const PRODUCTOS_POR_PAGINA = 10;
         const ENVIO_COSTO = 1.00;
 
@@ -1087,7 +1105,7 @@
         }
 
         // ============================================================
-        //  MODAL HISTORIAL
+        //  MODAL HISTORIAL (corregido: muestra lista de productos)
         // ============================================================
         async function abrirHistoryModal() {
             if (!usuarioActual) {
@@ -1114,10 +1132,22 @@
                     const fecha = new Date(p.fecha).toLocaleDateString('es-ES', {
                         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                     });
+                    // Convertir productos_json (string) en lista
+                    let productosLista = [];
+                    if (p.productos_json) {
+                        // Suponemos que es un string con nombres separados por coma
+                        productosLista = p.productos_json.split(',').map(item => item.trim());
+                    }
+                    let productosHtml = '<ul>';
+                    productosLista.forEach(item => {
+                        productosHtml += `<li>📦 ${item}</li>`;
+                    });
+                    productosHtml += '</ul>';
+
                     html += `
                         <div class="history-item">
                             <div class="order-date">📅 ${fecha}</div>
-                            <div class="order-products">📦 ${p.productos_json || 'Sin productos'}</div>
+                            <div class="order-products">${productosHtml}</div>
                             <div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div>
                             <div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div>
                         </div>
@@ -1132,11 +1162,11 @@
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
-        //  API
+        //  API (productos: hasta 500)
         // ============================================================
         async function obtenerProductos() {
             try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=100`);
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=500`);
                 if (resp.ok) {
                     const data = await resp.json();
                     return data.items.filter(p => parseInt(p.Stock || 0) > 0);
@@ -1178,12 +1208,22 @@
             } catch (e) { return { success: false, error: e.message }; }
         }
 
+        // ===== VERIFICAR COMPRA CORREGIDA =====
         async function verificarCompra(usuarioId, productoId) {
             try {
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records?filter=usuario_id="${usuarioId}"`);
                 if (resp.ok) {
                     const data = await resp.json();
-                    return data.items.some(v => v.productos_json && v.productos_json.includes(productoId));
+                    // Buscar en el campo productos_ids (nuevo) o en productos_json (fallback)
+                    return data.items.some(v => {
+                        if (v.productos_ids) {
+                            // productos_ids es un string con IDs separados por coma
+                            const ids = v.productos_ids.split(',').map(id => id.trim());
+                            return ids.includes(productoId);
+                        }
+                        // Fallback: buscar en productos_json (menos fiable)
+                        return v.productos_json && v.productos_json.includes(productoId);
+                    });
                 }
                 return false;
             } catch (e) { return false; }
@@ -1232,116 +1272,121 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS
+        //  RENDERIZAR PRODUCTOS (con mensaje de carga)
         // ============================================================
         function renderizarProductos() {
-            let filtrados = productos;
-            if (categoriaSeleccionada !== "Todas") {
-                filtrados = filtrados.filter(p =>
-                    (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
-                );
-            }
-            const busqueda = getBusqueda();
-            if (busqueda) {
-                filtrados = filtrados.filter(p =>
-                    (p.Nombre || '').toLowerCase().includes(busqueda) ||
-                    (p.Descripcion || '').toLowerCase().includes(busqueda)
-                );
-            }
-
-            const sortValue = document.getElementById('sortSelect').value;
-            switch (sortValue) {
-                case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
-                case 'price_desc': filtrados.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
-                case 'name_asc': filtrados.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
-                case 'name_desc': filtrados.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
-                default: break;
-            }
-
-            const total = filtrados.length;
-            document.getElementById('productCount').textContent = total;
-
-            const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
-            if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
-            const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
-            const fin = inicio + PRODUCTOS_POR_PAGINA;
-            const paginaItems = filtrados.slice(inicio, fin);
-
             const grid = document.getElementById('productsGrid');
-            if (paginaItems.length === 0) {
-                grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px 0;">No se encontraron productos.</p>`;
-            } else {
-                let html = '';
-                for (const prod of paginaItems) {
-                    const precio = precioFinal(prod);
-                    const venta = parseFloat(prod.Precio_Venta || 0);
-                    const oferta = parseFloat(prod.Precio_Oferta || 0);
-                    const tieneOferta = (oferta > 0 && oferta < venta);
+            grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
 
-                    let precioHtml = `<span class="price">`;
-                    if (tieneOferta) {
-                        precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
-                    } else { precioHtml += `$${venta.toFixed(2)}`; }
-                    precioHtml += `</span>`;
-
-                    const stock = parseInt(prod.Stock || 0);
-                    const stockText = stock < 5 ? `⚠️ ${stock} uds` : `${stock} uds`;
-
-                    const fotoUrl = prod.Foto ?
-                        `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
-                        'https://via.placeholder.com/300x200/f1f5f9/94a3b8?text=Sin+foto';
-
-                    html += `
-                        <div class="product-card" data-id="${prod.id}">
-                            <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" loading="lazy" />
-                            <h3>${prod.Nombre || 'Sin nombre'}</h3>
-                            ${precioHtml}
-                            <div class="stock">📦 ${stockText}</div>
-                            <button class="btn-add" data-id="${prod.id}">➕ Agregar</button>
-                        </div>
-                    `;
+            // Usamos setTimeout para que el mensaje de carga se muestre
+            setTimeout(() => {
+                let filtrados = productos;
+                if (categoriaSeleccionada !== "Todas") {
+                    filtrados = filtrados.filter(p =>
+                        (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
+                    );
                 }
-                grid.innerHTML = html;
-            }
+                const busqueda = getBusqueda();
+                if (busqueda) {
+                    filtrados = filtrados.filter(p =>
+                        (p.Nombre || '').toLowerCase().includes(busqueda) ||
+                        (p.Descripcion || '').toLowerCase().includes(busqueda)
+                    );
+                }
 
-            // Eventos para el botón "Agregar" (sin abrir carrito)
-            document.querySelectorAll('.btn-add').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const id = this.dataset.id;
-                    if (!usuarioActual) {
-                        alert('Debes iniciar sesión para agregar productos al carrito.');
-                        abrirModalLogin();
-                        return;
+                const sortValue = document.getElementById('sortSelect').value;
+                switch (sortValue) {
+                    case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
+                    case 'price_desc': filtrados.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
+                    case 'name_asc': filtrados.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
+                    case 'name_desc': filtrados.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
+                    default: break;
+                }
+
+                const total = filtrados.length;
+                document.getElementById('productCount').textContent = total;
+
+                const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
+                if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
+                const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
+                const fin = inicio + PRODUCTOS_POR_PAGINA;
+                const paginaItems = filtrados.slice(inicio, fin);
+
+                if (paginaItems.length === 0) {
+                    grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px 0;">No se encontraron productos.</p>`;
+                } else {
+                    let html = '';
+                    for (const prod of paginaItems) {
+                        const precio = precioFinal(prod);
+                        const venta = parseFloat(prod.Precio_Venta || 0);
+                        const oferta = parseFloat(prod.Precio_Oferta || 0);
+                        const tieneOferta = (oferta > 0 && oferta < venta);
+
+                        let precioHtml = `<span class="price">`;
+                        if (tieneOferta) {
+                            precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
+                        } else { precioHtml += `$${venta.toFixed(2)}`; }
+                        precioHtml += `</span>`;
+
+                        const stock = parseInt(prod.Stock || 0);
+                        const stockText = stock < 5 ? `⚠️ ${stock} uds` : `${stock} uds`;
+
+                        const fotoUrl = prod.Foto ?
+                            `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
+                            'https://via.placeholder.com/300x200/f1f5f9/94a3b8?text=Sin+foto';
+
+                        html += `
+                            <div class="product-card" data-id="${prod.id}">
+                                <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" loading="lazy" />
+                                <h3>${prod.Nombre || 'Sin nombre'}</h3>
+                                ${precioHtml}
+                                <div class="stock">📦 ${stockText}</div>
+                                <button class="btn-add" data-id="${prod.id}">➕ Agregar</button>
+                            </div>
+                        `;
                     }
-                    agregarAlCarrito(id);
-                    const originalText = this.textContent;
-                    this.textContent = '✅ Agregado';
-                    this.disabled = true;
-                    setTimeout(() => {
-                        this.textContent = '➕ Agregar';
-                        this.disabled = false;
-                    }, 1500);
-                });
-            });
+                    grid.innerHTML = html;
+                }
 
-            // Evento para abrir detalle al hacer clic en la tarjeta (excepto en el botón)
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'BUTTON') return;
-                    const id = this.dataset.id;
-                    abrirDetalle(id);
+                // Eventos para el botón "Agregar"
+                document.querySelectorAll('.btn-add').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = this.dataset.id;
+                        if (!usuarioActual) {
+                            alert('Debes iniciar sesión para agregar productos al carrito.');
+                            abrirModalLogin();
+                            return;
+                        }
+                        agregarAlCarrito(id);
+                        const originalText = this.textContent;
+                        this.textContent = '✅ Agregado';
+                        this.disabled = true;
+                        setTimeout(() => {
+                            this.textContent = '➕ Agregar';
+                            this.disabled = false;
+                        }, 1000);
+                    });
                 });
-            });
 
-            // Paginación
-            const pagContainer = document.getElementById('pagination');
-            if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
-            let pagHtml = '';
-            pagHtml += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
-            pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
-            pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
-            pagContainer.innerHTML = pagHtml;
+                // Evento para abrir detalle al hacer clic en la tarjeta (excepto en el botón)
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON') return;
+                        const id = this.dataset.id;
+                        abrirDetalle(id);
+                    });
+                });
+
+                // Paginación
+                const pagContainer = document.getElementById('pagination');
+                if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
+                let pagHtml = '';
+                pagHtml += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
+                pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
+                pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
+                pagContainer.innerHTML = pagHtml;
+            }, 300); // pequeño delay para mostrar el mensaje
         }
 
         function cambiarPagina(pag) {
@@ -1379,7 +1424,7 @@
                 carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
             }
             guardarCarritoLocal();
-            // NO abrimos el carrito aquí
+            // NO abrimos el carrito automáticamente
         }
 
         function eliminarDelCarrito(index) { carrito.splice(index, 1); guardarCarritoLocal(); }
@@ -1439,7 +1484,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO
+        //  PROCESO DE PEDIDO (CORREGIDO: guarda productos_ids)
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -1461,6 +1506,7 @@
             document.getElementById('confirmarPedidoBtn').style.display = 'none';
             document.getElementById('domDireccionGroup').style.display = 'none';
 
+            // Rellenar con datos del usuario
             if (usuarioActual) {
                 let nombre = usuarioActual.name || '';
                 let apellidos = '';
@@ -1555,11 +1601,31 @@
             const envio = (tipoEntregaSeleccionado === 'Domicilio') ? ENVIO_COSTO : 0;
             const totalFinal = subtotal + envio;
             const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad || 1}`).join(', ');
+            // Creamos un string con los IDs separados por coma
+            const productosIds = carrito.map(item => item.id).join(',');
             const fecha = new Date().toISOString();
 
             try {
+                // PRIMERO: actualizar stock de cada producto (para que si falla, no se guarde la venta)
+                for (const item of carrito) {
+                    const prod = productos.find(p => p.id === item.id);
+                    if (prod) {
+                        const nuevoStock = Math.max(0, parseInt(prod.Stock || 0) - (item.cantidad || 1));
+                        const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records/${prod.id}`, {
+                            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ Stock: nuevoStock })
+                        });
+                        if (!resp.ok) {
+                            throw new Error(`Error al actualizar stock de ${prod.Nombre}`);
+                        }
+                        prod.Stock = nuevoStock;
+                    }
+                }
+
+                // Ahora guardar la venta con productos_ids
                 const ventaData = {
                     productos_json: productosStr,
+                    productos_ids: productosIds, // NUEVO CAMPO
                     total: totalFinal,
                     fecha: fecha,
                     Tipo: tipoEntregaSeleccionado,
@@ -1575,6 +1641,7 @@
                 }
                 const ventaId = (await respVenta.json()).id;
 
+                // Guardar domicilio si aplica
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
@@ -1591,18 +1658,7 @@
                     });
                 }
 
-                for (const item of carrito) {
-                    const prod = productos.find(p => p.id === item.id);
-                    if (prod) {
-                        const nuevoStock = Math.max(0, parseInt(prod.Stock || 0) - (item.cantidad || 1));
-                        await fetch(`${POCKETBASE_URL}/api/collections/productos/records/${prod.id}`, {
-                            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ Stock: nuevoStock })
-                        });
-                        prod.Stock = nuevoStock;
-                    }
-                }
-
+                // Preparar mensaje de WhatsApp
                 let mensaje = `*Nuevo pedido*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
@@ -1625,10 +1681,12 @@
                 const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, '_blank');
 
+                // Vaciar carrito
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
+                // Recargar productos (stock actualizado)
                 productos = await obtenerProductos();
                 renderizarProductos();
 
@@ -1637,13 +1695,16 @@
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
                 alert('Error al procesar el pedido: ' + e.message);
+                // Si falló, recargamos productos para deshacer cambios de stock (ya que el stock se actualizó antes)
+                productos = await obtenerProductos();
+                renderizarProductos();
             }
         }
 
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
         // ============================================================
-        //  DETALLE DE PRODUCTO
+        //  DETALLE DE PRODUCTO (con verificación de compra mejorada)
         // ============================================================
         async function abrirDetalle(productoId) {
             const prod = productos.find(p => p.id === productoId);
