@@ -335,24 +335,7 @@
             color: #2980b9;
             font-weight: 600;
         }
-        .sidebar__extra {
-            margin-top: 20px;
-            border-top: 2px solid #f1f5f9;
-            padding-top: 16px;
-        }
-        .sidebar__extra .menu-item {
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: #64748b;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .sidebar__extra .menu-item:hover {
-            background: #f1f5f9;
-            color: #1e272e;
-        }
+        /* Ya no hay sidebar__extra porque movimos sus elementos al dropdown */
 
         /* ===== TOOLBAR ===== */
         .toolbar {
@@ -1142,7 +1125,7 @@
 
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main-content" id="mainContent">
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (ya no tiene los items extra) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
             <nav class="sidebar__nav">
@@ -1150,10 +1133,6 @@
                     <!-- Se llena con JS -->
                 </ul>
             </nav>
-            <div class="sidebar__extra">
-                <div class="menu-item" onclick="abrirHistoryModal()">📋 Mis pedidos</div>
-                <div class="menu-item" onclick="abrirContacto()">📞 Contáctenos</div>
-            </div>
         </aside>
 
         <!-- SECCIÓN DE PRODUCTOS -->
@@ -1161,7 +1140,7 @@
             <div class="toolbar">
                 <div class="toolbar__left">
                     <h2>Productos</h2>
-                    <!-- Categorías solo visible en móvil (mejorado) -->
+                    <!-- Categorías solo visible en móvil -->
                     <div class="toolbar__categories">
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
                             <span class="icon">☰</span> Categorías
@@ -1449,7 +1428,7 @@
             cerrarAccountDropdown();
         }
 
-        // MODIFICADO: Muestra "Hola, Nombre Apellidos" en el botón
+        // ACTUALIZADO: Incluye "Mis pedidos" y "Contáctenos" en el dropdown
         function actualizarUIUsuario() {
             const user = getCurrentUserFromToken();
             const dropdownContent = document.getElementById('accountDropdownContent');
@@ -1457,7 +1436,6 @@
             const label = document.getElementById('accountLabel');
 
             if (user) {
-                // Obtener nombre completo
                 let nombreCompleto = '';
                 if (user.nombre && user.apellidos) {
                     nombreCompleto = `${user.nombre} ${user.apellidos}`.trim();
@@ -1473,7 +1451,6 @@
                                 (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
 
                 avatar.textContent = inicial;
-                // Mostrar "Hola, Nombre Apellidos"
                 label.textContent = `Hola, ${nombreCompleto}`;
 
                 dropdownContent.innerHTML = `
@@ -1496,6 +1473,13 @@
                         </div>
                         <button class="btn-change-password" onclick="abrirCambiarPassword()">🔑 Cambiar contraseña</button>
                     </div>
+                    <!-- Nuevos submenús: Mis pedidos y Contáctenos -->
+                    <button class="dropdown-item" onclick="abrirHistoryModal()">
+                        <span class="icon">📋</span> Mis pedidos
+                    </button>
+                    <button class="dropdown-item" onclick="abrirContacto()">
+                        <span class="icon">📞</span> Contáctenos
+                    </button>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item" onclick="cerrarSesion()" style="color:#e74c3c;">
                         <span class="icon">🚪</span> Cerrar sesión
