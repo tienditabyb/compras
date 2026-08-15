@@ -491,27 +491,7 @@
             background: #f1f5f9;
             border-radius: 10px;
             margin-bottom: 8px;
-        }
-        .product-card .fotos-extra {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-        .product-card .fotos-extra img {
-            width: 32px;
-            height: 32px;
-            object-fit: cover;
-            border-radius: 4px;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .product-card .fotos-extra img:hover {
-            transform: scale(1.1);
-            border-color: #2980b9;
         }
         .product-card .product-tag {
             font-size: 0.7rem;
@@ -2027,7 +2007,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (con múltiples fotos)
+        //  RENDERIZAR PRODUCTOS (SOLO FOTO PRINCIPAL)
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2071,7 +2051,6 @@
                     for (const prod of paginaItems) {
                         const fotos = obtenerFotosProducto(prod);
                         const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                        const fotosExtra = fotos.slice(1, 5); // máximo 4 miniaturas
                         const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
 
                         const precio = precioFinal(prod);
@@ -2088,23 +2067,11 @@
                         const stock = parseInt(prod.Stock || 0);
                         const esEncargo = prod.Categoria && prod.Categoria.toLowerCase().includes('encargo');
 
-                        // Miniaturas extra
-                        let extrasHtml = '';
-                        if (fotosExtra.length > 0) {
-                            extrasHtml = `<div class="fotos-extra">`;
-                            fotosExtra.forEach(f => {
-                                const url = `${POCKETBASE_URL}/api/files/productos/${prod.id}/${f}`;
-                                extrasHtml += `<img src="${url}" alt="Extra" onclick="event.stopPropagation(); window.open('${url}','_blank')" />`;
-                            });
-                            extrasHtml += `</div>`;
-                        }
-
                         html += `
                             <div class="product-card" data-id="${prod.id}">
                                 <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
                                      alt="${prod.Nombre || 'Producto'}" 
                                      onclick="event.stopPropagation(); window.open('${fotoUrl || ''}','_blank')" />
-                                ${extrasHtml}
                                 ${esEncargo ? '<div class="product-tag">Solo por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
@@ -2161,7 +2128,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (con galería de fotos)
+        //  PÁGINA DE DETALLE (GALERÍA COMPLETA)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2194,7 +2161,6 @@
                 // Obtener todas las fotos
                 const fotos = obtenerFotosProducto(prod);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                const fotosExtra = fotos.slice(1);
                 const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
 
                 const venta = parseFloat(prod.Precio_Venta || 0);
@@ -2299,7 +2265,6 @@
                 html += `</div>`;
 
                 container.innerHTML = html;
-                // Restaurar la selección de estrellas si es necesario
                 if (document.getElementById('starsInput')) {
                     estrellaSeleccionada = 0;
                 }
