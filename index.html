@@ -821,16 +821,17 @@
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
 
-            /* === CORRECCIÓN FINAL: 2 columnas exactas === */
+            /* === DISEÑO MÓVIL OPTIMIZADO === */
             .products-grid {
-                gap: 6px;
+                gap: 4px;
                 grid-template-columns: 1fr 1fr;
-                align-items: start;
+                align-items: stretch;
+                grid-auto-rows: 1fr;
             }
             .product-card {
                 padding: 4px;
                 border-radius: 6px;
-                height: auto;
+                height: 100%;
                 display: flex;
                 flex-direction: column;
             }
@@ -881,7 +882,7 @@
 
         @media (max-width: 480px) {
             .products-grid {
-                gap: 4px;
+                gap: 3px;
                 grid-template-columns: 1fr 1fr;
             }
             .product-card {
@@ -1227,7 +1228,6 @@
     </style>
 </head>
 <body>
-
     <!-- ========== HEADER ========== -->
     <header class="header">
         <div class="header__container">
@@ -1243,9 +1243,7 @@
                         <span id="accountLabel">Mi cuenta</span>
                         <span class="arrow">▼</span>
                     </button>
-                    <div class="account-dropdown-content" id="accountDropdownContent">
-                        <!-- Se llena con JS -->
-                    </div>
+                    <div class="account-dropdown-content" id="accountDropdownContent"></div>
                 </div>
             </div>
         </div>
@@ -1262,14 +1260,10 @@
         <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
-            <nav class="sidebar__nav">
-                <ul id="categoryList">
-                    <!-- Se llena con JS -->
-                </ul>
-            </nav>
+            <nav class="sidebar__nav"><ul id="categoryList"></ul></nav>
         </aside>
 
-        <!-- SECCIÓN DE PRODUCTOS -->
+        <!-- PRODUCTOS -->
         <section class="products-section" id="productsSection">
             <div class="toolbar">
                 <div class="toolbar__left">
@@ -1278,9 +1272,7 @@
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
                             <span class="icon">☰</span> Categorías
                         </button>
-                        <div class="categories-dropdown" id="categoriesDropdown">
-                            <!-- Se llena con JS -->
-                        </div>
+                        <div class="categories-dropdown" id="categoriesDropdown"></div>
                     </div>
                 </div>
                 <div class="toolbar__sort">
@@ -1294,17 +1286,16 @@
                     </select>
                 </div>
             </div>
-
             <div class="products-grid" id="productsGrid">
                 <div class="loading-message">🔄 Cargando productos...</div>
             </div>
             <div class="pagination" id="pagination"></div>
         </section>
 
-        <!-- PÁGINA DE DETALLE -->
+        <!-- DETALLE -->
         <div class="detail-page" id="detailPage">
             <div class="detail-container" id="detailContainer">
-                <div class="detail-loading">🔄 Cargando detalles del producto...</div>
+                <div class="detail-loading">🔄 Cargando detalles...</div>
             </div>
         </div>
     </div>
@@ -1354,14 +1345,9 @@
             <h2>📞 Contáctenos</h2>
             <div class="contact-info">
                 <p><strong>Tiendita B&amp;B</strong></p>
-                <p>📱 Teléfonos:<br>
-                   +53 58388494 (Yoandy)<br>
-                   +53 53803134 (Carmen)</p>
+                <p>📱 Teléfonos:<br> +53 58388494 (Yoandy)<br> +53 53803134 (Carmen)</p>
                 <p>📧 Correo: <a href="mailto:bribry457@gmail.com">bribry457@gmail.com</a></p>
-                <p>📍 Dirección:<br>
-                   Paseo de la Paz #457 entre 2da y 3ra<br>
-                   Loma de Belén, Municipio Santa Clara<br>
-                   Provincia Villa Clara, Cuba</p>
+                <p>📍 Dirección:<br> Paseo de la Paz #457 entre 2da y 3ra<br> Loma de Belén, Municipio Santa Clara<br> Provincia Villa Clara, Cuba</p>
             </div>
         </div>
     </div>
@@ -1371,9 +1357,7 @@
         <div class="modal">
             <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
             <h2>📋 Mi Historial de Pedidos</h2>
-            <div id="historyContent">
-                <p style="color:#94a3b8; text-align:center;">Cargando historial...</p>
-            </div>
+            <div id="historyContent"><p style="color:#94a3b8; text-align:center;">Cargando historial...</p></div>
         </div>
     </div>
 
@@ -1395,14 +1379,10 @@
             <h2>📦 Elige tu método de entrega</h2>
             <div class="delivery-options">
                 <button onclick="seleccionarEntrega('Domicilio')">
-                    <span class="icon">🚚</span>
-                    <span class="label">Domicilio</span>
-                    <span class="sub">(Envío a tu dirección)</span>
+                    <span class="icon">🚚</span><span class="label">Domicilio</span><span class="sub">(Envío a tu dirección)</span>
                 </button>
                 <button onclick="seleccionarEntrega('Local')">
-                    <span class="icon">🏪</span>
-                    <span class="label">Retiro en tienda</span>
-                    <span class="sub">(Pasas a buscar)</span>
+                    <span class="icon">🏪</span><span class="label">Retiro en tienda</span><span class="sub">(Pasas a buscar)</span>
                 </button>
             </div>
             <div class="resumen-pedido" id="resumenPedido">
@@ -1418,27 +1398,12 @@
                 </div>
             </div>
             <div class="delivery-form" id="deliveryForm">
-                <div class="form-group">
-                    <label>Nombre *</label>
-                    <input type="text" id="domNombre" placeholder="Tu nombre" />
-                </div>
-                <div class="form-group">
-                    <label>Apellidos *</label>
-                    <input type="text" id="domApellidos" placeholder="Tus apellidos" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono *</label>
-                    <input type="tel" id="domTelefono" placeholder="Ej: 3001234567" />
-                </div>
+                <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" placeholder="Tu nombre" /></div>
+                <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" placeholder="Tus apellidos" /></div>
+                <div class="form-group"><label>Teléfono *</label><input type="tel" id="domTelefono" placeholder="Ej: 3001234567" /></div>
                 <div id="domDireccionGroup">
-                    <div class="form-group">
-                        <label>Dirección completa *</label>
-                        <input type="text" id="domDireccion" placeholder="Calle, número, barrio, ciudad" />
-                    </div>
-                    <div class="form-group">
-                        <label>Referencias (opcional)</label>
-                        <textarea id="domReferencias" placeholder="Ej: Tocar timbre, portón azul, etc." rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>Dirección completa *</label><input type="text" id="domDireccion" placeholder="Calle, número, barrio, ciudad" /></div>
+                    <div class="form-group"><label>Referencias (opcional)</label><textarea id="domReferencias" placeholder="Ej: Tocar timbre, portón azul, etc." rows="2"></textarea></div>
                 </div>
                 <button class="btn-primary" id="confirmarPedidoBtn" onclick="confirmarPedidoFinal()">✅ Confirmar pedido</button>
             </div>
@@ -1580,10 +1545,8 @@
                 } else {
                     nombreCompleto = user.email || 'Usuario';
                 }
-
                 const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() :
                                 (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
-
                 avatar.textContent = inicial;
                 label.textContent = `Hola, ${nombreCompleto}`;
 
@@ -1654,7 +1617,7 @@
         });
 
         // ============================================================
-        //  MODALES
+        //  MODALES (funciones abreviadas para ahorrar espacio)
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1777,7 +1740,6 @@
                     errorEl.textContent = 'La contraseña actual es incorrecta.';
                     errorEl.classList.add('show'); return;
                 }
-
                 const updateResp = await fetch(`${POCKETBASE_URL}/api/collections/users/records/${usuarioActual.id}`, {
                     method: 'PATCH',
                     headers: {
@@ -1790,7 +1752,6 @@
                     const err = await updateResp.json();
                     throw new Error(err.message || 'Error al actualizar la contraseña');
                 }
-
                 alert('✅ Contraseña actualizada correctamente.');
                 cerrarChangePasswordModal();
             } catch (e) {
@@ -1976,11 +1937,10 @@
         }
 
         // ============================================================
-        //  CATEGORÍAS (Sidebar + Dropdown)
+        //  CATEGORÍAS
         // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
-            // Sidebar
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
             const allLi = document.createElement('li');
@@ -2014,7 +1974,7 @@
                 ul.appendChild(li);
             });
 
-            // Dropdown (Toolbar móvil)
+            // Dropdown móvil
             const dropdown = document.getElementById('categoriesDropdown');
             dropdown.innerHTML = '';
             const allLinkDrop = document.createElement('a');
@@ -2473,7 +2433,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO
+        //  PROCESO DE PEDIDO (abreviado, mismo que antes)
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
