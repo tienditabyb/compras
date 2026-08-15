@@ -101,6 +101,7 @@
             font-size: 0.9rem;
             transition: 0.3s;
             cursor: pointer;
+            white-space: nowrap;
         }
         .account-btn:hover {
             background: rgba(255,255,255,0.25);
@@ -117,6 +118,7 @@
             justify-content: center;
             font-weight: 700;
             font-size: 0.85rem;
+            flex-shrink: 0;
         }
         .account-btn .arrow {
             font-size: 0.65rem;
@@ -377,26 +379,34 @@
             color: #1e272e;
         }
 
-        /* Botón categorías solo visible en móvil */
+        /* Botón categorías en móvil (moderno) */
         .toolbar__categories {
             display: none;
             position: relative;
         }
         .btn-categories {
-            background: #1a252f;
-            color: white;
+            background: #eef2f6;
             border: none;
-            padding: 6px 16px;
+            padding: 6px 14px;
             border-radius: 30px;
-            font-weight: 600;
+            font-weight: 500;
             font-size: 0.85rem;
+            color: #1e272e;
             cursor: pointer;
             transition: 0.3s;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .btn-categories:hover { background: #0f171e; }
+        .btn-categories:hover {
+            background: #e2e8f0;
+        }
+        .btn-categories .icon {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
         .categories-dropdown {
             display: none;
             position: absolute;
@@ -1000,7 +1010,8 @@
             .modal { padding: 16px; max-width: 100%; }
             .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
             .detail-page .detail-container { padding: 15px; }
-            .btn-categories { font-size: 0.75rem; padding: 4px 12px; }
+            .btn-categories { font-size: 0.75rem; padding: 4px 10px; }
+            .btn-categories .icon { font-size: 0.9rem; }
         }
 
         .loading-message {
@@ -1150,10 +1161,10 @@
             <div class="toolbar">
                 <div class="toolbar__left">
                     <h2>Productos</h2>
-                    <!-- Categorías solo visible en móvil -->
+                    <!-- Categorías solo visible en móvil (mejorado) -->
                     <div class="toolbar__categories">
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
-                            📂 Categorías ▼
+                            <span class="icon">☰</span> Categorías
                         </button>
                         <div class="categories-dropdown" id="categoriesDropdown">
                             <!-- Se llena con JS -->
@@ -1412,7 +1423,6 @@
             } catch (e) { return { success: false, error: e.message }; }
         }
 
-        // MODIFICADO: guardar nombre y apellidos por separado
         async function registrar(nombre, apellidos, email, telefono, password, passwordConfirm) {
             try {
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
@@ -1439,6 +1449,7 @@
             cerrarAccountDropdown();
         }
 
+        // MODIFICADO: Muestra "Hola, Nombre Apellidos" en el botón
         function actualizarUIUsuario() {
             const user = getCurrentUserFromToken();
             const dropdownContent = document.getElementById('accountDropdownContent');
@@ -1446,11 +1457,24 @@
             const label = document.getElementById('accountLabel');
 
             if (user) {
-                // Obtener nombre completo desde name (que tiene nombre+apellidos) o desde campos separados
-                const nombreCompleto = user.name || (user.nombre ? `${user.nombre} ${user.apellidos || ''}`.trim() : 'Usuario');
-                const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() : (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
+                // Obtener nombre completo
+                let nombreCompleto = '';
+                if (user.nombre && user.apellidos) {
+                    nombreCompleto = `${user.nombre} ${user.apellidos}`.trim();
+                } else if (user.nombre) {
+                    nombreCompleto = user.nombre;
+                } else if (user.name) {
+                    nombreCompleto = user.name;
+                } else {
+                    nombreCompleto = user.email || 'Usuario';
+                }
+
+                const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() :
+                                (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
+
                 avatar.textContent = inicial;
-                label.textContent = 'Mi cuenta';
+                // Mostrar "Hola, Nombre Apellidos"
+                label.textContent = `Hola, ${nombreCompleto}`;
 
                 dropdownContent.innerHTML = `
                     <div class="dropdown-header">
@@ -1749,7 +1773,6 @@
             } catch (e) { return []; }
         }
 
-        // MODIFICADO: obtener nombres y apellidos separados
         async function obtenerNombresUsuarios(userIds) {
             if (!userIds || userIds.length === 0) return {};
             const filter = userIds.map(id => `id="${id}"`).join('||');
@@ -1759,7 +1782,6 @@
                 const data = await resp.json();
                 const map = {};
                 data.items.forEach(u => {
-                    // Priorizar campos separados, luego name, luego email
                     let nombreCompleto = '';
                     if (u.nombre && u.apellidos) {
                         nombreCompleto = `${u.nombre} ${u.apellidos}`.trim();
@@ -2037,7 +2059,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (con nombres y apellidos)
+        //  PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2118,7 +2140,6 @@
                 }
             }
 
-            // Comentarios con nombre completo (nombre + apellidos)
             html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
             if (calificaciones.length === 0) {
                 html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
