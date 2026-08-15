@@ -212,13 +212,9 @@
             .list-item { flex-direction: column; align-items: stretch; gap: 6px; }
             .list-item .center { justify-content: flex-start; }
             .modal { max-width: 95%; padding: 20px; }
-            /* Grid productos en móvil */
             .product-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px;
-            }
-            .product-card img {
-                height: 100px !important;
             }
         }
         @media (max-width: 480px) {
@@ -231,9 +227,6 @@
             }
             .product-card {
                 padding: 8px !important;
-            }
-            .product-card img {
-                height: 80px !important;
             }
             .product-card h4 {
                 font-size: 0.75rem !important;
@@ -409,9 +402,7 @@
         }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ====================================================
-            ESTILOS PARA TARJETAS DE PRODUCTOS (como en tienda)
-        ==================================================== */
+        /* ===== TARJETAS DE PRODUCTOS (estilo tienda) ===== */
         .product-grid {
             display: grid;
             gap: 16px;
@@ -587,6 +578,7 @@
             border-color: #2980b9;
         }
         .form-group textarea { resize: vertical; min-height: 60px; }
+        /* Input múltiple de fotos */
         .form-group .file-input-wrapper {
             display: flex;
             align-items: center;
@@ -594,17 +586,17 @@
             flex-wrap: wrap;
         }
         .form-group .file-input-wrapper input[type="file"] { flex: 1; min-width: 120px; }
-        .form-group .file-input-wrapper .file-name {
+        .form-group .file-input-wrapper .file-count {
             font-size: 0.85rem;
             color: #64748b;
         }
-        .form-group .file-preview {
+        .form-group .file-preview-grid {
             display: flex;
             gap: 10px;
-            margin-top: 8px;
             flex-wrap: wrap;
+            margin-top: 8px;
         }
-        .form-group .file-preview img {
+        .form-group .file-preview-grid img {
             width: 80px;
             height: 80px;
             object-fit: cover;
@@ -943,38 +935,14 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- Fotos: Principal + 2 adicionales -->
+                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
                 <div class="form-group">
-                    <label>Foto Principal *</label>
+                    <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
-                        <input type="file" id="prodFoto" accept="image/*" />
-                        <span class="file-name" id="prodFotoNombre">Ningún archivo seleccionado</span>
+                        <input type="file" id="prodFotos" accept="image/*" multiple />
+                        <span class="file-count" id="prodFotosCount">Ningún archivo seleccionado</span>
                     </div>
-                    <div class="file-preview" id="prodFotoPreview" style="display:none;">
-                        <img id="prodFotoImg" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Foto 2 (adicional)</label>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="prodFoto2" accept="image/*" />
-                        <span class="file-name" id="prodFoto2Nombre">Ningún archivo seleccionado</span>
-                    </div>
-                    <div class="file-preview" id="prodFoto2Preview" style="display:none;">
-                        <img id="prodFoto2Img" />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Foto 3 (adicional)</label>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="prodFoto3" accept="image/*" />
-                        <span class="file-name" id="prodFoto3Nombre">Ningún archivo seleccionado</span>
-                    </div>
-                    <div class="file-preview" id="prodFoto3Preview" style="display:none;">
-                        <img id="prodFoto3Img" />
-                    </div>
+                    <div class="file-preview-grid" id="prodFotosPreview"></div>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
@@ -1212,23 +1180,43 @@
             }
             let html = '<div class="product-grid">';
             for (const p of filtrados) {
-                const fotoUrl = p.Foto ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto}` : '';
-                const foto2Url = p.Foto2 ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto2}` : '';
-                const foto3Url = p.Foto3 ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto3}` : '';
+                // Obtener lista de fotos (campo Fotos es un array de nombres de archivo)
+                let fotos = [];
+                if (p.Fotos) {
+                    if (Array.isArray(p.Fotos)) {
+                        fotos = p.Fotos;
+                    } else if (typeof p.Fotos === 'string') {
+                        try {
+                            const parsed = JSON.parse(p.Fotos);
+                            if (Array.isArray(parsed)) fotos = parsed;
+                        } catch (e) {}
+                    }
+                }
+                // Si no hay fotos en el nuevo campo, intentar con los antiguos (para compatibilidad)
+                if (fotos.length === 0) {
+                    if (p.Foto) fotos.push(p.Foto);
+                    if (p.Foto2) fotos.push(p.Foto2);
+                    if (p.Foto3) fotos.push(p.Foto3);
+                }
+                const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
+                const fotosExtra = fotos.slice(1);
+
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 const stock = parseInt(p.Stock || 0);
 
                 let extrasHtml = '';
-                const extras = [foto2Url, foto3Url].filter(u => u);
-                if (extras.length > 0) {
+                if (fotosExtra.length > 0) {
                     extrasHtml = `<div class="fotos-extra">`;
-                    extras.forEach(u => {
-                        extrasHtml += `<img src="${u}" alt="Extra" onclick="event.stopPropagation(); window.open('${u}','_blank')" />`;
+                    fotosExtra.forEach(f => {
+                        const url = `${POCKETBASE_URL}/api/files/productos/${p.id}/${f}`;
+                        extrasHtml += `<img src="${url}" alt="Extra" onclick="event.stopPropagation(); window.open('${url}','_blank')" />`;
                     });
                     extrasHtml += `</div>`;
                 }
+
+                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
 
                 html += `
                     <div class="product-card">
@@ -1480,19 +1468,15 @@
         });
 
         // ============================================================
-        // CRUD PRODUCTOS (con 3 fotos)
+        // CRUD PRODUCTOS (con múltiples fotos en un solo campo)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
             const form = document.getElementById('productForm');
             form.reset();
             document.getElementById('productId').value = '';
-            document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
-            document.getElementById('prodFotoPreview').style.display = 'none';
-            document.getElementById('prodFoto2Nombre').textContent = 'Ningún archivo seleccionado';
-            document.getElementById('prodFoto2Preview').style.display = 'none';
-            document.getElementById('prodFoto3Nombre').textContent = 'Ningún archivo seleccionado';
-            document.getElementById('prodFoto3Preview').style.display = 'none';
+            document.getElementById('prodFotosCount').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('prodFotosPreview').innerHTML = '';
             document.getElementById('productDeleteBtn').style.display = 'none';
 
             const catSelect = document.getElementById('prodCategoria');
@@ -1519,20 +1503,34 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                if (producto.Foto) {
-                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto}`;
-                    document.getElementById('prodFotoImg').src = url;
-                    document.getElementById('prodFotoPreview').style.display = 'block';
+                // Mostrar fotos existentes (campo Fotos)
+                let fotos = [];
+                if (producto.Fotos) {
+                    if (Array.isArray(producto.Fotos)) {
+                        fotos = producto.Fotos;
+                    } else if (typeof producto.Fotos === 'string') {
+                        try {
+                            const parsed = JSON.parse(producto.Fotos);
+                            if (Array.isArray(parsed)) fotos = parsed;
+                        } catch (e) {}
+                    }
                 }
-                if (producto.Foto2) {
-                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto2}`;
-                    document.getElementById('prodFoto2Img').src = url;
-                    document.getElementById('prodFoto2Preview').style.display = 'block';
+                // Fallback a campos antiguos
+                if (fotos.length === 0) {
+                    if (producto.Foto) fotos.push(producto.Foto);
+                    if (producto.Foto2) fotos.push(producto.Foto2);
+                    if (producto.Foto3) fotos.push(producto.Foto3);
                 }
-                if (producto.Foto3) {
-                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto3}`;
-                    document.getElementById('prodFoto3Img').src = url;
-                    document.getElementById('prodFoto3Preview').style.display = 'block';
+                if (fotos.length > 0) {
+                    const previewContainer = document.getElementById('prodFotosPreview');
+                    fotos.forEach(f => {
+                        const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${f}`;
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Foto';
+                        previewContainer.appendChild(img);
+                    });
+                    document.getElementById('prodFotosCount').textContent = `${fotos.length} foto(s) actuales`;
                 }
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
@@ -1550,27 +1548,27 @@
             if (e.target === e.currentTarget) cerrarModalProducto();
         });
 
-        // Previsualizaciones de fotos
-        function setupFilePreview(inputId, previewId, imgId, nameId) {
-            document.getElementById(inputId).addEventListener('change', function(e) {
-                const file = this.files[0];
-                if (file) {
-                    document.getElementById(nameId).textContent = file.name;
+        // Previsualización de múltiples fotos
+        document.getElementById('prodFotos').addEventListener('change', function(e) {
+            const files = this.files;
+            const container = document.getElementById('prodFotosPreview');
+            container.innerHTML = '';
+            if (files.length > 0) {
+                document.getElementById('prodFotosCount').textContent = `${files.length} archivo(s) seleccionado(s)`;
+                Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = function(ev) {
-                        document.getElementById(imgId).src = ev.target.result;
-                        document.getElementById(previewId).style.display = 'block';
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        img.alt = file.name;
+                        container.appendChild(img);
                     };
                     reader.readAsDataURL(file);
-                } else {
-                    document.getElementById(nameId).textContent = 'Ningún archivo seleccionado';
-                    document.getElementById(previewId).style.display = 'none';
-                }
-            });
-        }
-        setupFilePreview('prodFoto', 'prodFotoPreview', 'prodFotoImg', 'prodFotoNombre');
-        setupFilePreview('prodFoto2', 'prodFoto2Preview', 'prodFoto2Img', 'prodFoto2Nombre');
-        setupFilePreview('prodFoto3', 'prodFoto3Preview', 'prodFoto3Img', 'prodFoto3Nombre');
+                });
+            } else {
+                document.getElementById('prodFotosCount').textContent = 'Ningún archivo seleccionado';
+            }
+        });
 
         document.getElementById('productForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1583,6 +1581,7 @@
             const oferta = document.getElementById('prodOferta').value || '0';
             const stock = document.getElementById('prodStock').value;
             const detalles = document.getElementById('prodDetalles').value.trim();
+            const fotosFiles = document.getElementById('prodFotos').files;
 
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
@@ -1605,12 +1604,10 @@
                 for (const key in data) {
                     formData.append(key, data[key]);
                 }
-                const fotoFile = document.getElementById('prodFoto').files[0];
-                const foto2File = document.getElementById('prodFoto2').files[0];
-                const foto3File = document.getElementById('prodFoto3').files[0];
-                if (fotoFile) formData.append('Foto', fotoFile);
-                if (foto2File) formData.append('Foto2', foto2File);
-                if (foto3File) formData.append('Foto3', foto3File);
+                // Agregar todas las fotos con el mismo nombre "Fotos"
+                for (let i = 0; i < fotosFiles.length; i++) {
+                    formData.append('Fotos', fotosFiles[i]);
+                }
 
                 let response;
                 if (id) {
