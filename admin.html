@@ -466,12 +466,35 @@
             position: relative;
         }
         .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .product-card img {
+        .product-card .foto-principal {
             width: 100%;
             height: 90px;
             object-fit: cover;
             border-radius: 6px;
             background: #f1f5f9;
+            cursor: pointer;
+        }
+        /* Miniaturas de fotos adicionales */
+        .product-card .fotos-extra {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .product-card .fotos-extra img {
+            width: 30px;
+            height: 30px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #f1f5f9;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            transition: 0.2s;
+        }
+        .product-card .fotos-extra img:hover {
+            transform: scale(1.1);
+            border-color: #2980b9;
         }
         .product-card h4 {
             font-size: 0.8rem;
@@ -541,7 +564,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            max-width: 600px;
+            max-width: 650px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -600,11 +623,25 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
-        .form-group .file-input-wrapper input[type="file"] { flex: 1; }
+        .form-group .file-input-wrapper input[type="file"] { flex: 1; min-width: 120px; }
         .form-group .file-input-wrapper .file-name {
             font-size: 0.85rem;
             color: #64748b;
+        }
+        .form-group .file-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .form-group .file-preview img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            object-fit: cover;
         }
         .form-row {
             display: grid;
@@ -736,6 +773,41 @@
             padding: 40px;
             color: #94a3b8;
         }
+
+        /* ===== PREVIEW DE FOTOS EN EL FORMULARIO ===== */
+        .file-preview-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .file-preview-row .preview-item {
+            position: relative;
+            display: inline-block;
+        }
+        .file-preview-row .preview-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .file-preview-row .preview-item .remove-file {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -810,7 +882,6 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0;">📦 Inventario</h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <!-- Solo botón Nuevo Producto (se eliminó Exportar Excel) -->
                             <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
                         </div>
                     </div>
@@ -910,7 +981,7 @@
     </div>
 
     <div class="modal-overlay" id="productModal">
-        <div class="modal" style="max-width:650px;">
+        <div class="modal" style="max-width:700px;">
             <button class="close-modal" id="closeProductModal">✕</button>
             <h2 id="productModalTitle">Nuevo Producto</h2>
             <form id="productForm" enctype="multipart/form-data">
@@ -925,16 +996,41 @@
                 <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
+
+                <!-- Fotos: Principal + 2 adicionales -->
                 <div class="form-group">
-                    <label>Foto</label>
+                    <label>Foto Principal *</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="prodFoto" accept="image/*" />
                         <span class="file-name" id="prodFotoNombre">Ningún archivo seleccionado</span>
                     </div>
-                    <div id="prodFotoPreview" style="margin-top:8px; display:none;">
-                        <img id="prodFotoImg" style="max-width:100px; max-height:100px; border-radius:8px;" />
+                    <div class="file-preview" id="prodFotoPreview" style="display:none;">
+                        <img id="prodFotoImg" />
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label>Foto 2 (adicional)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodFoto2" accept="image/*" />
+                        <span class="file-name" id="prodFoto2Nombre">Ningún archivo seleccionado</span>
+                    </div>
+                    <div class="file-preview" id="prodFoto2Preview" style="display:none;">
+                        <img id="prodFoto2Img" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Foto 3 (adicional)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodFoto3" accept="image/*" />
+                        <span class="file-name" id="prodFoto3Nombre">Ningún archivo seleccionado</span>
+                    </div>
+                    <div class="file-preview" id="prodFoto3Preview" style="display:none;">
+                        <img id="prodFoto3Img" />
+                    </div>
+                </div>
+
                 <div style="display:flex; gap:10px; margin-top:10px;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
                     <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
@@ -1027,14 +1123,18 @@
         }
 
         // ============================================================
-        // API REQUEST
+        // API REQUEST (CORREGIDA para FormData)
         // ============================================================
         async function apiRequest(endpoint, options = {}) {
             const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
             const headers = {
-                'Content-Type': 'application/json',
                 ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
             };
+            // Si el body es FormData, no establecer Content-Type (el navegador lo hará automáticamente)
+            const isFormData = options.body instanceof FormData;
+            if (!isFormData) {
+                headers['Content-Type'] = 'application/json';
+            }
             const config = {
                 ...options,
                 headers: { ...headers, ...(options.headers || {}) }
@@ -1168,13 +1268,30 @@
             let html = '<div class="product-grid">';
             for (const p of filtrados) {
                 const fotoUrl = p.Foto ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto}` : '';
+                const foto2Url = p.Foto2 ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto2}` : '';
+                const foto3Url = p.Foto3 ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${p.Foto3}` : '';
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 const stock = parseInt(p.Stock || 0);
+
+                // Construir miniaturas de fotos adicionales
+                let extrasHtml = '';
+                const extras = [foto2Url, foto3Url].filter(u => u);
+                if (extras.length > 0) {
+                    extrasHtml = `<div class="fotos-extra">`;
+                    extras.forEach(u => {
+                        extrasHtml += `<img src="${u}" alt="Extra" onclick="event.stopPropagation(); window.open('${u}','_blank')" />`;
+                    });
+                    extrasHtml += `</div>`;
+                }
+
                 html += `
                     <div class="product-card">
-                        <img src="${fotoUrl}" alt="${p.Nombre || 'Producto'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'" />
+                        <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
+                             alt="${p.Nombre || 'Producto'}" 
+                             onclick="event.stopPropagation(); window.open('${fotoUrl || ''}','_blank')" />
+                        ${extrasHtml}
                         <h4>${p.Nombre || 'Sin nombre'}</h4>
                         <div class="price">$${precioFinal.toFixed(2)}</div>
                         <div class="stock">📦 ${stock} uds</div>
@@ -1419,15 +1536,20 @@
         });
 
         // ============================================================
-        // CRUD PRODUCTOS
+        // CRUD PRODUCTOS (con 3 fotos)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
             const form = document.getElementById('productForm');
             form.reset();
             document.getElementById('productId').value = '';
+            // Resetear nombres de archivos y previsualizaciones
             document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
             document.getElementById('prodFotoPreview').style.display = 'none';
+            document.getElementById('prodFoto2Nombre').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('prodFoto2Preview').style.display = 'none';
+            document.getElementById('prodFoto3Nombre').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('prodFoto3Preview').style.display = 'none';
             document.getElementById('productDeleteBtn').style.display = 'none';
 
             const catSelect = document.getElementById('prodCategoria');
@@ -1453,10 +1575,22 @@
                 document.getElementById('prodStock').value = producto.Stock || '';
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
+
+                // Mostrar fotos existentes
                 if (producto.Foto) {
                     const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto}`;
                     document.getElementById('prodFotoImg').src = url;
                     document.getElementById('prodFotoPreview').style.display = 'block';
+                }
+                if (producto.Foto2) {
+                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto2}`;
+                    document.getElementById('prodFoto2Img').src = url;
+                    document.getElementById('prodFoto2Preview').style.display = 'block';
+                }
+                if (producto.Foto3) {
+                    const url = `${POCKETBASE_URL}/api/files/productos/${producto.id}/${producto.Foto3}`;
+                    document.getElementById('prodFoto3Img').src = url;
+                    document.getElementById('prodFoto3Preview').style.display = 'block';
                 }
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
@@ -1474,21 +1608,27 @@
             if (e.target === e.currentTarget) cerrarModalProducto();
         });
 
-        document.getElementById('prodFoto').addEventListener('change', function(e) {
-            const file = this.files[0];
-            if (file) {
-                document.getElementById('prodFotoNombre').textContent = file.name;
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    document.getElementById('prodFotoImg').src = ev.target.result;
-                    document.getElementById('prodFotoPreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                document.getElementById('prodFotoNombre').textContent = 'Ningún archivo seleccionado';
-                document.getElementById('prodFotoPreview').style.display = 'none';
-            }
-        });
+        // Previsualizaciones de fotos
+        function setupFilePreview(inputId, previewId, imgId, nameId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (file) {
+                    document.getElementById(nameId).textContent = file.name;
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        document.getElementById(imgId).src = ev.target.result;
+                        document.getElementById(previewId).style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    document.getElementById(nameId).textContent = 'Ningún archivo seleccionado';
+                    document.getElementById(previewId).style.display = 'none';
+                }
+            });
+        }
+        setupFilePreview('prodFoto', 'prodFotoPreview', 'prodFotoImg', 'prodFotoNombre');
+        setupFilePreview('prodFoto2', 'prodFoto2Preview', 'prodFoto2Img', 'prodFoto2Nombre');
+        setupFilePreview('prodFoto3', 'prodFoto3Preview', 'prodFoto3Img', 'prodFoto3Nombre');
 
         document.getElementById('productForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -1501,7 +1641,6 @@
             const oferta = document.getElementById('prodOferta').value || '0';
             const stock = document.getElementById('prodStock').value;
             const detalles = document.getElementById('prodDetalles').value.trim();
-            const fotoFile = document.getElementById('prodFoto').files[0];
 
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
@@ -1521,38 +1660,32 @@
 
             try {
                 let response;
+                // Usar FormData para enviar archivos
+                const formData = new FormData();
+                for (const key in data) {
+                    formData.append(key, data[key]);
+                }
+                // Agregar fotos si existen
+                const fotoFile = document.getElementById('prodFoto').files[0];
+                const foto2File = document.getElementById('prodFoto2').files[0];
+                const foto3File = document.getElementById('prodFoto3').files[0];
+                if (fotoFile) formData.append('Foto', fotoFile);
+                if (foto2File) formData.append('Foto2', foto2File);
+                if (foto3File) formData.append('Foto3', foto3File);
+
                 if (id) {
-                    if (fotoFile) {
-                        const formData = new FormData();
-                        for (const key in data) formData.append(key, data[key]);
-                        formData.append('Foto', fotoFile);
-                        response = await apiRequest(`productos/records/${id}`, {
-                            method: 'PATCH',
-                            body: formData,
-                            headers: {}
-                        });
-                    } else {
-                        response = await apiRequest(`productos/records/${id}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify(data)
-                        });
-                    }
+                    // Editar: si no se seleccionan nuevas fotos, se mantienen las existentes
+                    response = await apiRequest(`productos/records/${id}`, {
+                        method: 'PATCH',
+                        body: formData,
+                        headers: {} // Importante: sin Content-Type para que el navegador lo configure
+                    });
                 } else {
-                    if (fotoFile) {
-                        const formData = new FormData();
-                        for (const key in data) formData.append(key, data[key]);
-                        formData.append('Foto', fotoFile);
-                        response = await apiRequest('productos/records', {
-                            method: 'POST',
-                            body: formData,
-                            headers: {}
-                        });
-                    } else {
-                        response = await apiRequest('productos/records', {
-                            method: 'POST',
-                            body: JSON.stringify(data)
-                        });
-                    }
+                    response = await apiRequest('productos/records', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {}
+                    });
                 }
                 alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
                 cerrarModalProducto();
