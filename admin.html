@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>B&B Admin - Panel de Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -216,25 +216,71 @@
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px;
             }
+            /* Ajustes de tarjetas en móvil (más pequeñas) */
+            .product-card {
+                padding: 6px !important;
+                border-radius: 10px !important;
+            }
+            .product-card .foto-principal {
+                border-radius: 6px !important;
+                margin-bottom: 4px !important;
+            }
+            .product-card h4 {
+                font-size: 0.7rem !important;
+                margin: 2px 0 1px !important;
+            }
+            .product-card .price {
+                font-size: 0.8rem !important;
+            }
+            .product-card .price .old {
+                font-size: 0.6rem !important;
+            }
+            .product-card .stock {
+                font-size: 0.55rem !important;
+            }
+            .product-card .category {
+                font-size: 0.55rem !important;
+            }
+            .product-card .actions button {
+                font-size: 0.55rem !important;
+                padding: 2px 6px !important;
+                border-radius: 12px !important;
+            }
         }
+
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
             .product-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px;
+                gap: 6px !important;
             }
             .product-card {
-                padding: 8px !important;
+                padding: 4px !important;
+                border-radius: 8px !important;
             }
             .product-card h4 {
-                font-size: 0.75rem !important;
+                font-size: 0.65rem !important;
             }
             .product-card .price {
-                font-size: 0.8rem !important;
+                font-size: 0.75rem !important;
+            }
+            .product-card .price .old {
+                font-size: 0.55rem !important;
+            }
+            .product-card .stock {
+                font-size: 0.5rem !important;
+            }
+            .product-card .category {
+                font-size: 0.5rem !important;
+            }
+            .product-card .actions button {
+                font-size: 0.5rem !important;
+                padding: 2px 4px !important;
             }
         }
+
         @media (min-width: 1400px) {
             .product-grid {
                 grid-template-columns: repeat(6, 1fr) !important;
@@ -402,7 +448,7 @@
         }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ===== TARJETAS DE PRODUCTOS ===== */
+        /* ===== TARJETAS DE PRODUCTOS (estilo tienda) ===== */
         .product-grid {
             display: grid;
             gap: 16px;
@@ -584,7 +630,7 @@
             gap: 15px;
         }
 
-        /* ===== GESTIÓN DE FOTOS (MEJORADA) ===== */
+        /* ===== GESTIÓN DE FOTOS ===== */
         .fotos-gestion {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -633,20 +679,6 @@
         .fotos-gestion .foto-item .btn-eliminar-foto:hover {
             background: #b91c1c;
             transform: scale(1.1);
-        }
-        .fotos-gestion .foto-item .nombre-foto {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            font-size: 0.55rem;
-            padding: 2px 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: center;
         }
         .fotos-gestion .fotos-preview-nuevas {
             display: flex;
@@ -843,6 +875,24 @@
             padding: 40px;
             color: #94a3b8;
         }
+
+        /* ===== FOOTER (corregido) ===== */
+        .footer {
+            background-color: #1a252f;
+            color: #b0c4d9;
+            text-align: center;
+            padding: 16px 20px;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+        .footer p {
+            margin: 0;
+            color: #b0c4d9;
+        }
+        .footer a {
+            color: #74b9ff;
+        }
     </style>
 </head>
 <body>
@@ -1032,7 +1082,7 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- ===== GESTIÓN DE FOTOS ===== -->
+                <!-- Gestión de fotos -->
                 <div class="form-group fotos-gestion">
                     <label>Fotos del producto</label>
                     <div id="fotosExistentes">
@@ -1571,11 +1621,10 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN EL FORMULARIO (MEJORADA)
+        // GESTIÓN DE FOTOS EN EL FORMULARIO
         // ============================================================
-        // Variables para gestionar fotos en el modal
-        let fotosActuales = []; // nombres de archivo existentes
-        let nuevasFotos = []; // archivos File seleccionados
+        let fotosActuales = [];
+        let nuevasFotos = [];
 
         function renderFotosExistentes() {
             const container = document.getElementById('fotosExistentes');
@@ -1598,7 +1647,6 @@
             html += '</div>';
             container.innerHTML = html;
 
-            // Eventos para eliminar fotos existentes
             container.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1631,7 +1679,6 @@
             html += '</div>';
             container.innerHTML = html;
 
-            // Eventos para quitar fotos nuevas (solo de la previsualización, no se suben)
             container.querySelectorAll('.btn-quitar-nueva').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -1647,21 +1694,17 @@
             const input = document.getElementById('prodFotosInput');
             const count = nuevasFotos.length;
             document.getElementById('prodFotosCount').textContent = count > 0 ? `${count} archivo(s) seleccionado(s)` : 'Seleccionar archivos';
-            // Limpiar el input para que se pueda volver a seleccionar el mismo archivo si se quita
             input.value = '';
         }
 
-        // Manejar la selección de archivos
         document.getElementById('prodFotosInput').addEventListener('change', function(e) {
             const files = Array.from(this.files);
             if (files.length === 0) return;
-            // Añadir los nuevos archivos a la lista de nuevas fotos
             nuevasFotos = nuevasFotos.concat(files);
             renderFotosNuevas();
             actualizarContadorFotos();
         });
 
-        // Función para resetear el estado de fotos al abrir el modal
         function resetFotosState() {
             fotosActuales = [];
             nuevasFotos = [];
@@ -1672,7 +1715,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS (con gestión de fotos mejorada)
+        // CRUD PRODUCTOS
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -1707,7 +1750,6 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                // Cargar fotos existentes
                 fotosActuales = obtenerFotosProducto(producto);
                 renderFotosExistentes();
             } else {
@@ -1727,7 +1769,6 @@
             if (e.target === e.currentTarget) cerrarModalProducto();
         });
 
-        // Enviar formulario (con fotos existentes + nuevas)
         document.getElementById('productForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const id = document.getElementById('productId').value;
@@ -1761,13 +1802,9 @@
                 for (const key in data) {
                     formData.append(key, data[key]);
                 }
-
-                // Fotos existentes (nombres de archivo) - se envían como array
                 fotosActuales.forEach(f => {
                     formData.append('Fotos', f);
                 });
-
-                // Nuevas fotos (archivos)
                 nuevasFotos.forEach(file => {
                     formData.append('Fotos', file);
                 });
@@ -1999,5 +2036,8 @@
             document.getElementById('appContainer').style.display = 'none';
         }
     </script>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer"><p>© <span id="yearAdmin"></span> B&amp;B Admin. Todos los derechos reservados.</p></footer>
 </body>
 </html>
