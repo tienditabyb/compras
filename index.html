@@ -259,31 +259,92 @@
             color: #1e272e;
         }
 
-        /* ===== PRODUCTOS ===== */
-        .products-section { flex: 1; min-width: 0; }
-        .section-header {
+        /* ===== TOOLBAR (con categorías) ===== */
+        .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 18px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
         }
-        .section-header h2 {
+        .toolbar__left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .toolbar__left h2 {
             font-size: 1.2rem;
             font-weight: 600;
             color: #1e272e;
         }
-        .section-header__sort {
+        .toolbar__categories {
+            position: relative;
+        }
+        .btn-categories {
+            background: #1a252f;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-categories:hover { background: #0f171e; }
+        .categories-dropdown {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 6px 0;
+            min-width: 170px;
+            z-index: 50;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .categories-dropdown.open { display: block; }
+        .categories-dropdown a {
+            display: block;
+            padding: 6px 18px;
+            color: #1e272e;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .categories-dropdown a:hover {
+            background: #f1f5f9;
+            color: #2980b9;
+        }
+        .categories-dropdown a.active {
+            background: #e6f0fa;
+            color: #2980b9;
+            font-weight: 500;
+        }
+
+        .toolbar__sort {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .section-header__sort label {
+        .toolbar__sort label {
             font-size: 0.85rem;
             color: #64748b;
         }
-        .section-header__sort select {
+        .toolbar__sort select {
             padding: 6px 12px;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -292,6 +353,9 @@
             outline: none;
             cursor: pointer;
         }
+
+        /* ===== PRODUCTOS ===== */
+        .products-section { flex: 1; min-width: 0; }
 
         .products-grid {
             display: grid;
@@ -833,6 +897,9 @@
             .account-btn { width: 34px; height: 34px; font-size: 1rem; }
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
+            .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+            .toolbar__left { justify-content: space-between; width: 100%; }
+            .toolbar__sort { justify-content: flex-start; }
         }
         @media (max-width: 480px) {
             .product-card { padding: 10px; }
@@ -843,6 +910,7 @@
             .modal { padding: 16px; max-width: 100%; }
             .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
             .detail-page .detail-container { padding: 15px; }
+            .btn-categories { font-size: 0.75rem; padding: 4px 12px; }
         }
 
         .loading-message {
@@ -987,10 +1055,21 @@
 
         <!-- SECCIÓN DE PRODUCTOS (lista) -->
         <section class="products-section" id="productsSection">
-            <div class="section-header">
-                <h2 id="productCountHeader">Productos</h2>
-                <div class="section-header__sort">
-                    <label for="sortSelect">Ordenar por:</label>
+            <!-- TOOLBAR con categorías -->
+            <div class="toolbar">
+                <div class="toolbar__left">
+                    <h2>Productos</h2>
+                    <div class="toolbar__categories">
+                        <button class="btn-categories" onclick="toggleCategoriesDropdown()">
+                            📂 Categorías ▼
+                        </button>
+                        <div class="categories-dropdown" id="categoriesDropdown">
+                            <!-- Se llena con JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="toolbar__sort">
+                    <label for="sortSelect">Ordenar:</label>
                     <select id="sortSelect" onchange="renderizarProductos()">
                         <option value="relevance">Relevancia</option>
                         <option value="price_asc">Menor precio</option>
@@ -1000,6 +1079,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="products-grid" id="productsGrid">
                 <div class="loading-message">🔄 Cargando productos...</div>
             </div>
@@ -1536,13 +1616,14 @@
 
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
-                const nombreUsuario = usuarioActual ? usuarioActual.name : 'Anónimo';
+                // Obtener el nombre real del usuario
+                const nombreUsuario = usuarioActual ? (usuarioActual.name || usuarioActual.email || 'Anónimo') : 'Anónimo';
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         producto_id: productoId,
                         usuario_id: usuarioId,
-                        nombre_usuario: nombreUsuario,
+                        nombre_usuario: nombreUsuario, // Guardamos el nombre real
                         puntuacion,
                         comentario: comentario || '',
                         fecha: new Date().toISOString()
@@ -1577,10 +1658,11 @@
         }
 
         // ============================================================
-        //  CATEGORÍAS
+        //  CATEGORÍAS (Sidebar + Dropdown)
         // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
+            // Sidebar
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
             const allLi = document.createElement('li');
@@ -1613,12 +1695,60 @@
                 li.appendChild(a);
                 ul.appendChild(li);
             });
+
+            // Dropdown (Toolbar móvil)
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.innerHTML = '';
+            const allLinkDrop = document.createElement('a');
+            allLinkDrop.textContent = '📂 Todas';
+            allLinkDrop.dataset.categoria = 'Todas';
+            if (categoriaSeleccionada === 'Todas') allLinkDrop.classList.add('active');
+            allLinkDrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                categoriaSeleccionada = 'Todas';
+                actualizarCategoriaActiva(allLinkDrop);
+                paginaActual = 1;
+                renderizarProductos();
+                cerrarDropdownCategorias();
+            });
+            dropdown.appendChild(allLinkDrop);
+
+            cats.forEach(cat => {
+                const a = document.createElement('a');
+                a.textContent = `📁 ${cat}`;
+                a.dataset.categoria = cat;
+                if (cat === categoriaSeleccionada) a.classList.add('active');
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    categoriaSeleccionada = cat;
+                    actualizarCategoriaActiva(a);
+                    paginaActual = 1;
+                    renderizarProductos();
+                    cerrarDropdownCategorias();
+                });
+                dropdown.appendChild(a);
+            });
         }
 
         function actualizarCategoriaActiva(activo) {
-            document.querySelectorAll('#categoryList a').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#categoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active'));
             if (activo) activo.classList.add('active');
         }
+
+        function toggleCategoriesDropdown() {
+            document.getElementById('categoriesDropdown').classList.toggle('open');
+        }
+
+        function cerrarDropdownCategorias() {
+            document.getElementById('categoriesDropdown').classList.remove('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.toolbar__categories');
+            if (container && !container.contains(e.target)) {
+                cerrarDropdownCategorias();
+            }
+        });
 
         // ============================================================
         //  BÚSQUEDA
@@ -1658,9 +1788,6 @@
                 }
 
                 const total = filtrados.length;
-                // Ya no mostramos el número, solo el título fijo
-                document.getElementById('productCountHeader').textContent = 'Productos';
-
                 const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
                 if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
                 const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
@@ -1707,7 +1834,6 @@
                     grid.innerHTML = html;
                 }
 
-                // Eventos para el botón "Agregar"
                 document.querySelectorAll('.btn-add').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -1722,12 +1848,10 @@
                     });
                 });
 
-                // Evento para abrir detalle (redirigir a página con ?id=)
                 document.querySelectorAll('.product-card').forEach(card => {
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
-                        // Redirigir a la misma página con parámetro id
                         window.location.href = `?id=${id}`;
                     });
                 });
@@ -1759,17 +1883,15 @@
             const detailPage = document.getElementById('detailPage');
             const container = document.getElementById('detailContainer');
 
-            // Ocultar lista y mostrar detalle
             productsSection.style.display = 'none';
             detailPage.classList.add('active');
 
             const prod = productos.find(p => p.id === productoId);
             if (!prod) {
-                container.innerHTML = `<p>Producto no encontrado. <a href="?">Volver</a></p>`;
+                container.innerHTML = `<p>Producto no encontrado. <a href="?" onclick="volverALista()">Volver</a></p>`;
                 return;
             }
 
-            // Obtener calificaciones
             const calificaciones = await obtenerCalificaciones(productoId);
             const promedio = calificaciones.length > 0 ?
                 calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
@@ -1806,7 +1928,6 @@
                 </button>
             `;
 
-            // Sección de calificar (si el usuario ha comprado y no ha calificado)
             if (usuarioActual) {
                 const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
                 const haComprado = await verificarCompra(usuarioActual.id, prod.id);
@@ -1833,7 +1954,7 @@
                 }
             }
 
-            // Comentarios
+            // Comentarios (mostrando nombre real)
             html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
             if (calificaciones.length === 0) {
                 html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
@@ -1841,10 +1962,12 @@
                 calificaciones.forEach(c => {
                     const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
                     const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
+                    // Mostrar nombre_usuario, si no existe mostrar 'Anónimo'
+                    const nombreMostrar = c.nombre_usuario || 'Anónimo';
                     html += `
                         <div class="comentario-item">
                             <div class="comentario-header">
-                                <span class="comentario-nombre">${c.nombre_usuario || 'Anónimo'}</span>
+                                <span class="comentario-nombre">${nombreMostrar}</span>
                                 <span class="comentario-estrellas">${estrellasCom}</span>
                             </div>
                             <div class="comentario-texto">${c.comentario || 'Sin comentario'}</div>
@@ -1858,14 +1981,15 @@
             container.innerHTML = html;
         }
 
+        // FUNCIÓN CORREGIDA: Al volver, recarga los productos
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
-            // Quitar el parámetro de la URL sin recargar
             window.history.pushState({}, document.title, window.location.pathname);
+            // Recargar la lista de productos para que no se quede en "cargando"
+            renderizarProductos();
         }
 
-        // Función para calificar desde el detalle (reutiliza la lógica)
         async function enviarCalificacionDesdeDetalle(productoId) {
             if (!usuarioActual) {
                 alert('Debes iniciar sesión para calificar.');
@@ -1879,7 +2003,6 @@
             const result = await guardarCalificacion(productoId, usuarioActual.id, estrellaSeleccionada, comentario);
             if (result.success) {
                 alert('✅ Calificación enviada correctamente. ¡Gracias!');
-                // Recargar detalle
                 mostrarDetalle(productoId);
             } else {
                 alert('Error al calificar: ' + result.error);
@@ -1981,7 +2104,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO (igual que antes)
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2199,15 +2322,12 @@
             productos = await obtenerProductos();
             await renderizarCategorias();
 
-            // Verificar si hay parámetro id en la URL
             const params = new URLSearchParams(window.location.search);
             const productoId = params.get('id');
 
             if (productoId) {
-                // Mostrar detalle directamente
                 await mostrarDetalle(productoId);
             } else {
-                // Mostrar lista de productos
                 renderizarProductos();
             }
 
