@@ -83,41 +83,95 @@
             gap: 12px;
             flex-shrink: 0;
         }
+
+        /* ===== MENÚ DE CUENTA MODERNO ===== */
+        .account-dropdown {
+            position: relative;
+        }
         .account-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border-radius: 30px;
+            padding: 6px 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
+            gap: 8px;
             color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9rem;
             transition: 0.3s;
-            position: relative;
+            cursor: pointer;
         }
         .account-btn:hover {
             background: rgba(255,255,255,0.25);
             border-color: rgba(255,255,255,0.4);
         }
-        .account-dropdown { position: relative; }
+        .account-btn .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #74b9ff;
+            color: #1a252f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .account-btn .arrow {
+            font-size: 0.65rem;
+            transition: transform 0.3s;
+            margin-left: 4px;
+        }
+        .account-btn.open .arrow { transform: rotate(180deg); }
+
         .account-dropdown-content {
             display: none;
             position: absolute;
             right: 0;
-            top: 110%;
+            top: 115%;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            min-width: 220px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 280px;
             padding: 8px 0;
             z-index: 200;
+            overflow: hidden;
         }
         .account-dropdown-content.open { display: block; }
+
+        .account-dropdown-content .dropdown-header {
+            padding: 14px 20px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .account-dropdown-content .dropdown-header .avatar-lg {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #2980b9;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .account-dropdown-content .dropdown-header .user-name {
+            font-weight: 600;
+            color: #1e272e;
+        }
+        .account-dropdown-content .dropdown-header .user-email {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
         .account-dropdown-content .dropdown-item {
             display: block;
-            padding: 8px 18px;
+            padding: 10px 20px;
             color: #1e272e;
             font-size: 0.9rem;
             cursor: pointer;
@@ -127,25 +181,64 @@
             width: 100%;
             text-align: left;
             font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .account-dropdown-content .dropdown-item:hover {
             background: #f1f5f9;
-            color: #2980b9;
         }
+        .account-dropdown-content .dropdown-item .icon { font-size: 1.1rem; }
+
         .account-dropdown-content .dropdown-divider {
             height: 1px;
             background: #e2e8f0;
             margin: 4px 12px;
         }
-        .account-dropdown-content .user-info-display {
-            padding: 8px 18px;
-            font-size: 0.85rem;
-            color: #64748b;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 4px;
+
+        /* Submenú perfil (acordeón) */
+        .profile-submenu {
+            padding: 0 16px 12px;
         }
-        .account-dropdown-content .user-info-display strong {
+        .profile-submenu .profile-data {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+        .profile-submenu .profile-data p {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .profile-submenu .profile-data p:last-child {
+            border-bottom: none;
+        }
+        .profile-submenu .profile-data .label {
+            color: #64748b;
+        }
+        .profile-submenu .profile-data .value {
+            font-weight: 500;
             color: #1e272e;
+            text-align: right;
+        }
+        .profile-submenu .btn-change-password {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+            background: #e6f0fa;
+            border: none;
+            border-radius: 8px;
+            color: #2980b9;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .profile-submenu .btn-change-password:hover {
+            background: #d0e4f5;
         }
 
         /* ========== CARRITO FLOTANTE ========== */
@@ -259,7 +352,7 @@
             color: #1e272e;
         }
 
-        /* ===== TOOLBAR (con categorías) ===== */
+        /* ===== TOOLBAR ===== */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -283,7 +376,10 @@
             font-weight: 600;
             color: #1e272e;
         }
+
+        /* Botón categorías solo visible en móvil */
         .toolbar__categories {
+            display: none; /* oculto por defecto, se muestra en móvil */
             position: relative;
         }
         .btn-categories {
@@ -307,7 +403,7 @@
             top: 110%;
             left: 0;
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             padding: 6px 0;
             min-width: 170px;
@@ -318,7 +414,7 @@
         .categories-dropdown.open { display: block; }
         .categories-dropdown a {
             display: block;
-            padding: 6px 18px;
+            padding: 8px 18px;
             color: #1e272e;
             text-decoration: none;
             font-size: 0.85rem;
@@ -356,7 +452,6 @@
 
         /* ===== PRODUCTOS ===== */
         .products-section { flex: 1; min-width: 0; }
-
         .products-grid {
             display: grid;
             gap: 20px;
@@ -364,30 +459,19 @@
         }
 
         @media (min-width: 1400px) {
-            .products-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
+            .products-grid { grid-template-columns: repeat(6, 1fr); }
         }
         @media (max-width: 1399px) and (min-width: 1024px) {
-            .products-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
+            .products-grid { grid-template-columns: repeat(4, 1fr); }
         }
         @media (max-width: 1023px) and (min-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            .products-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 767px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
         }
         @media (max-width: 480px) {
-            .products-grid {
-                gap: 8px;
-            }
+            .products-grid { gap: 8px; }
         }
 
         .product-card {
@@ -723,15 +807,13 @@
         .cart-sidebar .checkout-btn:hover { background: #0f171e; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* ========== DETALLE PRODUCTO (vista de página) ========== */
+        /* ========== DETALLE PRODUCTO ========== */
         .detail-page {
             display: none;
             padding: 20px 0;
             width: 100%;
         }
-        .detail-page.active {
-            display: block;
-        }
+        .detail-page.active { display: block; }
         .detail-page .back-link {
             display: inline-block;
             margin-bottom: 20px;
@@ -894,12 +976,20 @@
             .header__search { order: 3; flex: 1 1 100%; max-width: 100%; }
             .header__logo { font-size: 1.4rem; }
             .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
-            .account-btn { width: 34px; height: 34px; font-size: 1rem; }
+            .account-btn { padding: 4px 12px; font-size: 0.8rem; }
+            .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
             .toolbar__left { justify-content: space-between; width: 100%; }
             .toolbar__sort { justify-content: flex-start; }
+            /* Mostrar categorías en móvil */
+            .toolbar__categories { display: block; }
+            .account-dropdown-content { right: auto; left: 0; min-width: 260px; }
+        }
+        @media (min-width: 769px) {
+            /* Ocultar categorías en escritorio (solo sidebar) */
+            .toolbar__categories { display: none !important; }
         }
         @media (max-width: 480px) {
             .product-card { padding: 10px; }
@@ -1020,8 +1110,10 @@
             </form>
             <div class="header__actions">
                 <div class="account-dropdown" id="accountDropdown">
-                    <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()" title="Mi cuenta">
-                        👤
+                    <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
+                        <span class="avatar" id="accountAvatar">👤</span>
+                        <span id="accountLabel">Mi cuenta</span>
+                        <span class="arrow">▼</span>
                     </button>
                     <div class="account-dropdown-content" id="accountDropdownContent">
                         <!-- Se llena con JS -->
@@ -1053,12 +1145,12 @@
             </div>
         </aside>
 
-        <!-- SECCIÓN DE PRODUCTOS (lista) -->
+        <!-- SECCIÓN DE PRODUCTOS -->
         <section class="products-section" id="productsSection">
-            <!-- TOOLBAR con categorías -->
             <div class="toolbar">
                 <div class="toolbar__left">
                     <h2>Productos</h2>
+                    <!-- Categorías solo visible en móvil -->
                     <div class="toolbar__categories">
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
                             📂 Categorías ▼
@@ -1086,11 +1178,9 @@
             <div class="pagination" id="pagination"></div>
         </section>
 
-        <!-- PÁGINA DE DETALLE (se muestra cuando hay ?id=) -->
+        <!-- PÁGINA DE DETALLE -->
         <div class="detail-page" id="detailPage">
-            <div class="detail-container" id="detailContainer">
-                <!-- Contenido generado por JS -->
-            </div>
+            <div class="detail-container" id="detailContainer"></div>
         </div>
     </div>
 
@@ -1343,32 +1433,66 @@
         function actualizarUIUsuario() {
             const user = getCurrentUserFromToken();
             const dropdownContent = document.getElementById('accountDropdownContent');
+            const avatar = document.getElementById('accountAvatar');
+            const label = document.getElementById('accountLabel');
 
             if (user) {
+                const nombre = user.name || user.email;
+                const inicial = (user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase());
+                avatar.textContent = inicial;
+                label.textContent = 'Mi cuenta';
+
                 dropdownContent.innerHTML = `
-                    <div class="user-info-display">
-                        <strong>${user.name || user.email}</strong><br>
-                        <span style="font-size:0.8rem;">${user.email}</span><br>
-                        <span style="font-size:0.8rem;">📞 ${user.telefono || 'No especificado'}</span>
+                    <div class="dropdown-header">
+                        <div class="avatar-lg">${inicial}</div>
+                        <div>
+                            <div class="user-name">${user.name || 'Usuario'}</div>
+                            <div class="user-email">${user.email}</div>
+                        </div>
                     </div>
-                    <button class="dropdown-item" onclick="abrirCambiarPassword()">🔑 Cambiar contraseña</button>
+                    <button class="dropdown-item" onclick="toggleProfileSubmenu()">
+                        <span class="icon">👤</span> Perfil
+                    </button>
+                    <div class="profile-submenu" id="profileSubmenu" style="display:none;">
+                        <div class="profile-data">
+                            <p><span class="label">Nombre</span><span class="value">${user.name || 'No especificado'}</span></p>
+                            <p><span class="label">Teléfono</span><span class="value">${user.telefono || 'No especificado'}</span></p>
+                            <p><span class="label">Correo</span><span class="value">${user.email}</span></p>
+                        </div>
+                        <button class="btn-change-password" onclick="abrirCambiarPassword()">🔑 Cambiar contraseña</button>
+                    </div>
                     <div class="dropdown-divider"></div>
-                    <button class="dropdown-item" onclick="cerrarSesion()" style="color:#e74c3c;">🚪 Cerrar sesión</button>
+                    <button class="dropdown-item" onclick="cerrarSesion()" style="color:#e74c3c;">
+                        <span class="icon">🚪</span> Cerrar sesión
+                    </button>
                 `;
                 usuarioActual = user;
             } else {
+                avatar.textContent = '👤';
+                label.textContent = 'Iniciar sesión';
                 dropdownContent.innerHTML = `
-                    <button class="dropdown-item" onclick="abrirModalLogin()">🔑 Iniciar sesión</button>
+                    <button class="dropdown-item" onclick="abrirModalLogin()">
+                        <span class="icon">🔑</span> Iniciar sesión
+                    </button>
                 `;
                 usuarioActual = null;
             }
         }
 
+        function toggleProfileSubmenu() {
+            const sub = document.getElementById('profileSubmenu');
+            if (sub) {
+                sub.style.display = sub.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
         function toggleAccountDropdown() {
             document.getElementById('accountDropdownContent').classList.toggle('open');
+            document.getElementById('accountBtn').classList.toggle('open');
         }
         function cerrarAccountDropdown() {
             document.getElementById('accountDropdownContent').classList.remove('open');
+            document.getElementById('accountBtn').classList.remove('open');
         }
         document.addEventListener('click', function(e) {
             const container = document.getElementById('accountDropdown');
@@ -1616,14 +1740,13 @@
 
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
-                // Obtener el nombre real del usuario
                 const nombreUsuario = usuarioActual ? (usuarioActual.name || usuarioActual.email || 'Anónimo') : 'Anónimo';
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         producto_id: productoId,
                         usuario_id: usuarioId,
-                        nombre_usuario: nombreUsuario, // Guardamos el nombre real
+                        nombre_usuario: nombreUsuario,
                         puntuacion,
                         comentario: comentario || '',
                         fecha: new Date().toISOString()
@@ -1954,7 +2077,6 @@
                 }
             }
 
-            // Comentarios (mostrando nombre real)
             html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
             if (calificaciones.length === 0) {
                 html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
@@ -1962,7 +2084,6 @@
                 calificaciones.forEach(c => {
                     const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
                     const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
-                    // Mostrar nombre_usuario, si no existe mostrar 'Anónimo'
                     const nombreMostrar = c.nombre_usuario || 'Anónimo';
                     html += `
                         <div class="comentario-item">
@@ -1981,12 +2102,10 @@
             container.innerHTML = html;
         }
 
-        // FUNCIÓN CORREGIDA: Al volver, recarga los productos
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
             window.history.pushState({}, document.title, window.location.pathname);
-            // Recargar la lista de productos para que no se quede en "cargando"
             renderizarProductos();
         }
 
