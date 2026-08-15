@@ -1412,12 +1412,21 @@
             } catch (e) { return { success: false, error: e.message }; }
         }
 
+        // MODIFICADO: guardar nombre y apellidos por separado
         async function registrar(nombre, apellidos, email, telefono, password, passwordConfirm) {
             try {
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: nombreCompleto, email, password, passwordConfirm, telefono })
+                    body: JSON.stringify({
+                        nombre: nombre,
+                        apellidos: apellidos,
+                        name: nombreCompleto,
+                        email,
+                        password,
+                        passwordConfirm,
+                        telefono
+                    })
                 });
                 if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al registrar'); }
                 return await login(email, password);
@@ -1437,8 +1446,9 @@
             const label = document.getElementById('accountLabel');
 
             if (user) {
-                const nombre = user.name || user.email;
-                const inicial = (user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase());
+                // Obtener nombre completo desde name (que tiene nombre+apellidos) o desde campos separados
+                const nombreCompleto = user.name || (user.nombre ? `${user.nombre} ${user.apellidos || ''}`.trim() : 'Usuario');
+                const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() : (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
                 avatar.textContent = inicial;
                 label.textContent = 'Mi cuenta';
 
@@ -1446,7 +1456,7 @@
                     <div class="dropdown-header">
                         <div class="avatar-lg">${inicial}</div>
                         <div>
-                            <div class="user-name">${user.name || 'Usuario'}</div>
+                            <div class="user-name">${nombreCompleto}</div>
                             <div class="user-email">${user.email}</div>
                         </div>
                     </div>
@@ -1455,7 +1465,8 @@
                     </button>
                     <div class="profile-submenu" id="profileSubmenu" style="display:none;">
                         <div class="profile-data">
-                            <p><span class="label">Nombre</span><span class="value">${user.name || 'No especificado'}</span></p>
+                            <p><span class="label">Nombre</span><span class="value">${user.nombre || 'No especificado'}</span></p>
+                            <p><span class="label">Apellidos</span><span class="value">${user.apellidos || 'No especificado'}</span></p>
                             <p><span class="label">Teléfono</span><span class="value">${user.telefono || 'No especificado'}</span></p>
                             <p><span class="label">Correo</span><span class="value">${user.email}</span></p>
                         </div>
@@ -1738,7 +1749,7 @@
             } catch (e) { return []; }
         }
 
-        // Función para obtener nombres de usuarios a partir de una lista de IDs
+        // MODIFICADO: obtener nombres y apellidos separados
         async function obtenerNombresUsuarios(userIds) {
             if (!userIds || userIds.length === 0) return {};
             const filter = userIds.map(id => `id="${id}"`).join('||');
@@ -1748,7 +1759,18 @@
                 const data = await resp.json();
                 const map = {};
                 data.items.forEach(u => {
-                    map[u.id] = u.name || u.email || 'Usuario';
+                    // Priorizar campos separados, luego name, luego email
+                    let nombreCompleto = '';
+                    if (u.nombre && u.apellidos) {
+                        nombreCompleto = `${u.nombre} ${u.apellidos}`.trim();
+                    } else if (u.nombre) {
+                        nombreCompleto = u.nombre;
+                    } else if (u.name) {
+                        nombreCompleto = u.name;
+                    } else {
+                        nombreCompleto = u.email || 'Usuario';
+                    }
+                    map[u.id] = nombreCompleto;
                 });
                 return map;
             } catch (e) {
@@ -1758,7 +1780,6 @@
 
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
-                // Solo guardamos el usuario_id, el nombre se obtendrá luego desde la colección users
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2016,7 +2037,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (con nombres reales)
+        //  PÁGINA DE DETALLE (con nombres y apellidos)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2032,12 +2053,10 @@
                 return;
             }
 
-            // Obtener calificaciones
             const calificaciones = await obtenerCalificaciones(productoId);
             const promedio = calificaciones.length > 0 ?
                 calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
 
-            // Obtener nombres de los usuarios que calificaron
             const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
             const nombresMap = await obtenerNombresUsuarios(userIds);
 
@@ -2099,7 +2118,7 @@
                 }
             }
 
-            // Comentarios con nombres reales
+            // Comentarios con nombre completo (nombre + apellidos)
             html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
             if (calificaciones.length === 0) {
                 html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
@@ -2107,7 +2126,6 @@
                 calificaciones.forEach(c => {
                     const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
                     const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
-                    // Usar el nombre obtenido de la colección users
                     const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
                     html += `
                         <div class="comentario-item">
@@ -2270,15 +2288,12 @@
             document.getElementById('domDireccionGroup').style.display = 'none';
 
             if (usuarioActual) {
-                let nombre = usuarioActual.name || '';
-                let apellidos = '';
-                const nombreParts = nombre.split(' ');
-                if (nombreParts.length > 1) {
-                    nombre = nombreParts[0];
-                    apellidos = nombreParts.slice(1).join(' ');
-                } else {
-                    nombre = nombreParts[0];
-                    apellidos = '';
+                let nombre = usuarioActual.nombre || '';
+                let apellidos = usuarioActual.apellidos || '';
+                if (!nombre && usuarioActual.name) {
+                    const parts = usuarioActual.name.split(' ');
+                    nombre = parts[0] || '';
+                    apellidos = parts.slice(1).join(' ') || '';
                 }
                 document.getElementById('domNombre').value = nombre;
                 document.getElementById('domApellidos').value = apellidos;
