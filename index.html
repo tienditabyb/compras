@@ -335,7 +335,6 @@
             color: #2980b9;
             font-weight: 600;
         }
-        /* Ya no hay sidebar__extra porque movimos sus elementos al dropdown */
 
         /* ===== TOOLBAR ===== */
         .toolbar {
@@ -362,7 +361,7 @@
             color: #1e272e;
         }
 
-        /* Botón categorías en móvil (moderno) */
+        /* Botón categorías en móvil */
         .toolbar__categories {
             display: none;
             position: relative;
@@ -800,19 +799,24 @@
         .cart-sidebar .checkout-btn:hover { background: #0f171e; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* ========== DETALLE PRODUCTO ========== */
+        /* ========== DETALLE PRODUCTO (PÁGINA COMPLETA) ========== */
         .detail-page {
             display: none;
             padding: 20px 0;
             width: 100%;
         }
-        .detail-page.active { display: block; }
+        .detail-page.active {
+            display: block;
+        }
         .detail-page .back-link {
             display: inline-block;
             margin-bottom: 20px;
             color: #2980b9;
             font-weight: 600;
             cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
         }
         .detail-page .back-link:hover { text-decoration: underline; }
         .detail-page .detail-container {
@@ -820,6 +824,8 @@
             border-radius: 16px;
             padding: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 800px;
+            margin: 0 auto;
         }
         .detail-page .detail-container img {
             width: 100%;
@@ -833,6 +839,7 @@
             font-size: 1.8rem;
             font-weight: 700;
             color: #1e272e;
+            margin-top: 0;
         }
         .detail-page .detail-container .detail-price {
             font-size: 1.6rem;
@@ -976,12 +983,11 @@
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
             .toolbar__left { justify-content: space-between; width: 100%; }
             .toolbar__sort { justify-content: flex-start; }
-            /* Mostrar categorías en móvil */
             .toolbar__categories { display: block; }
             .account-dropdown-content { right: auto; left: 0; min-width: 260px; }
+            .detail-page .detail-container { padding: 15px; }
         }
         @media (min-width: 769px) {
-            /* Ocultar categorías en escritorio (solo sidebar) */
             .toolbar__categories { display: none !important; }
         }
         @media (max-width: 480px) {
@@ -992,7 +998,7 @@
             .btn-add { font-size: 0.75rem; padding: 4px 12px; }
             .modal { padding: 16px; max-width: 100%; }
             .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
-            .detail-page .detail-container { padding: 15px; }
+            .detail-page .detail-container { padding: 12px; }
             .btn-categories { font-size: 0.75rem; padding: 4px 10px; }
             .btn-categories .icon { font-size: 0.9rem; }
         }
@@ -1002,6 +1008,11 @@
             color: #94a3b8;
             padding: 40px 0;
             grid-column: 1 / -1;
+        }
+        .detail-loading {
+            text-align: center;
+            padding: 40px 0;
+            color: #94a3b8;
         }
 
         /* ===== DELIVERY ===== */
@@ -1125,7 +1136,7 @@
 
     <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main-content" id="mainContent">
-        <!-- SIDEBAR (ya no tiene los items extra) -->
+        <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
             <nav class="sidebar__nav">
@@ -1140,7 +1151,6 @@
             <div class="toolbar">
                 <div class="toolbar__left">
                     <h2>Productos</h2>
-                    <!-- Categorías solo visible en móvil -->
                     <div class="toolbar__categories">
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
                             <span class="icon">☰</span> Categorías
@@ -1170,7 +1180,9 @@
 
         <!-- PÁGINA DE DETALLE -->
         <div class="detail-page" id="detailPage">
-            <div class="detail-container" id="detailContainer"></div>
+            <div class="detail-container" id="detailContainer">
+                <div class="detail-loading">🔄 Cargando detalles del producto...</div>
+            </div>
         </div>
     </div>
 
@@ -1428,7 +1440,6 @@
             cerrarAccountDropdown();
         }
 
-        // ACTUALIZADO: Incluye "Mis pedidos" y "Contáctenos" en el dropdown
         function actualizarUIUsuario() {
             const user = getCurrentUserFromToken();
             const dropdownContent = document.getElementById('accountDropdownContent');
@@ -1473,7 +1484,6 @@
                         </div>
                         <button class="btn-change-password" onclick="abrirCambiarPassword()">🔑 Cambiar contraseña</button>
                     </div>
-                    <!-- Nuevos submenús: Mis pedidos y Contáctenos -->
                     <button class="dropdown-item" onclick="abrirHistoryModal()">
                         <span class="icon">📋</span> Mis pedidos
                     </button>
@@ -2019,6 +2029,7 @@
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
+                        // Redirigir a la página de detalle con el id
                         window.location.href = `?id=${id}`;
                     });
                 });
@@ -2043,110 +2054,136 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE
+        //  PÁGINA DE DETALLE (CORREGIDA Y MEJORADA)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
             const detailPage = document.getElementById('detailPage');
             const container = document.getElementById('detailContainer');
 
+            // Ocultar lista y mostrar detalle con carga
             productsSection.style.display = 'none';
             detailPage.classList.add('active');
+            container.innerHTML = '<div class="detail-loading">🔄 Cargando detalles del producto...</div>';
 
-            const prod = productos.find(p => p.id === productoId);
-            if (!prod) {
-                container.innerHTML = `<p>Producto no encontrado. <a href="?" onclick="volverALista()">Volver</a></p>`;
-                return;
-            }
-
-            const calificaciones = await obtenerCalificaciones(productoId);
-            const promedio = calificaciones.length > 0 ?
-                calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
-
-            const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
-            const nombresMap = await obtenerNombresUsuarios(userIds);
-
-            const fotoUrl = prod.Foto ?
-                `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
-                'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto';
-
-            const venta = parseFloat(prod.Precio_Venta || 0);
-            const oferta = parseFloat(prod.Precio_Oferta || 0);
-            const tieneOferta = (oferta > 0 && oferta < venta);
-
-            let precioHtml = `<span class="detail-price">`;
-            if (tieneOferta) {
-                precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
-            } else {
-                precioHtml += `$${venta.toFixed(2)}`;
-            }
-            precioHtml += `</span>`;
-
-            const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
-
-            let html = `
-                <div class="back-link" onclick="volverALista()">← Volver a productos</div>
-                <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" />
-                <h2>${prod.Nombre || 'Sin nombre'}</h2>
-                ${precioHtml}
-                <div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>
-                <div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>
-                <div class="detail-stars">${estrellas}</div>
-                <div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>
-                <button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>
-                    ${usuarioActual ? 'Agregar al carrito' : 'Inicia sesión para comprar'}
-                </button>
-            `;
-
-            if (usuarioActual) {
-                const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
-                const haComprado = await verificarCompra(usuarioActual.id, prod.id);
-
-                if (haComprado && !yaCalificado) {
-                    html += `
-                        <div class="calificar-section">
-                            <h4>⭐ Califica este producto</h4>
-                            <div class="stars-input" id="starsInput">
-                                <span data-star="1" onclick="seleccionarEstrella(1)">☆</span>
-                                <span data-star="2" onclick="seleccionarEstrella(2)">☆</span>
-                                <span data-star="3" onclick="seleccionarEstrella(3)">☆</span>
-                                <span data-star="4" onclick="seleccionarEstrella(4)">☆</span>
-                                <span data-star="5" onclick="seleccionarEstrella(5)">☆</span>
-                            </div>
-                            <textarea id="comentarioCalificacion" placeholder="Escribe un comentario (opcional)..." rows="2"></textarea>
-                            <button class="btn-calificar" onclick="enviarCalificacionDesdeDetalle('${prod.id}')">Enviar calificación</button>
+            try {
+                // Buscar producto en la lista ya cargada
+                const prod = productos.find(p => p.id === productoId);
+                if (!prod) {
+                    container.innerHTML = `
+                        <p style="text-align:center; color:#e74c3c;">❌ Producto no encontrado.</p>
+                        <div style="text-align:center; margin-top:20px;">
+                            <button class="btn-add" onclick="volverALista()" style="width:auto;">← Volver a productos</button>
                         </div>
                     `;
-                } else if (yaCalificado) {
-                    html += `<p style="color:#2ecc71; margin-top:15px;">✅ Ya calificaste este producto.</p>`;
-                } else if (!haComprado) {
-                    html += `<p style="color:#94a3b8; margin-top:15px;">Compra este producto para poder calificarlo.</p>`;
+                    return;
                 }
-            }
 
-            html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
-            if (calificaciones.length === 0) {
-                html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
-            } else {
-                calificaciones.forEach(c => {
-                    const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
-                    const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
-                    const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
-                    html += `
-                        <div class="comentario-item">
-                            <div class="comentario-header">
-                                <span class="comentario-nombre">${nombreReal}</span>
-                                <span class="comentario-estrellas">${estrellasCom}</span>
+                // Obtener calificaciones
+                const calificaciones = await obtenerCalificaciones(productoId);
+                const promedio = calificaciones.length > 0 ?
+                    calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
+
+                const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
+                const nombresMap = await obtenerNombresUsuarios(userIds);
+
+                const fotoUrl = prod.Foto ?
+                    `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
+                    'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto';
+
+                const venta = parseFloat(prod.Precio_Venta || 0);
+                const oferta = parseFloat(prod.Precio_Oferta || 0);
+                const tieneOferta = (oferta > 0 && oferta < venta);
+
+                let precioHtml = `<span class="detail-price">`;
+                if (tieneOferta) {
+                    precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
+                } else {
+                    precioHtml += `$${venta.toFixed(2)}`;
+                }
+                precioHtml += `</span>`;
+
+                const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
+
+                let html = `
+                    <button class="back-link" onclick="volverALista()">← Volver a productos</button>
+                    <img src="${fotoUrl}" alt="${prod.Nombre || 'Producto'}" />
+                    <h2>${prod.Nombre || 'Sin nombre'}</h2>
+                    ${precioHtml}
+                    <div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>
+                    <div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>
+                    <div class="detail-stars">${estrellas}</div>
+                    <div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>
+                    <button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>
+                        ${usuarioActual ? '➕ Agregar al carrito' : '🔒 Inicia sesión para comprar'}
+                    </button>
+                `;
+
+                // Sección de calificar
+                if (usuarioActual) {
+                    const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
+                    const haComprado = await verificarCompra(usuarioActual.id, prod.id);
+
+                    if (haComprado && !yaCalificado) {
+                        html += `
+                            <div class="calificar-section">
+                                <h4>⭐ Califica este producto</h4>
+                                <div class="stars-input" id="starsInput">
+                                    <span data-star="1" onclick="seleccionarEstrella(1)">☆</span>
+                                    <span data-star="2" onclick="seleccionarEstrella(2)">☆</span>
+                                    <span data-star="3" onclick="seleccionarEstrella(3)">☆</span>
+                                    <span data-star="4" onclick="seleccionarEstrella(4)">☆</span>
+                                    <span data-star="5" onclick="seleccionarEstrella(5)">☆</span>
+                                </div>
+                                <textarea id="comentarioCalificacion" placeholder="Escribe un comentario (opcional)..." rows="2"></textarea>
+                                <button class="btn-calificar" onclick="enviarCalificacionDesdeDetalle('${prod.id}')">Enviar calificación</button>
                             </div>
-                            <div class="comentario-texto">${c.comentario || 'Sin comentario'}</div>
-                            <div class="comentario-fecha">${fecha}</div>
-                        </div>
-                    `;
-                });
-            }
-            html += `</div>`;
+                        `;
+                    } else if (yaCalificado) {
+                        html += `<p style="color:#2ecc71; margin-top:15px;">✅ Ya calificaste este producto.</p>`;
+                    } else if (!haComprado) {
+                        html += `<p style="color:#94a3b8; margin-top:15px;">Compra este producto para poder calificarlo.</p>`;
+                    }
+                }
 
-            container.innerHTML = html;
+                // Comentarios con nombres reales
+                html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
+                if (calificaciones.length === 0) {
+                    html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
+                } else {
+                    calificaciones.forEach(c => {
+                        const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
+                        const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
+                        const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
+                        html += `
+                            <div class="comentario-item">
+                                <div class="comentario-header">
+                                    <span class="comentario-nombre">${nombreReal}</span>
+                                    <span class="comentario-estrellas">${estrellasCom}</span>
+                                </div>
+                                <div class="comentario-texto">${c.comentario || 'Sin comentario'}</div>
+                                <div class="comentario-fecha">${fecha}</div>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div>`;
+
+                container.innerHTML = html;
+                // Restaurar la selección de estrellas si es necesario
+                if (document.getElementById('starsInput')) {
+                    estrellaSeleccionada = 0;
+                }
+
+            } catch (error) {
+                console.error('Error al cargar detalle:', error);
+                container.innerHTML = `
+                    <p style="text-align:center; color:#e74c3c;">❌ Error al cargar los detalles del producto.</p>
+                    <div style="text-align:center; margin-top:20px;">
+                        <button class="btn-add" onclick="volverALista()" style="width:auto;">← Volver a productos</button>
+                    </div>
+                `;
+            }
         }
 
         function volverALista() {
@@ -2485,6 +2522,7 @@
             productos = await obtenerProductos();
             await renderizarCategorias();
 
+            // Verificar si hay parámetro id en la URL
             const params = new URLSearchParams(window.location.search);
             const productoId = params.get('id');
 
