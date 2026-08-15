@@ -379,7 +379,7 @@
 
         /* Botón categorías solo visible en móvil */
         .toolbar__categories {
-            display: none; /* oculto por defecto, se muestra en móvil */
+            display: none;
             position: relative;
         }
         .btn-categories {
@@ -1738,15 +1738,32 @@
             } catch (e) { return []; }
         }
 
+        // Función para obtener nombres de usuarios a partir de una lista de IDs
+        async function obtenerNombresUsuarios(userIds) {
+            if (!userIds || userIds.length === 0) return {};
+            const filter = userIds.map(id => `id="${id}"`).join('||');
+            try {
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records?filter=${encodeURIComponent(filter)}&perPage=100`);
+                if (!resp.ok) return {};
+                const data = await resp.json();
+                const map = {};
+                data.items.forEach(u => {
+                    map[u.id] = u.name || u.email || 'Usuario';
+                });
+                return map;
+            } catch (e) {
+                return {};
+            }
+        }
+
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
-                const nombreUsuario = usuarioActual ? (usuarioActual.name || usuarioActual.email || 'Anónimo') : 'Anónimo';
+                // Solo guardamos el usuario_id, el nombre se obtendrá luego desde la colección users
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         producto_id: productoId,
                         usuario_id: usuarioId,
-                        nombre_usuario: nombreUsuario,
                         puntuacion,
                         comentario: comentario || '',
                         fecha: new Date().toISOString()
@@ -1999,7 +2016,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE
+        //  PÁGINA DE DETALLE (con nombres reales)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2015,9 +2032,14 @@
                 return;
             }
 
+            // Obtener calificaciones
             const calificaciones = await obtenerCalificaciones(productoId);
             const promedio = calificaciones.length > 0 ?
                 calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
+
+            // Obtener nombres de los usuarios que calificaron
+            const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
+            const nombresMap = await obtenerNombresUsuarios(userIds);
 
             const fotoUrl = prod.Foto ?
                 `${POCKETBASE_URL}/api/files/productos/${prod.id}/${prod.Foto}` :
@@ -2077,6 +2099,7 @@
                 }
             }
 
+            // Comentarios con nombres reales
             html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
             if (calificaciones.length === 0) {
                 html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
@@ -2084,11 +2107,12 @@
                 calificaciones.forEach(c => {
                     const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
                     const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
-                    const nombreMostrar = c.nombre_usuario || 'Anónimo';
+                    // Usar el nombre obtenido de la colección users
+                    const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
                     html += `
                         <div class="comentario-item">
                             <div class="comentario-header">
-                                <span class="comentario-nombre">${nombreMostrar}</span>
+                                <span class="comentario-nombre">${nombreReal}</span>
                                 <span class="comentario-estrellas">${estrellasCom}</span>
                             </div>
                             <div class="comentario-texto">${c.comentario || 'Sin comentario'}</div>
