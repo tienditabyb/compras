@@ -460,14 +460,8 @@
         @media (max-width: 1399px) and (min-width: 1024px) {
             .products-grid { grid-template-columns: repeat(4, 1fr); }
         }
-        @media (max-width: 1023px) and (min-width: 768px) {
+        @media (max-width: 1023px) and (min-width: 769px) {
             .products-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 767px) {
-            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        }
-        @media (max-width: 480px) {
-            .products-grid { gap: 8px; }
         }
 
         .product-card {
@@ -491,7 +485,6 @@
             background: #f1f5f9;
             border-radius: 10px;
             margin-bottom: 8px;
-            /* Ya no tiene onclick para abrir imagen en nueva pestaña */
         }
         .product-card .product-tag {
             font-size: 0.7rem;
@@ -589,7 +582,7 @@
             padding: 0 10px;
         }
 
-        /* ========== DETALLE PRODUCTO (PÁGINA COMPLETA) ========== */
+        /* ========== DETALLE PRODUCTO ========== */
         .detail-page {
             display: none;
             width: 100%;
@@ -815,8 +808,6 @@
             .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
-            .detail-page .detail-container h2 { font-size: 1.4rem; }
-            .detail-page .detail-container .detail-price { font-size: 1.3rem; }
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
             .toolbar__left { justify-content: space-between; width: 100%; }
             .toolbar__sort { justify-content: flex-start; }
@@ -824,22 +815,93 @@
             .account-dropdown-content { right: auto; left: 0; min-width: 260px; }
             .detail-page .detail-container { padding: 15px; }
             .detail-page .detail-container .galeria .miniaturas img { width: 45px; height: 45px; }
+            .detail-page .detail-container h2 { font-size: 1.4rem; }
+            .detail-page .detail-container .detail-price { font-size: 1.3rem; }
+
+            /* === AJUSTES DE PRODUCTOS EN MÓVIL (más pequeños) === */
+            .products-grid {
+                gap: 10px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .product-card {
+                padding: 8px;
+                border-radius: 10px;
+            }
+            .product-card .foto-principal {
+                border-radius: 6px;
+                margin-bottom: 4px;
+            }
+            .product-card h3 {
+                font-size: 0.8rem;
+                margin: 4px 0 2px;
+            }
+            .product-card .product-desc {
+                font-size: 0.7rem;
+                -webkit-line-clamp: 1;
+                margin-bottom: 4px;
+            }
+            .product-card .price {
+                font-size: 0.9rem;
+            }
+            .product-card .price .old {
+                font-size: 0.7rem;
+            }
+            .product-card .stock-badge {
+                font-size: 0.6rem;
+            }
+            .product-card .product-footer {
+                padding-top: 4px;
+                margin-top: 4px;
+            }
+            .btn-add {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+                border-radius: 20px;
+            }
+            .product-card .product-tag {
+                font-size: 0.55rem;
+            }
         }
-        @media (min-width: 769px) {
-            .toolbar__categories { display: none !important; }
-        }
+
         @media (max-width: 480px) {
-            .product-card { padding: 10px; }
-            .product-card h3 { font-size: 0.85rem; }
-            .product-card .product-desc { font-size: 0.75rem; }
-            .product-card .price { font-size: 1rem; }
-            .btn-add { font-size: 0.75rem; padding: 4px 12px; }
-            .modal { padding: 16px; max-width: 100%; }
-            .cart-float { width: 44px; height: 44px; font-size: 1.2rem; bottom: 12px; right: 12px; }
+            .product-card {
+                padding: 6px;
+                border-radius: 8px;
+            }
+            .product-card h3 {
+                font-size: 0.7rem;
+            }
+            .product-card .product-desc {
+                display: none; /* Ocultar descripción en móviles muy pequeños para ahorrar espacio */
+            }
+            .product-card .price {
+                font-size: 0.8rem;
+            }
+            .product-card .price .old {
+                font-size: 0.6rem;
+            }
+            .btn-add {
+                font-size: 0.6rem;
+                padding: 3px 8px;
+            }
+            .product-card .stock-badge {
+                font-size: 0.5rem;
+            }
+            .product-card .product-footer {
+                padding-top: 2px;
+                margin-top: 2px;
+            }
+            .products-grid {
+                gap: 6px;
+            }
             .detail-page .detail-container { padding: 12px; }
+            .detail-page .detail-container .galeria .miniaturas img { width: 40px; height: 40px; }
             .btn-categories { font-size: 0.75rem; padding: 4px 10px; }
             .btn-categories .icon { font-size: 0.9rem; }
-            .detail-page .detail-container .galeria .miniaturas img { width: 40px; height: 40px; }
+        }
+
+        @media (min-width: 769px) {
+            .toolbar__categories { display: none !important; }
         }
 
         .loading-message {
@@ -1883,7 +1945,7 @@
         }
 
         // ============================================================
-        //  OBTENER LISTA DE FOTOS (SOLO DEL CAMPO Fotos - SIN FALLBACK)
+        //  OBTENER LISTA DE FOTOS
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -2000,7 +2062,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (AHORA LA IMAGEN NO TIENE EVENTO PROPIO)
+        //  RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2121,7 +2183,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (GALERÍA COMPLETA)
+        //  PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2151,7 +2213,6 @@
                 const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
                 const nombresMap = await obtenerNombresUsuarios(userIds);
 
-                // Obtener todas las fotos
                 const fotos = obtenerFotosProducto(prod);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
                 const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
@@ -2170,7 +2231,6 @@
 
                 const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
 
-                // Galería
                 let galeriaHtml = `
                     <div class="galeria">
                         <img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" />
@@ -2273,7 +2333,6 @@
             }
         }
 
-        // Función para cambiar la foto principal en el detalle
         function cambiarFotoDetalle(url, elemento) {
             document.getElementById('detalleImgPrincipal').src = url;
             document.querySelectorAll('#detalleMiniaturas img').forEach(img => img.classList.remove('active'));
@@ -2609,7 +2668,7 @@
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
         // ============================================================
-        //  MANEJO DEL BOTÓN "ATRÁS" DEL NAVEGADOR
+        //  MANEJO DEL BOTÓN "ATRÁS"
         // ============================================================
         window.addEventListener('popstate', function(event) {
             if (!event.state || !event.state.productoId) {
