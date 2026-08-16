@@ -797,7 +797,7 @@
             color: #94a3b8;
         }
 
-        /* ===== ESTILOS PARA CAJA ===== */
+        /* ===== ESTILOS PARA CAJA (MEJORADOS VISIBILIDAD) ===== */
         .caja-form {
             background: white;
             border-radius: 12px;
@@ -819,10 +819,23 @@
         }
         .caja-form .producto-selector .form-group input {
             width: 100%;
+            padding: 12px 14px; /* más padding para móvil */
+            font-size: 1rem; /* más legible */
+            border: 1px solid #94a3b8; /* borde más oscuro para contraste */
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        .caja-form .producto-selector .form-group input:focus {
+            border-color: #2980b9;
+            background: white;
+            outline: none;
         }
         .caja-form .producto-selector .btn-primary {
             align-self: flex-end;
             margin-bottom: 0;
+            padding: 12px 24px;
+            font-size: 1rem;
+            white-space: nowrap;
         }
         /* Sugerencias */
         .sugerencias-lista {
@@ -831,7 +844,7 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #94a3b8;
             border-radius: 8px;
             max-height: 200px;
             overflow-y: auto;
@@ -840,10 +853,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .sugerencias-lista .sugerencia-item {
-            padding: 8px 14px;
+            padding: 10px 14px;
             cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
             transition: 0.2s;
+            font-size: 0.95rem;
         }
         .sugerencias-lista .sugerencia-item:hover {
             background: #f1f5f9;
@@ -852,10 +866,11 @@
             border-bottom: none;
         }
         .sugerencias-lista .sugerencia-item .nombre {
-            font-weight: 500;
+            font-weight: 600;
+            color: #1e272e;
         }
         .sugerencias-lista .sugerencia-item .detalle {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #64748b;
         }
 
@@ -874,19 +889,22 @@
         .caja-form .carrito-item .info {
             flex: 1;
             font-weight: 500;
+            font-size: 0.95rem;
         }
         .caja-form .carrito-item .precio {
             font-weight: 600;
             color: #2980b9;
+            font-size: 0.95rem;
         }
         .caja-form .carrito-item .btn-eliminar {
             background: #fee2e2;
             border: none;
             border-radius: 6px;
-            padding: 2px 10px;
+            padding: 4px 12px;
             color: #dc2626;
             font-weight: 600;
             cursor: pointer;
+            font-size: 0.9rem;
         }
         .caja-form .carrito-item .btn-eliminar:hover {
             background: #fecaca;
@@ -911,9 +929,34 @@
             gap: 15px;
             margin-top: 15px;
         }
+        .caja-form .datos-cliente .form-group label {
+            font-weight: 600;
+            color: #1e272e;
+            font-size: 0.95rem;
+        }
+        .caja-form .datos-cliente .form-group input {
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid #94a3b8;
+            border-radius: 8px;
+            background: #f9fafb;
+            width: 100%;
+        }
+        .caja-form .datos-cliente .form-group input:focus {
+            border-color: #2980b9;
+            background: white;
+            outline: none;
+        }
         @media (max-width: 600px) {
             .caja-form .datos-cliente {
                 grid-template-columns: 1fr;
+            }
+            .caja-form .producto-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .caja-form .producto-selector .btn-primary {
+                align-self: stretch;
             }
         }
     </style>
@@ -1222,7 +1265,6 @@
         // CARRITO PARA CAJA
         // ============================================================
         let carrito = []; // cada item: { id, nombre, precio, cantidad, stockDisponible }
-        let productoSeleccionado = null; // { id, nombre, precio, stock }
 
         // ============================================================
         // AUTH
@@ -2289,13 +2331,12 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA (CON SELECCIÓN SIN AGREGADO AUTOMÁTICO)
+        // FUNCIONES PARA CAJA (VERSIÓN CON BUSCADOR Y SIN AUTO-AGREGADO)
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
             if (!texto.trim()) {
                 sugerenciasDiv.style.display = 'none';
-                productoSeleccionado = null;
                 return;
             }
             const filtrados = productosCache.filter(p => {
@@ -2304,7 +2345,6 @@
             });
             if (filtrados.length === 0) {
                 sugerenciasDiv.style.display = 'none';
-                productoSeleccionado = null;
                 return;
             }
             let html = '';
@@ -2322,43 +2362,34 @@
             sugerenciasDiv.innerHTML = html;
             sugerenciasDiv.style.display = 'block';
 
-            // Evento click en cada sugerencia: solo selecciona, no agrega automáticamente
+            // Evento click: seleccionar el producto (NO agregar automáticamente)
             sugerenciasDiv.querySelectorAll('.sugerencia-item').forEach(el => {
                 el.addEventListener('click', function() {
-                    const id = this.dataset.id;
                     const nombre = this.dataset.nombre;
-                    const precio = parseFloat(this.dataset.precio);
-                    const stock = parseInt(this.dataset.stock);
-                    // Almacenar producto seleccionado
-                    productoSeleccionado = { id, nombre, precio, stock };
-                    // Llenar el campo de búsqueda con el nombre
                     document.getElementById('cajaBusqueda').value = nombre;
                     sugerenciasDiv.style.display = 'none';
-                    // Opcional: mostrar un pequeño feedback visual
+                    // Guardamos el producto seleccionado en un data attribute o en una variable global
+                    // para que el botón "Agregar" pueda usarlo.
+                    // Usamos un atributo data en el campo de búsqueda.
+                    const busquedaInput = document.getElementById('cajaBusqueda');
+                    busquedaInput.dataset.productoId = this.dataset.id;
+                    busquedaInput.dataset.productoNombre = this.dataset.nombre;
+                    busquedaInput.dataset.productoPrecio = this.dataset.precio;
+                    busquedaInput.dataset.productoStock = this.dataset.stock;
                 });
             });
         }
 
-        function agregarItemCarrito() {
-            // Si no hay producto seleccionado, intentar usar el primer elemento de las sugerencias visibles (por si el usuario presiona Enter o el botón sin seleccionar)
-            if (!productoSeleccionado) {
-                const sugerenciasDiv = document.getElementById('cajaSugerencias');
-                const items = sugerenciasDiv.querySelectorAll('.sugerencia-item');
-                if (items.length === 0) {
-                    alert('Primero busca y selecciona un producto de la lista.');
-                    return;
-                }
-                // Tomar el primero como fallback
-                const first = items[0];
-                productoSeleccionado = {
-                    id: first.dataset.id,
-                    nombre: first.dataset.nombre,
-                    precio: parseFloat(first.dataset.precio),
-                    stock: parseInt(first.dataset.stock)
-                };
-                // Limpiar sugerencias y campo
-                sugerenciasDiv.style.display = 'none';
-                document.getElementById('cajaBusqueda').value = productoSeleccionado.nombre;
+        function agregarItemCarritoDesdeBusqueda() {
+            const busquedaInput = document.getElementById('cajaBusqueda');
+            const productoId = busquedaInput.dataset.productoId;
+            const nombre = busquedaInput.dataset.productoNombre;
+            const precio = parseFloat(busquedaInput.dataset.productoPrecio);
+            const stockDisponible = parseInt(busquedaInput.dataset.productoStock);
+
+            if (!productoId) {
+                alert('Primero selecciona un producto de la lista de sugerencias.');
+                return;
             }
 
             const cantidadInput = document.getElementById('cajaCantidad');
@@ -2367,34 +2398,37 @@
                 alert('La cantidad debe ser al menos 1.');
                 return;
             }
-            if (cantidad > productoSeleccionado.stock) {
-                alert(`Stock insuficiente. Solo quedan ${productoSeleccionado.stock} unidades.`);
+            if (cantidad > stockDisponible) {
+                alert(`Stock insuficiente. Solo quedan ${stockDisponible} unidades.`);
                 return;
             }
 
             // Verificar si ya está en el carrito
-            const existente = carrito.find(item => item.id === productoSeleccionado.id);
+            const existente = carrito.find(item => item.id === productoId);
             if (existente) {
                 const nuevaCant = existente.cantidad + cantidad;
-                if (nuevaCant > productoSeleccionado.stock) {
-                    alert(`No puedes agregar más. Stock disponible: ${productoSeleccionado.stock}, ya tienes ${existente.cantidad}.`);
+                if (nuevaCant > stockDisponible) {
+                    alert(`No puedes agregar más. Stock disponible: ${stockDisponible}, ya tienes ${existente.cantidad}.`);
                     return;
                 }
                 existente.cantidad = nuevaCant;
             } else {
                 carrito.push({
-                    id: productoSeleccionado.id,
-                    nombre: productoSeleccionado.nombre,
-                    precio: productoSeleccionado.precio,
+                    id: productoId,
+                    nombre: nombre,
+                    precio: precio,
                     cantidad: cantidad,
-                    stockDisponible: productoSeleccionado.stock
+                    stockDisponible: stockDisponible
                 });
             }
             renderizarCarrito();
             cantidadInput.value = 1;
-            // Limpiar selección y campo de búsqueda
-            document.getElementById('cajaBusqueda').value = '';
-            productoSeleccionado = null;
+            // Limpiar selección
+            busquedaInput.value = '';
+            busquedaInput.dataset.productoId = '';
+            busquedaInput.dataset.productoNombre = '';
+            busquedaInput.dataset.productoPrecio = '';
+            busquedaInput.dataset.productoStock = '';
             document.getElementById('cajaSugerencias').style.display = 'none';
         }
 
@@ -2489,7 +2523,7 @@
                         productos_ids: productosIds,
                         total: total,
                         fecha: new Date().toISOString(),
-                        Tipo: 'Local',  // Fijo, ya que no tenemos selector de tipo
+                        Tipo: 'Local',  // Fijo
                         usuario_id: userData ? userData.id : null,
                         cliente: clienteStr
                     })
@@ -2523,7 +2557,10 @@
                 document.getElementById('cajaTelefono').value = '';
                 document.getElementById('cajaDireccion').value = '';
                 document.getElementById('cajaBusqueda').value = '';
-                productoSeleccionado = null;
+                document.getElementById('cajaBusqueda').dataset.productoId = '';
+                document.getElementById('cajaBusqueda').dataset.productoNombre = '';
+                document.getElementById('cajaBusqueda').dataset.productoPrecio = '';
+                document.getElementById('cajaBusqueda').dataset.productoStock = '';
                 document.getElementById('cajaSugerencias').style.display = 'none';
             }
         }
@@ -2531,6 +2568,11 @@
         // Asignar eventos de la caja
         document.getElementById('cajaBusqueda').addEventListener('input', function() {
             mostrarSugerencias(this.value);
+            // Si el usuario escribe, limpiamos la selección previa
+            this.dataset.productoId = '';
+            this.dataset.productoNombre = '';
+            this.dataset.productoPrecio = '';
+            this.dataset.productoStock = '';
         });
         // Ocultar sugerencias al hacer clic fuera
         document.addEventListener('click', function(e) {
@@ -2538,17 +2580,22 @@
             const busqueda = document.getElementById('cajaBusqueda');
             if (!sugerencias.contains(e.target) && e.target !== busqueda) {
                 sugerencias.style.display = 'none';
-                // No borramos productoSeleccionado para que si el usuario vuelve a escribir, pueda seleccionar otro
             }
         });
 
-        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarItemCarrito);
+        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarItemCarritoDesdeBusqueda);
 
-        // Permitir agregar con Enter en el campo de búsqueda
+        // También permitir agregar con Enter en el campo de búsqueda o cantidad
         document.getElementById('cajaBusqueda').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                agregarItemCarrito();
+                agregarItemCarritoDesdeBusqueda();
+            }
+        });
+        document.getElementById('cajaCantidad').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarItemCarritoDesdeBusqueda();
             }
         });
 
