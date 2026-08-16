@@ -386,7 +386,7 @@
         ==================================================== */
         .product-grid {
             display: grid;
-            grid-auto-rows: 1fr;      /* Todas las tarjetas con la misma altura */
+            grid-auto-rows: 1fr;
             gap: 12px;
             padding: 14px;
         }
@@ -439,7 +439,7 @@
             border: 1px solid #f1f5f9;
             display: flex;
             flex-direction: column;
-            height: 100%;   /* Ocupa toda la altura de la fila */
+            height: 100%;
         }
         .product-card:hover {
             transform: translateY(-3px);
@@ -448,7 +448,7 @@
         .product-card .foto-principal {
             width: 100%;
             aspect-ratio: 1 / 1;
-            object-fit: cover;     /* Recorta la imagen para llenar el cuadrado */
+            object-fit: cover;
             background: #f1f5f9;
             border-radius: 6px;
             cursor: pointer;
@@ -487,7 +487,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.3;
-            min-height: 2.2em;  /* para mantener altura */
+            min-height: 2.2em;
         }
         .product-card .price {
             font-size: 0.9rem;
@@ -1372,31 +1372,134 @@
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // CAMBIAR ESTADO DOMICILIO (VERSIÓN MODIFICADA)
+        // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
+                // 1. Obtener el domicilio actual
                 const domActual = domiciliosCache.find(d => d.id === id);
                 if (!domActual) {
                     alert('Domicilio no encontrado.');
                     return;
                 }
+
+                // Si ya está Entregado, no permitir cambios
                 if (domActual.Estado === 'Entregado') {
                     alert('Este domicilio ya fue entregado y no se puede modificar.');
                     const select = document.getElementById(`estado-select-${id}`);
                     if (select) select.value = 'Entregado';
                     return;
                 }
+
+                // =====================================================
+                // 2. Si el NUEVO estado es "Entregado" -> DESCONTAMOS STOCK Y CREAMOS VENTA
+                // =====================================================
+                if (nuevoEstado === 'Entregado') {
+                    // 2a. Obtener los productos del pedido desde el campo productos_pedido
+                    let productosPedido = [];
+                    if (domActual.productos_pedido) {
+                        try {
+                            productosPedido = JSON.parse(domActual.productos_pedido);
+                        } catch (e) {
+                            alert('Error al leer los productos del pedido.');
+                            return;
+                        }
+                    } else {
+                        // Si no existe el campo (por si faltó agregarlo), intentamos parsear Detalles
+                        // Pero mejor avisar
+                        alert('⚠️ El campo "productos_pedido" no existe en este domicilio. Asegúrate de agregarlo en PocketBase y que la tienda lo guarde.');
+                        return;
+                    }
+
+                    if (productosPedido.length === 0) {
+                        alert('No hay productos en este pedido.');
+                        return;
+                    }
+
+                    // 2b. Descontar el stock de cada producto
+                    for (const item of productosPedido) {
+                        const prodId = item.id;
+                        const cantidad = item.cantidad || 1;
+
+                        // Obtener el producto actual (para saber su stock)
+                        const prodResp = await apiRequest(`productos/records/${prodId}`);
+                        const stockActual = parseInt(prodResp.Stock) || 0;
+                        const nuevoStock = Math.max(0, stockActual - cantidad);
+
+                        // Actualizar el stock
+                        await apiRequest(`productos/records/${prodId}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ Stock: nuevoStock })
+                        });
+                        console.log(`✅ Stock actualizado: ${item.nombre} (${stockActual} -> ${nuevoStock})`);
+                    }
+
+                    // 2c. Crear el registro de VENTA
+                    const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                    const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
+                    const productosIds = productosPedido.map(p => p.id).join(',');
+
+                    await apiRequest('Ventas/records', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            productos_json: productosStr,
+                            productos_ids: productosIds,
+                            total: total,
+                            fecha: new Date().toISOString(),
+                            Tipo: 'Domicilio',
+                            usuario_id: domActual.usuario_id || null
+                        })
+                    });
+
+                    console.log('✅ Venta creada correctamente.');
+
+                    // 2d. Finalmente, actualizar el estado del domicilio a "Entregado"
+                    await apiRequest(`domicilios/records/${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ Estado: 'Entregado' })
+                    });
+
+                    alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
+
+                    // Recargar datos para actualizar todo
+                    await cargarDomicilios();
+                    await cargarProductos();
+                    await cargarVentas();
+
+                    renderDomicilios(domiciliosCache);
+                    renderDashboard(ventasCache, domiciliosCache);
+
+                    // Enviar notificación al cliente de que ya fue entregado
+                    const enviarNotif = confirm('📱 ¿Enviar notificación de "Entregado" al cliente por WhatsApp?');
+                    if (enviarNotif) enviarWhatsApp(id);
+
+                    return; // Salir para no ejecutar el código de abajo
+                }
+
+                // =====================================================
+                // 3. Si el estado NO es "Entregado" (ej: En camino, Pendiente)
+                //    Solo actualizamos el estado sin tocar stock ni ventas
+                // =====================================================
                 await apiRequest(`domicilios/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ Estado: nuevoEstado })
                 });
+
+                // Actualizar cache y UI
                 domActual.Estado = nuevoEstado;
                 await cargarDomicilios();
                 renderDomicilios(domiciliosCache);
                 renderDashboard(ventasCache, domiciliosCache);
+
+                // Preguntar si enviar WhatsApp con el nuevo estado (sin tocar stock)
                 const enviar = confirm(`✅ Estado actualizado a "${nuevoEstado}".\n¿Deseas notificar al cliente por WhatsApp?`);
                 if (enviar) enviarWhatsApp(id);
+
             } catch (e) {
+                console.error('Error en cambiarEstadoDomicilio:', e);
                 alert('Error al cambiar estado: ' + e.message);
+                // Restaurar el select a su valor anterior
                 const select = document.getElementById(`estado-select-${id}`);
                 if (select) {
                     const dom = domiciliosCache.find(d => d.id === id);
