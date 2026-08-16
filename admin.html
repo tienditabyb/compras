@@ -303,7 +303,6 @@
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             overflow: hidden;
-            width: 100%;
         }
         .list-item {
             display: flex;
@@ -382,30 +381,33 @@
         .btn-whatsapp:hover { background: #1da851; }
 
         /* ====================================================
-            GRID DE PRODUCTOS CORREGIDO
+            GRID DE PRODUCTOS (FORZADO, como tienda)
         ==================================================== */
         .product-grid {
             display: grid;
             gap: 10px;
             padding: 12px;
-            width: 100%;
-            /* Por defecto, auto-fill con mínimo 140px */
+            /* Valores por defecto (se sobreescriben en breakpoints) */
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         }
 
-        /* En pantallas muy grandes, forzar 6 columnas fijas */
+        /* Pantallas ≥ 1400px -> 6 columnas fijas */
         @media (min-width: 1400px) {
             .product-grid {
                 grid-template-columns: repeat(6, 1fr);
+                gap: 12px;
+                padding: 14px;
             }
         }
-        /* Pantallas grandes (1024px - 1399px) -> 4 columnas */
+        /* Pantallas entre 1024px y 1399px -> 4 columnas fijas */
         @media (max-width: 1399px) and (min-width: 1024px) {
             .product-grid {
                 grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                padding: 12px;
             }
         }
-        /* Tablets (768px - 1023px) -> 3 columnas */
+        /* Tablets entre 768px y 1023px -> 3 columnas fijas */
         @media (max-width: 1023px) and (min-width: 768px) {
             .product-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -413,15 +415,15 @@
                 padding: 10px;
             }
         }
-        /* Móviles (menos de 768px) -> 2 columnas */
-        @media (max-width: 767px) {
+        /* Móviles entre 480px y 767px -> 2 columnas fijas */
+        @media (max-width: 767px) and (min-width: 481px) {
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 6px;
                 padding: 8px;
             }
         }
-        /* Móviles muy pequeños (menos de 480px) -> 2 columnas con menos padding */
+        /* Móviles muy pequeños < 480px -> 2 columnas fijas */
         @media (max-width: 480px) {
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -430,7 +432,7 @@
             }
         }
 
-        /* Tarjeta de producto */
+        /* Tarjeta de producto (compacta) */
         .product-card {
             background: white;
             border-radius: 10px;
