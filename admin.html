@@ -802,4 +802,1228 @@
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
-            <
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" />
+            </div>
+            <div id="loginError" class="error"></div>
+            <button class="btn-primary" id="loginBtn">Acceder</button>
+        </div>
+    </div>
+
+    <!-- ========== PANEL PRINCIPAL ========== -->
+    <div id="appContainer" style="display:none;">
+        <header class="header">
+            <div class="header__container">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="menu-toggle" id="menuToggle">☰</button>
+                    <a href="#" class="header__logo">B<span>&amp;</span>B <span class="admin-badge">Admin</span></a>
+                </div>
+                <div class="header__user">
+                    <span class="user-name" id="adminUserName">Administrador</span>
+                    <button id="logoutBtn">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="main-content">
+            <aside class="sidebar" id="sidebar">
+                <button class="close-sidebar" id="closeSidebarBtn">✕</button>
+                <div class="sidebar__title">Menú</div>
+                <nav class="sidebar__nav">
+                    <ul>
+                        <li><a class="active" data-tab="dashboard">📊 Dashboard</a></li>
+                        <li><a data-tab="inventario">📦 Inventario</a></li>
+                        <li><a data-tab="ventas">💰 Ventas</a></li>
+                        <li><a data-tab="domicilios">🛵 Domicilios</a></li>
+                        <li><a data-tab="reportes">📈 Reportes</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <section class="content">
+                <!-- DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content active">
+                    <h2 style="margin-bottom:20px; font-weight:600;">📊 Resumen General</h2>
+                    <div class="stats-grid" id="dashboardStats">
+                        <div class="stat-card"><div class="number" id="statVentas">-</div><div class="label">Ventas totales</div></div>
+                        <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">Ingresos totales</div></div>
+                        <div class="stat-card"><div class="number" id="statGanancia">-</div><div class="label">Ganancia total</div></div>
+                        <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
+                    </div>
+                    <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
+                        <div id="ultimasVentas"></div>
+                    </div>
+                </div>
+
+                <!-- INVENTARIO -->
+                <div id="tab-inventario" class="tab-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+                        <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
+                        <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px; font-size:0.9rem;" />
+                        <select id="invCategory" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;">
+                            <option value="Todas">Todas las categorías</option>
+                        </select>
+                        <button id="invRefreshBtn" style="padding:8px 20px; background:#1a252f; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refrescar</button>
+                    </div>
+                    <div class="list-container" id="inventarioContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando productos...</div>
+                    </div>
+                </div>
+
+                <!-- VENTAS -->
+                <div id="tab-ventas" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">💰 Ventas</h2>
+                    <div class="filters">
+                        <div><label>Desde:</label> <input type="date" id="ventasFechaDesde" /></div>
+                        <div><label>Hasta:</label> <input type="date" id="ventasFechaHasta" /></div>
+                        <div><label>Tipo:</label>
+                            <select id="ventasTipo">
+                                <option value="Todos">Todos</option>
+                                <option value="Local">Local</option>
+                                <option value="Domicilio">Domicilio</option>
+                            </select>
+                        </div>
+                        <button id="ventasFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="ventasLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="ventasContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando ventas...</div>
+                    </div>
+                </div>
+
+                <!-- DOMICILIOS -->
+                <div id="tab-domicilios" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">🛵 Domicilios</h2>
+                    <div class="filters">
+                        <div><label>Estado:</label>
+                            <select id="domFiltroEstado">
+                                <option value="Todos">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En camino">En camino</option>
+                                <option value="Entregado">Entregado</option>
+                            </select>
+                        </div>
+                        <button id="domFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="domLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="domiciliosContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando domicilios...</div>
+                    </div>
+                </div>
+
+                <!-- REPORTES -->
+                <div id="tab-reportes" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
+                    <div class="filters">
+                        <div><label>Desde:</label> <input type="date" id="repFechaDesde" /></div>
+                        <div><label>Hasta:</label> <input type="date" id="repFechaHasta" /></div>
+                        <div><label>Tipo:</label>
+                            <select id="repTipo">
+                                <option value="Todos">Todos</option>
+                                <option value="Local">Local</option>
+                                <option value="Domicilio">Domicilio</option>
+                            </select>
+                        </div>
+                        <button id="repFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="display:flex; gap:30px; flex-wrap:wrap;">
+                            <div><strong>Total ventas:</strong> <span id="repTotalVentas">$0.00</span></div>
+                            <div><strong>Ganancia total:</strong> <span id="repGananciaTotal">$0.00</span></div>
+                            <div><strong>N° ventas:</strong> <span id="repCount">0</span></div>
+                        </div>
+                    </div>
+                    <div class="list-container" id="reportesContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando reportes...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ========== MODALES ========== -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <button class="close-modal" id="closeDetailModal">✕</button>
+            <div id="detailContent">
+                <h2>Detalle</h2>
+                <div id="detailBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="productModal">
+        <div class="modal" style="max-width:700px;">
+            <button class="close-modal" id="closeProductModal">✕</button>
+            <h2 id="productModalTitle">Nuevo Producto</h2>
+            <form id="productForm" enctype="multipart/form-data">
+                <input type="hidden" id="productId" value="" />
+                <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
+                <div class="form-group"><label>Categoría *</label><select id="prodCategoria" required></select></div>
+                <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Precio Costo *</label><input type="number" id="prodCosto" step="0.01" required /></div>
+                    <div class="form-group"><label>Precio Venta *</label><input type="number" id="prodVenta" step="0.01" required /></div>
+                </div>
+                <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
+                <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
+                <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
+
+                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
+                <div class="form-group">
+                    <label>Fotos del producto</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="prodFotos" accept="image/*" multiple />
+                        <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
+                    </div>
+                    <div class="file-preview-grid" id="prodFotosPreview">
+                        <!-- Se llena con JS -->
+                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
+                        Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
+                    <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
+                    <button type="button" class="btn-clear" id="productCancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ====================== JAVASCRIPT =========================== -->
+    <!-- ============================================================ -->
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
+        const ADMIN_EMAIL = "byb@gmail.com";
+        let authToken = null;
+        let userData = null;
+        let productosCache = [];
+        let ventasCache = [];
+        let domiciliosCache = [];
+        let categoriasCache = [];
+
+        // ============================================================
+        // AUTH
+        // ============================================================
+        async function login(email, password) {
+            try {
+                const emailTrim = email.trim().toLowerCase();
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identity: email, password })
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    const errorMsg = data.message || 'Error de autenticación';
+                    throw new Error(errorMsg);
+                }
+                const user = data.record;
+                if (user.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                    throw new Error('Acceso denegado');
+                }
+                authToken = data.token;
+                userData = user;
+                localStorage.setItem('admin_token', authToken);
+                localStorage.setItem('admin_user', JSON.stringify(userData));
+                return true;
+            } catch (e) {
+                throw e;
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            userData = null;
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('loginError').classList.remove('show');
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            const user = localStorage.getItem('admin_user');
+            if (token && user) {
+                try {
+                    const parsedUser = JSON.parse(user);
+                    if (parsedUser.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                        logout();
+                        return false;
+                    }
+                    authToken = token;
+                    userData = parsedUser;
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'block';
+                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                    initApp();
+                    return true;
+                } catch (e) {
+                    logout();
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        // ============================================================
+        // API REQUEST
+        // ============================================================
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
+            const headers = {
+                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+            };
+            const isFormData = options.body instanceof FormData;
+            if (!isFormData) {
+                headers['Content-Type'] = 'application/json';
+            }
+            const config = {
+                ...options,
+                headers: { ...headers, ...(options.headers || {}) }
+            };
+            const resp = await fetch(url, config);
+            if (resp.status === 401) {
+                logout();
+                throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+            }
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.message || `Error ${resp.status}`);
+            }
+            return resp.json();
+        }
+
+        // ============================================================
+        // CARGAR DATOS
+        // ============================================================
+        async function cargarCategorias() {
+            try {
+                const data = await apiRequest('Categoria/records');
+                categoriasCache = data.items.map(c => c.nombre).filter(Boolean);
+                return categoriasCache;
+            } catch (e) { console.error('Error cargando categorías:', e); return []; }
+        }
+
+        async function cargarProductos() {
+            try {
+                const data = await apiRequest('productos/records?perPage=200');
+                productosCache = data.items;
+                return productosCache;
+            } catch (e) { console.error('Error cargando productos:', e); return []; }
+        }
+
+        async function cargarVentas() {
+            try {
+                const data = await apiRequest('Ventas/records?sort=-created&perPage=200');
+                ventasCache = data.items;
+                return ventasCache;
+            } catch (e) { console.error('Error cargando ventas:', e); return []; }
+        }
+
+        async function cargarDomicilios() {
+            try {
+                const data = await apiRequest('domicilios/records?sort=-created&perPage=200');
+                domiciliosCache = data.items;
+                return domiciliosCache;
+            } catch (e) { console.error('Error cargando domicilios:', e); return []; }
+        }
+
+        // ============================================================
+        // NORMALIZACIÓN y ganancias
+        // ============================================================
+        function normalizarNombre(nombre) {
+            if (!nombre) return "";
+            let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
+            return limpio.toLowerCase().replace(/\s+/g, ' ');
+        }
+        function extraerNombresProductos(texto) {
+            if (!texto) return [];
+            return texto.split(',').map(p => p.trim()).filter(Boolean);
+        }
+        function calcularGananciaVenta(venta) {
+            const total = parseFloat(venta.total || 0);
+            const productosStr = venta.productos_json || '';
+            const nombres = extraerNombresProductos(productosStr);
+            let sumaCostos = 0;
+            for (let nombre of nombres) {
+                const clave = normalizarNombre(nombre);
+                const prod = productosCache.find(p => normalizarNombre(p.Nombre) === clave);
+                if (prod) {
+                    const costo = parseFloat(prod.Precio_Costo || 0);
+                    sumaCostos += costo;
+                }
+            }
+            return total - sumaCostos;
+        }
+
+        // ============================================================
+        // OBTENER FOTOS DE UN PRODUCTO (ARRAY SEGURO)
+        // ============================================================
+        function obtenerFotosProducto(prod) {
+            let fotos = [];
+            if (prod.Fotos) {
+                if (Array.isArray(prod.Fotos)) {
+                    fotos = prod.Fotos;
+                } else if (typeof prod.Fotos === 'string') {
+                    try {
+                        const parsed = JSON.parse(prod.Fotos);
+                        if (Array.isArray(parsed)) fotos = parsed;
+                    } catch (e) {
+                        fotos = prod.Fotos.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                }
+            }
+            return fotos;
+        }
+
+        // ============================================================
+        // RENDERIZAR funciones
+        // ============================================================
+        function renderDashboard(ventas, domicilios) {
+            const totalVentas = ventas.length;
+            const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
+            let gananciaTotal = 0;
+            for (const v of ventas) gananciaTotal += calcularGananciaVenta(v);
+            const pendientes = domicilios.filter(d => d.Estado === 'Pendiente').length;
+
+            document.getElementById('statVentas').textContent = totalVentas;
+            document.getElementById('statTotal').textContent = `$${ingresos.toFixed(2)}`;
+            document.getElementById('statGanancia').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('statDomicilios').textContent = pendientes;
+
+            const ultimas = ventas.slice(0, 5);
+            const container = document.getElementById('ultimasVentas');
+            if (ultimas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas recientes.</div>';
+                return;
+            }
+            let html = '';
+            for (const v of ultimas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${v.Tipo || 'Local'}</div>
+                        </div>
+                        <div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderInventario(productos, categoriaFiltro = 'Todas', busqueda = '') {
+            const container = document.getElementById('inventarioContainer');
+            let filtrados = productos;
+            if (categoriaFiltro !== 'Todas') {
+                filtrados = filtrados.filter(p => (p.Categoria || 'General') === categoriaFiltro);
+            }
+            if (busqueda) {
+                const q = busqueda.toLowerCase();
+                filtrados = filtrados.filter(p => (p.Nombre || '').toLowerCase().includes(q) || (p.Codigo_de_Barras || '').includes(q));
+            }
+            if (filtrados.length === 0) {
+                container.innerHTML = '<div class="empty">No se encontraron productos.</div>';
+                return;
+            }
+            let html = '<div class="product-grid">';
+            for (const p of filtrados) {
+                const fotos = obtenerFotosProducto(p);
+                const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
+                const fotosExtra = fotos.slice(1);
+                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
+
+                const precio = parseFloat(p.Precio_Venta || 0);
+                const oferta = parseFloat(p.Precio_Oferta || 0);
+                const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
+                const stock = parseInt(p.Stock || 0);
+
+                let extrasHtml = '';
+                if (fotosExtra.length > 0) {
+                    extrasHtml = `<div class="fotos-extra">`;
+                    fotosExtra.forEach(f => {
+                        const url = `${POCKETBASE_URL}/api/files/productos/${p.id}/${f}`;
+                        extrasHtml += `<img src="${url}" alt="Extra" onclick="event.stopPropagation(); window.open('${url}','_blank')" />`;
+                    });
+                    extrasHtml += `</div>`;
+                }
+
+                html += `
+                    <div class="product-card">
+                        <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
+                             alt="${p.Nombre || 'Producto'}" 
+                             onclick="event.stopPropagation(); window.open('${fotoUrl || ''}','_blank')" />
+                        ${extrasHtml}
+                        <h4>${p.Nombre || 'Sin nombre'}</h4>
+                        <div class="price">$${precioFinal.toFixed(2)}</div>
+                        <div class="stock">📦 ${stock} uds</div>
+                        <div class="category">${p.Categoria || 'General'}</div>
+                        <div class="actions">
+                            <button class="btn-edit" onclick="editarProducto('${p.id}')">✏️ Editar</button>
+                            <button class="btn-delete" onclick="eliminarProducto('${p.id}')">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderVentas(ventas) {
+            const container = document.getElementById('ventasContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas.</div>';
+                return;
+            }
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function renderDomicilios(domicilios) {
+            const container = document.getElementById('domiciliosContainer');
+            if (domicilios.length === 0) {
+                container.innerHTML = '<div class="empty">No hay domicilios.</div>';
+                return;
+            }
+            let html = '';
+            for (const d of domicilios) {
+                const estado = d.Estado || 'Pendiente';
+                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
+                                   estado === 'En camino' ? 'estado-en-camino' : 'estado-entregado';
+                const fecha = d.created ? new Date(d.created).toLocaleString('es-ES') : 'Sin fecha';
+                let telefono = d.Telefono;
+                if (telefono === null || telefono === undefined) telefono = '';
+                telefono = String(telefono);
+                const isEntregado = (estado === 'Entregado');
+
+                html += `
+                    <div class="list-item" id="dom-item-${d.id}">
+                        <div class="left">
+                            <div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div>
+                            <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div>
+                            <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <select class="estado-select" id="estado-select-${d.id}" 
+                                    onchange="cambiarEstadoDomicilio('${d.id}', this.value)"
+                                    ${isEntregado ? 'disabled' : ''}>
+                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
+                                <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                            </select>
+                            <button class="btn-whatsapp" onclick="enviarWhatsApp('${d.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // CAMBIAR ESTADO DOMICILIO (VERSIÓN CORREGIDA Y AUTOMÁTICA)
+        // ============================================================
+        async function cambiarEstadoDomicilio(id, nuevoEstado) {
+            try {
+                const domActual = domiciliosCache.find(d => d.id === id);
+                if (!domActual) {
+                    alert('Domicilio no encontrado.');
+                    return;
+                }
+
+                if (domActual.Estado === 'Entregado') {
+                    alert('Este domicilio ya fue entregado y no se puede modificar.');
+                    const select = document.getElementById(`estado-select-${id}`);
+                    if (select) select.value = 'Entregado';
+                    return;
+                }
+
+                // =====================================================
+                // Si el nuevo estado es "Entregado" -> PROCESO AUTOMÁTICO
+                // =====================================================
+                if (nuevoEstado === 'Entregado') {
+                    // Intentar obtener los productos del pedido
+                    let productosPedido = [];
+                    let tieneProductos = false;
+
+                    // 1. Intentar leer productos_pedido (puede ser string o array)
+                    if (domActual.productos_pedido) {
+                        try {
+                            let parsed = domActual.productos_pedido;
+                            if (typeof parsed === 'string') {
+                                parsed = JSON.parse(parsed);
+                            }
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                productosPedido = parsed;
+                                tieneProductos = true;
+                            }
+                        } catch (e) {
+                            console.warn('No se pudo parsear productos_pedido:', e);
+                        }
+                    }
+
+                    // 2. Si NO tiene productos, marcar entregado sin cambios (automático)
+                    if (!tieneProductos) {
+                        await apiRequest(`domicilios/records/${id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ Estado: 'Entregado' })
+                        });
+                        alert('✅ Pedido marcado como Entregado (sin productos para descontar).');
+                        await cargarDomicilios();
+                        renderDomicilios(domiciliosCache);
+                        renderDashboard(ventasCache, domiciliosCache);
+                        // Enviar WhatsApp automáticamente
+                        enviarWhatsApp(id);
+                        return;
+                    }
+
+                    // 3. Si SÍ tiene productos -> DESCUENTO STOCK + CREAR VENTA (automático)
+                    for (const item of productosPedido) {
+                        const prodId = item.id;
+                        const cantidad = item.cantidad || 1;
+
+                        const prodResp = await apiRequest(`productos/records/${prodId}`);
+                        const stockActual = parseInt(prodResp.Stock) || 0;
+                        const nuevoStock = Math.max(0, stockActual - cantidad);
+
+                        await apiRequest(`productos/records/${prodId}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ Stock: nuevoStock })
+                        });
+                        console.log(`✅ Stock actualizado: ${item.nombre} (${stockActual} -> ${nuevoStock})`);
+                    }
+
+                    // Crear venta
+                    const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                    const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
+                    const productosIds = productosPedido.map(p => p.id).join(',');
+
+                    await apiRequest('Ventas/records', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            productos_json: productosStr,
+                            productos_ids: productosIds,
+                            total: total,
+                            fecha: new Date().toISOString(),
+                            Tipo: 'Domicilio',
+                            usuario_id: domActual.usuario_id || null
+                        })
+                    });
+
+                    // Actualizar estado del domicilio
+                    await apiRequest(`domicilios/records/${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ Estado: 'Entregado' })
+                    });
+
+                    alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
+
+                    // Recargar todo
+                    await cargarDomicilios();
+                    await cargarProductos();
+                    await cargarVentas();
+                    renderDomicilios(domiciliosCache);
+                    renderDashboard(ventasCache, domiciliosCache);
+
+                    // Enviar WhatsApp automáticamente
+                    enviarWhatsApp(id);
+
+                    return;
+                }
+
+                // =====================================================
+                // Si el estado NO es "Entregado" (Pendiente o En camino)
+                // =====================================================
+                await apiRequest(`domicilios/records/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ Estado: nuevoEstado })
+                });
+
+                domActual.Estado = nuevoEstado;
+                await cargarDomicilios();
+                renderDomicilios(domiciliosCache);
+                renderDashboard(ventasCache, domiciliosCache);
+
+                // Enviar WhatsApp automáticamente (sin preguntar)
+                enviarWhatsApp(id);
+
+            } catch (e) {
+                console.error('Error en cambiarEstadoDomicilio:', e);
+                alert('Error al cambiar estado: ' + e.message);
+                const select = document.getElementById(`estado-select-${id}`);
+                if (select) {
+                    const dom = domiciliosCache.find(d => d.id === id);
+                    if (dom) select.value = dom.Estado;
+                }
+            }
+        }
+
+        function enviarWhatsApp(id) {
+            const dom = domiciliosCache.find(d => d.id === id);
+            if (!dom) {
+                alert('Domicilio no encontrado.');
+                return;
+            }
+            let telefono = dom.Telefono;
+            if (telefono === null || telefono === undefined) {
+                alert('❌ El cliente no tiene número de teléfono registrado.');
+                return;
+            }
+            telefono = String(telefono).trim();
+            if (telefono === '') {
+                alert('❌ El número de teléfono está vacío.');
+                return;
+            }
+            const cliente = dom.Cliente_Nombre || 'Cliente';
+            const estado = dom.Estado || 'Pendiente';
+            const pedidoId = dom.id.slice(-6);
+            let mensaje = `Hola ${cliente} 👋\n`;
+            mensaje += `Tu pedido #${pedidoId} ha cambiado de estado a: *${estado}*.\n`;
+            if (estado === 'Pendiente') mensaje += 'Estamos preparando tu pedido. 📦\n';
+            else if (estado === 'En camino') mensaje += 'Tu pedido está en camino. 🚚\n';
+            else if (estado === 'Entregado') mensaje += 'Tu pedido ha sido entregado. ¡Disfrútalo! 🎉\n';
+            mensaje += '\nGracias por comprar en B&B. 🙌';
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        function renderReportes(ventas) {
+            const container = document.getElementById('reportesContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
+                return;
+            }
+            let totalIngresos = 0, gananciaTotal = 0;
+            for (const v of ventas) {
+                totalIngresos += parseFloat(v.total || 0);
+                gananciaTotal += calcularGananciaVenta(v);
+            }
+            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('repCount').textContent = ventas.length;
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // DETALLES (MODAL)
+        // ============================================================
+        async function verDetalleVenta(id) {
+            try {
+                const data = await apiRequest(`Ventas/records/${id}`);
+                const productos = data.productos_json || 'Sin productos';
+                const total = parseFloat(data.total || 0);
+                const fecha = data.fecha ? new Date(data.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = data.Tipo || 'Local';
+                const ganancia = calcularGananciaVenta(data);
+                let body = `
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Tipo</span><span class="value">${tipo}</span></div>
+                    <div class="detail-row"><span class="label">Productos</span><span class="value">${productos}</span></div>
+                    <div class="detail-row"><span class="label">Total</span><span class="value">$${total.toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Ganancia</span><span class="value">$${ganancia.toFixed(2)}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        async function verDetalleDomicilio(id) {
+            try {
+                const data = await apiRequest(`domicilios/records/${id}`);
+                const cliente = data.Cliente_Nombre || 'Sin nombre';
+                const direccion = data.Direccion_Entrega || 'Sin dirección';
+                const telefono = data.Telefono || 'Sin teléfono';
+                const estado = data.Estado || 'Pendiente';
+                const detalles = data.Detalles || 'Sin detalles';
+                const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
+                let body = `
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${cliente}</span></div>
+                    <div class="detail-row"><span class="label">Dirección</span><span class="value">${direccion}</span></div>
+                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${telefono}</span></div>
+                    <div class="detail-row"><span class="label">Estado</span><span class="value">${estado}</span></div>
+                    <div class="detail-row"><span class="label">Detalles</span><span class="value">${detalles}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        document.getElementById('closeDetailModal').addEventListener('click', () => {
+            document.getElementById('detailModal').classList.remove('active');
+        });
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('detailModal').classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        // GESTIÓN DE FOTOS EN FORMULARIO
+        // ============================================================
+        let fotosExistentes = [];
+        let fotosNuevas = [];
+
+        function renderFotosFormulario() {
+            const container = document.getElementById('prodFotosPreview');
+            container.innerHTML = '';
+
+            fotosExistentes.forEach((f, index) => {
+                const productoId = document.getElementById('productId').value;
+                const url = `${POCKETBASE_URL}/api/files/productos/${productoId}/${f}`;
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `
+                    <img src="${url}" alt="${f}" />
+                    <button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>
+                `;
+                container.appendChild(div);
+            });
+
+            fotosNuevas.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `
+                    <img src="${url}" alt="${file.name}" />
+                    <button type="button" class="btn-remove" data-nuevo="${index}" title="Quitar foto">✕</button>
+                `;
+                container.appendChild(div);
+            });
+
+            container.querySelectorAll('.foto-item .btn-remove[data-index]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.index);
+                    fotosExistentes.splice(idx, 1);
+                    renderFotosFormulario();
+                });
+            });
+
+            container.querySelectorAll('.foto-item .btn-remove[data-nuevo]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.nuevo);
+                    fotosNuevas.splice(idx, 1);
+                    renderFotosFormulario();
+                    actualizarContadorFotos();
+                });
+            });
+
+            actualizarContadorFotos();
+        }
+
+        function actualizarContadorFotos() {
+            const total = fotosExistentes.length + fotosNuevas.length;
+            document.getElementById('prodFotosCount').textContent = total > 0 ? `${total} foto(s)` : 'Seleccionar archivos';
+        }
+
+        document.getElementById('prodFotos').addEventListener('change', function(e) {
+            const files = Array.from(this.files);
+            if (files.length === 0) return;
+            fotosNuevas = fotosNuevas.concat(files);
+            renderFotosFormulario();
+            this.value = '';
+        });
+
+        function resetFotosFormulario() {
+            fotosExistentes = [];
+            fotosNuevas = [];
+            renderFotosFormulario();
+            document.getElementById('prodFotos').value = '';
+        }
+
+        // ============================================================
+        // CRUD PRODUCTOS
+        // ============================================================
+        function abrirModalProducto(producto = null) {
+            const modal = document.getElementById('productModal');
+            const form = document.getElementById('productForm');
+            form.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productDeleteBtn').style.display = 'none';
+            resetFotosFormulario();
+
+            const catSelect = document.getElementById('prodCategoria');
+            catSelect.innerHTML = '';
+            for (const cat of categoriasCache) {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                catSelect.appendChild(opt);
+            }
+
+            if (producto) {
+                document.getElementById('productModalTitle').textContent = '✏️ Editar Producto';
+                document.getElementById('productId').value = producto.id;
+                document.getElementById('prodNombre').value = producto.Nombre || '';
+                if (producto.Categoria && categoriasCache.includes(producto.Categoria)) {
+                    document.getElementById('prodCategoria').value = producto.Categoria;
+                }
+                document.getElementById('prodCodigo').value = producto.Codigo_de_Barras || '';
+                document.getElementById('prodCosto').value = producto.Precio_Costo || '';
+                document.getElementById('prodVenta').value = producto.Precio_Venta || '';
+                document.getElementById('prodOferta').value = producto.Precio_Oferta || '';
+                document.getElementById('prodStock').value = producto.Stock || '';
+                document.getElementById('prodDetalles').value = producto.Detalles || '';
+                document.getElementById('productDeleteBtn').style.display = 'inline-block';
+
+                fotosExistentes = obtenerFotosProducto(producto);
+                renderFotosFormulario();
+            } else {
+                document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
+            }
+            modal.classList.add('active');
+        }
+
+        function cerrarModalProducto() {
+            document.getElementById('productModal').classList.remove('active');
+            resetFotosFormulario();
+        }
+
+        document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
+        document.getElementById('productCancelBtn').addEventListener('click', cerrarModalProducto);
+        document.getElementById('productModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) cerrarModalProducto();
+        });
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('productId').value;
+            const nombre = document.getElementById('prodNombre').value.trim();
+            const categoria = document.getElementById('prodCategoria').value;
+            const codigo = document.getElementById('prodCodigo').value.trim();
+            const costo = document.getElementById('prodCosto').value;
+            const venta = document.getElementById('prodVenta').value;
+            const oferta = document.getElementById('prodOferta').value || '0';
+            const stock = document.getElementById('prodStock').value;
+            const detalles = document.getElementById('prodDetalles').value.trim();
+
+            if (!nombre || !categoria || !costo || !venta || stock === '') {
+                alert('Por favor completa todos los campos obligatorios.');
+                return;
+            }
+
+            const data = {
+                Nombre: nombre,
+                Categoria: categoria,
+                Codigo_de_Barras: codigo,
+                Precio_Costo: costo,
+                Precio_Venta: venta,
+                Precio_Oferta: oferta,
+                Stock: stock,
+                Detalles: detalles
+            };
+
+            try {
+                const formData = new FormData();
+                for (const key in data) {
+                    formData.append(key, data[key]);
+                }
+
+                fotosExistentes.forEach(f => {
+                    formData.append('Fotos', f);
+                });
+
+                fotosNuevas.forEach(file => {
+                    formData.append('Fotos', file);
+                });
+
+                let response;
+                if (id) {
+                    response = await apiRequest(`productos/records/${id}`, {
+                        method: 'PATCH',
+                        body: formData,
+                        headers: {}
+                    });
+                } else {
+                    response = await apiRequest('productos/records', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {}
+                    });
+                }
+                alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
+                cerrarModalProducto();
+                await cargarProductos();
+                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            }
+        });
+
+        async function eliminarProducto(id) {
+            if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+            try {
+                await apiRequest(`productos/records/${id}`, { method: 'DELETE' });
+                alert('Producto eliminado.');
+                await cargarProductos();
+                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+            } catch (e) {
+                alert('Error al eliminar: ' + e.message);
+            }
+        }
+
+        function editarProducto(id) {
+            const producto = productosCache.find(p => p.id === id);
+            if (producto) {
+                abrirModalProducto(producto);
+            } else {
+                alert('Producto no encontrado.');
+            }
+        }
+
+        document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
+
+        // ============================================================
+        // MENÚ MÓVIL
+        // ============================================================
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', closeMenu);
+        closeSidebarBtn.addEventListener('click', closeMenu);
+
+        document.querySelectorAll('.sidebar__nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    closeMenu();
+                }
+            });
+        });
+
+        // ============================================================
+        // INICIALIZACIÓN Y EVENTOS
+        // ============================================================
+        async function initApp() {
+            try {
+                await cargarCategorias();
+                await cargarProductos();
+                await cargarVentas();
+                await cargarDomicilios();
+
+                renderDashboard(ventasCache, domiciliosCache);
+                renderInventario(productosCache);
+
+                const catSelectInv = document.getElementById('invCategory');
+                catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                for (const cat of categoriasCache) {
+                    catSelectInv.innerHTML += `<option value="${cat}">${cat}</option>`;
+                }
+
+                renderVentas(ventasCache);
+                renderDomicilios(domiciliosCache);
+                renderReportes(ventasCache);
+
+                document.querySelectorAll('.sidebar__nav a').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const tab = this.dataset.tab;
+                        document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
+                        this.classList.add('active');
+                        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                        document.getElementById(`tab-${tab}`).classList.add('active');
+                    });
+                });
+
+                document.getElementById('invSearch').addEventListener('input', function() {
+                    renderInventario(productosCache, document.getElementById('invCategory').value, this.value);
+                });
+                document.getElementById('invCategory').addEventListener('change', function() {
+                    renderInventario(productosCache, this.value, document.getElementById('invSearch').value);
+                });
+                document.getElementById('invRefreshBtn').addEventListener('click', async function() {
+                    await cargarProductos();
+                    renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+                });
+
+                document.getElementById('ventasFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosVentas();
+                });
+                document.getElementById('ventasLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('ventasFechaDesde').value = '';
+                    document.getElementById('ventasFechaHasta').value = '';
+                    document.getElementById('ventasTipo').value = 'Todos';
+                    renderVentas(ventasCache);
+                });
+
+                function aplicarFiltrosVentas() {
+                    let filtradas = [...ventasCache];
+                    const desde = document.getElementById('ventasFechaDesde').value;
+                    const hasta = document.getElementById('ventasFechaHasta').value;
+                    const tipo = document.getElementById('ventasTipo').value;
+                    if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
+                    if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+                    if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
+                    renderVentas(filtradas);
+                }
+
+                document.getElementById('domFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosDomicilios();
+                });
+                document.getElementById('domLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('domFiltroEstado').value = 'Todos';
+                    renderDomicilios(domiciliosCache);
+                });
+
+                function aplicarFiltrosDomicilios() {
+                    const estado = document.getElementById('domFiltroEstado').value;
+                    let filtrados = [...domiciliosCache];
+                    if (estado !== 'Todos') filtrados = filtrados.filter(d => (d.Estado || 'Pendiente') === estado);
+                    renderDomicilios(filtrados);
+                }
+
+                document.getElementById('repFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosReportes();
+                });
+                document.getElementById('repLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('repFechaDesde').value = '';
+                    document.getElementById('repFechaHasta').value = '';
+                    document.getElementById('repTipo').value = 'Todos';
+                    renderReportes(ventasCache);
+                });
+
+                function aplicarFiltrosReportes() {
+                    let filtradas = [...ventasCache];
+                    const desde = document.getElementById('repFechaDesde').value;
+                    const hasta = document.getElementById('repFechaHasta').value;
+                    const tipo = document.getElementById('repTipo').value;
+                    if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
+                    if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+                    if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
+                    renderReportes(filtradas);
+                }
+
+            } catch (e) {
+                console.error('Error inicializando app:', e);
+                alert('Error al cargar datos: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            errorEl.classList.remove('show');
+            errorEl.textContent = '';
+            if (!email || !password) {
+                errorEl.textContent = 'Ingresa email y contraseña.';
+                errorEl.classList.add('show');
+                return;
+            }
+            try {
+                await login(email, password);
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                initApp();
+            } catch (e) {
+                errorEl.textContent = e.message;
+                errorEl.classList.add('show');
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+        document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // ============================================================
+        // INICIO - VERIFICAR SESIÓN
+        // ============================================================
+        if (!checkAuth()) {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
