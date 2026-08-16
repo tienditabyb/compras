@@ -349,6 +349,8 @@
         .estado-pendiente { background: #fef3c7; color: #d97706; }
         .estado-en-camino { background: #dbeafe; color: #2563eb; }
         .estado-entregado { background: #d1fae5; color: #059669; }
+        .estado-vendido { background: #d1fae5; color: #059669; }
+        .estado-cancelado { background: #fee2e2; color: #dc2626; }
 
         .estado-select {
             padding: 4px 8px;
@@ -842,6 +844,7 @@
                         <li><a data-tab="inventario">📦 Inventario</a></li>
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
+                        <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
                         <li><a data-tab="reportes">📈 Reportes</a></li>
                     </ul>
                 </nav>
@@ -894,6 +897,7 @@
                                 <option value="Todos">Todos</option>
                                 <option value="Local">Local</option>
                                 <option value="Domicilio">Domicilio</option>
+                                <option value="Tienda">Tienda</option>
                             </select>
                         </div>
                         <button id="ventasFiltrarBtn">Filtrar</button>
@@ -924,6 +928,26 @@
                     </div>
                 </div>
 
+                <!-- PEDIDOS TIENDA -->
+                <div id="tab-tienda" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">🏪 Pedidos en Tienda</h2>
+                    <div class="filters">
+                        <div><label>Estado:</label>
+                            <select id="tiendaFiltroEstado">
+                                <option value="Todos">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <button id="tiendaFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="tiendaLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="tiendaContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando pedidos en tienda...</div>
+                    </div>
+                </div>
+
                 <!-- REPORTES -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
@@ -935,6 +959,7 @@
                                 <option value="Todos">Todos</option>
                                 <option value="Local">Local</option>
                                 <option value="Domicilio">Domicilio</option>
+                                <option value="Tienda">Tienda</option>
                             </select>
                         </div>
                         <button id="repFiltrarBtn">Filtrar</button>
@@ -1021,6 +1046,7 @@
         let productosCache = [];
         let ventasCache = [];
         let domiciliosCache = [];
+        let tiendaCache = [];
         let categoriasCache = [];
 
         // ============================================================
@@ -1146,10 +1172,18 @@
 
         async function cargarDomicilios() {
             try {
-                const data = await apiRequest('domicilios/records?sort=-created&perPage=200');
+                const data = await apiRequest('Domicilios/records?sort=-created&perPage=200');
                 domiciliosCache = data.items;
                 return domiciliosCache;
             } catch (e) { console.error('Error cargando domicilios:', e); return []; }
+        }
+
+        async function cargarTienda() {
+            try {
+                const data = await apiRequest('PedidosTienda/records?sort=-created&perPage=200');
+                tiendaCache = data.items;
+                return tiendaCache;
+            } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
         }
 
         // ============================================================
@@ -1304,7 +1338,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
                 const ganancia = calcularGananciaVenta(v);
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
@@ -1355,7 +1389,7 @@
                                 <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
                                 <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
                             </select>
-                            <button class="btn-whatsapp" onclick="enviarWhatsApp('${d.id}')">💬 Notificar</button>
+                            <button class="btn-whatsapp" onclick="enviarWhatsAppDom('${d.id}')">💬 Notificar</button>
                         </div>
                         <div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;">
                             <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
@@ -1366,8 +1400,51 @@
             container.innerHTML = html;
         }
 
+        function renderTienda(pedidos) {
+            const container = document.getElementById('tiendaContainer');
+            if (pedidos.length === 0) {
+                container.innerHTML = '<div class="empty">No hay pedidos en tienda.</div>';
+                return;
+            }
+            let html = '';
+            for (const p of pedidos) {
+                const estado = p.Estado || 'Pendiente';
+                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
+                                   estado === 'Vendido' ? 'estado-vendido' : 'estado-cancelado';
+                const fecha = p.created ? new Date(p.created).toLocaleString('es-ES') : 'Sin fecha';
+                const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleString('es-ES') : 'No definida';
+                const telefono = p.Telefono || 'Sin teléfono';
+                const isVendido = (estado === 'Vendido' || estado === 'Cancelado');
+
+                html += `
+                    <div class="list-item" id="tienda-item-${p.id}">
+                        <div class="left">
+                            <div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div>
+                            <div class="sub">📞 ${telefono} • ${fecha}</div>
+                            <div class="sub">⏳ Límite: ${fechaLimite}</div>
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <select class="estado-select" id="tienda-select-${p.id}" 
+                                    onchange="cambiarEstadoTienda('${p.id}', this.value)"
+                                    ${isVendido ? 'disabled' : ''}>
+                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="Vendido" ${estado === 'Vendido' ? 'selected' : ''}>Vendido</option>
+                                <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                            </select>
+                            <button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleTienda('${p.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (VERSIÓN CORREGIDA Y AUTOMÁTICA)
+        // CAMBIAR ESTADO DOMICILIO (VERSIÓN CORREGIDA)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1384,15 +1461,11 @@
                     return;
                 }
 
-                // =====================================================
-                // Si el nuevo estado es "Entregado" -> PROCESO AUTOMÁTICO
-                // =====================================================
                 if (nuevoEstado === 'Entregado') {
                     // Intentar obtener los productos del pedido
                     let productosPedido = [];
                     let tieneProductos = false;
 
-                    // 1. Intentar leer productos_pedido (puede ser string o array)
                     if (domActual.productos_pedido) {
                         try {
                             let parsed = domActual.productos_pedido;
@@ -1408,9 +1481,8 @@
                         }
                     }
 
-                    // 2. Si NO tiene productos, marcar entregado sin cambios (automático)
                     if (!tieneProductos) {
-                        await apiRequest(`domicilios/records/${id}`, {
+                        await apiRequest(`Domicilios/records/${id}`, {
                             method: 'PATCH',
                             body: JSON.stringify({ Estado: 'Entregado' })
                         });
@@ -1418,12 +1490,11 @@
                         await cargarDomicilios();
                         renderDomicilios(domiciliosCache);
                         renderDashboard(ventasCache, domiciliosCache);
-                        // Enviar WhatsApp automáticamente
-                        enviarWhatsApp(id);
+                        enviarWhatsAppDom(id);
                         return;
                     }
 
-                    // 3. Si SÍ tiene productos -> DESCUENTO STOCK + CREAR VENTA (automático)
+                    // Descontar stock
                     for (const item of productosPedido) {
                         const prodId = item.id;
                         const cantidad = item.cantidad || 1;
@@ -1456,31 +1527,25 @@
                         })
                     });
 
-                    // Actualizar estado del domicilio
-                    await apiRequest(`domicilios/records/${id}`, {
+                    await apiRequest(`Domicilios/records/${id}`, {
                         method: 'PATCH',
                         body: JSON.stringify({ Estado: 'Entregado' })
                     });
 
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
 
-                    // Recargar todo
                     await cargarDomicilios();
                     await cargarProductos();
                     await cargarVentas();
                     renderDomicilios(domiciliosCache);
                     renderDashboard(ventasCache, domiciliosCache);
 
-                    // Enviar WhatsApp automáticamente
-                    enviarWhatsApp(id);
-
+                    enviarWhatsAppDom(id);
                     return;
                 }
 
-                // =====================================================
-                // Si el estado NO es "Entregado" (Pendiente o En camino)
-                // =====================================================
-                await apiRequest(`domicilios/records/${id}`, {
+                // Otros estados (Pendiente, En camino)
+                await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ Estado: nuevoEstado })
                 });
@@ -1490,8 +1555,7 @@
                 renderDomicilios(domiciliosCache);
                 renderDashboard(ventasCache, domiciliosCache);
 
-                // Enviar WhatsApp automáticamente (sin preguntar)
-                enviarWhatsApp(id);
+                enviarWhatsAppDom(id);
 
             } catch (e) {
                 console.error('Error en cambiarEstadoDomicilio:', e);
@@ -1504,7 +1568,7 @@
             }
         }
 
-        function enviarWhatsApp(id) {
+        function enviarWhatsAppDom(id) {
             const dom = domiciliosCache.find(d => d.id === id);
             if (!dom) {
                 alert('Domicilio no encontrado.');
@@ -1533,40 +1597,196 @@
             window.open(url, '_blank');
         }
 
-        function renderReportes(ventas) {
-            const container = document.getElementById('reportesContainer');
-            if (ventas.length === 0) {
-                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
+        // ============================================================
+        // CAMBIAR ESTADO PEDIDO TIENDA
+        // ============================================================
+        async function cambiarEstadoTienda(id, nuevoEstado) {
+            try {
+                const pedidoActual = tiendaCache.find(p => p.id === id);
+                if (!pedidoActual) {
+                    alert('Pedido no encontrado.');
+                    return;
+                }
+
+                if (pedidoActual.Estado === 'Vendido' || pedidoActual.Estado === 'Cancelado') {
+                    alert('Este pedido ya está vendido o cancelado y no se puede modificar.');
+                    const select = document.getElementById(`tienda-select-${id}`);
+                    if (select) select.value = pedidoActual.Estado;
+                    return;
+                }
+
+                // =====================================================
+                // Si el nuevo estado es "Vendido" -> DESCUENTA STOCK Y CREA VENTA
+                // =====================================================
+                if (nuevoEstado === 'Vendido') {
+                    let productosPedido = [];
+                    let tieneProductos = false;
+
+                    if (pedidoActual.productos_pedido) {
+                        try {
+                            let parsed = pedidoActual.productos_pedido;
+                            if (typeof parsed === 'string') {
+                                parsed = JSON.parse(parsed);
+                            }
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                productosPedido = parsed;
+                                tieneProductos = true;
+                            }
+                        } catch (e) {
+                            console.warn('No se pudo parsear productos_pedido:', e);
+                        }
+                    }
+
+                    if (!tieneProductos) {
+                        await apiRequest(`PedidosTienda/records/${id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ Estado: 'Vendido' })
+                        });
+                        alert('✅ Pedido marcado como Vendido (sin productos para descontar).');
+                        await cargarTienda();
+                        renderTienda(tiendaCache);
+                        renderDashboard(ventasCache, domiciliosCache);
+                        enviarWhatsAppTienda(id);
+                        return;
+                    }
+
+                    // Descontar stock
+                    for (const item of productosPedido) {
+                        const prodId = item.id;
+                        const cantidad = item.cantidad || 1;
+
+                        const prodResp = await apiRequest(`productos/records/${prodId}`);
+                        const stockActual = parseInt(prodResp.Stock) || 0;
+                        const nuevoStock = Math.max(0, stockActual - cantidad);
+
+                        await apiRequest(`productos/records/${prodId}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ Stock: nuevoStock })
+                        });
+                        console.log(`✅ Stock actualizado: ${item.nombre} (${stockActual} -> ${nuevoStock})`);
+                    }
+
+                    // Crear venta
+                    const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                    const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
+                    const productosIds = productosPedido.map(p => p.id).join(',');
+
+                    await apiRequest('Ventas/records', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            productos_json: productosStr,
+                            productos_ids: productosIds,
+                            total: total,
+                            fecha: new Date().toISOString(),
+                            Tipo: 'Tienda',
+                            usuario_id: pedidoActual.usuario_id || null
+                        })
+                    });
+
+                    await apiRequest(`PedidosTienda/records/${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ Estado: 'Vendido' })
+                    });
+
+                    alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
+
+                    await cargarTienda();
+                    await cargarProductos();
+                    await cargarVentas();
+                    renderTienda(tiendaCache);
+                    renderDashboard(ventasCache, domiciliosCache);
+
+                    enviarWhatsAppTienda(id);
+                    return;
+                }
+
+                // =====================================================
+                // Si es "Cancelado" o "Pendiente" -> solo actualizar estado
+                // =====================================================
+                await apiRequest(`PedidosTienda/records/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ Estado: nuevoEstado })
+                });
+
+                pedidoActual.Estado = nuevoEstado;
+                await cargarTienda();
+                renderTienda(tiendaCache);
+                renderDashboard(ventasCache, domiciliosCache);
+
+                if (nuevoEstado === 'Cancelado') {
+                    enviarWhatsAppTiendaCancelado(id);
+                } else {
+                    enviarWhatsAppTienda(id);
+                }
+
+            } catch (e) {
+                console.error('Error en cambiarEstadoTienda:', e);
+                alert('Error al cambiar estado: ' + e.message);
+                const select = document.getElementById(`tienda-select-${id}`);
+                if (select) {
+                    const ped = tiendaCache.find(p => p.id === id);
+                    if (ped) select.value = ped.Estado;
+                }
+            }
+        }
+
+        function enviarWhatsAppTienda(id) {
+            const ped = tiendaCache.find(p => p.id === id);
+            if (!ped) {
+                alert('Pedido no encontrado.');
                 return;
             }
-            let totalIngresos = 0, gananciaTotal = 0;
-            for (const v of ventas) {
-                totalIngresos += parseFloat(v.total || 0);
-                gananciaTotal += calcularGananciaVenta(v);
+            let telefono = ped.Telefono;
+            if (telefono === null || telefono === undefined) {
+                alert('❌ El cliente no tiene número de teléfono registrado.');
+                return;
             }
-            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
-            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
-            document.getElementById('repCount').textContent = ventas.length;
-            let html = '';
-            for (const v of ventas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
-                const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
-                const ganancia = calcularGananciaVenta(v);
-                html += `
-                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
-                        <div class="left">
-                            <div class="title">${v.productos_json || 'Sin productos'}</div>
-                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
-                        </div>
-                        <div class="right">
-                            $${parseFloat(v.total || 0).toFixed(2)}
-                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
-                        </div>
-                    </div>
-                `;
+            telefono = String(telefono).trim();
+            if (telefono === '') {
+                alert('❌ El número de teléfono está vacío.');
+                return;
             }
-            container.innerHTML = html;
+            const cliente = ped.Cliente_Nombre || 'Cliente';
+            const estado = ped.Estado || 'Pendiente';
+            const pedidoId = ped.id.slice(-6);
+            let mensaje = `Hola ${cliente} 👋\n`;
+            mensaje += `Tu pedido #${pedidoId} (Retiro en tienda) ha cambiado de estado a: *${estado}*.\n`;
+            if (estado === 'Pendiente') {
+                mensaje += 'Tu pedido está listo para ser retirado en tienda. 🏪\n';
+                mensaje += '📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n';
+                mensaje += '⏳ Recuerda que tienes 24 horas para recogerlo.';
+            } else if (estado === 'Vendido') {
+                mensaje += '✅ ¡Tu pedido ha sido vendido! Gracias por tu compra. 🎉';
+            }
+            mensaje += '\n\nGracias por comprar en B&B. 🙌';
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        function enviarWhatsAppTiendaCancelado(id) {
+            const ped = tiendaCache.find(p => p.id === id);
+            if (!ped) {
+                alert('Pedido no encontrado.');
+                return;
+            }
+            let telefono = ped.Telefono;
+            if (telefono === null || telefono === undefined) {
+                alert('❌ El cliente no tiene número de teléfono registrado.');
+                return;
+            }
+            telefono = String(telefono).trim();
+            if (telefono === '') {
+                alert('❌ El número de teléfono está vacío.');
+                return;
+            }
+            const cliente = ped.Cliente_Nombre || 'Cliente';
+            const pedidoId = ped.id.slice(-6);
+            let mensaje = `Hola ${cliente} 👋\n`;
+            mensaje += `Tu pedido #${pedidoId} (Retiro en tienda) ha sido *CANCELADO*.\n`;
+            mensaje += 'Si tienes alguna duda, contáctanos. 📞\n';
+            mensaje += '\nGracias por entender. 🙌';
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
         }
 
         // ============================================================
@@ -1596,7 +1816,7 @@
 
         async function verDetalleDomicilio(id) {
             try {
-                const data = await apiRequest(`domicilios/records/${id}`);
+                const data = await apiRequest(`Domicilios/records/${id}`);
                 const cliente = data.Cliente_Nombre || 'Sin nombre';
                 const direccion = data.Direccion_Entrega || 'Sin dirección';
                 const telefono = data.Telefono || 'Sin teléfono';
@@ -1610,6 +1830,44 @@
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${telefono}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${estado}</span></div>
                     <div class="detail-row"><span class="label">Detalles</span><span class="value">${detalles}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        async function verDetalleTienda(id) {
+            try {
+                const data = await apiRequest(`PedidosTienda/records/${id}`);
+                const cliente = data.Cliente_Nombre || 'Sin nombre';
+                const telefono = data.Telefono || 'Sin teléfono';
+                const estado = data.Estado || 'Pendiente';
+                const productos = data.productos_pedido ? JSON.parse(data.productos_pedido) : [];
+                const total = data.total || 0;
+                const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
+                const fechaLimite = data.fecha_limite ? new Date(data.fecha_limite).toLocaleString('es-ES') : 'No definida';
+
+                let productosHtml = '';
+                if (productos.length > 0) {
+                    productosHtml = '<ul>';
+                    productos.forEach(p => {
+                        productosHtml += `<li>${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}</li>`;
+                    });
+                    productosHtml += '</ul>';
+                } else {
+                    productosHtml = 'Sin productos';
+                }
+
+                let body = `
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${cliente}</span></div>
+                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${telefono}</span></div>
+                    <div class="detail-row"><span class="label">Estado</span><span class="value">${estado}</span></div>
+                    <div class="detail-row"><span class="label">Productos</span><span class="value">${productosHtml}</span></div>
+                    <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(total).toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Fecha límite</span><span class="value">${fechaLimite}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1883,6 +2141,7 @@
                 await cargarProductos();
                 await cargarVentas();
                 await cargarDomicilios();
+                await cargarTienda();
 
                 renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
@@ -1895,6 +2154,7 @@
 
                 renderVentas(ventasCache);
                 renderDomicilios(domiciliosCache);
+                renderTienda(tiendaCache);
                 renderReportes(ventasCache);
 
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
@@ -1955,6 +2215,21 @@
                     renderDomicilios(filtrados);
                 }
 
+                document.getElementById('tiendaFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosTienda();
+                });
+                document.getElementById('tiendaLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('tiendaFiltroEstado').value = 'Todos';
+                    renderTienda(tiendaCache);
+                });
+
+                function aplicarFiltrosTienda() {
+                    const estado = document.getElementById('tiendaFiltroEstado').value;
+                    let filtrados = [...tiendaCache];
+                    if (estado !== 'Todos') filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estado);
+                    renderTienda(filtrados);
+                }
+
                 document.getElementById('repFiltrarBtn').addEventListener('click', function() {
                     aplicarFiltrosReportes();
                 });
@@ -1980,6 +2255,45 @@
                 console.error('Error inicializando app:', e);
                 alert('Error al cargar datos: ' + e.message);
             }
+        }
+
+        // ============================================================
+        // REPORTES
+        // ============================================================
+        function renderReportes(ventas) {
+            const container = document.getElementById('reportesContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
+                return;
+            }
+            let totalIngresos = 0, gananciaTotal = 0;
+            for (const v of ventas) {
+                totalIngresos += parseFloat(v.total || 0);
+                gananciaTotal += calcularGananciaVenta(v);
+            }
+            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('repCount').textContent = ventas.length;
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
         }
 
         // ============================================================
