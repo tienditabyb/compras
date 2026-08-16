@@ -911,26 +911,24 @@
             gap: 15px;
             margin-top: 15px;
         }
-        .caja-form .datos-cliente .form-group:first-child {
-            grid-column: span 2; /* Nombre ocupa todo el ancho */
-        }
-        .caja-form .datos-cliente .form-group:nth-child(2),
-        .caja-form .datos-cliente .form-group:nth-child(3) {
-            grid-column: span 1; /* Teléfono y Dirección en dos columnas */
-        }
-        .caja-form .datos-cliente .form-group:nth-child(3) {
-            /* Dirección ya ocupa su columna */
-        }
-        /* En móviles, todo en columna y nombre arriba */
+        /* En móviles: una columna y en orden: Nombre, Teléfono, Dirección */
         @media (max-width: 600px) {
             .caja-form .datos-cliente {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+                gap: 10px;
             }
             .caja-form .datos-cliente .form-group {
                 grid-column: span 1 !important;
             }
-            .caja-form .producto-selector .form-group {
-                min-width: 120px;
+            /* Forzar el orden: Nombre (primero), Teléfono (segundo), Dirección (tercero) */
+            .caja-form .datos-cliente .form-group:first-child {
+                order: 1;
+            }
+            .caja-form .datos-cliente .form-group:nth-child(2) {
+                order: 2;
+            }
+            .caja-form .datos-cliente .form-group:nth-child(3) {
+                order: 3;
             }
         }
     </style>
@@ -1004,7 +1002,7 @@
                     </div>
                 </div>
 
-                <!-- ========== PESTAÑA CAJA ========== -->
+                <!-- ========== PESTAÑA CAJA (MODIFICADA) ========== -->
                 <div id="tab-caja" class="tab-content">
                     <h2 style="margin-bottom:20px; font-weight:600;">💳 Caja - Venta Manual</h2>
                     <div class="caja-form">
@@ -1012,7 +1010,8 @@
                         <div class="producto-selector">
                             <div class="form-group" style="flex:2; position:relative;">
                                 <label>Buscar producto</label>
-                                <input type="text" id="cajaBusqueda" placeholder="Escribe el nombre del producto..." autocomplete="off" />
+                                <!-- CAMBIO AQUÍ: placeholder ahora es "Nombre del Producto" -->
+                                <input type="text" id="cajaBusqueda" placeholder="Nombre del Producto" autocomplete="off" />
                                 <div class="sugerencias-lista" id="cajaSugerencias"></div>
                             </div>
                             <div class="form-group" style="flex:1;">
@@ -1029,7 +1028,7 @@
 
                         <div class="total" id="cajaTotal">Total: $0.00</div>
 
-                        <!-- Datos del cliente: Nombre (arriba), Teléfono, Dirección -->
+                        <!-- Datos del cliente: Nombre, Teléfono, Dirección -->
                         <div class="datos-cliente">
                             <div class="form-group">
                                 <label>Nombre</label>
@@ -1039,7 +1038,7 @@
                                 <label>Teléfono</label>
                                 <input type="text" id="cajaTelefono" placeholder="Número de teléfono" />
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="grid-column: span 2;">
                                 <label>Dirección</label>
                                 <input type="text" id="cajaDireccion" placeholder="Dirección" />
                             </div>
@@ -1443,7 +1442,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones
+        // RENDERIZAR funciones (sin cambios)
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1652,7 +1651,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO
+        // CAMBIAR ESTADO DOMICILIO (con parsearProductosPedido)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1736,7 +1735,7 @@
                     return;
                 }
 
-                // Otros estados
+                // Otros estados (Pendiente, En camino)
                 await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ Estado: nuevoEstado })
@@ -1790,7 +1789,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA
+        // CAMBIAR ESTADO PEDIDO TIENDA (con parsearProductosPedido)
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -2058,7 +2057,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO
+        // GESTIÓN DE FOTOS EN FORMULARIO (sin cambios)
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -2133,7 +2132,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS
+        // CRUD PRODUCTOS (sin cambios)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -2275,7 +2274,7 @@
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
         // ============================================================
-        // MENÚ MÓVIL
+        // MENÚ MÓVIL (sin cambios)
         // ============================================================
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -2305,7 +2304,7 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA
+        // FUNCIONES PARA CAJA (CON SELECCIÓN SIN AGREGAR AUTOMÁTICO)
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
@@ -2336,13 +2335,13 @@
             sugerenciasDiv.innerHTML = html;
             sugerenciasDiv.style.display = 'block';
 
-            // Evento click: selecciona sin agregar
+            // Evento click en cada sugerencia: solo selecciona (rellena el campo de búsqueda) sin agregar
             sugerenciasDiv.querySelectorAll('.sugerencia-item').forEach(el => {
                 el.addEventListener('click', function() {
                     const nombre = this.dataset.nombre;
                     document.getElementById('cajaBusqueda').value = nombre;
                     sugerenciasDiv.style.display = 'none';
-                    // Guardar datos para el botón Agregar
+                    // Guardamos los datos del producto seleccionado para el botón "Agregar"
                     document.getElementById('cajaBusqueda').dataset.selectedId = this.dataset.id;
                     document.getElementById('cajaBusqueda').dataset.selectedPrecio = this.dataset.precio;
                     document.getElementById('cajaBusqueda').dataset.selectedStock = this.dataset.stock;
@@ -2350,6 +2349,7 @@
             });
         }
 
+        // Función para agregar desde el botón "Agregar"
         function agregarDesdeBoton() {
             const busqueda = document.getElementById('cajaBusqueda');
             const selectedId = busqueda.dataset.selectedId;
@@ -2371,6 +2371,7 @@
                 return;
             }
 
+            // Verificar si ya está en el carrito
             const existente = carrito.find(item => item.id === selectedId);
             if (existente) {
                 const nuevaCant = existente.cantidad + cantidad;
@@ -2432,6 +2433,7 @@
                 return;
             }
 
+            // Verificar stock nuevamente
             for (const item of carrito) {
                 const prod = productosCache.find(p => p.id === item.id);
                 if (!prod) {
@@ -2445,10 +2447,12 @@
                 }
             }
 
+            // Obtener datos del cliente
             const nombreCliente = document.getElementById('cajaCliente').value.trim();
             const telefono = document.getElementById('cajaTelefono').value.trim();
             const direccion = document.getElementById('cajaDireccion').value.trim();
 
+            // Construir el campo cliente concatenado
             let clienteStr = '';
             if (nombreCliente) clienteStr += nombreCliente;
             if (telefono) {
@@ -2462,6 +2466,7 @@
             if (!clienteStr) clienteStr = 'Cliente sin datos';
 
             try {
+                // 1. Descontar stock de cada producto
                 for (const item of carrito) {
                     const prod = productosCache.find(p => p.id === item.id);
                     const stockActual = parseInt(prod.Stock || 0);
@@ -2472,6 +2477,7 @@
                     });
                 }
 
+                // 2. Crear la venta
                 const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad}`).join(', ');
                 const productosIds = carrito.map(item => item.id).join(',');
                 const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
@@ -2491,6 +2497,7 @@
 
                 alert('✅ Venta registrada correctamente.\n✅ Stock actualizado.');
 
+                // 3. Limpiar carrito y recargar datos
                 carrito = [];
                 renderizarCarrito();
                 document.getElementById('cajaCliente').value = '';
@@ -2518,10 +2525,11 @@
             }
         }
 
-        // Eventos de la caja
+        // Asignar eventos de la caja
         document.getElementById('cajaBusqueda').addEventListener('input', function() {
             mostrarSugerencias(this.value);
         });
+        // Ocultar sugerencias al hacer clic fuera
         document.addEventListener('click', function(e) {
             const sugerencias = document.getElementById('cajaSugerencias');
             const busqueda = document.getElementById('cajaBusqueda');
@@ -2530,7 +2538,9 @@
             }
         });
 
+        // Botón Agregar usa la nueva función
         document.getElementById('cajaAgregarBtn').addEventListener('click', agregarDesdeBoton);
+
         document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
