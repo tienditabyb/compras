@@ -1224,6 +1224,22 @@
         }
         .cart-sidebar .checkout-btn:hover { background: #0f171e; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        /* ========== FOOTER (NUEVO) ========== */
+        .footer {
+            background-color: #1a252f;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px 10px;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            border-top: 1px solid #3a5068;
+            width: 100%;
+        }
+        .footer p {
+            margin: 0;
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -1413,7 +1429,10 @@
         </div>
     </div>
 
-    <footer class="footer"><p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p></footer>
+    <!-- ========== FOOTER (ACTUALIZADO CON MISMO COLOR QUE HEADER) ========== -->
+    <footer class="footer">
+        <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
+    </footer>
 
     <!-- ============================================================ -->
     <!-- ====================== JAVASCRIPT =========================== -->
@@ -1439,7 +1458,7 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================================
-        //  AUTH
+        //  AUTH (sin cambios, se mantiene igual)
         // ============================================================
         function setAuthToken(token) {
             if (token) { localStorage.setItem('pb_token', token); authToken = token; }
@@ -1596,7 +1615,7 @@
         });
 
         // ============================================================
-        //  MODALES
+        //  MODALES (sin cambios)
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
