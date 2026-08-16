@@ -797,7 +797,7 @@
             color: #94a3b8;
         }
 
-        /* ===== ESTILOS PARA CAJA (MEJORADOS VISIBILIDAD) ===== */
+        /* ===== ESTILOS PARA CAJA ===== */
         .caja-form {
             background: white;
             border-radius: 12px;
@@ -819,23 +819,10 @@
         }
         .caja-form .producto-selector .form-group input {
             width: 100%;
-            padding: 12px 14px; /* más padding para móvil */
-            font-size: 1rem; /* más legible */
-            border: 1px solid #94a3b8; /* borde más oscuro para contraste */
-            border-radius: 8px;
-            background: #f9fafb;
-        }
-        .caja-form .producto-selector .form-group input:focus {
-            border-color: #2980b9;
-            background: white;
-            outline: none;
         }
         .caja-form .producto-selector .btn-primary {
             align-self: flex-end;
             margin-bottom: 0;
-            padding: 12px 24px;
-            font-size: 1rem;
-            white-space: nowrap;
         }
         /* Sugerencias */
         .sugerencias-lista {
@@ -844,7 +831,7 @@
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #94a3b8;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             max-height: 200px;
             overflow-y: auto;
@@ -853,11 +840,10 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .sugerencias-lista .sugerencia-item {
-            padding: 10px 14px;
+            padding: 8px 14px;
             cursor: pointer;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #f1f5f9;
             transition: 0.2s;
-            font-size: 0.95rem;
         }
         .sugerencias-lista .sugerencia-item:hover {
             background: #f1f5f9;
@@ -866,11 +852,10 @@
             border-bottom: none;
         }
         .sugerencias-lista .sugerencia-item .nombre {
-            font-weight: 600;
-            color: #1e272e;
+            font-weight: 500;
         }
         .sugerencias-lista .sugerencia-item .detalle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #64748b;
         }
 
@@ -889,22 +874,19 @@
         .caja-form .carrito-item .info {
             flex: 1;
             font-weight: 500;
-            font-size: 0.95rem;
         }
         .caja-form .carrito-item .precio {
             font-weight: 600;
             color: #2980b9;
-            font-size: 0.95rem;
         }
         .caja-form .carrito-item .btn-eliminar {
             background: #fee2e2;
             border: none;
             border-radius: 6px;
-            padding: 4px 12px;
+            padding: 2px 10px;
             color: #dc2626;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.9rem;
         }
         .caja-form .carrito-item .btn-eliminar:hover {
             background: #fecaca;
@@ -929,34 +911,12 @@
             gap: 15px;
             margin-top: 15px;
         }
-        .caja-form .datos-cliente .form-group label {
-            font-weight: 600;
-            color: #1e272e;
-            font-size: 0.95rem;
-        }
-        .caja-form .datos-cliente .form-group input {
-            padding: 12px 14px;
-            font-size: 1rem;
-            border: 1px solid #94a3b8;
-            border-radius: 8px;
-            background: #f9fafb;
-            width: 100%;
-        }
-        .caja-form .datos-cliente .form-group input:focus {
-            border-color: #2980b9;
-            background: white;
-            outline: none;
-        }
         @media (max-width: 600px) {
             .caja-form .datos-cliente {
                 grid-template-columns: 1fr;
             }
-            .caja-form .producto-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .caja-form .producto-selector .btn-primary {
-                align-self: stretch;
+            .caja-form .datos-cliente .form-group {
+                grid-column: span 1;
             }
         }
     </style>
@@ -1055,7 +1015,7 @@
 
                         <div class="total" id="cajaTotal">Total: $0.00</div>
 
-                        <!-- Datos del cliente: nombre, teléfono, dirección -->
+                        <!-- Datos del cliente: Nombre, Teléfono, Dirección -->
                         <div class="datos-cliente">
                             <div class="form-group">
                                 <label>Nombre</label>
@@ -1220,16 +1180,13 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="prodFotos" accept="image/*" multiple />
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
-                    <div class="file-preview-grid" id="prodFotosPreview">
-                        <!-- Se llena con JS -->
-                    </div>
+                    <div class="file-preview-grid" id="prodFotosPreview"></div>
                     <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
                         Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
                     </div>
@@ -1264,7 +1221,7 @@
         // ============================================================
         // CARRITO PARA CAJA
         // ============================================================
-        let carrito = []; // cada item: { id, nombre, precio, cantidad, stockDisponible }
+        let carrito = [];
 
         // ============================================================
         // AUTH
@@ -1469,7 +1426,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones (sin cambios)
+        // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1678,7 +1635,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (con parsearProductosPedido)
+        // CAMBIAR ESTADO DOMICILIO
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1816,7 +1773,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA (con parsearProductosPedido)
+        // CAMBIAR ESTADO PEDIDO TIENDA
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -2084,7 +2041,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO (sin cambios)
+        // GESTIÓN DE FOTOS EN FORMULARIO
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -2159,7 +2116,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS (sin cambios)
+        // CRUD PRODUCTOS
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -2301,7 +2258,7 @@
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
         // ============================================================
-        // MENÚ MÓVIL (sin cambios)
+        // MENÚ MÓVIL
         // ============================================================
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -2331,7 +2288,7 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA (VERSIÓN CON BUSCADOR Y SIN AUTO-AGREGADO)
+        // FUNCIONES PARA CAJA (CON SELECCIÓN SIN AGREGAR AUTOMÁTICO)
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
@@ -2362,73 +2319,66 @@
             sugerenciasDiv.innerHTML = html;
             sugerenciasDiv.style.display = 'block';
 
-            // Evento click: seleccionar el producto (NO agregar automáticamente)
+            // Evento click en cada sugerencia: solo selecciona (rellena el campo de búsqueda) sin agregar
             sugerenciasDiv.querySelectorAll('.sugerencia-item').forEach(el => {
                 el.addEventListener('click', function() {
                     const nombre = this.dataset.nombre;
                     document.getElementById('cajaBusqueda').value = nombre;
                     sugerenciasDiv.style.display = 'none';
-                    // Guardamos el producto seleccionado en un data attribute o en una variable global
-                    // para que el botón "Agregar" pueda usarlo.
-                    // Usamos un atributo data en el campo de búsqueda.
-                    const busquedaInput = document.getElementById('cajaBusqueda');
-                    busquedaInput.dataset.productoId = this.dataset.id;
-                    busquedaInput.dataset.productoNombre = this.dataset.nombre;
-                    busquedaInput.dataset.productoPrecio = this.dataset.precio;
-                    busquedaInput.dataset.productoStock = this.dataset.stock;
+                    // Guardamos los datos del producto seleccionado para el botón "Agregar"
+                    document.getElementById('cajaBusqueda').dataset.selectedId = this.dataset.id;
+                    document.getElementById('cajaBusqueda').dataset.selectedPrecio = this.dataset.precio;
+                    document.getElementById('cajaBusqueda').dataset.selectedStock = this.dataset.stock;
                 });
             });
         }
 
-        function agregarItemCarritoDesdeBusqueda() {
-            const busquedaInput = document.getElementById('cajaBusqueda');
-            const productoId = busquedaInput.dataset.productoId;
-            const nombre = busquedaInput.dataset.productoNombre;
-            const precio = parseFloat(busquedaInput.dataset.productoPrecio);
-            const stockDisponible = parseInt(busquedaInput.dataset.productoStock);
-
-            if (!productoId) {
+        // Función para agregar desde el botón "Agregar"
+        function agregarDesdeBoton() {
+            const busqueda = document.getElementById('cajaBusqueda');
+            const selectedId = busqueda.dataset.selectedId;
+            if (!selectedId) {
                 alert('Primero selecciona un producto de la lista de sugerencias.');
                 return;
             }
-
+            const nombre = busqueda.value.trim();
+            const precio = parseFloat(busqueda.dataset.selectedPrecio);
+            const stock = parseInt(busqueda.dataset.selectedStock);
             const cantidadInput = document.getElementById('cajaCantidad');
             const cantidad = parseInt(cantidadInput.value) || 1;
             if (cantidad < 1) {
                 alert('La cantidad debe ser al menos 1.');
                 return;
             }
-            if (cantidad > stockDisponible) {
-                alert(`Stock insuficiente. Solo quedan ${stockDisponible} unidades.`);
+            if (cantidad > stock) {
+                alert(`Stock insuficiente. Solo quedan ${stock} unidades.`);
                 return;
             }
 
             // Verificar si ya está en el carrito
-            const existente = carrito.find(item => item.id === productoId);
+            const existente = carrito.find(item => item.id === selectedId);
             if (existente) {
                 const nuevaCant = existente.cantidad + cantidad;
-                if (nuevaCant > stockDisponible) {
-                    alert(`No puedes agregar más. Stock disponible: ${stockDisponible}, ya tienes ${existente.cantidad}.`);
+                if (nuevaCant > stock) {
+                    alert(`No puedes agregar más. Stock disponible: ${stock}, ya tienes ${existente.cantidad}.`);
                     return;
                 }
                 existente.cantidad = nuevaCant;
             } else {
                 carrito.push({
-                    id: productoId,
+                    id: selectedId,
                     nombre: nombre,
                     precio: precio,
                     cantidad: cantidad,
-                    stockDisponible: stockDisponible
+                    stockDisponible: stock
                 });
             }
             renderizarCarrito();
             cantidadInput.value = 1;
-            // Limpiar selección
-            busquedaInput.value = '';
-            busquedaInput.dataset.productoId = '';
-            busquedaInput.dataset.productoNombre = '';
-            busquedaInput.dataset.productoPrecio = '';
-            busquedaInput.dataset.productoStock = '';
+            busqueda.value = '';
+            busqueda.dataset.selectedId = '';
+            busqueda.dataset.selectedPrecio = '';
+            busqueda.dataset.selectedStock = '';
             document.getElementById('cajaSugerencias').style.display = 'none';
         }
 
@@ -2523,7 +2473,7 @@
                         productos_ids: productosIds,
                         total: total,
                         fecha: new Date().toISOString(),
-                        Tipo: 'Local',  // Fijo
+                        Tipo: 'Local',
                         usuario_id: userData ? userData.id : null,
                         cliente: clienteStr
                     })
@@ -2556,23 +2506,12 @@
                 document.getElementById('cajaCliente').value = '';
                 document.getElementById('cajaTelefono').value = '';
                 document.getElementById('cajaDireccion').value = '';
-                document.getElementById('cajaBusqueda').value = '';
-                document.getElementById('cajaBusqueda').dataset.productoId = '';
-                document.getElementById('cajaBusqueda').dataset.productoNombre = '';
-                document.getElementById('cajaBusqueda').dataset.productoPrecio = '';
-                document.getElementById('cajaBusqueda').dataset.productoStock = '';
-                document.getElementById('cajaSugerencias').style.display = 'none';
             }
         }
 
         // Asignar eventos de la caja
         document.getElementById('cajaBusqueda').addEventListener('input', function() {
             mostrarSugerencias(this.value);
-            // Si el usuario escribe, limpiamos la selección previa
-            this.dataset.productoId = '';
-            this.dataset.productoNombre = '';
-            this.dataset.productoPrecio = '';
-            this.dataset.productoStock = '';
         });
         // Ocultar sugerencias al hacer clic fuera
         document.addEventListener('click', function(e) {
@@ -2583,21 +2522,8 @@
             }
         });
 
-        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarItemCarritoDesdeBusqueda);
-
-        // También permitir agregar con Enter en el campo de búsqueda o cantidad
-        document.getElementById('cajaBusqueda').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                agregarItemCarritoDesdeBusqueda();
-            }
-        });
-        document.getElementById('cajaCantidad').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                agregarItemCarritoDesdeBusqueda();
-            }
-        });
+        // Botón Agregar usa la nueva función
+        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarDesdeBoton);
 
         document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
