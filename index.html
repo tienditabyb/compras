@@ -821,7 +821,6 @@
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
 
-            /* === DISEÑO MÓVIL OPTIMIZADO === */
             .products-grid {
                 gap: 4px;
                 grid-template-columns: 1fr 1fr;
@@ -2495,7 +2494,7 @@
         }
 
         // ============================================================
-        //  CONFIRMAR PEDIDO (NUEVA VERSIÓN - SIN DESCONTAR STOCK)
+        //  CONFIRMAR PEDIDO (VERSIÓN MODIFICADA - MENSAJE SIN INVENTARIO)
         // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
@@ -2553,7 +2552,7 @@
                     Detalles: referencias || '',
                     Estado: 'Pendiente',
                     usuario_id: usuarioActual.id,
-                    productos_pedido: JSON.stringify(productosPedido) // Guardamos los productos aquí
+                    productos_pedido: JSON.stringify(productosPedido)
                 };
 
                 const respDom = await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
@@ -2571,7 +2570,7 @@
                 const pedidoId = domRecord.id.slice(-6);
 
                 // =====================================================
-                // 3. Enviar mensaje de WhatsApp (con estado Pendiente)
+                // 3. Enviar mensaje de WhatsApp (sin frase del inventario)
                 // =====================================================
                 let mensaje = `*🆕 Nuevo pedido (Pendiente)*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
@@ -2595,6 +2594,8 @@
                 mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
                 mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
 
+                // === ELIMINADA LA FRASE DEL INVENTARIO ===
+
                 const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, '_blank');
 
@@ -2605,11 +2606,10 @@
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
-                // Recargar productos (pero no descuento, así que solo refrescamos)
                 productos = await obtenerProductos();
                 renderizarProductos();
 
-                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.\n\n🟡 El inventario se descontará cuando el pedido sea marcado como "Entregado" por el administrador.');
+                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.\n\n🟡 Estado: Pendiente (el administrador procesará tu pedido).');
 
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
