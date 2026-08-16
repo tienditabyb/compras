@@ -1362,7 +1362,7 @@
                 <button onclick="seleccionarEntrega('Domicilio')">
                     <span class="icon">🚚</span><span class="label">Domicilio</span><span class="sub">(Envío a tu dirección)</span>
                 </button>
-                <button onclick="seleccionarEntrega('Local')">
+                <button onclick="seleccionarEntrega('Tienda')">
                     <span class="icon">🏪</span><span class="label">Retiro en tienda</span><span class="sub">(Pasas a buscar)</span>
                 </button>
             </div>
@@ -2494,7 +2494,7 @@
         }
 
         // ============================================================
-        //  CONFIRMAR PEDIDO (VERSIÓN MODIFICADA - MENSAJE SIN INVENTARIO)
+        //  CONFIRMAR PEDIDO (MODIFICADO PARA DOMICILIO Y TIENDA)
         // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
@@ -2507,6 +2507,8 @@
                 alert('Por favor, completa Nombre, Apellidos y Teléfono.');
                 return;
             }
+
+            // Para Domicilio, la dirección es obligatoria
             if (tipoEntregaSeleccionado === 'Domicilio' && !direccion) {
                 alert('Por favor, ingresa una dirección de entrega.');
                 return;
@@ -2522,9 +2524,7 @@
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
 
-            // =====================================================
-            // 1. Calcular totales y preparar datos del pedido
-            // =====================================================
+            // Calcular totales
             let subtotal = 0;
             const productosPedido = carrito.map(item => {
                 const cantidad = item.cantidad || 1;
@@ -2542,66 +2542,113 @@
             const totalFinal = subtotal + envio;
 
             try {
-                // =====================================================
-                // 2. SOLO guardar el domicilio (NO descuento, NO venta)
-                // =====================================================
-                const domData = {
-                    Cliente_Nombre: nombreCompleto,
-                    Direccion_Entrega: direccion,
-                    Telefono: telefono,
-                    Detalles: referencias || '',
-                    Estado: 'Pendiente',
-                    usuario_id: usuarioActual.id,
-                    productos_pedido: JSON.stringify(productosPedido)
-                };
-
-                const respDom = await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(domData)
-                });
-
-                if (!respDom.ok) {
-                    const error = await respDom.json();
-                    throw new Error(error.message || 'Error al registrar el domicilio');
-                }
-
-                const domRecord = await respDom.json();
-                const pedidoId = domRecord.id.slice(-6);
-
-                // =====================================================
-                // 3. Enviar mensaje de WhatsApp (sin frase del inventario)
-                // =====================================================
-                let mensaje = `*🆕 Nuevo pedido (Pendiente)*\n\n`;
-                mensaje += `👤 Cliente: ${nombreCompleto}\n`;
-                mensaje += `📞 Teléfono: ${telefono}\n`;
-                mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
-                mensaje += `📦 Tipo de entrega: *${tipoEntregaSeleccionado}*\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') {
+                    // =====================================================
+                    // DOMICILIO: Guardar en colección Domicilios (sin venta ni descuento)
+                    // =====================================================
+                    const domData = {
+                        Cliente_Nombre: nombreCompleto,
+                        Direccion_Entrega: direccion,
+                        Telefono: telefono,
+                        Detalles: referencias || '',
+                        Estado: 'Pendiente',
+                        usuario_id: usuarioActual.id,
+                        productos_pedido: JSON.stringify(productosPedido)
+                    };
+
+                    const respDom = await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(domData)
+                    });
+
+                    if (!respDom.ok) {
+                        const error = await respDom.json();
+                        throw new Error(error.message || 'Error al registrar el domicilio');
+                    }
+
+                    const domRecord = await respDom.json();
+                    const pedidoId = domRecord.id.slice(-6);
+
+                    // Mensaje WhatsApp Domicilio
+                    let mensaje = `*🆕 Nuevo pedido (Pendiente)*\n\n`;
+                    mensaje += `👤 Cliente: ${nombreCompleto}\n`;
+                    mensaje += `📞 Teléfono: ${telefono}\n`;
+                    mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
+                    mensaje += `📦 Tipo de entrega: *Domicilio*\n`;
                     mensaje += `📍 Dirección: ${direccion}\n`;
                     if (referencias) { mensaje += `📝 Referencias: ${referencias}\n`; }
                     mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
-                }
-                mensaje += `\n📋 Productos:\n`;
-                productosPedido.forEach(item => {
-                    mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
-                });
-                mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
-                if (tipoEntregaSeleccionado === 'Domicilio') {
+                    mensaje += `\n📋 Productos:\n`;
+                    productosPedido.forEach(item => {
+                        mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
+                    });
+                    mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
                     mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
+                    mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
+                    mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
+                    mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
+
+                    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+                    window.open(url, '_blank');
+
+                } else {
+                    // =====================================================
+                    // RETIRO EN TIENDA: Guardar en colección PedidosTienda
+                    // =====================================================
+                    // Calcular fecha límite (24 horas después)
+                    const ahora = new Date();
+                    const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000); // 24h
+
+                    const tiendaData = {
+                        Cliente_Nombre: nombreCompleto,
+                        Telefono: telefono,
+                        productos_pedido: JSON.stringify(productosPedido),
+                        total: totalFinal,
+                        Estado: 'Pendiente',
+                        fecha_pedido: ahora.toISOString(),
+                        usuario_id: usuarioActual.id,
+                        fecha_limite: fechaLimite.toISOString()
+                    };
+
+                    const respTienda = await fetch(`${POCKETBASE_URL}/api/collections/PedidosTienda/records`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(tiendaData)
+                    });
+
+                    if (!respTienda.ok) {
+                        const error = await respTienda.json();
+                        throw new Error(error.message || 'Error al registrar el pedido en tienda');
+                    }
+
+                    const tiendaRecord = await respTienda.json();
+                    const pedidoId = tiendaRecord.id.slice(-6);
+                    const fechaLimiteStr = fechaLimite.toLocaleString('es-ES', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    // Mensaje WhatsApp para Retiro en Tienda (con aviso de 24h)
+                    let mensaje = `*🆕 Nuevo pedido (Pendiente - Retiro en tienda)*\n\n`;
+                    mensaje += `👤 Cliente: ${nombreCompleto}\n`;
+                    mensaje += `📞 Teléfono: ${telefono}\n`;
+                    mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
+                    mensaje += `📦 Método: *Retiro en tienda* 🏪\n`;
+                    mensaje += `\n📋 Productos:\n`;
+                    productosPedido.forEach(item => {
+                        mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
+                    });
+                    mensaje += `\n💰 Total a pagar: $${totalFinal.toFixed(2)}`;
+                    mensaje += `\n\n⏳ Tienes 24 horas para recoger tu pedido.`;
+                    mensaje += `\n📅 Fecha límite: ${fechaLimiteStr}`;
+                    mensaje += `\n📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara`;
+                    mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
+
+                    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
+                    window.open(url, '_blank');
                 }
-                mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
-                mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
-                mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
 
-                // === ELIMINADA LA FRASE DEL INVENTARIO ===
-
-                const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
-                window.open(url, '_blank');
-
-                // =====================================================
-                // 4. Vaciar carrito y actualizar UI
-                // =====================================================
+                // Vaciar carrito
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
@@ -2609,7 +2656,7 @@
                 productos = await obtenerProductos();
                 renderizarProductos();
 
-                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.\n\n🟡 Estado: Pendiente (el administrador procesará tu pedido).');
+                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.');
 
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
