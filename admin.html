@@ -1235,6 +1235,23 @@
         }
 
         // ============================================================
+        // FUNCIÓN AUXILIAR PARA PARSEAR productos_pedido (nuevo)
+        // ============================================================
+        function parsearProductosPedido(valor) {
+            if (!valor) return [];
+            if (Array.isArray(valor)) return valor;
+            if (typeof valor === 'string') {
+                try {
+                    const parsed = JSON.parse(valor);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                    return [];
+                }
+            }
+            return [];
+        }
+
+        // ============================================================
         // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
@@ -1444,7 +1461,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (VERSIÓN CORREGIDA)
+        // CAMBIAR ESTADO DOMICILIO (con parsearProductosPedido)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1462,24 +1479,8 @@
                 }
 
                 if (nuevoEstado === 'Entregado') {
-                    // Intentar obtener los productos del pedido
-                    let productosPedido = [];
-                    let tieneProductos = false;
-
-                    if (domActual.productos_pedido) {
-                        try {
-                            let parsed = domActual.productos_pedido;
-                            if (typeof parsed === 'string') {
-                                parsed = JSON.parse(parsed);
-                            }
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                productosPedido = parsed;
-                                tieneProductos = true;
-                            }
-                        } catch (e) {
-                            console.warn('No se pudo parsear productos_pedido:', e);
-                        }
-                    }
+                    const productosPedido = parsearProductosPedido(domActual.productos_pedido);
+                    const tieneProductos = productosPedido.length > 0;
 
                     if (!tieneProductos) {
                         await apiRequest(`Domicilios/records/${id}`, {
@@ -1598,7 +1599,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA
+        // CAMBIAR ESTADO PEDIDO TIENDA (con parsearProductosPedido)
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -1615,27 +1616,9 @@
                     return;
                 }
 
-                // =====================================================
-                // Si el nuevo estado es "Vendido" -> DESCUENTA STOCK Y CREA VENTA
-                // =====================================================
                 if (nuevoEstado === 'Vendido') {
-                    let productosPedido = [];
-                    let tieneProductos = false;
-
-                    if (pedidoActual.productos_pedido) {
-                        try {
-                            let parsed = pedidoActual.productos_pedido;
-                            if (typeof parsed === 'string') {
-                                parsed = JSON.parse(parsed);
-                            }
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                productosPedido = parsed;
-                                tieneProductos = true;
-                            }
-                        } catch (e) {
-                            console.warn('No se pudo parsear productos_pedido:', e);
-                        }
-                    }
+                    const productosPedido = parsearProductosPedido(pedidoActual.productos_pedido);
+                    const tieneProductos = productosPedido.length > 0;
 
                     if (!tieneProductos) {
                         await apiRequest(`PedidosTienda/records/${id}`, {
@@ -1700,9 +1683,7 @@
                     return;
                 }
 
-                // =====================================================
-                // Si es "Cancelado" o "Pendiente" -> solo actualizar estado
-                // =====================================================
+                // Cancelado o Pendiente
                 await apiRequest(`PedidosTienda/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ Estado: nuevoEstado })
@@ -1790,7 +1771,7 @@
         }
 
         // ============================================================
-        // DETALLES (MODAL)
+        // DETALLES (MODAL) – con parsearProductosPedido en verDetalleTienda
         // ============================================================
         async function verDetalleVenta(id) {
             try {
@@ -1844,7 +1825,7 @@
                 const cliente = data.Cliente_Nombre || 'Sin nombre';
                 const telefono = data.Telefono || 'Sin teléfono';
                 const estado = data.Estado || 'Pendiente';
-                const productos = data.productos_pedido ? JSON.parse(data.productos_pedido) : [];
+                const productos = parsearProductosPedido(data.productos_pedido); // ← AQUÍ EL CAMBIO
                 const total = data.total || 0;
                 const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
                 const fechaLimite = data.fecha_limite ? new Date(data.fecha_limite).toLocaleString('es-ES') : 'No definida';
@@ -1886,7 +1867,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO
+        // GESTIÓN DE FOTOS EN FORMULARIO (sin cambios)
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -1961,7 +1942,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS
+        // CRUD PRODUCTOS (sin cambios)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
