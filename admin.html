@@ -810,6 +810,7 @@
             flex-wrap: wrap;
             align-items: flex-end;
             margin-bottom: 15px;
+            position: relative;
         }
         .caja-form .producto-selector .form-group {
             flex: 1;
@@ -819,6 +820,45 @@
         .caja-form .producto-selector .form-group input {
             width: 100%;
         }
+        .caja-form .producto-selector .btn-primary {
+            align-self: flex-end;
+            margin-bottom: 0;
+        }
+        /* Sugerencias */
+        .sugerencias-lista {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .sugerencias-lista .sugerencia-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: 0.2s;
+        }
+        .sugerencias-lista .sugerencia-item:hover {
+            background: #f1f5f9;
+        }
+        .sugerencias-lista .sugerencia-item:last-child {
+            border-bottom: none;
+        }
+        .sugerencias-lista .sugerencia-item .nombre {
+            font-weight: 500;
+        }
+        .sugerencias-lista .sugerencia-item .detalle {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
         .caja-form .carrito-items {
             margin: 15px 0;
         }
@@ -865,6 +905,17 @@
             justify-content: flex-end;
             flex-wrap: wrap;
         }
+        .caja-form .datos-cliente {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        @media (max-width: 600px) {
+            .caja-form .datos-cliente {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -910,7 +961,7 @@
                 <nav class="sidebar__nav">
                     <ul>
                         <li><a class="active" data-tab="dashboard">📊 Dashboard</a></li>
-                        <li><a data-tab="caja">💳 Caja</a></li>   <!-- NUEVO -->
+                        <li><a data-tab="caja">💳 Caja</a></li>
                         <li><a data-tab="inventario">📦 Inventario</a></li>
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
@@ -936,41 +987,45 @@
                     </div>
                 </div>
 
-                <!-- ========== NUEVA PESTAÑA CAJA ========== -->
+                <!-- ========== PESTAÑA CAJA (MODIFICADA) ========== -->
                 <div id="tab-caja" class="tab-content">
                     <h2 style="margin-bottom:20px; font-weight:600;">💳 Caja - Venta Manual</h2>
                     <div class="caja-form">
+                        <!-- Buscador y cantidad -->
                         <div class="producto-selector">
-                            <div class="form-group">
-                                <label>Producto</label>
-                                <select id="cajaProductoSelect">
-                                    <option value="">Seleccionar producto</option>
-                                </select>
+                            <div class="form-group" style="flex:2; position:relative;">
+                                <label>Buscar producto</label>
+                                <input type="text" id="cajaBusqueda" placeholder="Escribe el nombre del producto..." autocomplete="off" />
+                                <div class="sugerencias-lista" id="cajaSugerencias"></div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="flex:1;">
                                 <label>Cantidad</label>
                                 <input type="number" id="cajaCantidad" value="1" min="1" step="1" />
                             </div>
                             <button class="btn-primary" id="cajaAgregarBtn">➕ Agregar</button>
                         </div>
 
+                        <!-- Carrito -->
                         <div class="carrito-items" id="cajaCarrito">
                             <div class="empty">No hay productos agregados.</div>
                         </div>
 
                         <div class="total" id="cajaTotal">Total: $0.00</div>
 
-                        <div class="form-group">
-                            <label>Cliente (opcional)</label>
-                            <input type="text" id="cajaCliente" placeholder="Nombre del cliente" />
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo de venta</label>
-                            <select id="cajaTipo">
-                                <option value="Local">Local</option>
-                                <option value="Domicilio">Domicilio</option>
-                                <option value="Tienda">Tienda</option>
-                            </select>
+                        <!-- Datos del cliente: nombre, teléfono, dirección -->
+                        <div class="datos-cliente">
+                            <div class="form-group">
+                                <label>Nombre del cliente (opcional)</label>
+                                <input type="text" id="cajaCliente" placeholder="Nombre" />
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="text" id="cajaTelefono" placeholder="Número de teléfono" />
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Dirección</label>
+                                <input type="text" id="cajaDireccion" placeholder="Dirección" />
+                            </div>
                         </div>
 
                         <div class="acciones">
@@ -2174,8 +2229,7 @@
                 cerrarModalProducto();
                 await cargarProductos();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                // Actualizar también el selector de productos en Caja
-                llenarSelectorProductos();
+                // Actualizar también el selector de productos en Caja (no se usa, pero por si acaso)
             } catch (e) {
                 alert('Error al guardar: ' + e.message);
             }
@@ -2188,7 +2242,6 @@
                 alert('Producto eliminado.');
                 await cargarProductos();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                llenarSelectorProductos();
             } catch (e) {
                 alert('Error al eliminar: ' + e.message);
             }
@@ -2236,51 +2289,86 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA (NUEVO)
+        // FUNCIONES PARA CAJA (NUEVA VERSIÓN CON BUSCADOR)
         // ============================================================
-        function llenarSelectorProductos() {
-            const select = document.getElementById('cajaProductoSelect');
-            select.innerHTML = '<option value="">Seleccionar producto</option>';
-            // Ordenar por nombre
-            const sorted = [...productosCache].sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || ''));
-            for (const p of sorted) {
-                const stock = parseInt(p.Stock || 0);
-                if (stock <= 0) continue; // opcional: ocultar productos sin stock
-                const option = document.createElement('option');
-                option.value = p.id;
-                const precio = parseFloat(p.Precio_Venta || 0);
-                const oferta = parseFloat(p.Precio_Oferta || 0);
-                const precioMostrar = (oferta > 0 && oferta < precio) ? oferta : precio;
-                option.textContent = `${p.Nombre} - $${precioMostrar.toFixed(2)} (stock: ${stock})`;
-                option.dataset.precio = precioMostrar;
-                option.dataset.stock = stock;
-                select.appendChild(option);
-            }
-        }
-
-        function agregarItemCarrito() {
-            const select = document.getElementById('cajaProductoSelect');
-            const cantidadInput = document.getElementById('cajaCantidad');
-            const productoId = select.value;
-            if (!productoId) {
-                alert('Selecciona un producto.');
+        function mostrarSugerencias(texto) {
+            const sugerenciasDiv = document.getElementById('cajaSugerencias');
+            if (!texto.trim()) {
+                sugerenciasDiv.style.display = 'none';
                 return;
             }
+            const filtrados = productosCache.filter(p => {
+                const nombre = (p.Nombre || '').toLowerCase();
+                return nombre.includes(texto.toLowerCase()) && parseInt(p.Stock || 0) > 0;
+            });
+            if (filtrados.length === 0) {
+                sugerenciasDiv.style.display = 'none';
+                return;
+            }
+            let html = '';
+            filtrados.slice(0, 10).forEach(p => {
+                const precio = parseFloat(p.Precio_Venta || 0);
+                const oferta = parseFloat(p.Precio_Oferta || 0);
+                const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
+                html += `
+                    <div class="sugerencia-item" data-id="${p.id}" data-nombre="${p.Nombre}" data-precio="${precioFinal}" data-stock="${p.Stock}">
+                        <div class="nombre">${p.Nombre}</div>
+                        <div class="detalle">$${precioFinal.toFixed(2)} - Stock: ${p.Stock}</div>
+                    </div>
+                `;
+            });
+            sugerenciasDiv.innerHTML = html;
+            sugerenciasDiv.style.display = 'block';
+
+            // Evento click en cada sugerencia
+            sugerenciasDiv.querySelectorAll('.sugerencia-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const nombre = this.dataset.nombre;
+                    const precio = parseFloat(this.dataset.precio);
+                    const stock = parseInt(this.dataset.stock);
+                    agregarItemCarrito(id, nombre, precio, stock);
+                    document.getElementById('cajaBusqueda').value = '';
+                    sugerenciasDiv.style.display = 'none';
+                });
+            });
+        }
+
+        function agregarItemCarrito(productoId, nombre, precio, stockDisponible) {
+            // Si se llama sin parámetros (desde el botón "Agregar"), se obtiene del campo de búsqueda?
+            // Mejor usar solo la función con parámetros, y el botón "Agregar" lo dejamos como alternativa para escribir el nombre exacto.
+            // Pero para simplificar, el botón "Agregar" también usará el primer resultado de la búsqueda (si hay uno visible) o mostrará error.
+            // Lo implementamos: si no se pasan parámetros, intentamos obtener el primer elemento visible de sugerencias.
+            if (!productoId) {
+                // Intentar obtener de las sugerencias visibles
+                const sugerenciasDiv = document.getElementById('cajaSugerencias');
+                const items = sugerenciasDiv.querySelectorAll('.sugerencia-item');
+                if (items.length === 0) {
+                    alert('Busca y selecciona un producto de la lista, o escribe el nombre y elige una sugerencia.');
+                    return;
+                }
+                // Tomar el primero
+                const first = items[0];
+                productoId = first.dataset.id;
+                nombre = first.dataset.nombre;
+                precio = parseFloat(first.dataset.precio);
+                stockDisponible = parseInt(first.dataset.stock);
+                // Cerrar sugerencias
+                sugerenciasDiv.style.display = 'none';
+                document.getElementById('cajaBusqueda').value = '';
+            }
+
+            const cantidadInput = document.getElementById('cajaCantidad');
             const cantidad = parseInt(cantidadInput.value) || 1;
             if (cantidad < 1) {
                 alert('La cantidad debe ser al menos 1.');
                 return;
             }
-            const producto = productosCache.find(p => p.id === productoId);
-            if (!producto) {
-                alert('Producto no encontrado.');
-                return;
-            }
-            const stockDisponible = parseInt(producto.Stock || 0);
             if (cantidad > stockDisponible) {
                 alert(`Stock insuficiente. Solo quedan ${stockDisponible} unidades.`);
                 return;
             }
+
             // Verificar si ya está en el carrito
             const existente = carrito.find(item => item.id === productoId);
             if (existente) {
@@ -2291,20 +2379,16 @@
                 }
                 existente.cantidad = nuevaCant;
             } else {
-                const precio = parseFloat(producto.Precio_Venta || 0);
-                const oferta = parseFloat(producto.Precio_Oferta || 0);
-                const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 carrito.push({
                     id: productoId,
-                    nombre: producto.Nombre || 'Sin nombre',
-                    precio: precioFinal,
+                    nombre: nombre,
+                    precio: precio,
                     cantidad: cantidad,
                     stockDisponible: stockDisponible
                 });
             }
             renderizarCarrito();
             cantidadInput.value = 1;
-            select.value = '';
         }
 
         function eliminarItemCarrito(index) {
@@ -2356,8 +2440,23 @@
                 }
             }
 
-            const cliente = document.getElementById('cajaCliente').value.trim() || 'Cliente sin nombre';
-            const tipo = document.getElementById('cajaTipo').value;
+            // Obtener datos del cliente
+            const nombreCliente = document.getElementById('cajaCliente').value.trim();
+            const telefono = document.getElementById('cajaTelefono').value.trim();
+            const direccion = document.getElementById('cajaDireccion').value.trim();
+
+            // Construir el campo cliente concatenado
+            let clienteStr = '';
+            if (nombreCliente) clienteStr += nombreCliente;
+            if (telefono) {
+                if (clienteStr) clienteStr += ' - ';
+                clienteStr += telefono;
+            }
+            if (direccion) {
+                if (clienteStr) clienteStr += ' - ';
+                clienteStr += direccion;
+            }
+            if (!clienteStr) clienteStr = 'Cliente sin datos';
 
             try {
                 // 1. Descontar stock de cada producto
@@ -2383,9 +2482,9 @@
                         productos_ids: productosIds,
                         total: total,
                         fecha: new Date().toISOString(),
-                        Tipo: tipo,
+                        Tipo: 'Local',  // Fijo, ya que no tenemos selector de tipo
                         usuario_id: userData ? userData.id : null,
-                        cliente: cliente
+                        cliente: clienteStr
                     })
                 });
 
@@ -2395,12 +2494,13 @@
                 carrito = [];
                 renderizarCarrito();
                 document.getElementById('cajaCliente').value = '';
+                document.getElementById('cajaTelefono').value = '';
+                document.getElementById('cajaDireccion').value = '';
 
                 await cargarProductos();
                 await cargarVentas();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
                 renderDashboard(ventasCache, domiciliosCache);
-                llenarSelectorProductos();
 
             } catch (e) {
                 alert('Error al registrar la venta: ' + e.message);
@@ -2413,11 +2513,43 @@
                 carrito = [];
                 renderizarCarrito();
                 document.getElementById('cajaCliente').value = '';
+                document.getElementById('cajaTelefono').value = '';
+                document.getElementById('cajaDireccion').value = '';
             }
         }
 
         // Asignar eventos de la caja
-        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarItemCarrito);
+        document.getElementById('cajaBusqueda').addEventListener('input', function() {
+            mostrarSugerencias(this.value);
+        });
+        // Ocultar sugerencias al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const sugerencias = document.getElementById('cajaSugerencias');
+            const busqueda = document.getElementById('cajaBusqueda');
+            if (!sugerencias.contains(e.target) && e.target !== busqueda) {
+                sugerencias.style.display = 'none';
+            }
+        });
+
+        document.getElementById('cajaAgregarBtn').addEventListener('click', function() {
+            // Intentar agregar usando la primera sugerencia visible (si existe)
+            const sugerenciasDiv = document.getElementById('cajaSugerencias');
+            const items = sugerenciasDiv.querySelectorAll('.sugerencia-item');
+            if (items.length > 0) {
+                // Tomar el primero
+                const first = items[0];
+                const id = first.dataset.id;
+                const nombre = first.dataset.nombre;
+                const precio = parseFloat(first.dataset.precio);
+                const stock = parseInt(first.dataset.stock);
+                agregarItemCarrito(id, nombre, precio, stock);
+                document.getElementById('cajaBusqueda').value = '';
+                sugerenciasDiv.style.display = 'none';
+            } else {
+                alert('Busca y selecciona un producto de la lista.');
+            }
+        });
+
         document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
@@ -2446,9 +2578,6 @@
                 renderTienda(tiendaCache);
                 renderReportes(ventasCache);
 
-                // Llenar selector de productos para Caja
-                llenarSelectorProductos();
-
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
                     link.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -2457,10 +2586,6 @@
                         this.classList.add('active');
                         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
                         document.getElementById(`tab-${tab}`).classList.add('active');
-                        // Si es la pestaña Caja, refrescar el selector
-                        if (tab === 'caja') {
-                            llenarSelectorProductos();
-                        }
                     });
                 });
 
@@ -2473,7 +2598,6 @@
                 document.getElementById('invRefreshBtn').addEventListener('click', async function() {
                     await cargarProductos();
                     renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                    llenarSelectorProductos();
                 });
 
                 document.getElementById('ventasFiltrarBtn').addEventListener('click', function() {
