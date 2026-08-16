@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -296,6 +298,8 @@
         .filters .btn-clear:hover { background: #64748b; }
         .filters .btn-success { background: #059669; }
         .filters .btn-success:hover { background: #047857; }
+        .filters .btn-pdf { background: #dc2626; }
+        .filters .btn-pdf:hover { background: #b91c1c; }
 
         /* ===== LISTAS ===== */
         .list-container {
@@ -930,6 +934,60 @@
                 order: 3;
             }
         }
+
+        /* ===== ESTILOS PARA EL PDF (visible solo al imprimir/exportar) ===== */
+        #reportePdfContainer {
+            display: none;
+        }
+        .pdf-content {
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .pdf-content h1 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #1a252f;
+        }
+        .pdf-content .fecha {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+        .pdf-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .pdf-content table th {
+            background: #1a252f;
+            color: white;
+            padding: 8px 6px;
+            text-align: center;
+            border: 1px solid #1a252f;
+        }
+        .pdf-content table td {
+            padding: 6px 6px;
+            border: 1px solid #d1d5db;
+            text-align: center;
+        }
+        .pdf-content table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .pdf-content .totales {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: right;
+            font-size: 13px;
+            border-top: 2px solid #1a252f;
+            padding-top: 10px;
+        }
+        .pdf-content .totales span {
+            display: inline-block;
+            min-width: 120px;
+        }
     </style>
 </head>
 <body>
@@ -1130,7 +1188,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTES (Resumen solo con ventas, sin inventario) -->
+                <!-- REPORTES (con botón PDF) -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1146,6 +1204,7 @@
                         </div>
                         <button id="repFiltrarBtn">Filtrar</button>
                         <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
+                        <button class="btn-pdf" id="btnExportarPDF">📄 Exportar PDF</button>
                     </div>
 
                     <!-- RESUMEN SOLO VENTAS -->
@@ -1212,6 +1271,13 @@
                     <button type="button" class="btn-clear" id="productCancelBtn">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PARA EL PDF (oculto) -->
+    <div id="reportePdfContainer">
+        <div class="pdf-content" id="pdfContent">
+            <!-- Se llena con JS -->
         </div>
     </div>
 
@@ -1447,7 +1513,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones
+        // RENDERIZAR funciones (las mismas que antes, sin cambios)
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1669,7 +1735,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO
+        // CAMBIAR ESTADO DOMICILIO (sin cambios)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1804,7 +1870,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA
+        // CAMBIAR ESTADO PEDIDO TIENDA (sin cambios)
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -2543,7 +2609,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // REPORTES (actualizado: solo ventas)
+        // REPORTES - Renderizado y función para PDF
         // ============================================================
         function renderReportes(ventas) {
             const container = document.getElementById('reportesContainer');
@@ -2589,6 +2655,159 @@
                 `;
             }
             container.innerHTML = html;
+        }
+
+        // ============================================================
+        // EXPORTAR A PDF
+        // ============================================================
+        function generarContenidoPDF(ventas) {
+            // Creamos un objeto con los totales
+            let totalCantidad = 0, totalCosto = 0, totalVenta = 0, totalGanancia = 0;
+            let filas = [];
+
+            // Para cada venta, extraemos los productos individualmente
+            for (const v of ventas) {
+                const productosStr = v.productos_json || '';
+                const nombres = extraerNombresProductos(productosStr);
+                // Por cada nombre, buscamos el producto y calculamos
+                for (const nombre of nombres) {
+                    const clave = normalizarNombre(nombre);
+                    const prod = productosCache.find(p => normalizarNombre(p.Nombre) === clave);
+                    // Extraemos la cantidad si está en el nombre (ej: "Pan x2")
+                    let cantidad = 1;
+                    let nombreLimpio = nombre;
+                    const match = nombre.match(/x(\d+)$/i);
+                    if (match) {
+                        cantidad = parseInt(match[1]);
+                        nombreLimpio = nombre.replace(/\s*x\d+$/i, '').trim();
+                    }
+                    // Si no encontramos el producto, intentamos buscar por nombre parcial
+                    let producto = prod;
+                    if (!producto) {
+                        // Buscar por nombre que contenga la clave
+                        producto = productosCache.find(p => normalizarNombre(p.Nombre).includes(clave) || clave.includes(normalizarNombre(p.Nombre)));
+                    }
+                    if (producto) {
+                        const costo = parseFloat(producto.Precio_Costo || 0);
+                        const venta = parseFloat(producto.Precio_Venta || 0);
+                        const ganancia = (venta - costo) * cantidad;
+                        totalCantidad += cantidad;
+                        totalCosto += costo * cantidad;
+                        totalVenta += venta * cantidad;
+                        totalGanancia += ganancia;
+                        filas.push({
+                            producto: producto.Nombre || nombre,
+                            cantidad: cantidad,
+                            costo: costo,
+                            venta: venta,
+                            ganancia: ganancia
+                        });
+                    } else {
+                        // Producto no encontrado, mostramos el nombre original
+                        totalCantidad += cantidad;
+                        filas.push({
+                            producto: nombre + ' (sin datos)',
+                            cantidad: cantidad,
+                            costo: 0,
+                            venta: 0,
+                            ganancia: 0
+                        });
+                    }
+                }
+            }
+
+            // Construir el HTML del PDF
+            const fechaActual = new Date().toLocaleString('es-ES', {
+                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            let html = `
+                <h1>📊 Reporte de Ventas - B&B</h1>
+                <div class="fecha">Generado el ${fechaActual}</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Costo</th>
+                            <th>Precio Venta</th>
+                            <th>Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const row of filas) {
+                html += `
+                    <tr>
+                        <td>${row.producto}</td>
+                        <td>${row.cantidad}</td>
+                        <td>$${row.costo.toFixed(2)}</td>
+                        <td>$${row.venta.toFixed(2)}</td>
+                        <td>$${row.ganancia.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                    </tbody>
+                </table>
+                <div class="totales">
+                    <div><span>Total Cantidad:</span> ${totalCantidad}</div>
+                    <div><span>Total Precio Costo:</span> $${totalCosto.toFixed(2)}</div>
+                    <div><span>Total Precio Venta:</span> $${totalVenta.toFixed(2)}</div>
+                    <div><span>Total Ganancia:</span> $${totalGanancia.toFixed(2)}</div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function exportarPDF() {
+            // Obtener las ventas filtradas actuales (las que se muestran en el contenedor)
+            // Para simplificar, usamos las ventasCache pero podríamos filtrar por fecha/tipo
+            // Vamos a usar las ventas que están en la variable filtradas actual
+            // Mejor: usar el mismo filtro que en renderReportes
+            let ventasFiltradas = [...ventasCache];
+            const desde = document.getElementById('repFechaDesde').value;
+            const hasta = document.getElementById('repFechaHasta').value;
+            const tipo = document.getElementById('repTipo').value;
+            if (desde) ventasFiltradas = ventasFiltradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
+            if (hasta) ventasFiltradas = ventasFiltradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+            if (tipo !== 'Todos') ventasFiltradas = ventasFiltradas.filter(v => (v.Tipo || 'Local') === tipo);
+
+            if (ventasFiltradas.length === 0) {
+                alert('No hay ventas para exportar. Aplica filtros si es necesario.');
+                return;
+            }
+
+            const htmlContenido = generarContenidoPDF(ventasFiltradas);
+            const contenedor = document.getElementById('pdfContent');
+            contenedor.innerHTML = htmlContenido;
+
+            // Configurar opciones de html2pdf
+            const opt = {
+                margin: 1,
+                filename: `reporte_ventas_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            // Generar PDF
+            const element = document.getElementById('reportePdfContainer');
+            element.style.display = 'block';
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.style.display = 'none';
+                // Opcional: limpiar contenido después de guardar
+                contenedor.innerHTML = '';
+            }).catch(err => {
+                console.error('Error al generar PDF:', err);
+                alert('Error al generar el PDF. Inténtalo de nuevo.');
+                element.style.display = 'none';
+                contenedor.innerHTML = '';
+            });
         }
 
         // ============================================================
@@ -2709,6 +2928,9 @@
                     if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
                     renderReportes(filtradas);
                 }
+
+                // Botón exportar PDF
+                document.getElementById('btnExportarPDF').addEventListener('click', exportarPDF);
 
             } catch (e) {
                 console.error('Error inicializando app:', e);
