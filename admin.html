@@ -19,7 +19,7 @@
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
 
-        /* ===== HEADER (oscuro, como tienda) ===== */
+        /* ===== HEADER ===== */
         .header {
             background-color: #1a252f;
             padding: 10px 15px;
@@ -212,33 +212,11 @@
             .list-item { flex-direction: column; align-items: stretch; gap: 6px; }
             .list-item .center { justify-content: flex-start; }
             .modal { max-width: 95%; padding: 20px; }
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 10px;
-            }
         }
         @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px;
-            }
-            .product-card {
-                padding: 8px !important;
-            }
-            .product-card h4 {
-                font-size: 0.75rem !important;
-            }
-            .product-card .price {
-                font-size: 0.8rem !important;
-            }
-        }
-        @media (min-width: 1400px) {
-            .product-grid {
-                grid-template-columns: repeat(6, 1fr) !important;
-            }
         }
 
         .sidebar .close-sidebar {
@@ -403,19 +381,51 @@
         .btn-whatsapp:hover { background: #1da851; }
 
         /* ====================================================
-            ESTILOS PARA TARJETAS DE PRODUCTOS (como tienda)
+            ESTILOS PARA TARJETAS DE PRODUCTOS (CORREGIDOS)
         ==================================================== */
         .product-grid {
             display: grid;
-            gap: 16px;
-            padding: 16px;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            padding: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         }
+
+        /* En pantallas grandes, forzar 6 columnas */
+        @media (min-width: 1400px) {
+            .product-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        @media (max-width: 1399px) and (min-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 1023px) and (min-width: 769px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 6px;
+            }
+        }
+
         .product-card {
             background: white;
-            border-radius: 14px;
-            padding: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             transition: 0.3s;
             text-align: center;
             border: 1px solid #f1f5f9;
@@ -424,15 +434,15 @@
             height: 100%;
         }
         .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
         }
         .product-card .foto-principal {
             width: 100%;
             aspect-ratio: 1 / 1;
             object-fit: contain;
             background: #f1f5f9;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             margin-bottom: 6px;
         }
@@ -445,8 +455,8 @@
             margin-bottom: 4px;
         }
         .product-card .fotos-extra img {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             object-fit: cover;
             border-radius: 4px;
             background: #f1f5f9;
@@ -459,7 +469,7 @@
             border-color: #2980b9;
         }
         .product-card h4 {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             margin: 4px 0 2px;
             color: #1e272e;
@@ -468,25 +478,25 @@
             text-overflow: ellipsis;
         }
         .product-card .price {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: #2980b9;
         }
         .product-card .stock {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #64748b;
         }
         .product-card .category {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #94a3b8;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .product-card .actions {
-            margin-top: 8px;
+            margin-top: 6px;
             display: flex;
-            gap: 6px;
+            gap: 4px;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: auto;
@@ -494,10 +504,10 @@
             border-top: 1px solid #f1f5f9;
         }
         .product-card .actions button {
-            padding: 4px 12px;
+            padding: 3px 10px;
             border: none;
-            border-radius: 20px;
-            font-size: 0.7rem;
+            border-radius: 16px;
+            font-size: 0.65rem;
             cursor: pointer;
             font-weight: 600;
             transition: 0.2s;
@@ -972,7 +982,7 @@
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
                     <div class="file-preview-grid" id="prodFotosPreview">
-                        <!-- Se llena con JS (fotos existentes y nuevas) -->
+                        <!-- Se llena con JS -->
                     </div>
                     <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
                         Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
@@ -1174,7 +1184,6 @@
                         const parsed = JSON.parse(prod.Fotos);
                         if (Array.isArray(parsed)) fotos = parsed;
                     } catch (e) {
-                        // Si no se puede parsear, intentar dividir por comas
                         fotos = prod.Fotos.split(',').map(s => s.trim()).filter(Boolean);
                     }
                 }
