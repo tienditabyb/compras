@@ -854,13 +854,12 @@
             .product-card .product-desc {
                 display: none;
             }
-            /* ===== PRECIO Y BOTÓN MÁS GRANDES ===== */
             .product-card .price {
-                font-size: 0.85rem; /* antes 0.7rem */
+                font-size: 0.85rem;
                 line-height: 1.2;
             }
             .product-card .price .old {
-                font-size: 0.7rem; /* antes 0.55rem */
+                font-size: 0.7rem;
             }
             .product-card .stock-badge {
                 font-size: 0.55rem;
@@ -875,8 +874,8 @@
                 gap: 2px;
             }
             .btn-add {
-                font-size: 0.7rem; /* antes 0.55rem */
-                padding: 3px 8px; /* antes 2px 6px */
+                font-size: 0.7rem;
+                padding: 3px 8px;
                 border-radius: 16px;
             }
         }
@@ -894,14 +893,14 @@
                 font-size: 0.55rem;
             }
             .product-card .price {
-                font-size: 0.8rem; /* antes 0.6rem */
+                font-size: 0.8rem;
             }
             .product-card .price .old {
-                font-size: 0.6rem; /* antes 0.5rem */
+                font-size: 0.6rem;
             }
             .btn-add {
-                font-size: 0.65rem; /* antes 0.5rem */
-                padding: 3px 6px; /* antes 1px 5px */
+                font-size: 0.65rem;
+                padding: 3px 6px;
             }
             .product-card .stock-badge {
                 font-size: 0.5rem;
@@ -2413,7 +2412,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO
+        //  PROCESO DE PEDIDO (VERSIÓN MODIFICADA)
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2495,6 +2494,9 @@
             }
         }
 
+        // ============================================================
+        //  CONFIRMAR PEDIDO (NUEVA VERSIÓN - SIN DESCONTAR STOCK)
+        // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
             const apellidos = document.getElementById('domApellidos').value.trim();
@@ -2521,65 +2523,57 @@
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
 
+            // =====================================================
+            // 1. Calcular totales y preparar datos del pedido
+            // =====================================================
             let subtotal = 0;
-            carrito.forEach(item => { subtotal += item.precio * (item.cantidad || 1); });
+            const productosPedido = carrito.map(item => {
+                const cantidad = item.cantidad || 1;
+                const precio = item.precio;
+                subtotal += precio * cantidad;
+                return {
+                    id: item.id,
+                    nombre: item.nombre,
+                    cantidad: cantidad,
+                    precio: precio
+                };
+            });
+
             const envio = (tipoEntregaSeleccionado === 'Domicilio') ? ENVIO_COSTO : 0;
             const totalFinal = subtotal + envio;
-            const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad || 1}`).join(', ');
-            const productosIds = carrito.map(item => item.id).join(',');
-            const fecha = new Date().toISOString();
 
             try {
-                for (const item of carrito) {
-                    const prod = productos.find(p => p.id === item.id);
-                    if (prod) {
-                        const nuevoStock = Math.max(0, parseInt(prod.Stock || 0) - (item.cantidad || 1));
-                        const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records/${prod.id}`, {
-                            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ Stock: nuevoStock })
-                        });
-                        if (!resp.ok) {
-                            throw new Error(`Error al actualizar stock de ${prod.Nombre}`);
-                        }
-                        prod.Stock = nuevoStock;
-                    }
-                }
-
-                const ventaData = {
-                    productos_json: productosStr,
-                    productos_ids: productosIds,
-                    total: totalFinal,
-                    fecha: fecha,
-                    Tipo: tipoEntregaSeleccionado,
-                    usuario_id: usuarioActual.id
+                // =====================================================
+                // 2. SOLO guardar el domicilio (NO descuento, NO venta)
+                // =====================================================
+                const domData = {
+                    Cliente_Nombre: nombreCompleto,
+                    Direccion_Entrega: direccion,
+                    Telefono: telefono,
+                    Detalles: referencias || '',
+                    Estado: 'Pendiente',
+                    usuario_id: usuarioActual.id,
+                    productos_pedido: JSON.stringify(productosPedido) // Guardamos los productos aquí
                 };
-                const respVenta = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(ventaData)
+
+                const respDom = await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(domData)
                 });
-                if (!respVenta.ok) {
-                    const error = await respVenta.json();
-                    throw new Error(error.message || 'Error al registrar la venta');
-                }
-                const ventaId = (await respVenta.json()).id;
 
-                if (tipoEntregaSeleccionado === 'Domicilio') {
-                    const domData = {
-                        Cliente_Nombre: nombreCompleto,
-                        Direccion_Entrega: direccion,
-                        Telefono: telefono,
-                        Detalles: referencias || '',
-                        Estado: 'Pendiente',
-                        usuario_id: usuarioActual.id,
-                        venta_id: ventaId
-                    };
-                    await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(domData)
-                    });
+                if (!respDom.ok) {
+                    const error = await respDom.json();
+                    throw new Error(error.message || 'Error al registrar el domicilio');
                 }
 
-                let mensaje = `*Nuevo pedido*\n\n`;
+                const domRecord = await respDom.json();
+                const pedidoId = domRecord.id.slice(-6);
+
+                // =====================================================
+                // 3. Enviar mensaje de WhatsApp (con estado Pendiente)
+                // =====================================================
+                let mensaje = `*🆕 Nuevo pedido (Pendiente)*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
                 mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
@@ -2590,25 +2584,32 @@
                     mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
                 }
                 mensaje += `\n📋 Productos:\n`;
-                carrito.forEach(item => {
-                    mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad || 1} = $${(item.precio * (item.cantidad || 1)).toFixed(2)}\n`;
+                productosPedido.forEach(item => {
+                    mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
                 });
                 mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
-                if (tipoEntregaSeleccionado === 'Domicilio') { mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`; }
-                mensaje += `💵 Total: $${totalFinal.toFixed(2)}`;
-                mensaje += `\n\n¡Gracias por tu compra! 🏪`;
+                if (tipoEntregaSeleccionado === 'Domicilio') {
+                    mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
+                }
+                mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
+                mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
+                mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
 
                 const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, '_blank');
 
+                // =====================================================
+                // 4. Vaciar carrito y actualizar UI
+                // =====================================================
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
+                // Recargar productos (pero no descuento, así que solo refrescamos)
                 productos = await obtenerProductos();
                 renderizarProductos();
 
-                alert('✅ Pedido realizado con éxito. Revisa WhatsApp para confirmar.');
+                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.\n\n🟡 El inventario se descontará cuando el pedido sea marcado como "Entregado" por el administrador.');
 
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
