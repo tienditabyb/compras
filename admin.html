@@ -920,7 +920,6 @@
             .caja-form .datos-cliente .form-group {
                 grid-column: span 1 !important;
             }
-            /* Forzar el orden: Nombre (primero), Teléfono (segundo), Dirección (tercero) */
             .caja-form .datos-cliente .form-group:first-child {
                 order: 1;
             }
@@ -995,6 +994,9 @@
                         <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">Ingresos totales</div></div>
                         <div class="stat-card"><div class="number" id="statGanancia">-</div><div class="label">Ganancia total</div></div>
                         <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
+                        <!-- NUEVAS TARJETAS -->
+                        <div class="stat-card"><div class="number" id="statCostoInventario">-</div><div class="label">Costo total inventario</div></div>
+                        <div class="stat-card"><div class="number" id="statGananciaPotencial">-</div><div class="label">Ganancia potencial</div></div>
                     </div>
                     <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                         <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
@@ -1002,15 +1004,13 @@
                     </div>
                 </div>
 
-                <!-- ========== PESTAÑA CAJA (MODIFICADA) ========== -->
+                <!-- CAJA -->
                 <div id="tab-caja" class="tab-content">
                     <h2 style="margin-bottom:20px; font-weight:600;">💳 Caja - Venta Manual</h2>
                     <div class="caja-form">
-                        <!-- Buscador y cantidad -->
                         <div class="producto-selector">
                             <div class="form-group" style="flex:2; position:relative;">
                                 <label>Buscar producto</label>
-                                <!-- CAMBIO AQUÍ: placeholder ahora es "Nombre del Producto" -->
                                 <input type="text" id="cajaBusqueda" placeholder="Nombre del Producto" autocomplete="off" />
                                 <div class="sugerencias-lista" id="cajaSugerencias"></div>
                             </div>
@@ -1021,14 +1021,12 @@
                             <button class="btn-primary" id="cajaAgregarBtn">➕ Agregar</button>
                         </div>
 
-                        <!-- Carrito -->
                         <div class="carrito-items" id="cajaCarrito">
                             <div class="empty">No hay productos agregados.</div>
                         </div>
 
                         <div class="total" id="cajaTotal">Total: $0.00</div>
 
-                        <!-- Datos del cliente: Nombre, Teléfono, Dirección -->
                         <div class="datos-cliente">
                             <div class="form-group">
                                 <label>Nombre</label>
@@ -1133,7 +1131,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTES -->
+                <!-- REPORTES (MODIFICADO CON NUEVAS ESTADÍSTICAS) -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1150,13 +1148,20 @@
                         <button id="repFiltrarBtn">Filtrar</button>
                         <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
                     </div>
+
+                    <!-- RESUMEN AMPLIADO -->
                     <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-                        <div style="display:flex; gap:30px; flex-wrap:wrap;">
-                            <div><strong>Total ventas:</strong> <span id="repTotalVentas">$0.00</span></div>
-                            <div><strong>Ganancia total:</strong> <span id="repGananciaTotal">$0.00</span></div>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:15px;">
+                            <div><strong>Total ventas (ingresos):</strong> <span id="repTotalVentas">$0.00</span></div>
+                            <div><strong>Costo de productos vendidos:</strong> <span id="repCostoVendido">$0.00</span></div>
+                            <div><strong>Ganancia real:</strong> <span id="repGananciaTotal">$0.00</span></div>
                             <div><strong>N° ventas:</strong> <span id="repCount">0</span></div>
+                            <div><strong>Total Precio Costo (inventario):</strong> <span id="repCostoInventario">$0.00</span></div>
+                            <div><strong>Total Precio Venta (inventario):</strong> <span id="repVentaInventario">$0.00</span></div>
+                            <div><strong>Ganancia potencial (inventario):</strong> <span id="repGananciaPotencial">$0.00</span></div>
                         </div>
                     </div>
+
                     <div class="list-container" id="reportesContainer">
                         <div class="loading"><div class="spinner"></div>Cargando reportes...</div>
                     </div>
@@ -1193,16 +1198,13 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
-                <!-- ===== CAMPO MÚLTIPLE DE FOTOS ===== -->
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="prodFotos" accept="image/*" multiple />
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
-                    <div class="file-preview-grid" id="prodFotosPreview">
-                        <!-- Se llena con JS -->
-                    </div>
+                    <div class="file-preview-grid" id="prodFotosPreview"></div>
                     <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
                         Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
                     </div>
@@ -1384,12 +1386,14 @@
             let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
             return limpio.toLowerCase().replace(/\s+/g, ' ');
         }
+
         function extraerNombresProductos(texto) {
             if (!texto) return [];
             return texto.split(',').map(p => p.trim()).filter(Boolean);
         }
-        function calcularGananciaVenta(venta) {
-            const total = parseFloat(venta.total || 0);
+
+        // Calcular costo de una venta (suma de precios costo de cada producto)
+        function calcularCostoVenta(venta) {
             const productosStr = venta.productos_json || '';
             const nombres = extraerNombresProductos(productosStr);
             let sumaCostos = 0;
@@ -1401,7 +1405,13 @@
                     sumaCostos += costo;
                 }
             }
-            return total - sumaCostos;
+            return sumaCostos;
+        }
+
+        function calcularGananciaVenta(venta) {
+            const total = parseFloat(venta.total || 0);
+            const costo = calcularCostoVenta(venta);
+            return total - costo;
         }
 
         // ============================================================
@@ -1442,7 +1452,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones (sin cambios)
+        // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1451,10 +1461,24 @@
             for (const v of ventas) gananciaTotal += calcularGananciaVenta(v);
             const pendientes = domicilios.filter(d => d.Estado === 'Pendiente').length;
 
+            // Calcular estadísticas de inventario
+            let costoInventario = 0;
+            let ventaInventario = 0;
+            for (const p of productosCache) {
+                const stock = parseInt(p.Stock || 0);
+                const costo = parseFloat(p.Precio_Costo || 0);
+                const venta = parseFloat(p.Precio_Venta || 0);
+                costoInventario += stock * costo;
+                ventaInventario += stock * venta;
+            }
+            const gananciaPotencial = ventaInventario - costoInventario;
+
             document.getElementById('statVentas').textContent = totalVentas;
             document.getElementById('statTotal').textContent = `$${ingresos.toFixed(2)}`;
             document.getElementById('statGanancia').textContent = `$${gananciaTotal.toFixed(2)}`;
             document.getElementById('statDomicilios').textContent = pendientes;
+            document.getElementById('statCostoInventario').textContent = `$${costoInventario.toFixed(2)}`;
+            document.getElementById('statGananciaPotencial').textContent = `$${gananciaPotencial.toFixed(2)}`;
 
             const ultimas = ventas.slice(0, 5);
             const container = document.getElementById('ultimasVentas');
@@ -1651,7 +1675,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (con parsearProductosPedido)
+        // CAMBIAR ESTADO DOMICILIO
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1789,7 +1813,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA (con parsearProductosPedido)
+        // CAMBIAR ESTADO PEDIDO TIENDA
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -2057,7 +2081,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO (sin cambios)
+        // GESTIÓN DE FOTOS EN FORMULARIO
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -2132,7 +2156,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS (sin cambios)
+        // CRUD PRODUCTOS
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -2274,7 +2298,7 @@
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
         // ============================================================
-        // MENÚ MÓVIL (sin cambios)
+        // MENÚ MÓVIL
         // ============================================================
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
@@ -2304,7 +2328,7 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA (CON SELECCIÓN SIN AGREGAR AUTOMÁTICO)
+        // FUNCIONES PARA CAJA
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
@@ -2335,13 +2359,11 @@
             sugerenciasDiv.innerHTML = html;
             sugerenciasDiv.style.display = 'block';
 
-            // Evento click en cada sugerencia: solo selecciona (rellena el campo de búsqueda) sin agregar
             sugerenciasDiv.querySelectorAll('.sugerencia-item').forEach(el => {
                 el.addEventListener('click', function() {
                     const nombre = this.dataset.nombre;
                     document.getElementById('cajaBusqueda').value = nombre;
                     sugerenciasDiv.style.display = 'none';
-                    // Guardamos los datos del producto seleccionado para el botón "Agregar"
                     document.getElementById('cajaBusqueda').dataset.selectedId = this.dataset.id;
                     document.getElementById('cajaBusqueda').dataset.selectedPrecio = this.dataset.precio;
                     document.getElementById('cajaBusqueda').dataset.selectedStock = this.dataset.stock;
@@ -2349,7 +2371,6 @@
             });
         }
 
-        // Función para agregar desde el botón "Agregar"
         function agregarDesdeBoton() {
             const busqueda = document.getElementById('cajaBusqueda');
             const selectedId = busqueda.dataset.selectedId;
@@ -2371,7 +2392,6 @@
                 return;
             }
 
-            // Verificar si ya está en el carrito
             const existente = carrito.find(item => item.id === selectedId);
             if (existente) {
                 const nuevaCant = existente.cantidad + cantidad;
@@ -2433,7 +2453,6 @@
                 return;
             }
 
-            // Verificar stock nuevamente
             for (const item of carrito) {
                 const prod = productosCache.find(p => p.id === item.id);
                 if (!prod) {
@@ -2447,12 +2466,10 @@
                 }
             }
 
-            // Obtener datos del cliente
             const nombreCliente = document.getElementById('cajaCliente').value.trim();
             const telefono = document.getElementById('cajaTelefono').value.trim();
             const direccion = document.getElementById('cajaDireccion').value.trim();
 
-            // Construir el campo cliente concatenado
             let clienteStr = '';
             if (nombreCliente) clienteStr += nombreCliente;
             if (telefono) {
@@ -2466,7 +2483,6 @@
             if (!clienteStr) clienteStr = 'Cliente sin datos';
 
             try {
-                // 1. Descontar stock de cada producto
                 for (const item of carrito) {
                     const prod = productosCache.find(p => p.id === item.id);
                     const stockActual = parseInt(prod.Stock || 0);
@@ -2477,7 +2493,6 @@
                     });
                 }
 
-                // 2. Crear la venta
                 const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad}`).join(', ');
                 const productosIds = carrito.map(item => item.id).join(',');
                 const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
@@ -2497,7 +2512,6 @@
 
                 alert('✅ Venta registrada correctamente.\n✅ Stock actualizado.');
 
-                // 3. Limpiar carrito y recargar datos
                 carrito = [];
                 renderizarCarrito();
                 document.getElementById('cajaCliente').value = '';
@@ -2525,11 +2539,9 @@
             }
         }
 
-        // Asignar eventos de la caja
         document.getElementById('cajaBusqueda').addEventListener('input', function() {
             mostrarSugerencias(this.value);
         });
-        // Ocultar sugerencias al hacer clic fuera
         document.addEventListener('click', function(e) {
             const sugerencias = document.getElementById('cajaSugerencias');
             const busqueda = document.getElementById('cajaBusqueda');
@@ -2538,11 +2550,78 @@
             }
         });
 
-        // Botón Agregar usa la nueva función
         document.getElementById('cajaAgregarBtn').addEventListener('click', agregarDesdeBoton);
-
         document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
+
+        // ============================================================
+        // REPORTES (actualizado con nuevos totales)
+        // ============================================================
+        function renderReportes(ventas) {
+            const container = document.getElementById('reportesContainer');
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
+                // Aún así, mostramos ceros
+                document.getElementById('repTotalVentas').textContent = '$0.00';
+                document.getElementById('repCostoVendido').textContent = '$0.00';
+                document.getElementById('repGananciaTotal').textContent = '$0.00';
+                document.getElementById('repCount').textContent = '0';
+                actualizarEstadisticasInventario();
+                return;
+            }
+
+            let totalIngresos = 0, costoTotalVendido = 0, gananciaTotal = 0;
+            for (const v of ventas) {
+                totalIngresos += parseFloat(v.total || 0);
+                const costo = calcularCostoVenta(v);
+                costoTotalVendido += costo;
+                gananciaTotal += (parseFloat(v.total || 0) - costo);
+            }
+
+            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('repCostoVendido').textContent = `$${costoTotalVendido.toFixed(2)}`;
+            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+            document.getElementById('repCount').textContent = ventas.length;
+            actualizarEstadisticasInventario();
+
+            let html = '';
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
+                const ganancia = calcularGananciaVenta(v);
+                html += `
+                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
+                        <div class="left">
+                            <div class="title">${v.productos_json || 'Sin productos'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                        </div>
+                        <div class="right">
+                            $${parseFloat(v.total || 0).toFixed(2)}
+                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Función para actualizar estadísticas de inventario en reportes
+        function actualizarEstadisticasInventario() {
+            let costoInventario = 0;
+            let ventaInventario = 0;
+            for (const p of productosCache) {
+                const stock = parseInt(p.Stock || 0);
+                const costo = parseFloat(p.Precio_Costo || 0);
+                const venta = parseFloat(p.Precio_Venta || 0);
+                costoInventario += stock * costo;
+                ventaInventario += stock * venta;
+            }
+            const gananciaPotencial = ventaInventario - costoInventario;
+            document.getElementById('repCostoInventario').textContent = `$${costoInventario.toFixed(2)}`;
+            document.getElementById('repVentaInventario').textContent = `$${ventaInventario.toFixed(2)}`;
+            document.getElementById('repGananciaPotencial').textContent = `$${gananciaPotencial.toFixed(2)}`;
+        }
 
         // ============================================================
         // INICIALIZACIÓN Y EVENTOS
@@ -2667,45 +2746,6 @@
                 console.error('Error inicializando app:', e);
                 alert('Error al cargar datos: ' + e.message);
             }
-        }
-
-        // ============================================================
-        // REPORTES
-        // ============================================================
-        function renderReportes(ventas) {
-            const container = document.getElementById('reportesContainer');
-            if (ventas.length === 0) {
-                container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
-                return;
-            }
-            let totalIngresos = 0, gananciaTotal = 0;
-            for (const v of ventas) {
-                totalIngresos += parseFloat(v.total || 0);
-                gananciaTotal += calcularGananciaVenta(v);
-            }
-            document.getElementById('repTotalVentas').textContent = `$${totalIngresos.toFixed(2)}`;
-            document.getElementById('repGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
-            document.getElementById('repCount').textContent = ventas.length;
-            let html = '';
-            for (const v of ventas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
-                const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
-                const ganancia = calcularGananciaVenta(v);
-                html += `
-                    <div class="list-item" onclick="verDetalleVenta('${v.id}')">
-                        <div class="left">
-                            <div class="title">${v.productos_json || 'Sin productos'}</div>
-                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
-                        </div>
-                        <div class="right">
-                            $${parseFloat(v.total || 0).toFixed(2)}
-                            <div class="small">Ganancia: $${ganancia.toFixed(2)}</div>
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
         }
 
         // ============================================================
