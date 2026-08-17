@@ -2560,6 +2560,17 @@
                 return;
             }
 
+            // Construir la tabla en un contenedor oculto para evitar parpadeos
+            const container = document.createElement('div');
+            container.style.display = 'none';
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '100%';
+            container.style.background = 'white';
+            container.style.padding = '20px';
+            document.body.appendChild(container);
+
             let tablaHtml = `
                 <style>
                     body { font-family: 'Poppins', sans-serif; }
@@ -2631,11 +2642,12 @@
                 </tbody></table>
             `;
 
-            const container = document.createElement('div');
             container.innerHTML = tablaHtml;
-            container.style.padding = '20px';
-            container.style.background = 'white';
-            document.body.appendChild(container);
+
+            // Mostrar un mensaje de procesamiento
+            const btn = document.getElementById('btnExportarInventario');
+            btn.textContent = '⏳ Generando...';
+            btn.disabled = true;
 
             const opt = {
                 margin:        [0.5, 0.5, 0.5, 0.5],
@@ -2645,19 +2657,26 @@
                 jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
             };
 
-            html2pdf().set(opt).from(container).save().then(() => {
-                document.body.removeChild(container);
-            }).catch((error) => {
-                console.error('Error al generar PDF:', error);
-                alert('Error al generar el PDF: ' + error.message);
-                document.body.removeChild(container);
-            });
+            // Usar setTimeout para que el DOM se actualice
+            setTimeout(() => {
+                html2pdf().set(opt).from(container).save().then(() => {
+                    document.body.removeChild(container);
+                    btn.textContent = '📄 Exportar a PDF';
+                    btn.disabled = false;
+                }).catch((error) => {
+                    console.error('Error al generar PDF:', error);
+                    alert('Error al generar el PDF: ' + error.message);
+                    document.body.removeChild(container);
+                    btn.textContent = '📄 Exportar a PDF';
+                    btn.disabled = false;
+                });
+            }, 100);
         }
 
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (NUEVA)
+        // EXPORTAR REPORTES A PDF (CORREGIDO)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2665,6 +2684,17 @@
                 alert('No hay ventas en el reporte para exportar.');
                 return;
             }
+
+            // Crear contenedor oculto
+            const container = document.createElement('div');
+            container.style.display = 'none';
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '100%';
+            container.style.background = 'white';
+            container.style.padding = '20px';
+            document.body.appendChild(container);
 
             let tablaHtml = `
                 <style>
@@ -2733,11 +2763,11 @@
                 </div>
             `;
 
-            const container = document.createElement('div');
             container.innerHTML = tablaHtml;
-            container.style.padding = '20px';
-            container.style.background = 'white';
-            document.body.appendChild(container);
+
+            const btn = document.getElementById('btnExportarReportes');
+            btn.textContent = '⏳ Generando...';
+            btn.disabled = true;
 
             const opt = {
                 margin:        [0.5, 0.5, 0.5, 0.5],
@@ -2747,13 +2777,19 @@
                 jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
             };
 
-            html2pdf().set(opt).from(container).save().then(() => {
-                document.body.removeChild(container);
-            }).catch((error) => {
-                console.error('Error al generar PDF:', error);
-                alert('Error al generar el PDF: ' + error.message);
-                document.body.removeChild(container);
-            });
+            setTimeout(() => {
+                html2pdf().set(opt).from(container).save().then(() => {
+                    document.body.removeChild(container);
+                    btn.textContent = '📄 Exportar a PDF';
+                    btn.disabled = false;
+                }).catch((error) => {
+                    console.error('Error al generar PDF:', error);
+                    alert('Error al generar el PDF: ' + error.message);
+                    document.body.removeChild(container);
+                    btn.textContent = '📄 Exportar a PDF';
+                    btn.disabled = false;
+                });
+            }, 100);
         }
 
         document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
