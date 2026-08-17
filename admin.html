@@ -1048,7 +1048,7 @@
                     </div>
                 </div>
 
-                <!-- INVENTARIO (con botón Exportar a Excel) -->
+                <!-- INVENTARIO (con botón Exportar a Excel mejorado) -->
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
@@ -2543,7 +2543,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A EXCEL (CSV)
+        // EXPORTAR INVENTARIO A EXCEL (MEJORADO)
         // ============================================================
         function exportarInventarioExcel() {
             if (productosCache.length === 0) {
@@ -2551,30 +2551,33 @@
                 return;
             }
 
-            // Preparar datos
+            // Encabezados (excluimos "Detalles")
             let csv = '\uFEFF'; // BOM para UTF-8
-            csv += 'Producto;Stock;Precio Costo;Precio Venta;Ganancia por unidad\n';
+            csv += 'Producto;Categoría;Código de Barras;Stock;Precio Costo;Precio Venta;Precio Oferta;Ganancia por unidad\n';
 
             let totalCosto = 0;
             let totalVenta = 0;
             let totalGanancia = 0;
 
             for (const p of productosCache) {
-                const nombre = p.Nombre || 'Sin nombre';
+                const nombre = (p.Nombre || 'Sin nombre').replace(/;/g, ','); // Reemplazar punto y coma por coma para evitar romper CSV
+                const categoria = (p.Categoria || 'General').replace(/;/g, ',');
+                const codigo = (p.Codigo_de_Barras || '').replace(/;/g, ',');
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
                 const venta = parseFloat(p.Precio_Venta || 0);
+                const oferta = parseFloat(p.Precio_Oferta || 0);
                 const ganancia = venta - costo;
 
                 totalCosto += stock * costo;
                 totalVenta += stock * venta;
                 totalGanancia += stock * ganancia;
 
-                csv += `${nombre};${stock};${costo.toFixed(2)};${venta.toFixed(2)};${ganancia.toFixed(2)}\n`;
+                csv += `${nombre};${categoria};${codigo};${stock};${costo.toFixed(2)};${venta.toFixed(2)};${oferta.toFixed(2)};${ganancia.toFixed(2)}\n`;
             }
 
             // Totales
-            csv += '\nTOTALES;;;' + totalCosto.toFixed(2) + ';' + totalVenta.toFixed(2) + ';' + totalGanancia.toFixed(2) + '\n';
+            csv += '\nTOTALES;;;;;' + totalCosto.toFixed(2) + ';' + totalVenta.toFixed(2) + ';' + totalGanancia.toFixed(2) + '\n';
 
             // Descargar
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
