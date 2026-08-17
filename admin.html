@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- LIBRERÍAS PARA PDF (sin html2canvas ni html2pdf) -->
+    <!-- LIBRERÍAS PARA PDF (sin html2canvas ni html2pdf, solo jsPDF + autotable) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <!-- Mantenemos html2pdf solo para inventario (si lo usas) -->
@@ -2663,7 +2663,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (CON jspdf + autotable, SIN DESTELLO)
+        // EXPORTAR REPORTES A PDF - CON FUENTES MEJORADAS Y LEGIBLES
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2672,21 +2672,22 @@
                 return;
             }
 
-            // Crear documento PDF en horizontal (landscape)
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // Título
-            doc.setFontSize(18);
+            // --- TÍTULO ---
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
             doc.setTextColor('#1a252f');
             doc.text('📊 Reporte de Ventas - B&B', 40, 40);
 
-            // Subtítulo con fecha
+            // --- FECHA ---
+            doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#64748b');
             doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
 
-            // Datos de la tabla
+            // --- DATOS DE LA TABLA ---
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
 
@@ -2701,43 +2702,60 @@
                 tableData.push([fecha, tipo, productos, `$${total.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
             }
 
-            // Configurar columnas
-            const columns = [
-                { header: 'Fecha', dataKey: 'fecha' },
-                { header: 'Tipo', dataKey: 'tipo' },
-                { header: 'Productos', dataKey: 'productos' },
-                { header: 'Total (USD)', dataKey: 'total' },
-                { header: 'Ganancia (USD)', dataKey: 'ganancia' }
-            ];
-
-            // Generar tabla
+            // --- CONFIGURACIÓN DE LA TABLA (MEJOR LEGIBILIDAD) ---
             doc.autoTable({
-                head: [columns.map(c => c.header)],
+                head: [['Fecha', 'Tipo', 'Productos', 'Total (USD)', 'Ganancia (USD)']],
                 body: tableData,
-                startY: 70,
-                styles: { fontSize: 8, cellPadding: 3 },
-                headStyles: { fillColor: '#1a252f', textColor: '#ffffff', fontSize: 9 },
+                startY: 72,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: '#1a252f',
+                    textColor: '#ffffff',
+                    fontStyle: 'bold',
+                    fontSize: 11,
+                    halign: 'center'
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 5,
+                    valign: 'middle',
+                    lineColor: '#d0d7de',
+                    lineWidth: 0.2
+                },
+                columnStyles: {
+                    0: { cellWidth: 100, halign: 'center' },
+                    1: { cellWidth: 70, halign: 'center' },
+                    2: { cellWidth: 'auto', halign: 'left' },
+                    3: { cellWidth: 80, halign: 'right' },
+                    4: { cellWidth: 80, halign: 'right' }
+                },
+                margin: { left: 40, right: 40 },
                 didDrawPage: function(data) {
                     // Pie de página
                     const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFont('helvetica', 'italic');
                     doc.setFontSize(8);
                     doc.setTextColor('#94a3b8');
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
             });
 
-            // Agregar resumen al final
-            const finalY = doc.lastAutoTable.finalY + 20;
-            doc.setFontSize(12);
+            // --- RESUMEN FINAL ---
+            const finalY = doc.lastAutoTable.finalY + 25;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
             doc.setTextColor('#1a252f');
             doc.text('Resumen', 40, finalY);
-            doc.setFontSize(10);
-            doc.setTextColor('#000000');
-            doc.text(`📦 N° Ventas: ${ventas.length}`, 40, finalY + 18);
-            doc.text(`💰 Ingresos totales: $${totalIngresos.toFixed(2)}`, 40, finalY + 34);
-            doc.text(`📈 Ganancia total: $${totalGanancia.toFixed(2)}`, 40, finalY + 50);
 
-            // Guardar PDF
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.setTextColor('#1e272e');
+            const resumenY = finalY + 18;
+            doc.text(`📦 N° Ventas: ${ventas.length}`, 40, resumenY);
+            doc.text(`💰 Ingresos totales: $${totalIngresos.toFixed(2)}`, 40, resumenY + 18);
+            doc.text(`📈 Ganancia total: $${totalGanancia.toFixed(2)}`, 40, resumenY + 36);
+
+            // --- GUARDAR ---
             doc.save(`reporte_ventas_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
