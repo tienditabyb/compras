@@ -1133,7 +1133,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTES -->
+                <!-- REPORTES (con botón Exportar a PDF) -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1149,6 +1149,8 @@
                         </div>
                         <button id="repFiltrarBtn">Filtrar</button>
                         <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
+                        <!-- 🔽 BOTÓN NUEVO -->
+                        <button class="btn-primary" id="btnExportarReportes" style="margin-left:auto;">📄 Exportar a PDF</button>
                     </div>
 
                     <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -1238,6 +1240,11 @@
         // CARRITO PARA CAJA
         // ============================================================
         let carrito = [];
+
+        // ============================================================
+        // VARIABLE GLOBAL PARA REPORTES (NUEVA)
+        // ============================================================
+        let ventasFiltradasReporte = [];
 
         // ============================================================
         // AUTH
@@ -2545,7 +2552,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (nuevo)
+        // EXPORTAR INVENTARIO A PDF
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2553,7 +2560,6 @@
                 return;
             }
 
-            // Construir tabla HTML
             let tablaHtml = `
                 <style>
                     body { font-family: 'Poppins', sans-serif; }
@@ -2613,7 +2619,6 @@
                 `;
             }
 
-            // Totales
             tablaHtml += `
                     <tr class="totales">
                         <td colspan="3" style="text-align:right;">TOTALES</td>
@@ -2626,14 +2631,12 @@
                 </tbody></table>
             `;
 
-            // Crear contenedor temporal
             const container = document.createElement('div');
             container.innerHTML = tablaHtml;
             container.style.padding = '20px';
             container.style.background = 'white';
             document.body.appendChild(container);
 
-            // Configurar opciones de html2pdf
             const opt = {
                 margin:        [0.5, 0.5, 0.5, 0.5],
                 filename:      `inventario_${new Date().toISOString().slice(0,10)}.pdf`,
@@ -2642,7 +2645,6 @@
                 jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
             };
 
-            // Generar y descargar PDF
             html2pdf().set(opt).from(container).save().then(() => {
                 document.body.removeChild(container);
             }).catch((error) => {
@@ -2655,9 +2657,112 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // REPORTES
+        // EXPORTAR REPORTES A PDF (NUEVA)
+        // ============================================================
+        function exportarReportesPDF() {
+            const ventas = ventasFiltradasReporte;
+            if (ventas.length === 0) {
+                alert('No hay ventas en el reporte para exportar.');
+                return;
+            }
+
+            let tablaHtml = `
+                <style>
+                    body { font-family: 'Poppins', sans-serif; margin: 20px; }
+                    h1 { color: #1a252f; text-align: center; font-size: 22px; margin-bottom: 2px; }
+                    .fecha { text-align: center; color: #64748b; margin-bottom: 15px; }
+                    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+                    th { background: #1a252f; color: white; padding: 6px; text-align: left; }
+                    td { padding: 4px 6px; border-bottom: 1px solid #e2e8f0; }
+                    .totales { font-weight: bold; background: #f1f5f9; }
+                    .totales td { border-top: 2px solid #1a252f; }
+                    .resumen { margin-top: 15px; display: flex; gap: 20px; flex-wrap: wrap; }
+                    .resumen-item { background: #f8fafc; padding: 8px 14px; border-radius: 6px; }
+                </style>
+                <h1>📊 Reporte de Ventas - B&amp;B</h1>
+                <div class="fecha">Generado: ${new Date().toLocaleString('es-ES')}</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Productos</th>
+                            <th>Total (USD)</th>
+                            <th>Ganancia (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let totalIngresos = 0, totalCosto = 0, totalGanancia = 0;
+            for (const v of ventas) {
+                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const total = parseFloat(v.total || 0);
+                const ganancia = calcularGananciaVenta(v);
+                const costo = total - ganancia;
+
+                totalIngresos += total;
+                totalCosto += costo;
+                totalGanancia += ganancia;
+
+                tablaHtml += `
+                    <tr>
+                        <td>${fecha}</td>
+                        <td>${tipo}</td>
+                        <td>${v.productos_json || 'Sin productos'}</td>
+                        <td style="text-align:right;">$${total.toFixed(2)}</td>
+                        <td style="text-align:right;">$${ganancia.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+
+            tablaHtml += `
+                    <tr class="totales">
+                        <td colspan="2" style="text-align:right;">TOTALES</td>
+                        <td></td>
+                        <td style="text-align:right;">$${totalIngresos.toFixed(2)}</td>
+                        <td style="text-align:right;">$${totalGanancia.toFixed(2)}</td>
+                    </tr>
+                </tbody></table>
+                <div class="resumen">
+                    <div class="resumen-item"><strong>📦 N° Ventas:</strong> ${ventas.length}</div>
+                    <div class="resumen-item"><strong>💰 Ingresos totales:</strong> $${totalIngresos.toFixed(2)}</div>
+                    <div class="resumen-item"><strong>📉 Costo total:</strong> $${totalCosto.toFixed(2)}</div>
+                    <div class="resumen-item"><strong>📈 Ganancia total:</strong> $${totalGanancia.toFixed(2)}</div>
+                </div>
+            `;
+
+            const container = document.createElement('div');
+            container.innerHTML = tablaHtml;
+            container.style.padding = '20px';
+            container.style.background = 'white';
+            document.body.appendChild(container);
+
+            const opt = {
+                margin:        [0.5, 0.5, 0.5, 0.5],
+                filename:      `reporte_ventas_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:         { type: 'jpeg', quality: 0.98 },
+                html2canvas:   { scale: 2, letterRendering: true },
+                jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(container).save().then(() => {
+                document.body.removeChild(container);
+            }).catch((error) => {
+                console.error('Error al generar PDF:', error);
+                alert('Error al generar el PDF: ' + error.message);
+                document.body.removeChild(container);
+            });
+        }
+
+        document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
+
+        // ============================================================
+        // REPORTES (renderizado con guardado de filtrados)
         // ============================================================
         function renderReportes(ventas) {
+            ventasFiltradasReporte = ventas; // Guardamos las ventas filtradas
             const container = document.getElementById('reportesContainer');
             if (ventas.length === 0) {
                 container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
