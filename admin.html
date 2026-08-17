@@ -7,8 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- LIBRERÍA PARA GENERAR PDF -->
+    <!-- LIBRERÍAS PARA PDF: html2pdf (incluye html2canvas y jsPDF) y las cargamos explícitamente para mayor control -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1133,7 +1135,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTES (con botón Exportar a PDF) -->
+                <!-- REPORTES (con botón Exportar a PDF mejorado) -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1149,7 +1151,6 @@
                         </div>
                         <button id="repFiltrarBtn">Filtrar</button>
                         <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
-                        <!-- BOTÓN EXPORTAR PDF -->
                         <button class="btn-primary" id="btnExportarReportes" style="margin-left:auto;">📄 Exportar a PDF</button>
                     </div>
 
@@ -2638,20 +2639,27 @@
             container.style.top = '0';
             container.style.width = '100%';
             container.style.background = 'white';
-            container.style.zIndex = '-1';
+            container.style.opacity = '0';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '-1000';
             document.body.appendChild(container);
 
-            const opt = {
-                margin:        [0.5, 0.5, 0.5, 0.5],
-                filename:      `inventario_${new Date().toISOString().slice(0,10)}.pdf`,
-                image:         { type: 'jpeg', quality: 0.98 },
-                html2canvas:   { scale: 2, letterRendering: true },
-                jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
-            };
-
-            html2pdf().set(opt).from(container).save().then(() => {
+            html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                logging: false,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'in', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
                 document.body.removeChild(container);
-            }).catch((error) => {
+            }).catch(error => {
                 console.error('Error al generar PDF:', error);
                 alert('Error al generar el PDF: ' + error.message);
                 document.body.removeChild(container);
@@ -2661,7 +2669,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (MEJORADO - SIN DESTELLO)
+        // EXPORTAR REPORTES A PDF (SIN DESTELLO)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2737,7 +2745,6 @@
                 </div>
             `;
 
-            // Creamos el contenedor pero lo colocamos fuera de la pantalla para evitar destellos
             const container = document.createElement('div');
             container.innerHTML = tablaHtml;
             container.style.position = 'fixed';
@@ -2745,20 +2752,27 @@
             container.style.top = '0';
             container.style.width = '100%';
             container.style.background = 'white';
-            container.style.zIndex = '-1';
+            container.style.opacity = '0';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '-1000';
             document.body.appendChild(container);
 
-            const opt = {
-                margin:        [0.5, 0.5, 0.5, 0.5],
-                filename:      `reporte_ventas_${new Date().toISOString().slice(0,10)}.pdf`,
-                image:         { type: 'jpeg', quality: 0.98 },
-                html2canvas:   { scale: 2, letterRendering: true },
-                jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
-            };
-
-            html2pdf().set(opt).from(container).save().then(() => {
+            html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                logging: false,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'in', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`reporte_ventas_${new Date().toISOString().slice(0,10)}.pdf`);
                 document.body.removeChild(container);
-            }).catch((error) => {
+            }).catch(error => {
                 console.error('Error al generar PDF:', error);
                 alert('Error al generar el PDF: ' + error.message);
                 document.body.removeChild(container);
@@ -2771,7 +2785,7 @@
         // REPORTES (renderizado con guardado de filtrados)
         // ============================================================
         function renderReportes(ventas) {
-            ventasFiltradasReporte = ventas; // Guardamos las ventas filtradas
+            ventasFiltradasReporte = ventas;
             const container = document.getElementById('reportesContainer');
             if (ventas.length === 0) {
                 container.innerHTML = '<div class="empty">No hay ventas para mostrar.</div>';
