@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- LIBRERÍA PARA GENERAR PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1048,13 +1050,13 @@
                     </div>
                 </div>
 
-                <!-- INVENTARIO (con botón Exportar a Excel mejorado) -->
+                <!-- INVENTARIO (con botón Exportar a PDF) -->
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
-                            <button class="btn-primary" id="btnExportarInventario">📊 Exportar a Excel</button>
+                            <button class="btn-primary" id="btnExportarInventario">📄 Exportar a PDF</button>
                         </div>
                     </div>
                     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -2543,26 +2545,50 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A EXCEL (MEJORADO)
+        // EXPORTAR INVENTARIO A PDF (nuevo)
         // ============================================================
-        function exportarInventarioExcel() {
+        function exportarInventarioPDF() {
             if (productosCache.length === 0) {
                 alert('No hay productos en el inventario para exportar.');
                 return;
             }
 
-            // Encabezados (excluimos "Detalles")
-            let csv = '\uFEFF'; // BOM para UTF-8
-            csv += 'Producto;Categoría;Código de Barras;Stock;Precio Costo;Precio Venta;Precio Oferta;Ganancia por unidad\n';
+            // Construir tabla HTML
+            let tablaHtml = `
+                <style>
+                    body { font-family: 'Poppins', sans-serif; }
+                    h1 { color: #1a252f; text-align: center; font-size: 24px; margin-bottom: 5px; }
+                    .fecha { text-align: center; color: #64748b; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+                    th { background: #1a252f; color: white; padding: 6px; text-align: left; }
+                    td { padding: 4px 6px; border-bottom: 1px solid #e2e8f0; }
+                    .totales { font-weight: bold; background: #f1f5f9; }
+                    .totales td { border-top: 2px solid #1a252f; }
+                </style>
+                <h1>📦 Inventario B&amp;B</h1>
+                <div class="fecha">Generado: ${new Date().toLocaleString('es-ES')}</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Código de Barras</th>
+                            <th>Stock</th>
+                            <th>Precio Costo</th>
+                            <th>Precio Venta</th>
+                            <th>Precio Oferta</th>
+                            <th>Ganancia x unidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
 
-            let totalCosto = 0;
-            let totalVenta = 0;
-            let totalGanancia = 0;
+            let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
 
             for (const p of productosCache) {
-                const nombre = (p.Nombre || 'Sin nombre').replace(/;/g, ','); // Reemplazar punto y coma por coma para evitar romper CSV
-                const categoria = (p.Categoria || 'General').replace(/;/g, ',');
-                const codigo = (p.Codigo_de_Barras || '').replace(/;/g, ',');
+                const nombre = p.Nombre || 'Sin nombre';
+                const categoria = p.Categoria || 'General';
+                const codigo = p.Codigo_de_Barras || '';
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
                 const venta = parseFloat(p.Precio_Venta || 0);
@@ -2573,23 +2599,60 @@
                 totalVenta += stock * venta;
                 totalGanancia += stock * ganancia;
 
-                csv += `${nombre};${categoria};${codigo};${stock};${costo.toFixed(2)};${venta.toFixed(2)};${oferta.toFixed(2)};${ganancia.toFixed(2)}\n`;
+                tablaHtml += `
+                    <tr>
+                        <td>${nombre}</td>
+                        <td>${categoria}</td>
+                        <td>${codigo}</td>
+                        <td style="text-align:center;">${stock}</td>
+                        <td style="text-align:right;">$${costo.toFixed(2)}</td>
+                        <td style="text-align:right;">$${venta.toFixed(2)}</td>
+                        <td style="text-align:right;">$${oferta.toFixed(2)}</td>
+                        <td style="text-align:right;">$${ganancia.toFixed(2)}</td>
+                    </tr>
+                `;
             }
 
             // Totales
-            csv += '\nTOTALES;;;;;' + totalCosto.toFixed(2) + ';' + totalVenta.toFixed(2) + ';' + totalGanancia.toFixed(2) + '\n';
+            tablaHtml += `
+                    <tr class="totales">
+                        <td colspan="3" style="text-align:right;">TOTALES</td>
+                        <td style="text-align:center;"></td>
+                        <td style="text-align:right;">$${totalCosto.toFixed(2)}</td>
+                        <td style="text-align:right;">$${totalVenta.toFixed(2)}</td>
+                        <td style="text-align:right;"></td>
+                        <td style="text-align:right;">$${totalGanancia.toFixed(2)}</td>
+                    </tr>
+                </tbody></table>
+            `;
 
-            // Descargar
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const fecha = new Date().toISOString().slice(0,10);
-            link.href = URL.createObjectURL(blob);
-            link.download = `inventario_${fecha}.csv`;
-            link.click();
-            URL.revokeObjectURL(link.href);
+            // Crear contenedor temporal
+            const container = document.createElement('div');
+            container.innerHTML = tablaHtml;
+            container.style.padding = '20px';
+            container.style.background = 'white';
+            document.body.appendChild(container);
+
+            // Configurar opciones de html2pdf
+            const opt = {
+                margin:        [0.5, 0.5, 0.5, 0.5],
+                filename:      `inventario_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:         { type: 'jpeg', quality: 0.98 },
+                html2canvas:   { scale: 2, letterRendering: true },
+                jsPDF:         { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            // Generar y descargar PDF
+            html2pdf().set(opt).from(container).save().then(() => {
+                document.body.removeChild(container);
+            }).catch((error) => {
+                console.error('Error al generar PDF:', error);
+                alert('Error al generar el PDF: ' + error.message);
+                document.body.removeChild(container);
+            });
         }
 
-        document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioExcel);
+        document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
         // REPORTES
