@@ -985,26 +985,6 @@
         }
         .resumen-pedido .envio { color: #64748b; }
         .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
-        .whatsapp-selector {
-            display: flex;
-            gap: 16px;
-            margin: 8px 0;
-            flex-wrap: wrap;
-        }
-        .whatsapp-selector label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-            color: #1e272e;
-            font-size: 0.9rem;
-        }
-        .whatsapp-selector input[type="radio"] {
-            accent-color: #1a252f;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
         .history-item {
             border-bottom: 1px solid #f1f5f9;
             padding: 10px 0;
@@ -1225,7 +1205,7 @@
         .cart-sidebar .checkout-btn:hover { background: #0f171e; }
         .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* ========== FOOTER (NUEVO) ========== */
+        /* ========== FOOTER ========== */
         .footer {
             background-color: #1a252f;
             color: #ffffff;
@@ -1387,13 +1367,7 @@
                 <div class="linea envio" id="resumenEnvio"><span>Envío</span> <span id="resumenEnvioMonto">$0.00</span></div>
                 <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
             </div>
-            <div class="form-group">
-                <label>📱 Elige el número para recibir el pedido:</label>
-                <div class="whatsapp-selector">
-                    <label><input type="radio" name="whatsappNumber" value="5358388494" checked> Yoandy (+53 58388494)</label>
-                    <label><input type="radio" name="whatsappNumber" value="5353803134"> Carmen (+53 53803134)</label>
-                </div>
-            </div>
+            <!-- ELIMINADO: selector de número de WhatsApp -->
             <div class="delivery-form" id="deliveryForm">
                 <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" placeholder="Tu nombre" /></div>
                 <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" placeholder="Tus apellidos" /></div>
@@ -1429,7 +1403,7 @@
         </div>
     </div>
 
-    <!-- ========== FOOTER (ACTUALIZADO CON MISMO COLOR QUE HEADER) ========== -->
+    <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
     </footer>
@@ -1439,15 +1413,18 @@
     <!-- ============================================================ -->
     <script>
         // ============================================================
-        // CONFIGURACIÓN
+        //  CONFIGURACIÓN
         // ============================================================
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
 
-        // 🔑 Credenciales de Green-API (las tuyas)
-        const GREEN_API_INSTANCE = "710722715742";
+        // ===== GREEN-API CREDENCIALES =====
+        const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
+
+        // ===== ID DEL GRUPO DE WHATSAPP (ya actualizado) =====
+        const GRUPO_CHAT_ID = "120363410173464743@g.us";
 
         let productos = [];
         let carrito = [];
@@ -1462,7 +1439,7 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================================
-        // AUTH (sin cambios)
+        //  AUTH
         // ============================================================
         function setAuthToken(token) {
             if (token) { localStorage.setItem('pb_token', token); authToken = token; }
@@ -1619,7 +1596,7 @@
         });
 
         // ============================================================
-        // MODALES (sin cambios)
+        //  MODALES
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1818,7 +1795,7 @@
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
-        // API
+        //  API
         // ============================================================
         async function obtenerProductos() {
             try {
@@ -1921,7 +1898,7 @@
         }
 
         // ============================================================
-        // OBTENER LISTA DE FOTOS
+        //  OBTENER LISTA DE FOTOS
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1939,7 +1916,7 @@
         }
 
         // ============================================================
-        // CATEGORÍAS
+        //  CATEGORÍAS
         // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
@@ -2030,13 +2007,13 @@
         });
 
         // ============================================================
-        // BÚSQUEDA
+        //  BÚSQUEDA
         // ============================================================
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        // RENDERIZAR PRODUCTOS
+        //  RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2157,7 +2134,7 @@
         }
 
         // ============================================================
-        // PÁGINA DE DETALLE
+        //  PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2349,7 +2326,7 @@
         }
 
         // ============================================================
-        // CARRITO
+        //  CARRITO
         // ============================================================
         function mostrarAddToCartModal() { document.getElementById('addToCartModal').classList.add('active'); }
         function cerrarAddToCartModal() { document.getElementById('addToCartModal').classList.remove('active'); }
@@ -2434,7 +2411,7 @@
         });
 
         // ============================================================
-        // PROCESO DE PEDIDO (CON ENVÍO AUTOMÁTICO POR GREEN-API)
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2517,7 +2494,7 @@
         }
 
         // ============================================================
-        // CONFIRMAR PEDIDO (CON GREEN-API)
+        //  CONFIRMAR PEDIDO FINAL (CON GREEN-API Y GRUPO)
         // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
@@ -2535,13 +2512,6 @@
                 alert('Por favor, ingresa una dirección de entrega.');
                 return;
             }
-
-            const whatsappSelected = document.querySelector('input[name="whatsappNumber"]:checked');
-            if (!whatsappSelected) {
-                alert('Por favor, selecciona un número de WhatsApp para el pedido.');
-                return;
-            }
-            const whatsappNumber = whatsappSelected.value; // Ej: "5358388494" (sin +)
 
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
@@ -2565,10 +2535,9 @@
 
             try {
                 let pedidoId = '';
-                let mensaje = '';
 
                 if (tipoEntregaSeleccionado === 'Domicilio') {
-                    // ----- DOMICILIO -----
+                    // DOMICILIO: Guardar en colección Domicilios
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
                         Direccion_Entrega: direccion,
@@ -2593,27 +2562,8 @@
                     const domRecord = await respDom.json();
                     pedidoId = domRecord.id.slice(-6);
 
-                    // Mensaje para Domicilio
-                    mensaje = `*🆕 Nuevo pedido (Domicilio)*\n\n`;
-                    mensaje += `👤 Cliente: ${nombreCompleto}\n`;
-                    mensaje += `📞 Teléfono: ${telefono}\n`;
-                    mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
-                    mensaje += `📍 Dirección: ${direccion}\n`;
-                    if (referencias) mensaje += `📝 Referencias: ${referencias}\n`;
-                    mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
-                    mensaje += `\n📋 Productos:\n`;
-                    productosPedido.forEach(item => {
-                        mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
-                    });
-                    mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
-                    mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
-                    mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
-                    mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
-                    mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
-                    mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
-
                 } else {
-                    // ----- RETIRO EN TIENDA -----
+                    // RETIRO EN TIENDA: Guardar en colección PedidosTienda
                     const ahora = new Date();
                     const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
@@ -2641,65 +2591,68 @@
 
                     const tiendaRecord = await respTienda.json();
                     pedidoId = tiendaRecord.id.slice(-6);
-                    const fechaLimiteStr = fechaLimite.toLocaleString('es-ES', {
-                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-
-                    // Mensaje para Retiro en Tienda
-                    mensaje = `*🆕 Nuevo pedido (Retiro en tienda)*\n\n`;
-                    mensaje += `👤 Cliente: ${nombreCompleto}\n`;
-                    mensaje += `📞 Teléfono: ${telefono}\n`;
-                    mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
-                    mensaje += `📦 Método: *Retiro en tienda* 🏪\n`;
-                    mensaje += `\n📋 Productos:\n`;
-                    productosPedido.forEach(item => {
-                        mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
-                    });
-                    mensaje += `\n💰 Total a pagar: $${totalFinal.toFixed(2)}`;
-                    mensaje += `\n\n⏳ Tienes 24 horas para recoger tu pedido.`;
-                    mensaje += `\n📅 Fecha límite: ${fechaLimiteStr}`;
-                    mensaje += `\n📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara`;
-                    mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
-                    mensaje += `\n📅 Fecha del pedido: ${new Date().toLocaleString('es-ES')}`;
                 }
 
-                // ----- ENVIAR MENSAJE POR GREEN-API -----
-                const greenApiUrl = `https://api.green-api.com/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`;
-                const greenBody = {
-                    chatId: `${whatsappNumber}@c.us`, // El número debe tener código de país, sin '+'
+                // =====================================================
+                //  CONSTRUIR MENSAJE
+                // =====================================================
+                let mensaje = `*🆕 Nuevo pedido*\n\n`;
+                mensaje += `👤 Cliente: ${nombreCompleto}\n`;
+                mensaje += `📞 Teléfono: ${telefono}\n`;
+                mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
+                mensaje += `📦 Tipo: ${tipoEntregaSeleccionado === 'Domicilio' ? 'Domicilio' : 'Retiro en tienda'}\n`;
+                if (tipoEntregaSeleccionado === 'Domicilio') {
+                    mensaje += `📍 Dirección: ${direccion}\n`;
+                    if (referencias) mensaje += `📝 Referencias: ${referencias}\n`;
+                    mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
+                }
+                mensaje += `\n📋 Productos:\n`;
+                productosPedido.forEach(item => {
+                    mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
+                });
+                mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
+                if (tipoEntregaSeleccionado === 'Domicilio') mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
+                mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
+                mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
+                mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
+
+                // =====================================================
+                //  ENVIAR MENSAJE AL GRUPO DE WHATSAPP
+                // =====================================================
+                const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
+                const body = {
+                    chatId: GRUPO_CHAT_ID,
                     message: mensaje
                 };
 
-                const greenResponse = await fetch(greenApiUrl, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(greenBody)
+                    body: JSON.stringify(body)
                 });
 
-                if (!greenResponse.ok) {
-                    const errorText = await greenResponse.text();
-                    console.error('Error en Green-API:', errorText);
-                    // No interrumpimos el flujo, solo mostramos un aviso
-                    alert('⚠️ El pedido se guardó, pero hubo un problema al enviar la notificación. Por favor, contacta a la tienda.');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error al enviar WhatsApp al grupo:', errorText);
                 } else {
-                    console.log('✅ Notificación WhatsApp enviada correctamente.');
+                    console.log('✅ Mensaje enviado al grupo de WhatsApp.');
                 }
 
-                // ----- VACIAR CARRITO Y FINALIZAR -----
+                // Vaciar carrito
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
                 // Mostrar mensaje de éxito al cliente
-                alert('✅ ¡Pedido realizado con éxito! Recibirás la confirmación en breve.\n\nGracias por comprar en B&B.');
+                alert('✅ ¡Pedido realizado con éxito! Te esperamos en la tienda o en tu domicilio.');
 
-                // Recargar productos (por si hubo cambios en stock)
+                // Recargar productos
                 productos = await obtenerProductos();
                 renderizarProductos();
 
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
-                alert('❌ Error al procesar el pedido: ' + e.message);
+                alert('Error al procesar el pedido: ' + e.message);
                 productos = await obtenerProductos();
                 renderizarProductos();
             }
@@ -2708,7 +2661,7 @@
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
         // ============================================================
-        // MANEJO DEL BOTÓN "ATRÁS"
+        //  MANEJO DEL BOTÓN "ATRÁS"
         // ============================================================
         window.addEventListener('popstate', function(event) {
             if (!event.state || !event.state.productoId) {
@@ -2719,7 +2672,7 @@
         });
 
         // ============================================================
-        // INICIALIZACIÓN
+        //  INICIALIZACIÓN
         // ============================================================
         async function init() {
             actualizarUIUsuario();
