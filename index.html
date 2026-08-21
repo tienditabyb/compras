@@ -1439,11 +1439,15 @@
     <!-- ============================================================ -->
     <script>
         // ============================================================
-        //  CONFIGURACIÓN
+        // CONFIGURACIÓN
         // ============================================================
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
+
+        // 🔑 Credenciales de Green-API (las tuyas)
+        const GREEN_API_INSTANCE = "710722715742";
+        const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
 
         let productos = [];
         let carrito = [];
@@ -1458,7 +1462,7 @@
         document.getElementById('year').textContent = new Date().getFullYear();
 
         // ============================================================
-        //  AUTH (sin cambios, se mantiene igual)
+        // AUTH (sin cambios)
         // ============================================================
         function setAuthToken(token) {
             if (token) { localStorage.setItem('pb_token', token); authToken = token; }
@@ -1615,7 +1619,7 @@
         });
 
         // ============================================================
-        //  MODALES (sin cambios)
+        // MODALES (sin cambios)
         // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
@@ -1814,7 +1818,7 @@
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
-        //  API
+        // API
         // ============================================================
         async function obtenerProductos() {
             try {
@@ -1917,7 +1921,7 @@
         }
 
         // ============================================================
-        //  OBTENER LISTA DE FOTOS
+        // OBTENER LISTA DE FOTOS
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1935,7 +1939,7 @@
         }
 
         // ============================================================
-        //  CATEGORÍAS
+        // CATEGORÍAS
         // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
@@ -2026,13 +2030,13 @@
         });
 
         // ============================================================
-        //  BÚSQUEDA
+        // BÚSQUEDA
         // ============================================================
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS
+        // RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2153,7 +2157,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE
+        // PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2345,7 +2349,7 @@
         }
 
         // ============================================================
-        //  CARRITO
+        // CARRITO
         // ============================================================
         function mostrarAddToCartModal() { document.getElementById('addToCartModal').classList.add('active'); }
         function cerrarAddToCartModal() { document.getElementById('addToCartModal').classList.remove('active'); }
@@ -2430,7 +2434,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO (VERSIÓN MODIFICADA)
+        // PROCESO DE PEDIDO (CON ENVÍO AUTOMÁTICO POR GREEN-API)
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2513,7 +2517,7 @@
         }
 
         // ============================================================
-        //  CONFIRMAR PEDIDO (MODIFICADO PARA DOMICILIO Y TIENDA)
+        // CONFIRMAR PEDIDO (CON GREEN-API)
         // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
@@ -2527,7 +2531,6 @@
                 return;
             }
 
-            // Para Domicilio, la dirección es obligatoria
             if (tipoEntregaSeleccionado === 'Domicilio' && !direccion) {
                 alert('Por favor, ingresa una dirección de entrega.');
                 return;
@@ -2538,7 +2541,7 @@
                 alert('Por favor, selecciona un número de WhatsApp para el pedido.');
                 return;
             }
-            const whatsappNumber = whatsappSelected.value;
+            const whatsappNumber = whatsappSelected.value; // Ej: "5358388494" (sin +)
 
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
@@ -2561,10 +2564,11 @@
             const totalFinal = subtotal + envio;
 
             try {
+                let pedidoId = '';
+                let mensaje = '';
+
                 if (tipoEntregaSeleccionado === 'Domicilio') {
-                    // =====================================================
-                    // DOMICILIO: Guardar en colección Domicilios (sin venta ni descuento)
-                    // =====================================================
+                    // ----- DOMICILIO -----
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
                         Direccion_Entrega: direccion,
@@ -2587,16 +2591,15 @@
                     }
 
                     const domRecord = await respDom.json();
-                    const pedidoId = domRecord.id.slice(-6);
+                    pedidoId = domRecord.id.slice(-6);
 
-                    // Mensaje WhatsApp Domicilio
-                    let mensaje = `*🆕 Nuevo pedido (Pendiente)*\n\n`;
+                    // Mensaje para Domicilio
+                    mensaje = `*🆕 Nuevo pedido (Domicilio)*\n\n`;
                     mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                     mensaje += `📞 Teléfono: ${telefono}\n`;
                     mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
-                    mensaje += `📦 Tipo de entrega: *Domicilio*\n`;
                     mensaje += `📍 Dirección: ${direccion}\n`;
-                    if (referencias) { mensaje += `📝 Referencias: ${referencias}\n`; }
+                    if (referencias) mensaje += `📝 Referencias: ${referencias}\n`;
                     mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
                     mensaje += `\n📋 Productos:\n`;
                     productosPedido.forEach(item => {
@@ -2607,17 +2610,12 @@
                     mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
                     mensaje += `\n\n🟡 Estado: Pendiente (esperando confirmación de entrega)`;
                     mensaje += `\n🆔 ID Pedido: #${pedidoId}`;
-
-                    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
-                    window.open(url, '_blank');
+                    mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
 
                 } else {
-                    // =====================================================
-                    // RETIRO EN TIENDA: Guardar en colección PedidosTienda
-                    // =====================================================
-                    // Calcular fecha límite (24 horas después)
+                    // ----- RETIRO EN TIENDA -----
                     const ahora = new Date();
-                    const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000); // 24h
+                    const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
                     const tiendaData = {
                         Cliente_Nombre: nombreCompleto,
@@ -2642,13 +2640,13 @@
                     }
 
                     const tiendaRecord = await respTienda.json();
-                    const pedidoId = tiendaRecord.id.slice(-6);
+                    pedidoId = tiendaRecord.id.slice(-6);
                     const fechaLimiteStr = fechaLimite.toLocaleString('es-ES', {
                         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                     });
 
-                    // Mensaje WhatsApp para Retiro en Tienda (con aviso de 24h)
-                    let mensaje = `*🆕 Nuevo pedido (Pendiente - Retiro en tienda)*\n\n`;
+                    // Mensaje para Retiro en Tienda
+                    mensaje = `*🆕 Nuevo pedido (Retiro en tienda)*\n\n`;
                     mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                     mensaje += `📞 Teléfono: ${telefono}\n`;
                     mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
@@ -2662,24 +2660,46 @@
                     mensaje += `\n📅 Fecha límite: ${fechaLimiteStr}`;
                     mensaje += `\n📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara`;
                     mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
-
-                    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensaje)}`;
-                    window.open(url, '_blank');
+                    mensaje += `\n📅 Fecha del pedido: ${new Date().toLocaleString('es-ES')}`;
                 }
 
-                // Vaciar carrito
+                // ----- ENVIAR MENSAJE POR GREEN-API -----
+                const greenApiUrl = `https://api.green-api.com/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`;
+                const greenBody = {
+                    chatId: `${whatsappNumber}@c.us`, // El número debe tener código de país, sin '+'
+                    message: mensaje
+                };
+
+                const greenResponse = await fetch(greenApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(greenBody)
+                });
+
+                if (!greenResponse.ok) {
+                    const errorText = await greenResponse.text();
+                    console.error('Error en Green-API:', errorText);
+                    // No interrumpimos el flujo, solo mostramos un aviso
+                    alert('⚠️ El pedido se guardó, pero hubo un problema al enviar la notificación. Por favor, contacta a la tienda.');
+                } else {
+                    console.log('✅ Notificación WhatsApp enviada correctamente.');
+                }
+
+                // ----- VACIAR CARRITO Y FINALIZAR -----
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
+                // Mostrar mensaje de éxito al cliente
+                alert('✅ ¡Pedido realizado con éxito! Recibirás la confirmación en breve.\n\nGracias por comprar en B&B.');
+
+                // Recargar productos (por si hubo cambios en stock)
                 productos = await obtenerProductos();
                 renderizarProductos();
 
-                alert('✅ Pedido registrado correctamente. Revisa WhatsApp para confirmar.');
-
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
-                alert('Error al procesar el pedido: ' + e.message);
+                alert('❌ Error al procesar el pedido: ' + e.message);
                 productos = await obtenerProductos();
                 renderizarProductos();
             }
@@ -2688,7 +2708,7 @@
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
         // ============================================================
-        //  MANEJO DEL BOTÓN "ATRÁS"
+        // MANEJO DEL BOTÓN "ATRÁS"
         // ============================================================
         window.addEventListener('popstate', function(event) {
             if (!event.state || !event.state.productoId) {
@@ -2699,7 +2719,7 @@
         });
 
         // ============================================================
-        //  INICIALIZACIÓN
+        // INICIALIZACIÓN
         // ============================================================
         async function init() {
             actualizarUIUsuario();
