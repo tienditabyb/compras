@@ -1367,7 +1367,6 @@
                 <div class="linea envio" id="resumenEnvio"><span>Envío</span> <span id="resumenEnvioMonto">$0.00</span></div>
                 <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
             </div>
-            <!-- ELIMINADO: selector de número de WhatsApp -->
             <div class="delivery-form" id="deliveryForm">
                 <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" placeholder="Tu nombre" /></div>
                 <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" placeholder="Tus apellidos" /></div>
@@ -1423,7 +1422,7 @@
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
 
-        // ===== ID DEL GRUPO DE WHATSAPP (ya actualizado) =====
+        // ===== ID DEL GRUPO DE WHATSAPP =====
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
 
         let productos = [];
@@ -2643,8 +2642,10 @@
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
-                // Mostrar mensaje de éxito al cliente
-                alert('✅ ¡Pedido realizado con éxito! Te esperamos en la tienda o en tu domicilio.');
+                // =====================================================
+                //  MOSTRAR MENSAJE DE ÉXITO (MODIFICADO)
+                // =====================================================
+                alert('✅ Pedido realizado con éxito. ¡Gracias por comprar en La Tiendita B&B!');
 
                 // Recargar productos
                 productos = await obtenerProductos();
