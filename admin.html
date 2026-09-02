@@ -334,14 +334,13 @@
         }
         .estado-pendiente { background: #fef3c7; color: #d97706; }
         .estado-en-proceso { background: #dbeafe; color: #2563eb; }
+        .estado-en-camino { background: #93c5fd; color: #1d4ed8; }
         .estado-aduana { background: #e0e7ff; color: #4f46e5; }
         .estado-local { background: #d1fae5; color: #059669; }
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
 
         /* Para compatibilidad con estados anteriores */
-        .estado-en-camino { background: #dbeafe; color: #2563eb; }
-        .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-completado { background: #d1fae5; color: #059669; }
 
         .estado-select {
@@ -1120,6 +1119,7 @@
                                 <option value="Todos">Todos</option>
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En proceso">En proceso</option>
+                                <option value="En camino">En camino</option>
                                 <option value="Procesando en aduana de Cuba">Procesando en aduana de Cuba</option>
                                 <option value="En el local TienditaB&B lista para la entrega">En el local TienditaB&B lista para la entrega</option>
                                 <option value="Entregado">Entregado</option>
@@ -1684,7 +1684,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con nuevos estados)
+        // RENDER ENCARGOS (con nuevos estados, incluyendo "En camino")
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1700,6 +1700,7 @@
                 let badgeClass = 'estado-pendiente';
                 if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
                 else if (estado === 'En proceso') badgeClass = 'estado-en-proceso';
+                else if (estado === 'En camino') badgeClass = 'estado-en-camino';
                 else if (estado === 'Procesando en aduana de Cuba') badgeClass = 'estado-aduana';
                 else if (estado === 'En el local TienditaB&B lista para la entrega') badgeClass = 'estado-local';
                 else if (estado === 'Entregado') badgeClass = 'estado-entregado';
@@ -1728,10 +1729,11 @@
                     }
                 }
 
-                // Opciones del select (solo los estados permitidos)
+                // Opciones del select (todos los estados, excepto "Cancelado" que se añade manual)
                 const opciones = `
                     <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                     <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
+                    <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
                     <option value="Procesando en aduana de Cuba" ${estado === 'Procesando en aduana de Cuba' ? 'selected' : ''}>Procesando en aduana de Cuba</option>
                     <option value="En el local TienditaB&B lista para la entrega" ${estado === 'En el local TienditaB&B lista para la entrega' ? 'selected' : ''}>En el local TienditaB&B lista para la entrega</option>
                     <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
@@ -1873,6 +1875,11 @@
                     case 'En proceso':
                         mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
                             `✅ Tu encargo de *${producto}* está en proceso de gestión. Estamos trabajando en ello. 📦\n\n` +
+                            `Gracias por confiar en B&B. 🙌`;
+                        break;
+                    case 'En camino':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `🚚 Tu encargo de *${producto}* está en camino hacia Cuba. Pronto estará disponible.\n\n` +
                             `Gracias por confiar en B&B. 🙌`;
                         break;
                     case 'Procesando en aduana de Cuba':
