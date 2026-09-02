@@ -1989,13 +1989,13 @@
             encargoLi.appendChild(encargoLink);
             ul.appendChild(encargoLi);
 
-            // Línea separadora visual (opcional)
+            // Línea separadora visual
             const sepLi = document.createElement('li');
             sepLi.style.borderTop = '1px solid #e2e8f0';
             sepLi.style.margin = '6px 0';
             ul.appendChild(sepLi);
 
-            // Categorías normales
+            // Categorías normales (excluyendo productos de encargo)
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo';
@@ -2048,7 +2048,6 @@
             });
             dropdown.appendChild(encargoDrop);
 
-            // Separador visual
             const sepDrop = document.createElement('div');
             sepDrop.style.borderTop = '1px solid #e2e8f0';
             sepDrop.style.margin = '4px 12px';
@@ -2123,11 +2122,17 @@
             setTimeout(() => {
                 let filtrados = productos;
                 if (categoriaSeleccionada === "PedidosPorEncargo") {
+                    // Solo mostrar productos marcados como encargo
                     filtrados = filtrados.filter(p => p.Es_Encargo === true);
                 } else if (categoriaSeleccionada !== "Todas") {
-                    filtrados = filtrados.filter(p =>
-                        (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
-                    );
+                    // Categorías normales: excluir los encargos
+                    filtrados = filtrados.filter(p => {
+                        const coincideCategoria = (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase();
+                        return coincideCategoria && p.Es_Encargo !== true;
+                    });
+                } else {
+                    // "Todas": excluir los encargos
+                    filtrados = filtrados.filter(p => p.Es_Encargo !== true);
                 }
                 const busqueda = getBusqueda();
                 if (busqueda) {
@@ -2850,6 +2855,7 @@
                     throw new Error(err.message || 'Error al guardar el encargo');
                 }
 
+                // Enviar notificación al grupo de WhatsApp
                 const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
                     `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
                     `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
@@ -2861,13 +2867,20 @@
                     `🆔 ID Encargo: ${(await resp.json()).id.slice(-6)}`;
 
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                await fetch(url, {
+                const sendResp = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
                 });
 
-                alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
+                if (!sendResp.ok) {
+                    console.error('Error al enviar WhatsApp:', await sendResp.text());
+                    // No lanzamos error para no interrumpir el flujo, solo mostramos alerta
+                    alert('⚠️ La solicitud se guardó, pero hubo un error al enviar la notificación. Revisa la consola.');
+                } else {
+                    alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
+                }
+
                 cerrarEncargoModal();
 
             } catch (e) {
