@@ -333,11 +333,15 @@
             text-transform: uppercase;
         }
         .estado-pendiente { background: #fef3c7; color: #d97706; }
-        .estado-en-camino { background: #dbeafe; color: #2563eb; }
+        .estado-en-proceso { background: #dbeafe; color: #2563eb; }
+        .estado-aduana { background: #e0e7ff; color: #4f46e5; }
+        .estado-local { background: #d1fae5; color: #059669; }
         .estado-entregado { background: #d1fae5; color: #059669; }
-        .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
-        .estado-proceso { background: #dbeafe; color: #2563eb; }
+
+        /* Para compatibilidad con estados anteriores */
+        .estado-en-camino { background: #dbeafe; color: #2563eb; }
+        .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-completado { background: #d1fae5; color: #059669; }
 
         .estado-select {
@@ -1116,7 +1120,9 @@
                                 <option value="Todos">Todos</option>
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En proceso">En proceso</option>
-                                <option value="Completado">Completado</option>
+                                <option value="Procesando en aduana de Cuba">Procesando en aduana de Cuba</option>
+                                <option value="En el local TienditaB&B lista para la entrega">En el local TienditaB&B lista para la entrega</option>
+                                <option value="Entregado">Entregado</option>
                                 <option value="Cancelado">Cancelado</option>
                             </select>
                         </div>
@@ -1678,7 +1684,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con temporizador)
+        // RENDER ENCARGOS (con nuevos estados)
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1690,9 +1696,15 @@
             const ahora = new Date();
             for (const e of encargos) {
                 const estado = e.estado || 'Pendiente';
-                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
-                                   estado === 'En proceso' ? 'estado-proceso' :
-                                   estado === 'Completado' ? 'estado-completado' : 'estado-cancelado';
+                // Mapeo de clases CSS para badges
+                let badgeClass = 'estado-pendiente';
+                if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
+                else if (estado === 'En proceso') badgeClass = 'estado-en-proceso';
+                else if (estado === 'Procesando en aduana de Cuba') badgeClass = 'estado-aduana';
+                else if (estado === 'En el local TienditaB&B lista para la entrega') badgeClass = 'estado-local';
+                else if (estado === 'Entregado') badgeClass = 'estado-entregado';
+                else if (estado === 'Cancelado') badgeClass = 'estado-cancelado';
+
                 const fecha = e.fecha_solicitud ? new Date(e.fecha_solicitud).toLocaleString('es-ES') : 'Sin fecha';
                 const telefono = e.usuario_telefono || 'Sin teléfono';
                 const nombreCliente = e.usuario_nombre || 'Cliente';
@@ -1716,6 +1728,16 @@
                     }
                 }
 
+                // Opciones del select (solo los estados permitidos)
+                const opciones = `
+                    <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
+                    <option value="Procesando en aduana de Cuba" ${estado === 'Procesando en aduana de Cuba' ? 'selected' : ''}>Procesando en aduana de Cuba</option>
+                    <option value="En el local TienditaB&B lista para la entrega" ${estado === 'En el local TienditaB&B lista para la entrega' ? 'selected' : ''}>En el local TienditaB&B lista para la entrega</option>
+                    <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                    <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                `;
+
                 html += `
                     <div class="list-item" id="encargo-item-${e.id}">
                         <div class="left">
@@ -1729,11 +1751,8 @@
                             <span class="estado-badge ${badgeClass}">${estado}</span>
                             <select class="estado-select" id="encargo-select-${e.id}" 
                                     onchange="cambiarEstadoEncargo('${e.id}', this.value)"
-                                    ${estado === 'Cancelado' || estado === 'Completado' ? 'disabled' : ''}>
-                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
-                                <option value="Completado" ${estado === 'Completado' ? 'selected' : ''}>Completado</option>
-                                <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                                    ${estado === 'Entregado' || estado === 'Cancelado' ? 'disabled' : ''}>
+                                ${opciones}
                             </select>
                             <button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬 Notificar</button>
                         </div>
@@ -1774,9 +1793,13 @@
                 }
 
                 let data = { estado: nuevoEstado, fecha_actualizacion: new Date().toISOString() };
+                // Si se cambia a Pendiente, establecer fecha límite de pago (24h)
                 if (nuevoEstado === 'Pendiente') {
                     const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                     data.fecha_limite_pago = limite.toISOString();
+                } else {
+                    // Si cambia a otro estado, eliminar fecha_limite_pago (opcional)
+                    data.fecha_limite_pago = null;
                 }
 
                 await apiRequest(`Encargos/records/${id}`, {
@@ -1787,11 +1810,14 @@
                 encargoActual.estado = nuevoEstado;
                 if (nuevoEstado === 'Pendiente') {
                     encargoActual.fecha_limite_pago = data.fecha_limite_pago;
+                } else {
+                    encargoActual.fecha_limite_pago = null;
                 }
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                if (nuevoEstado === 'Pendiente' || nuevoEstado === 'Completado' || nuevoEstado === 'En proceso') {
+                // Notificar solo si no es Cancelado (ya se notifica aparte)
+                if (nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
             } catch (e) {
@@ -1831,25 +1857,45 @@
                     `Tu encargo de *${producto}* ha sido *CANCELADO* porque no se realizó el pago en el plazo de 24h.\n` +
                     `Si aún estás interesado, vuelve a solicitarlo. 🙌\n\n` +
                     `Gracias por confiar en B&B.`;
-            } else if (estado === 'Pendiente') {
-                mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
-                    `Usted ha solicitado un Encargo del siguiente Producto:\n` +
-                    `🛒 *${producto}*\n` +
-                    `🔢 Cantidad: ${cantidad}\n` +
-                    `💰 Costo total: $${total.toFixed(2)}\n` +
-                    `💵 Debe ingresar la *mitad del costo ($${mitad.toFixed(2)})* antes de las siguientes 24h en la Tiendita B&B para confirmar su pedido.\n` +
-                    `📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n` +
-                    `⏳ Plazo: 24 horas.\n\n` +
-                    `¡Gracias por tu compra! 🙌`;
-            } else if (estado === 'En proceso') {
-                mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
-                    `Tu encargo de *${producto}* está en proceso. Estamos gestionándolo. 📦\n\n` +
-                    `Gracias por confiar en B&B. 🙌`;
-            } else if (estado === 'Completado') {
-                mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
-                    `✅ Tu encargo de *${producto}* ha sido completado. ¡Ya está listo!\n` +
-                    `Puedes pasar a recogerlo o te lo enviamos según acordamos. 📦\n\n` +
-                    `Gracias por comprar en B&B. 🙌`;
+            } else {
+                switch (estado) {
+                    case 'Pendiente':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `Usted ha solicitado un Encargo del siguiente Producto:\n` +
+                            `🛒 *${producto}*\n` +
+                            `🔢 Cantidad: ${cantidad}\n` +
+                            `💰 Costo total: $${total.toFixed(2)}\n` +
+                            `💵 Debe ingresar la *mitad del costo ($${mitad.toFixed(2)})* antes de las siguientes 24h en la Tiendita B&B para confirmar su pedido.\n` +
+                            `📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n` +
+                            `⏳ Plazo: 24 horas.\n\n` +
+                            `¡Gracias por tu compra! 🙌`;
+                        break;
+                    case 'En proceso':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `✅ Tu encargo de *${producto}* está en proceso de gestión. Estamos trabajando en ello. 📦\n\n` +
+                            `Gracias por confiar en B&B. 🙌`;
+                        break;
+                    case 'Procesando en aduana de Cuba':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `📦 Tu encargo de *${producto}* está siendo procesado en *Aduana de Cuba*. Este proceso puede demorar algunos días.\n` +
+                            `Te mantendremos informado. 🙌`;
+                        break;
+                    case 'En el local TienditaB&B lista para la entrega':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `🎉 ¡Buenas noticias! Tu encargo de *${producto}* ya se encuentra en el local *TienditaB&B* listo para ser entregado.\n` +
+                            `📍 Dirección: Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n` +
+                            `Puedes pasar a recogerlo en nuestro horario de atención. ¡Te esperamos! 🙌`;
+                        break;
+                    case 'Entregado':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `✅ Tu encargo de *${producto}* ha sido *ENTREGADO*.\n` +
+                            `¡Disfruta tu compra! Gracias por confiar en B&B. 🎉`;
+                        break;
+                    default:
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `Tu encargo de *${producto}* ha cambiado de estado a: *${estado}*.\n` +
+                            `Gracias por confiar en B&B. 🙌`;
+                }
             }
 
             if (mensaje) {
