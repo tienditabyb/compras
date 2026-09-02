@@ -83,22 +83,6 @@
             gap: 12px;
             flex-shrink: 0;
         }
-        .header__actions .btn-encargo {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 30px;
-            padding: 6px 16px;
-            color: #ffffff;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-        .header__actions .btn-encargo:hover {
-            background: rgba(255,255,255,0.25);
-            border-color: rgba(255,255,255,0.4);
-        }
 
         /* ===== MENÚ DE CUENTA MODERNO ===== */
         .account-dropdown {
@@ -927,7 +911,6 @@
             .detail-page .detail-container .galeria .miniaturas img { width: 40px; height: 40px; }
             .btn-categories { font-size: 0.75rem; padding: 4px 10px; }
             .btn-categories .icon { font-size: 0.9rem; }
-            .header__actions .btn-encargo { font-size: 0.7rem; padding: 4px 10px; }
         }
 
         @media (min-width: 769px) {
@@ -1249,7 +1232,6 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
-                <button class="btn-encargo" onclick="abrirFormularioEncargo()">📝 Encargo</button>
                 <div class="account-dropdown" id="accountDropdown">
                     <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
                         <span class="avatar" id="accountAvatar">👤</span>
@@ -1358,39 +1340,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE ENCARGO -->
-    <div class="modal-overlay" id="encargoModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
-            <h2>📝 Solicitar Encargo</h2>
-            <p style="text-align:center; color:#64748b; margin-bottom:15px;">Describe el producto que necesitas y te lo conseguiremos.</p>
-            <form id="encargoForm">
-                <div class="form-group">
-                    <label>Nombre completo *</label>
-                    <input type="text" id="encNombre" required placeholder="Tu nombre" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono *</label>
-                    <input type="tel" id="encTelefono" required placeholder="Número de contacto" />
-                </div>
-                <div class="form-group">
-                    <label>Correo electrónico</label>
-                    <input type="email" id="encEmail" placeholder="tu@email.com (opcional)" />
-                </div>
-                <div class="form-group">
-                    <label>Descripción del producto *</label>
-                    <textarea id="encDescripcion" required rows="3" placeholder="Marca, modelo, color, talla, enlace, etc."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Cantidad *</label>
-                    <input type="number" id="encCantidad" min="1" value="1" required />
-                </div>
-                <div id="encError" class="error-msg"></div>
-                <button type="submit" class="btn-primary">Enviar encargo</button>
-            </form>
-        </div>
-    </div>
-
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h2>🛒 Tu Carrito</h2>
@@ -1477,6 +1426,7 @@
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
 
         let productos = [];
+        let encargos = []; // NUEVO
         let carrito = [];
         let categoriaSeleccionada = "Todas";
         let paginaActual = 1;
@@ -1845,97 +1795,6 @@
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
-        //  ENCARGOS (Frontend)
-        // ============================================================
-        function abrirFormularioEncargo() {
-            document.getElementById('encargoModal').classList.add('active');
-            document.getElementById('encError').classList.remove('show');
-            // Prellenar con datos del usuario si está logueado
-            if (usuarioActual) {
-                let nombreCompleto = '';
-                if (usuarioActual.nombre && usuarioActual.apellidos) {
-                    nombreCompleto = `${usuarioActual.nombre} ${usuarioActual.apellidos}`.trim();
-                } else if (usuarioActual.nombre) {
-                    nombreCompleto = usuarioActual.nombre;
-                } else if (usuarioActual.name) {
-                    nombreCompleto = usuarioActual.name;
-                }
-                document.getElementById('encNombre').value = nombreCompleto;
-                document.getElementById('encTelefono').value = usuarioActual.telefono || '';
-                document.getElementById('encEmail').value = usuarioActual.email || '';
-            }
-        }
-
-        function cerrarEncargoModal() {
-            document.getElementById('encargoModal').classList.remove('active');
-        }
-
-        document.getElementById('encargoForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const nombre = document.getElementById('encNombre').value.trim();
-            const telefono = document.getElementById('encTelefono').value.trim();
-            const email = document.getElementById('encEmail').value.trim();
-            const descripcion = document.getElementById('encDescripcion').value.trim();
-            const cantidad = parseInt(document.getElementById('encCantidad').value) || 1;
-            const errorEl = document.getElementById('encError');
-
-            if (!nombre || !telefono || !descripcion) {
-                errorEl.textContent = 'Completa todos los campos obligatorios.';
-                errorEl.classList.add('show');
-                return;
-            }
-
-            try {
-                const data = {
-                    cliente_nombre: nombre,
-                    cliente_telefono: telefono,
-                    cliente_email: email || '',
-                    descripcion: descripcion,
-                    cantidad: cantidad,
-                    estado: 'Pendiente',
-                    fecha_encargo: new Date().toISOString(),
-                    usuario_id: usuarioActual ? usuarioActual.id : null
-                };
-
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (!resp.ok) {
-                    const err = await resp.json();
-                    throw new Error(err.message || 'Error al enviar el encargo');
-                }
-
-                alert('✅ Encargo enviado correctamente. Nos pondremos en contacto contigo.');
-                cerrarEncargoModal();
-                this.reset();
-
-                // Notificar al administrador por WhatsApp (grupo)
-                await notificarEncargoAdmin(nombre, telefono, descripcion, cantidad);
-
-            } catch (e) {
-                errorEl.textContent = e.message;
-                errorEl.classList.add('show');
-            }
-        });
-
-        async function notificarEncargoAdmin(cliente, telefono, descripcion, cantidad) {
-            const mensaje = `*📦 Nuevo encargo*\n\nCliente: ${cliente}\nTeléfono: ${telefono}\nProducto: ${descripcion}\nCantidad: ${cantidad}\n\nRevisa el panel de administración.`;
-            const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-            const body = {
-                chatId: GRUPO_CHAT_ID,
-                message: mensaje
-            };
-            try {
-                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            } catch (e) {
-                console.error('Error notificando al admin:', e);
-            }
-        }
-
-        // ============================================================
         //  API
         // ============================================================
         async function obtenerProductos() {
@@ -1955,6 +1814,18 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     return data.items.map(c => c.nombre).filter(Boolean);
+                }
+                return [];
+            } catch (e) { return []; }
+        }
+
+        // NUEVO: Obtener encargos disponibles
+        async function obtenerEncargos() {
+            try {
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records?filter=Disponible=true`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    return data.items;
                 }
                 return [];
             } catch (e) { return []; }
@@ -2063,6 +1934,7 @@
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
+            // Todo
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo';
@@ -2078,6 +1950,22 @@
             allLi.appendChild(allLink);
             ul.appendChild(allLi);
 
+            // Encargos (categoría virtual)
+            const encLi = document.createElement('li');
+            const encLink = document.createElement('a');
+            encLink.textContent = '🔹 Encargos';
+            encLink.dataset.categoria = 'Encargos';
+            encLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                categoriaSeleccionada = 'Encargos';
+                actualizarCategoriaActiva(encLink);
+                paginaActual = 1;
+                renderizarProductos();
+            });
+            encLi.appendChild(encLink);
+            ul.appendChild(encLi);
+
+            // Categorías reales
             cats.forEach(cat => {
                 const li = document.createElement('li');
                 const a = document.createElement('a');
@@ -2094,6 +1982,7 @@
                 ul.appendChild(li);
             });
 
+            // Dropdown móvil
             const dropdown = document.getElementById('categoriesDropdown');
             dropdown.innerHTML = '';
             const allLinkDrop = document.createElement('a');
@@ -2109,6 +1998,19 @@
                 cerrarDropdownCategorias();
             });
             dropdown.appendChild(allLinkDrop);
+
+            const encDrop = document.createElement('a');
+            encDrop.textContent = '🔹 Encargos';
+            encDrop.dataset.categoria = 'Encargos';
+            encDrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                categoriaSeleccionada = 'Encargos';
+                actualizarCategoriaActiva(encDrop);
+                paginaActual = 1;
+                renderizarProductos();
+                cerrarDropdownCategorias();
+            });
+            dropdown.appendChild(encDrop);
 
             cats.forEach(cat => {
                 const a = document.createElement('a');
@@ -2154,115 +2056,135 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS
+        //  RENDERIZAR PRODUCTOS (incluye encargos)
         // ============================================================
-        function renderizarProductos() {
+        async function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
 
-            setTimeout(() => {
-                let filtrados = productos;
-                if (categoriaSeleccionada !== "Todas") {
-                    filtrados = filtrados.filter(p =>
-                        (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
-                    );
+            // Si categoría es "Encargos", cargar encargos, sino productos normales
+            let items = [];
+            let esEncargo = false;
+            if (categoriaSeleccionada === 'Encargos') {
+                esEncargo = true;
+                items = await obtenerEncargos();
+                encargos = items; // guardar para uso posterior
+            } else {
+                items = productos; // ya cargados en init
+                if (categoriaSeleccionada !== 'Todas') {
+                    items = items.filter(p => (p.Categoria || 'General') === categoriaSeleccionada);
                 }
-                const busqueda = getBusqueda();
-                if (busqueda) {
-                    filtrados = filtrados.filter(p =>
-                        (p.Nombre || '').toLowerCase().includes(busqueda) ||
-                        (p.Descripcion || '').toLowerCase().includes(busqueda)
-                    );
-                }
+            }
 
-                const sortValue = document.getElementById('sortSelect').value;
+            // Búsqueda por texto
+            const busqueda = getBusqueda();
+            if (busqueda) {
+                items = items.filter(p =>
+                    (p.Nombre || '').toLowerCase().includes(busqueda) ||
+                    (p.Descripcion || '').toLowerCase().includes(busqueda)
+                );
+            }
+
+            // Ordenamiento
+            const sortValue = document.getElementById('sortSelect').value;
+            if (esEncargo) {
+                // Ordenar encargos
                 switch (sortValue) {
-                    case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
-                    case 'price_desc': filtrados.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
-                    case 'name_asc': filtrados.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
-                    case 'name_desc': filtrados.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
+                    case 'price_asc': items.sort((a, b) => (a.Precio_Estimado || 0) - (b.Precio_Estimado || 0)); break;
+                    case 'price_desc': items.sort((a, b) => (b.Precio_Estimado || 0) - (a.Precio_Estimado || 0)); break;
+                    case 'name_asc': items.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
+                    case 'name_desc': items.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
                     default: break;
                 }
-
-                const total = filtrados.length;
-                const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
-                if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
-                const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
-                const fin = inicio + PRODUCTOS_POR_PAGINA;
-                const paginaItems = filtrados.slice(inicio, fin);
-
-                if (paginaItems.length === 0) {
-                    grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px 0;">No se encontraron productos.</p>`;
-                } else {
-                    let html = '';
-                    for (const prod of paginaItems) {
-                        const fotos = obtenerFotosProducto(prod);
-                        const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                        const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
-
-                        const precio = precioFinal(prod);
-                        const venta = parseFloat(prod.Precio_Venta || 0);
-                        const oferta = parseFloat(prod.Precio_Oferta || 0);
-                        const tieneOferta = (oferta > 0 && oferta < venta);
-
-                        let precioHtml = `<span class="price">`;
-                        if (tieneOferta) {
-                            precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
-                        } else { precioHtml += `$${venta.toFixed(2)}`; }
-                        precioHtml += `</span>`;
-
-                        const stock = parseInt(prod.Stock || 0);
-                        const esEncargo = prod.Categoria && prod.Categoria.toLowerCase().includes('encargo');
-
-                        html += `
-                            <div class="product-card" data-id="${prod.id}">
-                                <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
-                                     alt="${prod.Nombre || 'Producto'}" />
-                                ${esEncargo ? '<div class="product-tag">Solo por encargo</div>' : ''}
-                                <h3>${prod.Nombre || 'Sin nombre'}</h3>
-                                <div class="product-desc">${prod.Descripcion || ''}</div>
-                                <div class="product-footer">
-                                    ${precioHtml}
-                                    <button class="btn-add" data-id="${prod.id}">Agregar</button>
-                                </div>
-                                <div class="stock-badge">${stock} uds</div>
-                            </div>
-                        `;
-                    }
-                    grid.innerHTML = html;
+            } else {
+                switch (sortValue) {
+                    case 'price_asc': items.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
+                    case 'price_desc': items.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
+                    case 'name_asc': items.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
+                    case 'name_desc': items.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
+                    default: break;
                 }
+            }
 
-                document.querySelectorAll('.btn-add').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const id = this.dataset.id;
-                        if (!usuarioActual) {
-                            alert('Debes iniciar sesión para agregar productos al carrito.');
-                            abrirModalLogin();
-                            return;
-                        }
+            const total = items.length;
+            const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
+            if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
+            const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
+            const fin = inicio + PRODUCTOS_POR_PAGINA;
+            const paginaItems = items.slice(inicio, fin);
+
+            if (paginaItems.length === 0) {
+                grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px 0;">No se encontraron productos.</p>`;
+            } else {
+                let html = '';
+                for (const item of paginaItems) {
+                    const nombre = item.Nombre || 'Sin nombre';
+                    const descripcion = item.Descripcion || '';
+                    const precio = esEncargo ? (item.Precio_Estimado || 0) : precioFinal(item);
+                    const stock = esEncargo ? 999 : parseInt(item.Stock || 0);
+                    const fotoUrl = ''; // los encargos no tienen foto (se puede poner un placeholder)
+                    const esEncargoLabel = esEncargo ? '<div class="product-tag">🔹 Por encargo</div>' : '';
+
+                    html += `
+                        <div class="product-card" data-id="${item.id}" data-encargo="${esEncargo ? 'true' : 'false'}">
+                            <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" alt="${nombre}" />
+                            ${esEncargoLabel}
+                            <h3>${nombre}</h3>
+                            <div class="product-desc">${descripcion}</div>
+                            <div class="product-footer">
+                                <span class="price">$${precio.toFixed(2)}</span>
+                                <button class="btn-add" data-id="${item.id}" data-encargo="${esEncargo ? 'true' : 'false'}">${esEncargo ? 'Solicitar' : 'Agregar'}</button>
+                            </div>
+                            <div class="stock-badge">${esEncargo ? '📦 Disponible' : stock + ' uds'}</div>
+                        </div>
+                    `;
+                }
+                grid.innerHTML = html;
+            }
+
+            // Asignar eventos a botones
+            document.querySelectorAll('.btn-add').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const esEncargo = this.dataset.encargo === 'true';
+                    if (!usuarioActual) {
+                        alert('Debes iniciar sesión para solicitar productos.');
+                        abrirModalLogin();
+                        return;
+                    }
+                    if (esEncargo) {
+                        solicitarEncargo(id);
+                    } else {
                         agregarAlCarrito(id);
                         mostrarAddToCartModal();
-                    });
+                    }
                 });
+            });
 
-                document.querySelectorAll('.product-card').forEach(card => {
-                    card.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        const id = this.dataset.id;
+            // Evento click en tarjeta
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON') return;
+                    const id = this.dataset.id;
+                    const esEncargo = this.dataset.encargo === 'true';
+                    if (esEncargo) {
+                        verDetalleEncargoCliente(id);
+                    } else {
                         window.history.pushState({ productoId: id }, '', `?id=${id}`);
                         mostrarDetalle(id);
-                    });
+                    }
                 });
+            });
 
-                const pagContainer = document.getElementById('pagination');
-                if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
-                let pagHtml = '';
-                pagHtml += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
-                pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
-                pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
-                pagContainer.innerHTML = pagHtml;
-            }, 300);
+            // Paginación
+            const pagContainer = document.getElementById('pagination');
+            if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
+            let pagHtml = '';
+            pagHtml += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
+            pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
+            pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
+            pagContainer.innerHTML = pagHtml;
         }
 
         function cambiarPagina(pag) {
@@ -2275,7 +2197,33 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE
+        //  FUNCIÓN PARA SOLICITAR ENCARGO
+        // ============================================================
+        function solicitarEncargo(encargoId) {
+            // Buscar en la lista de encargos actual (la variable global encargos)
+            const item = encargos.find(e => e.id === encargoId);
+            if (!item) {
+                alert('El encargo no está disponible.');
+                return;
+            }
+            const existente = carrito.find(c => c.id === encargoId && c.esEncargo === true);
+            if (existente) {
+                existente.cantidad = (existente.cantidad || 1) + 1;
+            } else {
+                carrito.push({
+                    id: item.id,
+                    nombre: item.Nombre || 'Encargo',
+                    precio: item.Precio_Estimado || 0,
+                    cantidad: 1,
+                    esEncargo: true
+                });
+            }
+            guardarCarritoLocal();
+            mostrarAddToCartModal();
+        }
+
+        // ============================================================
+        //  PÁGINA DE DETALLE (para productos normales)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2488,11 +2436,11 @@
         function agregarAlCarrito(productId) {
             const prod = productos.find(p => p.id === productId);
             if (!prod) return;
-            const existente = carrito.find(item => item.id === productId);
+            const existente = carrito.find(item => item.id === productId && !item.esEncargo);
             if (existente) {
                 existente.cantidad = (existente.cantidad || 1) + 1;
             } else {
-                carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
+                carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1, esEncargo: false });
             }
             guardarCarritoLocal();
         }
@@ -2525,10 +2473,11 @@
             carrito.forEach((item, idx) => {
                 const subtotalItem = item.precio * (item.cantidad || 1);
                 subtotal += subtotalItem;
+                const esEncargo = item.esEncargo ? '🔹 ' : '';
                 html += `
                     <div class="cart-item">
                         <div class="item-info">
-                            <div class="item-name">${item.nombre}</div>
+                            <div class="item-name">${esEncargo}${item.nombre}</div>
                             <div class="item-price">$${item.precio.toFixed(2)} x ${item.cantidad || 1}</div>
                         </div>
                         <div class="item-actions">
@@ -2552,7 +2501,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO
+        //  PROCESO DE PEDIDO (incluye encargos)
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2635,7 +2584,7 @@
         }
 
         // ============================================================
-        //  CONFIRMAR PEDIDO FINAL (CON GREEN-API Y GRUPO)
+        //  CONFIRMAR PEDIDO FINAL (con GREEN-API y grupo)
         // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
@@ -2667,7 +2616,8 @@
                     id: item.id,
                     nombre: item.nombre,
                     cantidad: cantidad,
-                    precio: precio
+                    precio: precio,
+                    esEncargo: item.esEncargo || false
                 };
             });
 
@@ -2678,7 +2628,7 @@
                 let pedidoId = '';
 
                 if (tipoEntregaSeleccionado === 'Domicilio') {
-                    // DOMICILIO: Guardar en colección Domicilios
+                    // DOMICILIO
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
                         Direccion_Entrega: direccion,
@@ -2704,7 +2654,7 @@
                     pedidoId = domRecord.id.slice(-6);
 
                 } else {
-                    // RETIRO EN TIENDA: Guardar en colección PedidosTienda
+                    // RETIRO EN TIENDA
                     const ahora = new Date();
                     const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
@@ -2734,9 +2684,29 @@
                     pedidoId = tiendaRecord.id.slice(-6);
                 }
 
-                // =====================================================
-                //  CONSTRUIR MENSAJE
-                // =====================================================
+                // También registrar como venta (con Tipo "Local" o "Domicilio") - ya se hará en el admin cuando se marque como entregado/vendido.
+                // Pero para encargos, queremos que aparezca en la lista de ventas con Tipo "Encargo"
+                // Vamos a registrar una venta directamente si alguno de los productos es encargo
+                const tieneEncargo = productosPedido.some(p => p.esEncargo);
+                if (tieneEncargo) {
+                    const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
+                    const productosIds = productosPedido.map(p => p.id).join(',');
+                    // No descontamos stock porque los encargos no tienen stock.
+                    await apiRequest('Ventas/records', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            productos_json: productosStr,
+                            productos_ids: productosIds,
+                            total: totalFinal,
+                            fecha: new Date().toISOString(),
+                            Tipo: 'Encargo',
+                            usuario_id: usuarioActual.id,
+                            cliente: nombreCompleto
+                        })
+                    });
+                }
+
+                // ===== ENVIAR MENSAJE AL GRUPO =====
                 let mensaje = `*🆕 Nuevo pedido*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
@@ -2749,7 +2719,8 @@
                 }
                 mensaje += `\n📋 Productos:\n`;
                 productosPedido.forEach(item => {
-                    mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
+                    const tipo = item.esEncargo ? '🔹 [Encargo] ' : '';
+                    mensaje += `- ${tipo}${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`;
                 });
                 mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
@@ -2757,9 +2728,6 @@
                 mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
                 mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
 
-                // =====================================================
-                //  ENVIAR MENSAJE AL GRUPO DE WHATSAPP
-                // =====================================================
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
                 const body = {
                     chatId: GRUPO_CHAT_ID,
@@ -2773,8 +2741,7 @@
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Error al enviar WhatsApp al grupo:', errorText);
+                    console.error('Error al enviar WhatsApp al grupo:', await response.text());
                 } else {
                     console.log('✅ Mensaje enviado al grupo de WhatsApp.');
                 }
@@ -2784,9 +2751,6 @@
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
-                // =====================================================
-                //  MOSTRAR MENSAJE DE ÉXITO (MODIFICADO)
-                // =====================================================
                 alert('✅ Pedido realizado con éxito. ¡Gracias por comprar en La Tiendita B&B!');
 
                 // Recargar productos
@@ -2802,6 +2766,29 @@
         }
 
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
+
+        // ============================================================
+        //  DETALLE DE ENCARGO PARA CLIENTE (modal simple)
+        // ============================================================
+        async function verDetalleEncargoCliente(id) {
+            try {
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records/${id}`);
+                if (!resp.ok) throw new Error('No se pudo obtener el encargo');
+                const data = await resp.json();
+                const body = `
+                    <div class="detail-row"><span class="label">Nombre</span><span class="value">${data.Nombre || 'Sin nombre'}</span></div>
+                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${data.Descripcion || 'Sin descripción'}</span></div>
+                    <div class="detail-row"><span class="label">Precio estimado</span><span class="value">$${parseFloat(data.Precio_Estimado || 0).toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Enlace</span><span class="value">${data.Enlace ? `<a href="${data.Enlace}" target="_blank">${data.Enlace}</a>` : 'No proporcionado'}</span></div>
+                    <div class="detail-row"><span class="label">Disponible</span><span class="value">${data.Disponible ? '✅ Sí' : '❌ No'}</span></div>
+                `;
+                // Usamos el mismo modal de detalle que ya existe
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle del encargo: ' + e.message);
+            }
+        }
 
         // ============================================================
         //  MANEJO DEL BOTÓN "ATRÁS"
