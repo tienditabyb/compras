@@ -356,6 +356,7 @@
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
+        .estado-encargo { background: #e0e7ff; color: #4338ca; }
 
         .estado-select {
             padding: 4px 8px;
@@ -916,6 +917,7 @@
             gap: 15px;
             margin-top: 15px;
         }
+        /* En móviles: una columna y en orden: Nombre, Teléfono, Dirección */
         @media (max-width: 600px) {
             .caja-form .datos-cliente {
                 grid-template-columns: 1fr !important;
@@ -984,7 +986,7 @@
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
                         <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
-                        <li><a data-tab="encargos">📋 Encargos</a></li>
+                        <li><a data-tab="encargos">📦 Encargos</a></li> <!-- NUEVO -->
                         <li><a data-tab="reportes">📈 Reportes</a></li>
                     </ul>
                 </nav>
@@ -1001,7 +1003,6 @@
                         <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
                         <div class="stat-card"><div class="number" id="statCostoInventario">-</div><div class="label">Costo total inventario</div></div>
                         <div class="stat-card"><div class="number" id="statGananciaPotencial">-</div><div class="label">Ganancia potencial</div></div>
-                        <div class="stat-card"><div class="number" id="statEncargosPendientes">-</div><div class="label">Encargos pendientes</div></div>
                     </div>
                     <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                         <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
@@ -1138,20 +1139,16 @@
                     </div>
                 </div>
 
-                <!-- ENCARGOS -->
+                <!-- ENCARGOS (NUEVO) -->
                 <div id="tab-encargos" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">📋 Encargos de Clientes</h2>
-                    <div class="filters">
-                        <div><label>Estado:</label>
-                            <select id="encFiltroEstado">
-                                <option value="Todos">Todos</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Comprado">Comprado</option>
-                                <option value="Entregado">Entregado</option>
-                            </select>
+                    <h2 style="margin-bottom:20px; font-weight:600;">📦 Productos por Encargo</h2>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+                        <div>
+                            <button class="btn-success" id="btnNuevoEncargo">➕ Nuevo Encargo</button>
                         </div>
-                        <button id="encFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="encLimpiarBtn">Limpiar</button>
+                        <div>
+                            <button class="btn-primary" id="btnRefrescarEncargos">🔄 Refrescar</button>
+                        </div>
                     </div>
                     <div class="list-container" id="encargosContainer">
                         <div class="loading"><div class="spinner"></div>Cargando encargos...</div>
@@ -1244,6 +1241,32 @@
         </div>
     </div>
 
+    <!-- MODAL ENCARGO (NUEVO) -->
+    <div class="modal-overlay" id="encargoModal">
+        <div class="modal" style="max-width:600px;">
+            <button class="close-modal" id="closeEncargoModal">✕</button>
+            <h2 id="encargoModalTitle">Nuevo Encargo</h2>
+            <form id="encargoForm">
+                <input type="hidden" id="encargoId" value="" />
+                <div class="form-group"><label>Nombre del producto *</label><input type="text" id="encNombre" required /></div>
+                <div class="form-group"><label>Descripción</label><textarea id="encDescripcion" rows="3"></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Precio estimado *</label><input type="number" id="encPrecio" step="0.01" required /></div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:20px;">
+                        <label style="margin:0;">Disponible</label>
+                        <input type="checkbox" id="encDisponible" checked style="width:20px; height:20px;" />
+                    </div>
+                </div>
+                <div class="form-group"><label>Enlace de referencia (Amazon/Temu/Shein)</label><input type="url" id="encEnlace" placeholder="https://..." /></div>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary" id="encargoSubmitBtn">Guardar</button>
+                    <button type="button" class="btn-danger" id="encargoDeleteBtn" style="display:none;">Eliminar</button>
+                    <button type="button" class="btn-clear" id="encargoCancelBtn">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ============================================================ -->
     <!-- ====================== JAVASCRIPT =========================== -->
     <!-- ============================================================ -->
@@ -1259,8 +1282,8 @@
         let ventasCache = [];
         let domiciliosCache = [];
         let tiendaCache = [];
-        let encargosCache = [];
         let categoriasCache = [];
+        let encargosCache = []; // NUEVO
 
         // ============================================================
         // CARRITO PARA CAJA
@@ -1367,7 +1390,7 @@
         }
 
         // ============================================================
-        // CARGAR DATOS
+        // CARGAR DATOS (incluyendo encargos)
         // ============================================================
         async function cargarCategorias() {
             try {
@@ -1409,9 +1432,10 @@
             } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
         }
 
+        // NUEVO: Cargar encargos
         async function cargarEncargos() {
             try {
-                const data = await apiRequest('Encargos/records?sort=-fecha_encargo&perPage=200');
+                const data = await apiRequest('Encargos/records?sort=-created&perPage=200');
                 encargosCache = data.items;
                 return encargosCache;
             } catch (e) { console.error('Error cargando encargos:', e); return []; }
@@ -1453,7 +1477,7 @@
         }
 
         // ============================================================
-        // OBTENER FOTOS DE UN PRODUCTO
+        // OBTENER FOTOS DE UN PRODUCTO (ARRAY SEGURO)
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1490,15 +1514,14 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones
+        // RENDERIZAR funciones (incluyendo encargos)
         // ============================================================
-        function renderDashboard(ventas, domicilios, encargos) {
+        function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
             const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
             let gananciaTotal = 0;
             for (const v of ventas) gananciaTotal += calcularGananciaVenta(v);
             const pendientes = domicilios.filter(d => d.Estado === 'Pendiente').length;
-            const encargosPendientes = encargos ? encargos.filter(e => e.estado === 'Pendiente').length : 0;
 
             let costoInventario = 0;
             let ventaInventario = 0;
@@ -1517,7 +1540,6 @@
             document.getElementById('statDomicilios').textContent = pendientes;
             document.getElementById('statCostoInventario').textContent = `$${costoInventario.toFixed(2)}`;
             document.getElementById('statGananciaPotencial').textContent = `$${gananciaPotencial.toFixed(2)}`;
-            document.getElementById('statEncargosPendientes').textContent = encargosPendientes;
 
             const ultimas = ventas.slice(0, 5);
             const container = document.getElementById('ultimasVentas');
@@ -1528,11 +1550,13 @@
             let html = '';
             for (const v of ultimas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const tipo = v.Tipo || 'Local';
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
                         <div class="left">
                             <div class="title">${v.productos_json || 'Sin productos'}</div>
-                            <div class="sub">${fecha} • ${v.Tipo || 'Local'}</div>
+                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
                         </div>
                         <div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div>
                     </div>
@@ -1608,7 +1632,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📋' : '🏪'));
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
                 const ganancia = calcularGananciaVenta(v);
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
@@ -1713,41 +1737,31 @@
             container.innerHTML = html;
         }
 
+        // NUEVO: Renderizar encargos
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
             if (encargos.length === 0) {
-                container.innerHTML = '<div class="empty">No hay encargos.</div>';
+                container.innerHTML = '<div class="empty">No hay productos de encargo creados.</div>';
                 return;
             }
             let html = '';
             for (const e of encargos) {
-                const estado = e.estado || 'Pendiente';
-                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
-                                   estado === 'Comprado' ? 'estado-en-camino' : 'estado-entregado';
-                const fecha = e.fecha_encargo ? new Date(e.fecha_encargo).toLocaleString('es-ES') : 'Sin fecha';
-                const isTerminado = (estado === 'Entregado');
-
+                const disponible = e.Disponible ? '✅ Disponible' : '❌ No disponible';
+                const fecha = e.created ? new Date(e.created).toLocaleString('es-ES') : 'Sin fecha';
                 html += `
-                    <div class="list-item" id="enc-item-${e.id}">
+                    <div class="list-item" onclick="verDetalleEncargo('${e.id}')">
                         <div class="left">
-                            <div class="title">👤 ${e.cliente_nombre || 'Sin nombre'}</div>
-                            <div class="sub">📞 ${e.cliente_telefono || 'Sin teléfono'} • ${fecha}</div>
-                            <div class="sub">📦 ${e.descripcion || 'Sin descripción'} (x${e.cantidad || 1})</div>
-                            ${e.costo_compra ? `<div class="sub">💰 Costo compra: $${parseFloat(e.costo_compra).toFixed(2)}</div>` : ''}
-                            ${e.precio_venta ? `<div class="sub">💰 Precio venta: $${parseFloat(e.precio_venta).toFixed(2)}</div>` : ''}
+                            <div class="title">${e.Nombre || 'Sin nombre'}</div>
+                            <div class="sub">${e.Descripcion || ''}</div>
+                            <div class="sub">💰 $${parseFloat(e.Precio_Estimado || 0).toFixed(2)} • ${disponible}</div>
+                            <div class="sub" style="font-size:0.7rem; color:#2980b9;">${e.Enlace ? '🔗 Enlace de referencia' : ''}</div>
                         </div>
                         <div class="center">
-                            <span class="estado-badge ${badgeClass}">${estado}</span>
-                            <select class="estado-select" id="enc-select-${e.id}" 
-                                    onchange="cambiarEstadoEncargo('${e.id}', this.value)"
-                                    ${isTerminado ? 'disabled' : ''}>
-                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="Comprado" ${estado === 'Comprado' ? 'selected' : ''}>Comprado</option>
-                                <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
-                            </select>
-                            ${!isTerminado ? `<button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬 Notificar</button>` : ''}
+                            <span class="estado-badge ${e.Disponible ? 'estado-vendido' : 'estado-cancelado'}">${e.Disponible ? 'Disponible' : 'No disponible'}</span>
+                            <button class="btn-edit" onclick="event.stopPropagation(); editarEncargo('${e.id}')">✏️ Editar</button>
+                            <button class="btn-delete" onclick="event.stopPropagation(); eliminarEncargo('${e.id}')">🗑️ Eliminar</button>
                         </div>
-                        <div class="right" onclick="verDetalleEncargo('${e.id}')" style="cursor:pointer;">
+                        <div class="right">
                             <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
                         </div>
                     </div>
@@ -1757,7 +1771,139 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO DOMICILIO
+        // DETALLE DE ENCARGO (usando el modal de detalle general)
+        // ============================================================
+        async function verDetalleEncargo(id) {
+            try {
+                const data = await apiRequest(`Encargos/records/${id}`);
+                const body = `
+                    <div class="detail-row"><span class="label">Nombre</span><span class="value">${data.Nombre || 'Sin nombre'}</span></div>
+                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${data.Descripcion || 'Sin descripción'}</span></div>
+                    <div class="detail-row"><span class="label">Precio estimado</span><span class="value">$${parseFloat(data.Precio_Estimado || 0).toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">Enlace</span><span class="value">${data.Enlace ? `<a href="${data.Enlace}" target="_blank">${data.Enlace}</a>` : 'No proporcionado'}</span></div>
+                    <div class="detail-row"><span class="label">Disponible</span><span class="value">${data.Disponible ? '✅ Sí' : '❌ No'}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // CRUD ENCARGOS
+        // ============================================================
+        function abrirModalEncargo(encargo = null) {
+            const modal = document.getElementById('encargoModal');
+            document.getElementById('encargoForm').reset();
+            document.getElementById('encargoId').value = '';
+            document.getElementById('encargoDeleteBtn').style.display = 'none';
+            document.getElementById('encDisponible').checked = true;
+
+            if (encargo) {
+                document.getElementById('encargoModalTitle').textContent = '✏️ Editar Encargo';
+                document.getElementById('encargoId').value = encargo.id;
+                document.getElementById('encNombre').value = encargo.Nombre || '';
+                document.getElementById('encDescripcion').value = encargo.Descripcion || '';
+                document.getElementById('encPrecio').value = encargo.Precio_Estimado || '';
+                document.getElementById('encEnlace').value = encargo.Enlace || '';
+                document.getElementById('encDisponible').checked = encargo.Disponible !== undefined ? encargo.Disponible : true;
+                document.getElementById('encargoDeleteBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('encargoModalTitle').textContent = '➕ Nuevo Encargo';
+            }
+            modal.classList.add('active');
+        }
+
+        function cerrarModalEncargo() {
+            document.getElementById('encargoModal').classList.remove('active');
+        }
+
+        function editarEncargo(id) {
+            const enc = encargosCache.find(e => e.id === id);
+            if (enc) abrirModalEncargo(enc);
+            else alert('Encargo no encontrado.');
+        }
+
+        async function eliminarEncargo(id) {
+            if (!confirm('¿Estás seguro de eliminar este encargo?')) return;
+            try {
+                await apiRequest(`Encargos/records/${id}`, { method: 'DELETE' });
+                alert('Encargo eliminado.');
+                await cargarEncargos();
+                renderEncargos(encargosCache);
+            } catch (e) {
+                alert('Error al eliminar: ' + e.message);
+            }
+        }
+
+        // Eventos del modal de encargo
+        document.getElementById('closeEncargoModal').addEventListener('click', cerrarModalEncargo);
+        document.getElementById('encargoCancelBtn').addEventListener('click', cerrarModalEncargo);
+        document.getElementById('encargoModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) cerrarModalEncargo();
+        });
+
+        document.getElementById('btnNuevoEncargo').addEventListener('click', () => abrirModalEncargo(null));
+        document.getElementById('btnRefrescarEncargos').addEventListener('click', async function() {
+            await cargarEncargos();
+            renderEncargos(encargosCache);
+        });
+
+        document.getElementById('encargoDeleteBtn').addEventListener('click', async function() {
+            const id = document.getElementById('encargoId').value;
+            if (id) {
+                await eliminarEncargo(id);
+                cerrarModalEncargo();
+            }
+        });
+
+        // Guardar encargo (crear o actualizar)
+        document.getElementById('encargoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('encargoId').value;
+            const nombre = document.getElementById('encNombre').value.trim();
+            const descripcion = document.getElementById('encDescripcion').value.trim();
+            const precio = document.getElementById('encPrecio').value;
+            const enlace = document.getElementById('encEnlace').value.trim();
+            const disponible = document.getElementById('encDisponible').checked;
+
+            if (!nombre || !precio) {
+                alert('Nombre y precio estimado son obligatorios.');
+                return;
+            }
+
+            const data = {
+                Nombre: nombre,
+                Descripcion: descripcion,
+                Precio_Estimado: parseFloat(precio),
+                Enlace: enlace || '',
+                Disponible: disponible
+            };
+
+            try {
+                if (id) {
+                    await apiRequest(`Encargos/records/${id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    await apiRequest('Encargos/records', {
+                        method: 'POST',
+                        body: JSON.stringify(data)
+                    });
+                }
+                alert(id ? '✅ Encargo actualizado.' : '✅ Encargo creado.');
+                cerrarModalEncargo();
+                await cargarEncargos();
+                renderEncargos(encargosCache);
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            }
+        });
+
+        // ============================================================
+        // CAMBIAR ESTADO DOMICILIO (ya existente)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1786,7 +1932,7 @@
                         alert('✅ Pedido marcado como Entregado (sin productos para descontar).');
                         await cargarDomicilios();
                         renderDomicilios(domiciliosCache);
-                        renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                        renderDashboard(ventasCache, domiciliosCache);
                         enviarWhatsAppDom(id);
                         return;
                     }
@@ -1833,7 +1979,7 @@
                     await cargarProductos();
                     await cargarVentas();
                     renderDomicilios(domiciliosCache);
-                    renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                    renderDashboard(ventasCache, domiciliosCache);
 
                     enviarWhatsAppDom(id);
                     return;
@@ -1847,7 +1993,7 @@
                 domActual.Estado = nuevoEstado;
                 await cargarDomicilios();
                 renderDomicilios(domiciliosCache);
-                renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                renderDashboard(ventasCache, domiciliosCache);
 
                 enviarWhatsAppDom(id);
 
@@ -1892,7 +2038,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA
+        // CAMBIAR ESTADO PEDIDO TIENDA (ya existente)
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -1921,7 +2067,7 @@
                         alert('✅ Pedido marcado como Vendido (sin productos para descontar).');
                         await cargarTienda();
                         renderTienda(tiendaCache);
-                        renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                        renderDashboard(ventasCache, domiciliosCache);
                         enviarWhatsAppTienda(id);
                         return;
                     }
@@ -1968,7 +2114,7 @@
                     await cargarProductos();
                     await cargarVentas();
                     renderTienda(tiendaCache);
-                    renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                    renderDashboard(ventasCache, domiciliosCache);
 
                     enviarWhatsAppTienda(id);
                     return;
@@ -1982,7 +2128,7 @@
                 pedidoActual.Estado = nuevoEstado;
                 await cargarTienda();
                 renderTienda(tiendaCache);
-                renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                renderDashboard(ventasCache, domiciliosCache);
 
                 if (nuevoEstado === 'Cancelado') {
                     enviarWhatsAppTiendaCancelado(id);
@@ -2058,141 +2204,6 @@
             mensaje += '\nGracias por entender. 🙌';
             const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
             window.open(url, '_blank');
-        }
-
-        // ============================================================
-        // FUNCIONES PARA ENCARGOS
-        // ============================================================
-        async function cambiarEstadoEncargo(id, nuevoEstado) {
-            try {
-                const enc = encargosCache.find(e => e.id === id);
-                if (!enc) { alert('Encargo no encontrado.'); return; }
-
-                if (enc.estado === 'Entregado') {
-                    alert('Este encargo ya fue entregado y no se puede modificar.');
-                    const select = document.getElementById(`enc-select-${id}`);
-                    if (select) select.value = 'Entregado';
-                    return;
-                }
-
-                // Si cambia a "Comprado", pedir el costo de compra
-                if (nuevoEstado === 'Comprado' && enc.estado !== 'Comprado') {
-                    const costo = prompt('Ingresa el costo de compra del producto (en USD):', '0.00');
-                    if (costo === null) return;
-                    const costoNum = parseFloat(costo);
-                    if (isNaN(costoNum) || costoNum < 0) {
-                        alert('Costo inválido.');
-                        return;
-                    }
-                    await apiRequest(`Encargos/records/${id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ estado: 'Comprado', costo_compra: costoNum })
-                    });
-                    alert('✅ Encargo marcado como Comprado. Costo registrado.');
-                    await cargarEncargos();
-                    renderEncargos(encargosCache);
-                    notificarEncargo(id);
-                    return;
-                }
-
-                // Si cambia a "Entregado" (desde Comprado o Pendiente)
-                if (nuevoEstado === 'Entregado') {
-                    const precioVenta = prompt('Ingresa el precio final de venta al cliente (en USD):', '0.00');
-                    if (precioVenta === null) return;
-                    const precioNum = parseFloat(precioVenta);
-                    if (isNaN(precioNum) || precioNum < 0) {
-                        alert('Precio inválido.');
-                        return;
-                    }
-
-                    // Registrar la venta en la colección Ventas
-                    const productosStr = `Encargo: ${enc.descripcion} x${enc.cantidad}`;
-                    await apiRequest('Ventas/records', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            productos_json: productosStr,
-                            total: precioNum,
-                            fecha: new Date().toISOString(),
-                            Tipo: 'Encargo',
-                            usuario_id: enc.usuario_id || null,
-                            cliente: `${enc.cliente_nombre} - ${enc.cliente_telefono}`
-                        })
-                    });
-
-                    // Actualizar estado del encargo
-                    await apiRequest(`Encargos/records/${id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ estado: 'Entregado', precio_venta: precioNum })
-                    });
-
-                    alert('✅ Encargo entregado. Venta registrada correctamente.');
-                    await cargarEncargos();
-                    await cargarVentas();
-                    renderEncargos(encargosCache);
-                    renderDashboard(ventasCache, domiciliosCache, encargosCache);
-                    notificarEncargo(id);
-                    return;
-                }
-
-                // Cambio simple (Pendiente a otro sin costo)
-                await apiRequest(`Encargos/records/${id}`, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
-                await cargarEncargos();
-                renderEncargos(encargosCache);
-                notificarEncargo(id);
-
-            } catch (e) {
-                console.error('Error en cambiarEstadoEncargo:', e);
-                alert('Error: ' + e.message);
-                // Restaurar valor
-                const select = document.getElementById(`enc-select-${id}`);
-                if (select) {
-                    const enc = encargosCache.find(e => e.id === id);
-                    if (enc) select.value = enc.estado;
-                }
-            }
-        }
-
-        function notificarEncargo(id) {
-            const enc = encargosCache.find(e => e.id === id);
-            if (!enc) { alert('Encargo no encontrado.'); return; }
-            let telefono = enc.cliente_telefono;
-            if (!telefono) { alert('El cliente no tiene número de teléfono.'); return; }
-            telefono = String(telefono).trim();
-            if (telefono === '') return;
-
-            const estado = enc.estado || 'Pendiente';
-            const mensajes = {
-                'Pendiente': 'Hemos recibido tu encargo y lo estamos procesando. 📝',
-                'Comprado': 'Ya hemos comprado tu producto. Pronto te llegará. 🛒',
-                'Entregado': 'Tu encargo ha sido entregado. ¡Disfrútalo! 🎉'
-            };
-            const mensaje = `Hola ${enc.cliente_nombre || 'cliente'} 👋\n${mensajes[estado] || 'Tu encargo ha cambiado de estado.'}\n\nGracias por confiar en B&B. 🙌`;
-            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-            window.open(url, '_blank');
-        }
-
-        async function verDetalleEncargo(id) {
-            try {
-                const data = await apiRequest(`Encargos/records/${id}`);
-                const body = `
-                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${data.fecha_encargo ? new Date(data.fecha_encargo).toLocaleString('es-ES') : 'Sin fecha'}</span></div>
-                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.cliente_nombre || 'Sin nombre'}</span></div>
-                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.cliente_telefono || 'Sin teléfono'}</span></div>
-                    <div class="detail-row"><span class="label">Correo</span><span class="value">${data.cliente_email || 'No proporcionado'}</span></div>
-                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${data.descripcion || 'Sin descripción'}</span></div>
-                    <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
-                    <div class="detail-row"><span class="label">Estado</span><span class="value">${data.estado || 'Pendiente'}</span></div>
-                    ${data.costo_compra ? `<div class="detail-row"><span class="label">Costo compra</span><span class="value">$${parseFloat(data.costo_compra).toFixed(2)}</span></div>` : ''}
-                    ${data.precio_venta ? `<div class="detail-row"><span class="label">Precio venta</span><span class="value">$${parseFloat(data.precio_venta).toFixed(2)}</span></div>` : ''}
-                `;
-                document.getElementById('detailBody').innerHTML = body;
-                document.getElementById('detailModal').classList.add('active');
-            } catch (e) {
-                alert('Error al cargar detalle: ' + e.message);
-            }
         }
 
         // ============================================================
@@ -2292,7 +2303,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO
+        // GESTIÓN DE FOTOS EN FORMULARIO (ya existente)
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -2367,7 +2378,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS
+        // CRUD PRODUCTOS (ya existente)
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -2539,7 +2550,7 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA
+        // FUNCIONES PARA CAJA (ya existentes)
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
@@ -2732,7 +2743,7 @@
                 await cargarProductos();
                 await cargarVentas();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                renderDashboard(ventasCache, domiciliosCache);
 
             } catch (e) {
                 alert('Error al registrar la venta: ' + e.message);
@@ -2766,7 +2777,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF
+        // EXPORTAR INVENTARIO A PDF (ya existente)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2875,7 +2886,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF
+        // EXPORTAR REPORTES A PDF (ya existente)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2967,7 +2978,7 @@
         document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
 
         // ============================================================
-        // REPORTES
+        // REPORTES (renderizado con guardado de filtrados)
         // ============================================================
         function renderReportes(ventas) {
             ventasFiltradasReporte = ventas;
@@ -2998,7 +3009,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📋' : '🏪'));
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
                 const ganancia = calcularGananciaVenta(v);
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
@@ -3026,10 +3037,11 @@
                 await cargarVentas();
                 await cargarDomicilios();
                 await cargarTienda();
-                await cargarEncargos();
+                await cargarEncargos(); // NUEVO
 
-                renderDashboard(ventasCache, domiciliosCache, encargosCache);
+                renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
+                renderEncargos(encargosCache); // NUEVO
 
                 const catSelectInv = document.getElementById('invCategory');
                 catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
@@ -3040,7 +3052,6 @@
                 renderVentas(ventasCache);
                 renderDomicilios(domiciliosCache);
                 renderTienda(tiendaCache);
-                renderEncargos(encargosCache);
                 renderReportes(ventasCache);
 
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
@@ -3114,21 +3125,6 @@
                     let filtrados = [...tiendaCache];
                     if (estado !== 'Todos') filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estado);
                     renderTienda(filtrados);
-                }
-
-                document.getElementById('encFiltrarBtn').addEventListener('click', function() {
-                    aplicarFiltrosEncargos();
-                });
-                document.getElementById('encLimpiarBtn').addEventListener('click', function() {
-                    document.getElementById('encFiltroEstado').value = 'Todos';
-                    renderEncargos(encargosCache);
-                });
-
-                function aplicarFiltrosEncargos() {
-                    const estado = document.getElementById('encFiltroEstado').value;
-                    let filtrados = [...encargosCache];
-                    if (estado !== 'Todos') filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
-                    renderEncargos(filtrados);
                 }
 
                 document.getElementById('repFiltrarBtn').addEventListener('click', function() {
