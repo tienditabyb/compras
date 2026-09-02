@@ -83,6 +83,22 @@
             gap: 12px;
             flex-shrink: 0;
         }
+        .header__actions .btn-encargo {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 6px 16px;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .header__actions .btn-encargo:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.4);
+        }
 
         /* ===== MENÚ DE CUENTA MODERNO ===== */
         .account-dropdown {
@@ -455,26 +471,6 @@
             align-items: stretch;
         }
 
-        /* Estilo para productos de encargo */
-        .product-card.encargo {
-            border: 2px solid #f59e0b;
-            position: relative;
-        }
-        .product-card.encargo::before {
-            content: "🛒 ENCARGO";
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #f59e0b;
-            color: white;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-            z-index: 5;
-        }
-
         @media (min-width: 1400px) {
             .products-grid { grid-template-columns: repeat(6, 1fr); }
         }
@@ -573,21 +569,6 @@
         .product-card .stock-badge {
             font-size: 0.7rem;
             color: #94a3b8;
-        }
-        .product-card .proveedor {
-            font-size: 0.65rem;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-        .product-card .estado-agotado {
-            background: #fee2e2;
-            color: #dc2626;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 4px;
         }
 
         .pagination {
@@ -912,15 +893,6 @@
                 padding: 3px 8px;
                 border-radius: 16px;
             }
-            .product-card .proveedor {
-                font-size: 0.5rem;
-            }
-            .product-card.encargo::before {
-                font-size: 0.5rem;
-                padding: 1px 6px;
-                top: 4px;
-                right: 4px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -955,6 +927,7 @@
             .detail-page .detail-container .galeria .miniaturas img { width: 40px; height: 40px; }
             .btn-categories { font-size: 0.75rem; padding: 4px 10px; }
             .btn-categories .icon { font-size: 0.9rem; }
+            .header__actions .btn-encargo { font-size: 0.7rem; padding: 4px 10px; }
         }
 
         @media (min-width: 769px) {
@@ -1276,6 +1249,7 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
+                <button class="btn-encargo" onclick="abrirFormularioEncargo()">📝 Encargo</button>
                 <div class="account-dropdown" id="accountDropdown">
                     <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
                         <span class="avatar" id="accountAvatar">👤</span>
@@ -1384,12 +1358,12 @@
         </div>
     </div>
 
-    <!-- ===== MODAL DE ENCARGO ===== -->
+    <!-- MODAL DE ENCARGO -->
     <div class="modal-overlay" id="encargoModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
             <h2>📝 Solicitar Encargo</h2>
-            <p style="text-align:center; color:#64748b; margin-bottom:15px;">¿No encuentras lo que buscas? Descríbenos el producto y te lo conseguimos.</p>
+            <p style="text-align:center; color:#64748b; margin-bottom:15px;">Describe el producto que necesitas y te lo conseguiremos.</p>
             <form id="encargoForm">
                 <div class="form-group">
                     <label>Nombre completo *</label>
@@ -1405,7 +1379,7 @@
                 </div>
                 <div class="form-group">
                     <label>Descripción del producto *</label>
-                    <textarea id="encDescripcion" required rows="3" placeholder="Marca, modelo, color, talla, etc."></textarea>
+                    <textarea id="encDescripcion" required rows="3" placeholder="Marca, modelo, color, talla, enlace, etc."></textarea>
                 </div>
                 <div class="form-group">
                     <label>Cantidad *</label>
@@ -1414,36 +1388,6 @@
                 <div id="encError" class="error-msg"></div>
                 <button type="submit" class="btn-primary">Enviar encargo</button>
             </form>
-        </div>
-    </div>
-
-    <!-- ===== MODAL PARA SOLICITAR PRODUCTO DE ENCARGO ===== -->
-    <div class="modal-overlay" id="solicitarEncargoModal">
-        <div class="modal">
-            <button class="close-modal" onclick="cerrarSolicitarEncargoModal()">✕</button>
-            <h2>🛒 Solicitar este producto</h2>
-            <div id="solicitarEncargoContent">
-                <p style="text-align:center; color:#64748b; margin-bottom:15px;">
-                    Este producto no está en stock. Nosotros lo compramos por ti y te lo entregamos.
-                </p>
-                <div id="solicitarProductoInfo" style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:15px;"></div>
-                <form id="solicitarEncargoForm">
-                    <div class="form-group">
-                        <label>Nombre completo *</label>
-                        <input type="text" id="solEncNombre" required placeholder="Tu nombre" />
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono *</label>
-                        <input type="tel" id="solEncTelefono" required placeholder="Número de contacto" />
-                    </div>
-                    <div class="form-group">
-                        <label>Cantidad *</label>
-                        <input type="number" id="solEncCantidad" min="1" value="1" required />
-                    </div>
-                    <div id="solEncError" class="error-msg"></div>
-                    <button type="submit" class="btn-primary">Solicitar encargo</button>
-                </form>
-            </div>
         </div>
     </div>
 
@@ -1533,7 +1477,6 @@
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
 
         let productos = [];
-        let productosEncargo = [];
         let carrito = [];
         let categoriaSeleccionada = "Todas";
         let paginaActual = 1;
@@ -1658,9 +1601,6 @@
                     </div>
                     <button class="dropdown-item" onclick="abrirHistoryModal()">
                         <span class="icon">📋</span> Mis pedidos
-                    </button>
-                    <button class="dropdown-item" onclick="abrirFormularioEncargo()">
-                        <span class="icon">📝</span> Hacer un encargo
                     </button>
                     <button class="dropdown-item" onclick="abrirContacto()">
                         <span class="icon">📞</span> Contáctenos
@@ -1905,11 +1845,12 @@
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
         // ============================================================
-        //  ENCARGOS (Cliente)
+        //  ENCARGOS (Frontend)
         // ============================================================
         function abrirFormularioEncargo() {
             document.getElementById('encargoModal').classList.add('active');
             document.getElementById('encError').classList.remove('show');
+            // Prellenar con datos del usuario si está logueado
             if (usuarioActual) {
                 let nombreCompleto = '';
                 if (usuarioActual.nombre && usuarioActual.apellidos) {
@@ -1927,7 +1868,6 @@
 
         function cerrarEncargoModal() {
             document.getElementById('encargoModal').classList.remove('active');
-            document.getElementById('encError').classList.remove('show');
         }
 
         document.getElementById('encargoForm').addEventListener('submit', async function(e) {
@@ -1972,14 +1912,8 @@
                 cerrarEncargoModal();
                 this.reset();
 
-                // Notificar al admin
-                const mensaje = `*📦 Nuevo encargo*\n\nCliente: ${nombre}\nTeléfono: ${telefono}\nProducto: ${descripcion}\nCantidad: ${cantidad}\n\nRevisa el panel de administración.`;
-                const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
-                }).catch(() => {});
+                // Notificar al administrador por WhatsApp (grupo)
+                await notificarEncargoAdmin(nombre, telefono, descripcion, cantidad);
 
             } catch (e) {
                 errorEl.textContent = e.message;
@@ -1987,119 +1921,19 @@
             }
         });
 
-        // ============================================================
-        //  SOLICITAR PRODUCTO DE ENCARGO (desde catálogo)
-        // ============================================================
-        let productoEncargoSeleccionado = null;
-
-        function abrirSolicitarEncargo(productoId) {
-            const prod = productosEncargo.find(p => p.id === productoId);
-            if (!prod) {
-                alert('Producto no encontrado.');
-                return;
-            }
-            productoEncargoSeleccionado = prod;
-
-            const infoContainer = document.getElementById('solicitarProductoInfo');
-            const precio = parseFloat(prod.Precio_Estimado || 0);
-            const imagen = prod.Imagen ? `${POCKETBASE_URL}/api/files/ProductosEncargo/${prod.id}/${prod.Imagen}` : '';
-            infoContainer.innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px;">
-                    ${imagen ? `<img src="${imagen}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" />` : ''}
-                    <div>
-                        <strong>${prod.Nombre || 'Producto'}</strong>
-                        <div style="font-size:0.9rem; color:#2980b9; font-weight:700;">$${precio.toFixed(2)}</div>
-                        ${prod.Proveedor ? `<div style="font-size:0.75rem; color:#64748b;">Proveedor: ${prod.Proveedor}</div>` : ''}
-                    </div>
-                </div>
-            `;
-
-            // Prellenar datos del usuario
-            if (usuarioActual) {
-                let nombreCompleto = '';
-                if (usuarioActual.nombre && usuarioActual.apellidos) {
-                    nombreCompleto = `${usuarioActual.nombre} ${usuarioActual.apellidos}`.trim();
-                } else if (usuarioActual.nombre) {
-                    nombreCompleto = usuarioActual.nombre;
-                } else if (usuarioActual.name) {
-                    nombreCompleto = usuarioActual.name;
-                }
-                document.getElementById('solEncNombre').value = nombreCompleto;
-                document.getElementById('solEncTelefono').value = usuarioActual.telefono || '';
-            } else {
-                document.getElementById('solEncNombre').value = '';
-                document.getElementById('solEncTelefono').value = '';
-            }
-            document.getElementById('solEncCantidad').value = 1;
-            document.getElementById('solEncError').classList.remove('show');
-            document.getElementById('solicitarEncargoModal').classList.add('active');
-        }
-
-        function cerrarSolicitarEncargoModal() {
-            document.getElementById('solicitarEncargoModal').classList.remove('active');
-            productoEncargoSeleccionado = null;
-        }
-
-        document.getElementById('solicitarEncargoForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (!productoEncargoSeleccionado) {
-                alert('Producto no seleccionado.');
-                return;
-            }
-
-            const nombre = document.getElementById('solEncNombre').value.trim();
-            const telefono = document.getElementById('solEncTelefono').value.trim();
-            const cantidad = parseInt(document.getElementById('solEncCantidad').value) || 1;
-            const errorEl = document.getElementById('solEncError');
-
-            if (!nombre || !telefono) {
-                errorEl.textContent = 'Completa nombre y teléfono.';
-                errorEl.classList.add('show');
-                return;
-            }
-
-            const descripcion = `${productoEncargoSeleccionado.Nombre} (Producto de encargo) - Proveedor: ${productoEncargoSeleccionado.Proveedor || 'No especificado'}`;
-
+        async function notificarEncargoAdmin(cliente, telefono, descripcion, cantidad) {
+            const mensaje = `*📦 Nuevo encargo*\n\nCliente: ${cliente}\nTeléfono: ${telefono}\nProducto: ${descripcion}\nCantidad: ${cantidad}\n\nRevisa el panel de administración.`;
+            const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
+            const body = {
+                chatId: GRUPO_CHAT_ID,
+                message: mensaje
+            };
             try {
-                const data = {
-                    cliente_nombre: nombre,
-                    cliente_telefono: telefono,
-                    cliente_email: usuarioActual ? usuarioActual.email || '' : '',
-                    descripcion: descripcion,
-                    cantidad: cantidad,
-                    estado: 'Pendiente',
-                    fecha_encargo: new Date().toISOString(),
-                    usuario_id: usuarioActual ? usuarioActual.id : null
-                };
-
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (!resp.ok) {
-                    const err = await resp.json();
-                    throw new Error(err.message || 'Error al enviar el encargo');
-                }
-
-                alert(`✅ Encargo de "${productoEncargoSeleccionado.Nombre}" enviado correctamente.`);
-                cerrarSolicitarEncargoModal();
-
-                // Notificar al admin
-                const mensaje = `*📦 Nuevo encargo de producto*\n\nCliente: ${nombre}\nTeléfono: ${telefono}\nProducto: ${productoEncargoSeleccionado.Nombre}\nCantidad: ${cantidad}\n\nRevisa el panel de administración.`;
-                const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
-                }).catch(() => {});
-
+                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
             } catch (e) {
-                errorEl.textContent = e.message;
-                errorEl.classList.add('show');
+                console.error('Error notificando al admin:', e);
             }
-        });
+        }
 
         // ============================================================
         //  API
@@ -2110,17 +1944,6 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     return data.items.filter(p => parseInt(p.Stock || 0) > 0);
-                }
-                return [];
-            } catch (e) { return []; }
-        }
-
-        async function obtenerProductosEncargo() {
-            try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/ProductosEncargo/records?perPage=500`);
-                if (resp.ok) {
-                    const data = await resp.json();
-                    return data.items;
                 }
                 return [];
             } catch (e) { return []; }
@@ -2331,38 +2154,14 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (incluye productos de encargo)
+        //  RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
 
             setTimeout(() => {
-                // Combinar productos normales + productos de encargo
-                let todos = [...productos];
-
-                // Agregar productos de encargo (con una bandera)
-                const encargoItems = productosEncargo.map(p => ({
-                    ...p,
-                    esEncargo: true,
-                    // Mapear campos para que sea compatible con la vista
-                    Nombre: p.Nombre || 'Producto',
-                    Descripcion: p.Descripcion || '',
-                    Categoria: p.Categoria || 'Encargo',
-                    Precio_Venta: p.Precio_Estimado || 0,
-                    Precio_Oferta: 0,
-                    Stock: p.Estado === 'Disponible' ? 9999 : 0,
-                    Stock_display: p.Estado === 'Disponible' ? 'Disponible' : 'Agotado',
-                    Proveedor: p.Proveedor || '',
-                    Fotos: p.Imagen ? [p.Imagen] : [],
-                    id_encargo: p.id,
-                    esProductoEncargo: true
-                }));
-
-                todos = [...todos, ...encargoItems];
-
-                // Filtros
-                let filtrados = todos;
+                let filtrados = productos;
                 if (categoriaSeleccionada !== "Todas") {
                     filtrados = filtrados.filter(p =>
                         (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
@@ -2378,8 +2177,8 @@
 
                 const sortValue = document.getElementById('sortSelect').value;
                 switch (sortValue) {
-                    case 'price_asc': filtrados.sort((a, b) => (parseFloat(a.Precio_Venta || 0) - parseFloat(b.Precio_Venta || 0))); break;
-                    case 'price_desc': filtrados.sort((a, b) => (parseFloat(b.Precio_Venta || 0) - parseFloat(a.Precio_Venta || 0))); break;
+                    case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
+                    case 'price_desc': filtrados.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
                     case 'name_asc': filtrados.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
                     case 'name_desc': filtrados.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
                     default: break;
@@ -2399,51 +2198,41 @@
                     for (const prod of paginaItems) {
                         const fotos = obtenerFotosProducto(prod);
                         const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                        const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/${prod.esProductoEncargo ? 'ProductosEncargo' : 'productos'}/${prod.esProductoEncargo ? prod.id_encargo : prod.id}/${fotoPrincipal}` : '';
+                        const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
 
-                        const precio = parseFloat(prod.Precio_Venta || 0);
-                        const esEncargo = prod.esProductoEncargo || false;
-                        const estado = prod.Estado || 'Disponible';
-                        const proveedor = prod.Proveedor || '';
+                        const precio = precioFinal(prod);
+                        const venta = parseFloat(prod.Precio_Venta || 0);
+                        const oferta = parseFloat(prod.Precio_Oferta || 0);
+                        const tieneOferta = (oferta > 0 && oferta < venta);
 
-                        let precioHtml = `<span class="price">$${precio.toFixed(2)}</span>`;
+                        let precioHtml = `<span class="price">`;
+                        if (tieneOferta) {
+                            precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
+                        } else { precioHtml += `$${venta.toFixed(2)}`; }
+                        precioHtml += `</span>`;
 
-                        // Botón de acción
-                        let botonHtml = '';
-                        if (esEncargo) {
-                            if (estado === 'Disponible') {
-                                botonHtml = `<button class="btn-add" onclick="abrirSolicitarEncargo('${prod.id_encargo}')">📝 Solicitar</button>`;
-                            } else {
-                                botonHtml = `<span class="estado-agotado">Agotado</span>`;
-                            }
-                        } else {
-                            botonHtml = `<button class="btn-add" data-id="${prod.id}">Agregar</button>`;
-                        }
-
-                        // Clase adicional para productos de encargo
-                        const cardClass = esEncargo ? 'product-card encargo' : 'product-card';
+                        const stock = parseInt(prod.Stock || 0);
+                        const esEncargo = prod.Categoria && prod.Categoria.toLowerCase().includes('encargo');
 
                         html += `
-                            <div class="${cardClass}" data-id="${prod.esProductoEncargo ? prod.id_encargo : prod.id}" ${esEncargo ? 'data-encargo="true"' : ''}>
+                            <div class="product-card" data-id="${prod.id}">
                                 <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
                                      alt="${prod.Nombre || 'Producto'}" />
-                                ${esEncargo ? '<div class="product-tag">🛒 POR ENCARGO</div>' : ''}
+                                ${esEncargo ? '<div class="product-tag">Solo por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
-                                ${proveedor ? `<div class="proveedor">📦 ${proveedor}</div>` : ''}
                                 <div class="product-footer">
                                     ${precioHtml}
-                                    ${botonHtml}
+                                    <button class="btn-add" data-id="${prod.id}">Agregar</button>
                                 </div>
-                                <div class="stock-badge">${esEncargo ? (estado === 'Disponible' ? '✅ Disponible' : '❌ Agotado') : (parseInt(prod.Stock || 0) + ' uds')}</div>
+                                <div class="stock-badge">${stock} uds</div>
                             </div>
                         `;
                     }
                     grid.innerHTML = html;
                 }
 
-                // Eventos para productos normales (no encargo)
-                document.querySelectorAll('.btn-add[data-id]').forEach(btn => {
+                document.querySelectorAll('.btn-add').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
                         const id = this.dataset.id;
@@ -2457,22 +2246,12 @@
                     });
                 });
 
-                // Click en tarjeta para ver detalle (solo productos normales)
-                document.querySelectorAll('.product-card:not(.encargo)').forEach(card => {
+                document.querySelectorAll('.product-card').forEach(card => {
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
                         const id = this.dataset.id;
                         window.history.pushState({ productoId: id }, '', `?id=${id}`);
                         mostrarDetalle(id);
-                    });
-                });
-
-                // Click en tarjeta de encargo -> abre solicitud
-                document.querySelectorAll('.product-card.encargo').forEach(card => {
-                    card.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'BUTTON') return;
-                        const id = this.dataset.id;
-                        abrirSolicitarEncargo(id);
                     });
                 });
 
@@ -2488,7 +2267,7 @@
 
         function cambiarPagina(pag) {
             if (pag < 1) return;
-            const total = productos.length + productosEncargo.length;
+            const total = productos.length;
             const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
             if (pag > totalPaginas) return;
             paginaActual = pag;
@@ -2496,7 +2275,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (solo productos normales)
+        //  PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2773,7 +2552,7 @@
         });
 
         // ============================================================
-        //  PROCESO DE PEDIDO (sin cambios)
+        //  PROCESO DE PEDIDO
         // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
@@ -2855,6 +2634,9 @@
             }
         }
 
+        // ============================================================
+        //  CONFIRMAR PEDIDO FINAL (CON GREEN-API Y GRUPO)
+        // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
             const apellidos = document.getElementById('domApellidos').value.trim();
@@ -2875,6 +2657,7 @@
             const nombreCompleto = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
 
+            // Calcular totales
             let subtotal = 0;
             const productosPedido = carrito.map(item => {
                 const cantidad = item.cantidad || 1;
@@ -2895,6 +2678,7 @@
                 let pedidoId = '';
 
                 if (tipoEntregaSeleccionado === 'Domicilio') {
+                    // DOMICILIO: Guardar en colección Domicilios
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
                         Direccion_Entrega: direccion,
@@ -2920,6 +2704,7 @@
                     pedidoId = domRecord.id.slice(-6);
 
                 } else {
+                    // RETIRO EN TIENDA: Guardar en colección PedidosTienda
                     const ahora = new Date();
                     const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
@@ -2949,6 +2734,9 @@
                     pedidoId = tiendaRecord.id.slice(-6);
                 }
 
+                // =====================================================
+                //  CONSTRUIR MENSAJE
+                // =====================================================
                 let mensaje = `*🆕 Nuevo pedido*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
@@ -2969,28 +2757,46 @@
                 mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
                 mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
 
+                // =====================================================
+                //  ENVIAR MENSAJE AL GRUPO DE WHATSAPP
+                // =====================================================
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                await fetch(url, {
+                const body = {
+                    chatId: GRUPO_CHAT_ID,
+                    message: mensaje
+                };
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
-                }).catch(() => {});
+                    body: JSON.stringify(body)
+                });
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error al enviar WhatsApp al grupo:', errorText);
+                } else {
+                    console.log('✅ Mensaje enviado al grupo de WhatsApp.');
+                }
+
+                // Vaciar carrito
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
 
+                // =====================================================
+                //  MOSTRAR MENSAJE DE ÉXITO (MODIFICADO)
+                // =====================================================
                 alert('✅ Pedido realizado con éxito. ¡Gracias por comprar en La Tiendita B&B!');
 
+                // Recargar productos
                 productos = await obtenerProductos();
-                productosEncargo = await obtenerProductosEncargo();
                 renderizarProductos();
 
             } catch (e) {
                 console.error('Error en confirmarPedidoFinal:', e);
                 alert('Error al procesar el pedido: ' + e.message);
                 productos = await obtenerProductos();
-                productosEncargo = await obtenerProductosEncargo();
                 renderizarProductos();
             }
         }
@@ -3014,7 +2820,6 @@
         async function init() {
             actualizarUIUsuario();
             productos = await obtenerProductos();
-            productosEncargo = await obtenerProductosEncargo();
             await renderizarCategorias();
 
             const params = new URLSearchParams(window.location.search);
@@ -3032,10 +2837,8 @@
                 if (!document.hidden) {
                     setTimeout(async () => {
                         const nuevos = await obtenerProductos();
-                        const nuevosEncargo = await obtenerProductosEncargo();
-                        if (nuevos.length || nuevosEncargo.length) {
+                        if (nuevos.length) {
                             productos = nuevos;
-                            productosEncargo = nuevosEncargo;
                             renderizarProductos();
                         }
                     }, 500);
