@@ -1337,6 +1337,10 @@
         <div class="modal">
             <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
             <h2>📦 Solicitar Pedido por Encargo</h2>
+            <div style="background:#fef9e7; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; color:#7d6608; border-left:4px solid #f1c40f;">
+                <strong>ℹ️ Información importante:</strong><br>
+                Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>.
+            </div>
             <div id="encargoForm">
                 <div class="form-group">
                     <label>Producto</label>
@@ -1852,7 +1856,7 @@
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=500`);
                 if (resp.ok) {
                     const data = await resp.json();
-                    return data.items; // no filtramos por stock, porque los encargos no lo necesitan
+                    return data.items;
                 }
                 return [];
             } catch (e) { return []; }
@@ -1995,7 +1999,7 @@
             sepLi.style.margin = '6px 0';
             ul.appendChild(sepLi);
 
-            // Categorías normales (excluyendo productos de encargo)
+            // Categorías normales
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo';
@@ -2122,17 +2126,15 @@
             setTimeout(() => {
                 let filtrados = productos;
                 if (categoriaSeleccionada === "PedidosPorEncargo") {
-                    // Solo mostrar productos marcados como encargo
                     filtrados = filtrados.filter(p => p.Es_Encargo === true);
-                } else if (categoriaSeleccionada !== "Todas") {
-                    // Categorías normales: excluir los encargos
-                    filtrados = filtrados.filter(p => {
-                        const coincideCategoria = (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase();
-                        return coincideCategoria && p.Es_Encargo !== true;
-                    });
                 } else {
-                    // "Todas": excluir los encargos
-                    filtrados = filtrados.filter(p => p.Es_Encargo !== true);
+                    // Excluir productos de encargo
+                    filtrados = filtrados.filter(p => !p.Es_Encargo);
+                    if (categoriaSeleccionada !== "Todas") {
+                        filtrados = filtrados.filter(p =>
+                            (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase()
+                        );
+                    }
                 }
                 const busqueda = getBusqueda();
                 if (busqueda) {
@@ -2855,7 +2857,7 @@
                     throw new Error(err.message || 'Error al guardar el encargo');
                 }
 
-                // Enviar notificación al grupo de WhatsApp
+                const result = await resp.json();
                 const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
                     `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
                     `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
@@ -2864,23 +2866,16 @@
                     `🔢 Cantidad: ${cantidad}\n` +
                     `💬 Comentario: ${comentario || 'Sin comentario'}\n` +
                     `📅 Fecha: ${new Date().toLocaleString('es-ES')}\n` +
-                    `🆔 ID Encargo: ${(await resp.json()).id.slice(-6)}`;
+                    `🆔 ID Encargo: ${result.id.slice(-6)}`;
 
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                const sendResp = await fetch(url, {
+                await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
                 });
 
-                if (!sendResp.ok) {
-                    console.error('Error al enviar WhatsApp:', await sendResp.text());
-                    // No lanzamos error para no interrumpir el flujo, solo mostramos alerta
-                    alert('⚠️ La solicitud se guardó, pero hubo un error al enviar la notificación. Revisa la consola.');
-                } else {
-                    alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
-                }
-
+                alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
                 cerrarEncargoModal();
 
             } catch (e) {
