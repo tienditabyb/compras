@@ -356,6 +356,8 @@
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
+        .estado-proceso { background: #dbeafe; color: #2563eb; }
+        .estado-completado { background: #d1fae5; color: #059669; }
 
         .estado-select {
             padding: 4px 8px;
@@ -505,6 +507,16 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .product-card .encargo-label {
+            font-size: 0.6rem;
+            background: #fef3c7;
+            color: #d97706;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 4px 0;
+            font-weight: 600;
         }
         .product-card .actions {
             margin-top: auto;
@@ -916,7 +928,6 @@
             gap: 15px;
             margin-top: 15px;
         }
-        /* En móviles: una columna y en orden: Nombre, Teléfono, Dirección */
         @media (max-width: 600px) {
             .caja-form .datos-cliente {
                 grid-template-columns: 1fr !important;
@@ -985,6 +996,7 @@
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
                         <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
+                        <li><a data-tab="encargos">📋 Encargos</a></li>
                         <li><a data-tab="reportes">📈 Reportes</a></li>
                     </ul>
                 </nav>
@@ -1053,7 +1065,7 @@
                     </div>
                 </div>
 
-                <!-- INVENTARIO (con botón Exportar a PDF) -->
+                <!-- INVENTARIO -->
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
@@ -1136,7 +1148,28 @@
                     </div>
                 </div>
 
-                <!-- REPORTES (con botón Exportar a PDF mejorado) -->
+                <!-- ENCARGOS -->
+                <div id="tab-encargos" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">📋 Encargos</h2>
+                    <div class="filters">
+                        <div><label>Estado:</label>
+                            <select id="encFiltroEstado">
+                                <option value="Todos">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En proceso">En proceso</option>
+                                <option value="Completado">Completado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <button id="encFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="encLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="encargosContainer">
+                        <div class="loading"><div class="spinner"></div>Cargando encargos...</div>
+                    </div>
+                </div>
+
+                <!-- REPORTES -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1200,6 +1233,13 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
 
+                <!-- NUEVO: Checkbox para encargo -->
+                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos
+                    </label>
+                </div>
+
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
@@ -1236,6 +1276,7 @@
         let ventasCache = [];
         let domiciliosCache = [];
         let tiendaCache = [];
+        let encargosCache = [];
         let categoriasCache = [];
 
         // ============================================================
@@ -1385,6 +1426,14 @@
             } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
         }
 
+        async function cargarEncargos() {
+            try {
+                const data = await apiRequest('Encargos/records?sort=-fecha_solicitud&perPage=200');
+                encargosCache = data.items;
+                return encargosCache;
+            } catch (e) { console.error('Error cargando encargos:', e); return []; }
+        }
+
         // ============================================================
         // NORMALIZACIÓN y ganancias
         // ============================================================
@@ -1532,6 +1581,7 @@
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 const stock = parseInt(p.Stock || 0);
+                const esEncargo = p.Es_Encargo === true;
 
                 let extrasHtml = '';
                 if (fotosExtra.length > 0) {
@@ -1550,6 +1600,7 @@
                              onclick="event.stopPropagation(); window.open('${fotoUrl || ''}','_blank')" />
                         ${extrasHtml}
                         <h4>${p.Nombre || 'Sin nombre'}</h4>
+                        ${esEncargo ? '<div class="encargo-label">📦 Encargo</div>' : ''}
                         <div class="price">$${precioFinal.toFixed(2)}</div>
                         <div class="stock">📦 ${stock} uds</div>
                         <div class="category">${p.Categoria || 'General'}</div>
@@ -1677,6 +1728,139 @@
                 `;
             }
             container.innerHTML = html;
+        }
+
+        // ============================================================
+        // RENDER ENCARGOS
+        // ============================================================
+        function renderEncargos(encargos) {
+            const container = document.getElementById('encargosContainer');
+            if (encargos.length === 0) {
+                container.innerHTML = '<div class="empty">No hay encargos.</div>';
+                return;
+            }
+            let html = '';
+            for (const e of encargos) {
+                const estado = e.estado || 'Pendiente';
+                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
+                                   estado === 'En proceso' ? 'estado-proceso' :
+                                   estado === 'Completado' ? 'estado-completado' : 'estado-cancelado';
+                const fecha = e.fecha_solicitud ? new Date(e.fecha_solicitud).toLocaleString('es-ES') : 'Sin fecha';
+                const telefono = e.usuario_telefono || 'Sin teléfono';
+                const nombreCliente = e.usuario_nombre || 'Cliente';
+                const producto = e.producto_nombre || 'Producto';
+                const cantidad = e.cantidad || 1;
+                const comentario = e.comentario || '';
+
+                html += `
+                    <div class="list-item" id="encargo-item-${e.id}">
+                        <div class="left">
+                            <div class="title">📦 ${producto} (x${cantidad})</div>
+                            <div class="sub">👤 ${nombreCliente} • 📞 ${telefono}</div>
+                            <div class="sub">📅 ${fecha}</div>
+                            ${comentario ? `<div class="sub">💬 ${comentario}</div>` : ''}
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <select class="estado-select" id="encargo-select-${e.id}" 
+                                    onchange="cambiarEstadoEncargo('${e.id}', this.value)">
+                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
+                                <option value="Completado" ${estado === 'Completado' ? 'selected' : ''}>Completado</option>
+                                <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                            </select>
+                            <button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleEncargo('${e.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // FUNCIONES PARA ENCARGOS
+        // ============================================================
+        async function cambiarEstadoEncargo(id, nuevoEstado) {
+            try {
+                const encargoActual = encargosCache.find(e => e.id === id);
+                if (!encargoActual) {
+                    alert('Encargo no encontrado.');
+                    return;
+                }
+
+                await apiRequest(`Encargos/records/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ estado: nuevoEstado, fecha_actualizacion: new Date().toISOString() })
+                });
+
+                encargoActual.estado = nuevoEstado;
+                await cargarEncargos();
+                aplicarFiltrosEncargos();
+                notificarEncargo(id);
+            } catch (e) {
+                console.error('Error al cambiar estado del encargo:', e);
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function notificarEncargo(id) {
+            const enc = encargosCache.find(e => e.id === id);
+            if (!enc) {
+                alert('Encargo no encontrado.');
+                return;
+            }
+            let telefono = enc.usuario_telefono;
+            if (!telefono || telefono === 'Sin teléfono') {
+                alert('El cliente no tiene número de teléfono registrado.');
+                return;
+            }
+            telefono = String(telefono).trim();
+            if (telefono === '') {
+                alert('El número de teléfono está vacío.');
+                return;
+            }
+
+            const estado = enc.estado || 'Pendiente';
+            const producto = enc.producto_nombre || 'Producto';
+            const mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                `Tu encargo de *${producto}* ha cambiado de estado a: *${estado}*.\n` +
+                `Si tienes dudas, contáctanos. 📞\n\n` +
+                `Gracias por confiar en B&B. 🙌`;
+
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+
+        async function verDetalleEncargo(id) {
+            try {
+                const data = await apiRequest(`Encargos/records/${id}`);
+                const body = `
+                    <div class="detail-row"><span class="label">Producto</span><span class="value">${data.producto_nombre || 'Sin nombre'}</span></div>
+                    <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
+                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.usuario_nombre || 'Cliente'}</span></div>
+                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.usuario_telefono || 'Sin teléfono'}</span></div>
+                    <div class="detail-row"><span class="label">Estado</span><span class="value">${data.estado || 'Pendiente'}</span></div>
+                    <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
+                    <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${new Date(data.fecha_solicitud).toLocaleString('es-ES')}</span></div>
+                    <div class="detail-row"><span class="label">Última actualización</span><span class="value">${new Date(data.fecha_actualizacion).toLocaleString('es-ES')}</span></div>
+                `;
+                document.getElementById('detailBody').innerHTML = body;
+                document.getElementById('detailModal').classList.add('active');
+            } catch (e) {
+                alert('Error al cargar detalle: ' + e.message);
+            }
+        }
+
+        function aplicarFiltrosEncargos() {
+            const estado = document.getElementById('encFiltroEstado').value;
+            let filtrados = [...encargosCache];
+            if (estado !== 'Todos') {
+                filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
+            }
+            renderEncargos(filtrados);
         }
 
         // ============================================================
@@ -2187,12 +2371,14 @@
                 document.getElementById('prodOferta').value = producto.Precio_Oferta || '';
                 document.getElementById('prodStock').value = producto.Stock || '';
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
+                document.getElementById('prodEsEncargo').checked = producto.Es_Encargo === true;
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
                 fotosExistentes = obtenerFotosProducto(producto);
                 renderFotosFormulario();
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
+                document.getElementById('prodEsEncargo').checked = false;
             }
             modal.classList.add('active');
         }
@@ -2219,6 +2405,7 @@
             const oferta = document.getElementById('prodOferta').value || '0';
             const stock = document.getElementById('prodStock').value;
             const detalles = document.getElementById('prodDetalles').value.trim();
+            const esEncargo = document.getElementById('prodEsEncargo').checked;
 
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
@@ -2233,7 +2420,8 @@
                 Precio_Venta: venta,
                 Precio_Oferta: oferta,
                 Stock: stock,
-                Detalles: detalles
+                Detalles: detalles,
+                Es_Encargo: esEncargo
             };
 
             try {
@@ -2663,7 +2851,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF - CORREGIDO (SIN EMOJIS)
+        // EXPORTAR REPORTES A PDF
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2675,19 +2863,16 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // Título sin emojis
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
             doc.text('Reporte de Ventas - B&B', 40, 40);
 
-            // Fecha
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#64748b');
             doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
 
-            // Tabla
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
 
@@ -2738,7 +2923,6 @@
                 }
             });
 
-            // Resumen (sin emojis)
             const finalY = doc.lastAutoTable.finalY + 25;
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(14);
@@ -2759,7 +2943,7 @@
         document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
 
         // ============================================================
-        // REPORTES (renderizado con guardado de filtrados)
+        // REPORTES
         // ============================================================
         function renderReportes(ventas) {
             ventasFiltradasReporte = ventas;
@@ -2818,6 +3002,7 @@
                 await cargarVentas();
                 await cargarDomicilios();
                 await cargarTienda();
+                await cargarEncargos();
 
                 renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
@@ -2831,6 +3016,7 @@
                 renderVentas(ventasCache);
                 renderDomicilios(domiciliosCache);
                 renderTienda(tiendaCache);
+                renderEncargos(encargosCache);
                 renderReportes(ventasCache);
 
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
@@ -2905,6 +3091,14 @@
                     if (estado !== 'Todos') filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estado);
                     renderTienda(filtrados);
                 }
+
+                document.getElementById('encFiltrarBtn').addEventListener('click', function() {
+                    aplicarFiltrosEncargos();
+                });
+                document.getElementById('encLimpiarBtn').addEventListener('click', function() {
+                    document.getElementById('encFiltroEstado').value = 'Todos';
+                    renderEncargos(encargosCache);
+                });
 
                 document.getElementById('repFiltrarBtn').addEventListener('click', function() {
                     aplicarFiltrosReportes();
