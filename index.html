@@ -1287,7 +1287,7 @@
         <section class="products-section" id="productsSection">
             <div class="toolbar">
                 <div class="toolbar__left">
-                    <h2>Productos</h2>
+                    <h2 id="sectionTitle">Productos</h2>
                     <div class="toolbar__categories">
                         <button class="btn-categories" onclick="toggleCategoriesDropdown()">
                             <span class="icon">☰</span> Categorías
@@ -1336,7 +1336,7 @@
     <div class="modal-overlay" id="encargoModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
-            <h2>📦 Solicitar Encargo</h2>
+            <h2>📦 Solicitar Pedido por Encargo</h2>
             <div id="encargoForm">
                 <div class="form-group">
                     <label>Producto</label>
@@ -1852,7 +1852,7 @@
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=500`);
                 if (resp.ok) {
                     const data = await resp.json();
-                    return data.items.filter(p => parseInt(p.Stock || 0) > 0);
+                    return data.items; // no filtramos por stock, porque los encargos no lo necesitan
                 }
                 return [];
             } catch (e) { return []; }
@@ -1972,6 +1972,30 @@
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
+            
+            // Sección "Pedidos Por Encargo" (independiente)
+            const encargoLi = document.createElement('li');
+            const encargoLink = document.createElement('a');
+            encargoLink.textContent = '📦 Pedidos Por Encargo';
+            encargoLink.dataset.categoria = 'PedidosPorEncargo';
+            encargoLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                categoriaSeleccionada = 'PedidosPorEncargo';
+                actualizarCategoriaActiva(encargoLink);
+                document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo';
+                paginaActual = 1;
+                renderizarProductos();
+            });
+            encargoLi.appendChild(encargoLink);
+            ul.appendChild(encargoLi);
+
+            // Línea separadora visual (opcional)
+            const sepLi = document.createElement('li');
+            sepLi.style.borderTop = '1px solid #e2e8f0';
+            sepLi.style.margin = '6px 0';
+            ul.appendChild(sepLi);
+
+            // Categorías normales
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo';
@@ -1981,26 +2005,12 @@
                 e.preventDefault();
                 categoriaSeleccionada = 'Todas';
                 actualizarCategoriaActiva(allLink);
+                document.getElementById('sectionTitle').textContent = 'Productos';
                 paginaActual = 1;
                 renderizarProductos();
             });
             allLi.appendChild(allLink);
             ul.appendChild(allLi);
-
-            // Añadir "Encargos" como categoría especial
-            const encargoLi = document.createElement('li');
-            const encargoLink = document.createElement('a');
-            encargoLink.textContent = '📦 Encargos';
-            encargoLink.dataset.categoria = 'Encargos';
-            encargoLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'Encargos';
-                actualizarCategoriaActiva(encargoLink);
-                paginaActual = 1;
-                renderizarProductos();
-            });
-            encargoLi.appendChild(encargoLink);
-            ul.appendChild(encargoLi);
 
             cats.forEach(cat => {
                 const li = document.createElement('li');
@@ -2011,6 +2021,7 @@
                     e.preventDefault();
                     categoriaSeleccionada = cat;
                     actualizarCategoriaActiva(a);
+                    document.getElementById('sectionTitle').textContent = cat;
                     paginaActual = 1;
                     renderizarProductos();
                 });
@@ -2018,8 +2029,31 @@
                 ul.appendChild(li);
             });
 
+            // Dropdown móvil
             const dropdown = document.getElementById('categoriesDropdown');
             dropdown.innerHTML = '';
+            
+            const encargoDrop = document.createElement('a');
+            encargoDrop.textContent = '📦 Pedidos Por Encargo';
+            encargoDrop.dataset.categoria = 'PedidosPorEncargo';
+            if (categoriaSeleccionada === 'PedidosPorEncargo') encargoDrop.classList.add('active');
+            encargoDrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                categoriaSeleccionada = 'PedidosPorEncargo';
+                actualizarCategoriaActiva(encargoDrop);
+                document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo';
+                paginaActual = 1;
+                renderizarProductos();
+                cerrarDropdownCategorias();
+            });
+            dropdown.appendChild(encargoDrop);
+
+            // Separador visual
+            const sepDrop = document.createElement('div');
+            sepDrop.style.borderTop = '1px solid #e2e8f0';
+            sepDrop.style.margin = '4px 12px';
+            dropdown.appendChild(sepDrop);
+
             const allLinkDrop = document.createElement('a');
             allLinkDrop.textContent = '📂 Todas';
             allLinkDrop.dataset.categoria = 'Todas';
@@ -2028,26 +2062,12 @@
                 e.preventDefault();
                 categoriaSeleccionada = 'Todas';
                 actualizarCategoriaActiva(allLinkDrop);
+                document.getElementById('sectionTitle').textContent = 'Productos';
                 paginaActual = 1;
                 renderizarProductos();
                 cerrarDropdownCategorias();
             });
             dropdown.appendChild(allLinkDrop);
-
-            // Encargos en dropdown
-            const encargoDrop = document.createElement('a');
-            encargoDrop.textContent = '📦 Encargos';
-            encargoDrop.dataset.categoria = 'Encargos';
-            if (categoriaSeleccionada === 'Encargos') encargoDrop.classList.add('active');
-            encargoDrop.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'Encargos';
-                actualizarCategoriaActiva(encargoDrop);
-                paginaActual = 1;
-                renderizarProductos();
-                cerrarDropdownCategorias();
-            });
-            dropdown.appendChild(encargoDrop);
 
             cats.forEach(cat => {
                 const a = document.createElement('a');
@@ -2058,6 +2078,7 @@
                     e.preventDefault();
                     categoriaSeleccionada = cat;
                     actualizarCategoriaActiva(a);
+                    document.getElementById('sectionTitle').textContent = cat;
                     paginaActual = 1;
                     renderizarProductos();
                     cerrarDropdownCategorias();
@@ -2101,7 +2122,7 @@
 
             setTimeout(() => {
                 let filtrados = productos;
-                if (categoriaSeleccionada === "Encargos") {
+                if (categoriaSeleccionada === "PedidosPorEncargo") {
                     filtrados = filtrados.filter(p => p.Es_Encargo === true);
                 } else if (categoriaSeleccionada !== "Todas") {
                     filtrados = filtrados.filter(p =>
@@ -2152,14 +2173,13 @@
                         } else { precioHtml += `$${venta.toFixed(2)}`; }
                         precioHtml += `</span>`;
 
-                        const stock = parseInt(prod.Stock || 0);
                         const esEncargo = prod.Es_Encargo === true;
 
                         html += `
                             <div class="product-card" data-id="${prod.id}">
                                 <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
                                      alt="${prod.Nombre || 'Producto'}" />
-                                ${esEncargo ? '<div class="encargo-badge">📦 Encargo</div>' : ''}
+                                ${esEncargo ? '<div class="encargo-badge">📦 Pedido por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
                                 <div class="product-footer">
@@ -2169,7 +2189,7 @@
                                         `<button class="btn-add" data-id="${prod.id}">Agregar</button>`
                                     }
                                 </div>
-                                <div class="stock-badge">${stock} uds</div>
+                                ${!esEncargo ? `<div class="stock-badge">${parseInt(prod.Stock || 0)} uds</div>` : ''}
                             </div>
                         `;
                     }
@@ -2299,9 +2319,9 @@
                     <button class="back-link" onclick="volverALista()">← Volver a productos</button>
                     ${galeriaHtml}
                     <h2>${prod.Nombre || 'Sin nombre'}</h2>
-                    ${esEncargo ? '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un encargo</div>' : ''}
+                    ${esEncargo ? '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>' : ''}
                     ${precioHtml}
-                    <div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>
+                    ${!esEncargo ? `<div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>` : ''}
                     <div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>
                 `;
 
@@ -2801,13 +2821,11 @@
                 return;
             }
 
-            // Deshabilitar botón para evitar doble envío
             const btn = this;
             btn.disabled = true;
             btn.textContent = '⏳ Enviando...';
 
             try {
-                // Guardar en colección Encargos
                 const encargoData = {
                     producto_id: prod.id,
                     producto_nombre: prod.Nombre || 'Sin nombre',
@@ -2832,7 +2850,6 @@
                     throw new Error(err.message || 'Error al guardar el encargo');
                 }
 
-                // Enviar notificación al admin por WhatsApp
                 const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
                     `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
                     `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
@@ -2863,7 +2880,6 @@
             }
         });
 
-        // Cerrar modal con overlay
         document.getElementById('encargoModal').addEventListener('click', function(e) {
             if (e.target === this) cerrarEncargoModal();
         });
