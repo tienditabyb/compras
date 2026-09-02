@@ -356,7 +356,6 @@
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-vendido { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
-        .estado-encargo { background: #e0e7ff; color: #4338ca; }
 
         .estado-select {
             padding: 4px 8px;
@@ -986,7 +985,6 @@
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
                         <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
-                        <li><a data-tab="encargos">📦 Encargos</a></li> <!-- NUEVO -->
                         <li><a data-tab="reportes">📈 Reportes</a></li>
                     </ul>
                 </nav>
@@ -1055,7 +1053,7 @@
                     </div>
                 </div>
 
-                <!-- INVENTARIO -->
+                <!-- INVENTARIO (con botón Exportar a PDF) -->
                 <div id="tab-inventario" class="tab-content">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
                         <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
@@ -1088,7 +1086,6 @@
                                 <option value="Local">Local</option>
                                 <option value="Domicilio">Domicilio</option>
                                 <option value="Tienda">Tienda</option>
-                                <option value="Encargo">Encargo</option>
                             </select>
                         </div>
                         <button id="ventasFiltrarBtn">Filtrar</button>
@@ -1139,23 +1136,7 @@
                     </div>
                 </div>
 
-                <!-- ENCARGOS (NUEVO) -->
-                <div id="tab-encargos" class="tab-content">
-                    <h2 style="margin-bottom:20px; font-weight:600;">📦 Productos por Encargo</h2>
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-                        <div>
-                            <button class="btn-success" id="btnNuevoEncargo">➕ Nuevo Encargo</button>
-                        </div>
-                        <div>
-                            <button class="btn-primary" id="btnRefrescarEncargos">🔄 Refrescar</button>
-                        </div>
-                    </div>
-                    <div class="list-container" id="encargosContainer">
-                        <div class="loading"><div class="spinner"></div>Cargando encargos...</div>
-                    </div>
-                </div>
-
-                <!-- REPORTES -->
+                <!-- REPORTES (con botón Exportar a PDF mejorado) -->
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
                     <div class="filters">
@@ -1167,7 +1148,6 @@
                                 <option value="Local">Local</option>
                                 <option value="Domicilio">Domicilio</option>
                                 <option value="Tienda">Tienda</option>
-                                <option value="Encargo">Encargo</option>
                             </select>
                         </div>
                         <button id="repFiltrarBtn">Filtrar</button>
@@ -1241,32 +1221,6 @@
         </div>
     </div>
 
-    <!-- MODAL ENCARGO (NUEVO) -->
-    <div class="modal-overlay" id="encargoModal">
-        <div class="modal" style="max-width:600px;">
-            <button class="close-modal" id="closeEncargoModal">✕</button>
-            <h2 id="encargoModalTitle">Nuevo Encargo</h2>
-            <form id="encargoForm">
-                <input type="hidden" id="encargoId" value="" />
-                <div class="form-group"><label>Nombre del producto *</label><input type="text" id="encNombre" required /></div>
-                <div class="form-group"><label>Descripción</label><textarea id="encDescripcion" rows="3"></textarea></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Precio estimado *</label><input type="number" id="encPrecio" step="0.01" required /></div>
-                    <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:20px;">
-                        <label style="margin:0;">Disponible</label>
-                        <input type="checkbox" id="encDisponible" checked style="width:20px; height:20px;" />
-                    </div>
-                </div>
-                <div class="form-group"><label>Enlace de referencia (Amazon/Temu/Shein)</label><input type="url" id="encEnlace" placeholder="https://..." /></div>
-                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                    <button type="submit" class="btn-primary" id="encargoSubmitBtn">Guardar</button>
-                    <button type="button" class="btn-danger" id="encargoDeleteBtn" style="display:none;">Eliminar</button>
-                    <button type="button" class="btn-clear" id="encargoCancelBtn">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- ============================================================ -->
     <!-- ====================== JAVASCRIPT =========================== -->
     <!-- ============================================================ -->
@@ -1283,7 +1237,6 @@
         let domiciliosCache = [];
         let tiendaCache = [];
         let categoriasCache = [];
-        let encargosCache = []; // NUEVO
 
         // ============================================================
         // CARRITO PARA CAJA
@@ -1390,7 +1343,7 @@
         }
 
         // ============================================================
-        // CARGAR DATOS (incluyendo encargos)
+        // CARGAR DATOS
         // ============================================================
         async function cargarCategorias() {
             try {
@@ -1430,15 +1383,6 @@
                 tiendaCache = data.items;
                 return tiendaCache;
             } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
-        }
-
-        // NUEVO: Cargar encargos
-        async function cargarEncargos() {
-            try {
-                const data = await apiRequest('Encargos/records?sort=-created&perPage=200');
-                encargosCache = data.items;
-                return encargosCache;
-            } catch (e) { console.error('Error cargando encargos:', e); return []; }
         }
 
         // ============================================================
@@ -1514,7 +1458,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones (incluyendo encargos)
+        // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1550,13 +1494,11 @@
             let html = '';
             for (const v of ultimas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
-                const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
                         <div class="left">
                             <div class="title">${v.productos_json || 'Sin productos'}</div>
-                            <div class="sub">${fecha} • ${icono} ${tipo}</div>
+                            <div class="sub">${fecha} • ${v.Tipo || 'Local'}</div>
                         </div>
                         <div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div>
                     </div>
@@ -1632,7 +1574,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
                 const ganancia = calcularGananciaVenta(v);
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
@@ -1737,173 +1679,8 @@
             container.innerHTML = html;
         }
 
-        // NUEVO: Renderizar encargos
-        function renderEncargos(encargos) {
-            const container = document.getElementById('encargosContainer');
-            if (encargos.length === 0) {
-                container.innerHTML = '<div class="empty">No hay productos de encargo creados.</div>';
-                return;
-            }
-            let html = '';
-            for (const e of encargos) {
-                const disponible = e.Disponible ? '✅ Disponible' : '❌ No disponible';
-                const fecha = e.created ? new Date(e.created).toLocaleString('es-ES') : 'Sin fecha';
-                html += `
-                    <div class="list-item" onclick="verDetalleEncargo('${e.id}')">
-                        <div class="left">
-                            <div class="title">${e.Nombre || 'Sin nombre'}</div>
-                            <div class="sub">${e.Descripcion || ''}</div>
-                            <div class="sub">💰 $${parseFloat(e.Precio_Estimado || 0).toFixed(2)} • ${disponible}</div>
-                            <div class="sub" style="font-size:0.7rem; color:#2980b9;">${e.Enlace ? '🔗 Enlace de referencia' : ''}</div>
-                        </div>
-                        <div class="center">
-                            <span class="estado-badge ${e.Disponible ? 'estado-vendido' : 'estado-cancelado'}">${e.Disponible ? 'Disponible' : 'No disponible'}</span>
-                            <button class="btn-edit" onclick="event.stopPropagation(); editarEncargo('${e.id}')">✏️ Editar</button>
-                            <button class="btn-delete" onclick="event.stopPropagation(); eliminarEncargo('${e.id}')">🗑️ Eliminar</button>
-                        </div>
-                        <div class="right">
-                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-        }
-
         // ============================================================
-        // DETALLE DE ENCARGO (usando el modal de detalle general)
-        // ============================================================
-        async function verDetalleEncargo(id) {
-            try {
-                const data = await apiRequest(`Encargos/records/${id}`);
-                const body = `
-                    <div class="detail-row"><span class="label">Nombre</span><span class="value">${data.Nombre || 'Sin nombre'}</span></div>
-                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${data.Descripcion || 'Sin descripción'}</span></div>
-                    <div class="detail-row"><span class="label">Precio estimado</span><span class="value">$${parseFloat(data.Precio_Estimado || 0).toFixed(2)}</span></div>
-                    <div class="detail-row"><span class="label">Enlace</span><span class="value">${data.Enlace ? `<a href="${data.Enlace}" target="_blank">${data.Enlace}</a>` : 'No proporcionado'}</span></div>
-                    <div class="detail-row"><span class="label">Disponible</span><span class="value">${data.Disponible ? '✅ Sí' : '❌ No'}</span></div>
-                `;
-                document.getElementById('detailBody').innerHTML = body;
-                document.getElementById('detailModal').classList.add('active');
-            } catch (e) {
-                alert('Error al cargar detalle: ' + e.message);
-            }
-        }
-
-        // ============================================================
-        // CRUD ENCARGOS
-        // ============================================================
-        function abrirModalEncargo(encargo = null) {
-            const modal = document.getElementById('encargoModal');
-            document.getElementById('encargoForm').reset();
-            document.getElementById('encargoId').value = '';
-            document.getElementById('encargoDeleteBtn').style.display = 'none';
-            document.getElementById('encDisponible').checked = true;
-
-            if (encargo) {
-                document.getElementById('encargoModalTitle').textContent = '✏️ Editar Encargo';
-                document.getElementById('encargoId').value = encargo.id;
-                document.getElementById('encNombre').value = encargo.Nombre || '';
-                document.getElementById('encDescripcion').value = encargo.Descripcion || '';
-                document.getElementById('encPrecio').value = encargo.Precio_Estimado || '';
-                document.getElementById('encEnlace').value = encargo.Enlace || '';
-                document.getElementById('encDisponible').checked = encargo.Disponible !== undefined ? encargo.Disponible : true;
-                document.getElementById('encargoDeleteBtn').style.display = 'inline-block';
-            } else {
-                document.getElementById('encargoModalTitle').textContent = '➕ Nuevo Encargo';
-            }
-            modal.classList.add('active');
-        }
-
-        function cerrarModalEncargo() {
-            document.getElementById('encargoModal').classList.remove('active');
-        }
-
-        function editarEncargo(id) {
-            const enc = encargosCache.find(e => e.id === id);
-            if (enc) abrirModalEncargo(enc);
-            else alert('Encargo no encontrado.');
-        }
-
-        async function eliminarEncargo(id) {
-            if (!confirm('¿Estás seguro de eliminar este encargo?')) return;
-            try {
-                await apiRequest(`Encargos/records/${id}`, { method: 'DELETE' });
-                alert('Encargo eliminado.');
-                await cargarEncargos();
-                renderEncargos(encargosCache);
-            } catch (e) {
-                alert('Error al eliminar: ' + e.message);
-            }
-        }
-
-        // Eventos del modal de encargo
-        document.getElementById('closeEncargoModal').addEventListener('click', cerrarModalEncargo);
-        document.getElementById('encargoCancelBtn').addEventListener('click', cerrarModalEncargo);
-        document.getElementById('encargoModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) cerrarModalEncargo();
-        });
-
-        document.getElementById('btnNuevoEncargo').addEventListener('click', () => abrirModalEncargo(null));
-        document.getElementById('btnRefrescarEncargos').addEventListener('click', async function() {
-            await cargarEncargos();
-            renderEncargos(encargosCache);
-        });
-
-        document.getElementById('encargoDeleteBtn').addEventListener('click', async function() {
-            const id = document.getElementById('encargoId').value;
-            if (id) {
-                await eliminarEncargo(id);
-                cerrarModalEncargo();
-            }
-        });
-
-        // Guardar encargo (crear o actualizar)
-        document.getElementById('encargoForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('encargoId').value;
-            const nombre = document.getElementById('encNombre').value.trim();
-            const descripcion = document.getElementById('encDescripcion').value.trim();
-            const precio = document.getElementById('encPrecio').value;
-            const enlace = document.getElementById('encEnlace').value.trim();
-            const disponible = document.getElementById('encDisponible').checked;
-
-            if (!nombre || !precio) {
-                alert('Nombre y precio estimado son obligatorios.');
-                return;
-            }
-
-            const data = {
-                Nombre: nombre,
-                Descripcion: descripcion,
-                Precio_Estimado: parseFloat(precio),
-                Enlace: enlace || '',
-                Disponible: disponible
-            };
-
-            try {
-                if (id) {
-                    await apiRequest(`Encargos/records/${id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify(data)
-                    });
-                } else {
-                    await apiRequest('Encargos/records', {
-                        method: 'POST',
-                        body: JSON.stringify(data)
-                    });
-                }
-                alert(id ? '✅ Encargo actualizado.' : '✅ Encargo creado.');
-                cerrarModalEncargo();
-                await cargarEncargos();
-                renderEncargos(encargosCache);
-            } catch (e) {
-                alert('Error al guardar: ' + e.message);
-            }
-        });
-
-        // ============================================================
-        // CAMBIAR ESTADO DOMICILIO (ya existente)
+        // CAMBIAR ESTADO DOMICILIO
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -2038,7 +1815,7 @@
         }
 
         // ============================================================
-        // CAMBIAR ESTADO PEDIDO TIENDA (ya existente)
+        // CAMBIAR ESTADO PEDIDO TIENDA
         // ============================================================
         async function cambiarEstadoTienda(id, nuevoEstado) {
             try {
@@ -2303,7 +2080,7 @@
         });
 
         // ============================================================
-        // GESTIÓN DE FOTOS EN FORMULARIO (ya existente)
+        // GESTIÓN DE FOTOS EN FORMULARIO
         // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
@@ -2378,7 +2155,7 @@
         }
 
         // ============================================================
-        // CRUD PRODUCTOS (ya existente)
+        // CRUD PRODUCTOS
         // ============================================================
         function abrirModalProducto(producto = null) {
             const modal = document.getElementById('productModal');
@@ -2550,7 +2327,7 @@
         });
 
         // ============================================================
-        // FUNCIONES PARA CAJA (ya existentes)
+        // FUNCIONES PARA CAJA
         // ============================================================
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
@@ -2777,7 +2554,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (ya existente)
+        // EXPORTAR INVENTARIO A PDF (con html2pdf)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2886,7 +2663,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (ya existente)
+        // EXPORTAR REPORTES A PDF - CORREGIDO (SIN EMOJIS)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2898,16 +2675,19 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
+            // Título sin emojis
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
             doc.text('Reporte de Ventas - B&B', 40, 40);
 
+            // Fecha
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#64748b');
             doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
 
+            // Tabla
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
 
@@ -2958,6 +2738,7 @@
                 }
             });
 
+            // Resumen (sin emojis)
             const finalY = doc.lastAutoTable.finalY + 25;
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(14);
@@ -3009,7 +2790,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : (tipo === 'Encargo' ? '📦' : '🏪'));
+                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
                 const ganancia = calcularGananciaVenta(v);
                 html += `
                     <div class="list-item" onclick="verDetalleVenta('${v.id}')">
@@ -3037,11 +2818,9 @@
                 await cargarVentas();
                 await cargarDomicilios();
                 await cargarTienda();
-                await cargarEncargos(); // NUEVO
 
                 renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
-                renderEncargos(encargosCache); // NUEVO
 
                 const catSelectInv = document.getElementById('invCategory');
                 catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
