@@ -1220,6 +1220,33 @@
             margin: 0;
             opacity: 0.9;
         }
+
+        /* ========== ESTILOS PARA ENCARGOS ========== */
+        .encargo-form textarea {
+            min-height: 80px;
+        }
+        .btn-encargo {
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-encargo:hover {
+            background: #d35400;
+            transform: scale(1.02);
+        }
+        @media (max-width: 480px) {
+            .btn-encargo {
+                font-size: 0.7rem;
+                padding: 4px 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1232,6 +1259,7 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
+                <button class="btn-encargo" onclick="abrirFormularioEncargo()">📝 Encargo</button>
                 <div class="account-dropdown" id="accountDropdown">
                     <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
                         <span class="avatar" id="accountAvatar">👤</span>
@@ -1337,6 +1365,39 @@
             <button class="close-modal" onclick="cerrarHistoryModal()">✕</button>
             <h2>📋 Mi Historial de Pedidos</h2>
             <div id="historyContent"><p style="color:#94a3b8; text-align:center;">Cargando historial...</p></div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DE ENCARGO ========== -->
+    <div class="modal-overlay" id="encargoModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
+            <h2>📝 Solicitar Encargo</h2>
+            <p style="text-align:center; color:#64748b; margin-bottom:15px;">Describe el producto que necesitas y te lo conseguiremos.</p>
+            <form id="encargoForm">
+                <div class="form-group">
+                    <label>Nombre completo *</label>
+                    <input type="text" id="encNombre" required placeholder="Tu nombre" />
+                </div>
+                <div class="form-group">
+                    <label>Teléfono *</label>
+                    <input type="tel" id="encTelefono" required placeholder="Número de contacto" />
+                </div>
+                <div class="form-group">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="encEmail" placeholder="tu@email.com (opcional)" />
+                </div>
+                <div class="form-group">
+                    <label>Descripción del producto *</label>
+                    <textarea id="encDescripcion" required rows="3" placeholder="Marca, modelo, color, talla, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad *</label>
+                    <input type="number" id="encCantidad" min="1" value="1" required />
+                </div>
+                <div id="encError" class="error-msg"></div>
+                <button type="submit" class="btn-primary">Enviar encargo</button>
+            </form>
         </div>
     </div>
 
@@ -1792,6 +1853,94 @@
             }
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+        // ============================================================
+        //  ENCARGOS - NUEVA FUNCIONALIDAD
+        // ============================================================
+        function abrirFormularioEncargo() {
+            document.getElementById('encargoModal').classList.add('active');
+            document.getElementById('encError').classList.remove('show');
+            // Prellenar con datos del usuario si está logueado
+            if (usuarioActual) {
+                document.getElementById('encNombre').value = (usuarioActual.nombre || '') + ' ' + (usuarioActual.apellidos || '');
+                document.getElementById('encTelefono').value = usuarioActual.telefono || '';
+                document.getElementById('encEmail').value = usuarioActual.email || '';
+            } else {
+                // Si no está logueado, sugerir iniciar sesión pero igual permitir el encargo
+            }
+        }
+
+        function cerrarEncargoModal() {
+            document.getElementById('encargoModal').classList.remove('active');
+        }
+
+        // Enviar encargo a PocketBase
+        document.getElementById('encargoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('encNombre').value.trim();
+            const telefono = document.getElementById('encTelefono').value.trim();
+            const email = document.getElementById('encEmail').value.trim();
+            const descripcion = document.getElementById('encDescripcion').value.trim();
+            const cantidad = parseInt(document.getElementById('encCantidad').value) || 1;
+            const errorEl = document.getElementById('encError');
+
+            if (!nombre || !telefono || !descripcion) {
+                errorEl.textContent = 'Completa todos los campos obligatorios.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            try {
+                const data = {
+                    cliente_nombre: nombre,
+                    cliente_telefono: telefono,
+                    cliente_email: email || '',
+                    descripcion: descripcion,
+                    cantidad: cantidad,
+                    estado: 'Pendiente',
+                    fecha_encargo: new Date().toISOString(),
+                    usuario_id: usuarioActual ? usuarioActual.id : null
+                };
+
+                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.message || 'Error al enviar el encargo');
+                }
+
+                alert('✅ Encargo enviado correctamente. Nos pondremos en contacto contigo.');
+                cerrarEncargoModal();
+                this.reset();
+
+                // Notificar al administrador por WhatsApp
+                await notificarEncargoAdmin(nombre, telefono, descripcion, cantidad);
+
+            } catch (e) {
+                errorEl.textContent = e.message;
+                errorEl.classList.add('show');
+            }
+        });
+
+        // Función para notificar al admin (usando Green-API)
+        async function notificarEncargoAdmin(cliente, telefono, descripcion, cantidad) {
+            const mensaje = `*📦 Nuevo encargo*\n\nCliente: ${cliente}\nTeléfono: ${telefono}\nProducto: ${descripcion}\nCantidad: ${cantidad}\n\nRevisa el panel de administración.`;
+            const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
+            const body = {
+                chatId: GRUPO_CHAT_ID,
+                message: mensaje
+            };
+            try {
+                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                console.log('Notificación enviada al admin.');
+            } catch (e) {
+                console.error('Error notificando al admin:', e);
+            }
+        }
 
         // ============================================================
         //  API
