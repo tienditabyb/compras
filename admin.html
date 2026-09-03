@@ -1683,6 +1683,7 @@
 
         // ============================================================
         // RENDER ENCARGOS (con nuevos estados y temporizador)
+        // MODIFICADO: detecta "Nuevo Encargo" si estado es 'Pendiente' sin fecha_limite_pago
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1693,16 +1694,24 @@
             let html = '';
             const ahora = new Date();
             for (const e of encargos) {
-                const estado = e.estado || 'Pendiente';
+                let estado = e.estado || 'Pendiente';
+                let estadoMostrado = estado;
+
+                // 🔥 Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
+                if (estado === 'Pendiente' && !e.fecha_limite_pago) {
+                    estadoMostrado = 'Nuevo Encargo';
+                }
+
+                // Clase CSS para el badge (usamos estadoMostrado)
                 let badgeClass = 'estado-pendiente';
-                if (estado === 'Nuevo Encargo') badgeClass = 'estado-pendiente';
-                else if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
-                else if (estado === 'En proceso') badgeClass = 'estado-en-proceso';
-                else if (estado === 'En camino') badgeClass = 'estado-en-camino';
-                else if (estado === 'Procesando en aduana de Cuba') badgeClass = 'estado-aduana';
-                else if (estado === 'En el local TienditaB&B lista para la entrega') badgeClass = 'estado-local';
-                else if (estado === 'Entregado') badgeClass = 'estado-entregado';
-                else if (estado === 'Cancelado') badgeClass = 'estado-cancelado';
+                if (estadoMostrado === 'Nuevo Encargo') badgeClass = 'estado-pendiente';
+                else if (estadoMostrado === 'Pendiente') badgeClass = 'estado-pendiente';
+                else if (estadoMostrado === 'En proceso') badgeClass = 'estado-en-proceso';
+                else if (estadoMostrado === 'En camino') badgeClass = 'estado-en-camino';
+                else if (estadoMostrado === 'Procesando en aduana de Cuba') badgeClass = 'estado-aduana';
+                else if (estadoMostrado === 'En el local TienditaB&B lista para la entrega') badgeClass = 'estado-local';
+                else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
+                else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
 
                 const fecha = e.fecha_solicitud ? new Date(e.fecha_solicitud).toLocaleString('es-ES') : 'Sin fecha';
                 const telefono = e.usuario_telefono || 'Sin teléfono';
@@ -1717,6 +1726,7 @@
                     fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
                 }
 
+                // 🕒 Temporizador solo si el estado real es 'Pendiente' y tiene fecha límite
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
                     const limite = new Date(e.fecha_limite_pago);
@@ -1733,15 +1743,16 @@
                     }
                 }
 
+                // Opciones del selector: la opción seleccionada será estadoMostrado
                 const opciones = `
-                    <option value="Nuevo Encargo" ${estado === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo Encargo</option>
-                    <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                    <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
-                    <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
-                    <option value="Procesando en aduana de Cuba" ${estado === 'Procesando en aduana de Cuba' ? 'selected' : ''}>Procesando en aduana de Cuba</option>
-                    <option value="En el local TienditaB&B lista para la entrega" ${estado === 'En el local TienditaB&B lista para la entrega' ? 'selected' : ''}>En el local TienditaB&B lista para la entrega</option>
-                    <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
-                    <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                    <option value="Nuevo Encargo" ${estadoMostrado === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo Encargo</option>
+                    <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="En proceso" ${estadoMostrado === 'En proceso' ? 'selected' : ''}>En proceso</option>
+                    <option value="En camino" ${estadoMostrado === 'En camino' ? 'selected' : ''}>En camino</option>
+                    <option value="Procesando en aduana de Cuba" ${estadoMostrado === 'Procesando en aduana de Cuba' ? 'selected' : ''}>Procesando en aduana de Cuba</option>
+                    <option value="En el local TienditaB&B lista para la entrega" ${estadoMostrado === 'En el local TienditaB&B lista para la entrega' ? 'selected' : ''}>En el local TienditaB&B lista para la entrega</option>
+                    <option value="Entregado" ${estadoMostrado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                    <option value="Cancelado" ${estadoMostrado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                 `;
 
                 html += `
@@ -1755,7 +1766,7 @@
                             ${tiempoHtml}
                         </div>
                         <div class="center">
-                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
                             <select class="estado-select" id="encargo-select-${e.id}" 
                                     onchange="cambiarEstadoEncargo('${e.id}', this.value)"
                                     ${estado === 'Entregado' || estado === 'Cancelado' ? 'disabled' : ''}>
@@ -1794,6 +1805,7 @@
             }
         }
 
+        // Función modificada para manejar correctamente "Nuevo Encargo" y "Pendiente"
         async function cambiarEstadoEncargo(id, nuevoEstado) {
             try {
                 const encargoActual = encargosCache.find(e => e.id === id);
@@ -1803,29 +1815,47 @@
                 }
 
                 let data = { 
-                    estado: nuevoEstado, 
                     fecha_actualizacion: new Date().toISOString()
                 };
 
-                if (nuevoEstado === 'Pendiente') {
-                    const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
-                    data.fecha_limite_pago = limite.toISOString();
+                // 🔥 Lógica para "Nuevo Encargo"
+                if (nuevoEstado === 'Nuevo Encargo') {
+                    // Lo guardamos como 'Pendiente' pero sin fecha límite
+                    data.estado = 'Pendiente';
+                    data.fecha_limite_pago = null; // eliminar la fecha si existía
+                }
+                // 🔥 Lógica para "Pendiente"
+                else if (nuevoEstado === 'Pendiente') {
+                    data.estado = 'Pendiente';
+                    // Si no tiene fecha límite, la creamos (24h)
+                    if (!encargoActual.fecha_limite_pago) {
+                        const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                        data.fecha_limite_pago = limite.toISOString();
+                    }
+                }
+                // Resto de estados (se guardan tal cual)
+                else {
+                    data.estado = nuevoEstado;
                 }
 
+                // Enviar actualización
                 const response = await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
+                // Actualizar caché local
                 const index = encargosCache.findIndex(e => e.id === id);
                 if (index !== -1) {
                     encargosCache[index] = { ...encargosCache[index], ...response };
                 }
 
+                // Recargar y re-renderizar
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                if (nuevoEstado !== 'Cancelado') {
+                // Notificar solo si no es "Nuevo Encargo" ni "Cancelado"
+                if (nuevoEstado !== 'Nuevo Encargo' && nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
 
@@ -1949,7 +1979,15 @@
             const estado = document.getElementById('encFiltroEstado').value;
             let filtrados = [...encargosCache];
             if (estado !== 'Todos') {
-                filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
+                // Para filtrar, comparamos con el estado real (Pendiente) o con el mostrado (Nuevo Encargo)
+                if (estado === 'Nuevo Encargo') {
+                    filtrados = filtrados.filter(e => {
+                        const estadoReal = e.estado || 'Pendiente';
+                        return estadoReal === 'Pendiente' && !e.fecha_limite_pago;
+                    });
+                } else {
+                    filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
+                }
             }
             renderEncargos(filtrados);
         }
