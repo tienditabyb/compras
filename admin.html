@@ -1870,9 +1870,9 @@
                 switch (estado) {
                     case 'Nuevo Encargo':
                         mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
-                            `Hemos recibido tu solicitud de encargo para *${producto}* (x${cantidad}).\n` +
-                            `Pronto nos pondremos en contacto para confirmar los detalles del pago.\n\n` +
-                            `Gracias por confiar en B&B. 🙌`;
+                                  `Hemos recibido tu solicitud de encargo para *${producto}* (x${cantidad}).\n` +
+                                  `Pronto nos pondremos en contacto para confirmar los detalles del pago.\n\n` +
+                                  `Gracias por confiar en B&B. 🙌`;
                         break;
                     case 'Pendiente':
                         mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
@@ -3202,7 +3202,6 @@
                     renderReportes(ventasCache);
                 });
 
-                // Temporizador para encargos (cada 10 segundos para probar, luego cambiar a 60 segundos)
                 setInterval(() => {
                     aplicarFiltrosEncargos();
                 }, 10000);
