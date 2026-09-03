@@ -1681,7 +1681,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con temporizador)
+        // RENDER ENCARGOS (con nuevos estados y temporizador)
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1709,33 +1709,27 @@
                 const cantidad = e.cantidad || 1;
                 const comentario = e.comentario || '';
 
-                // Calcular tiempo restante - si no tiene fecha_limite_pago, usamos fecha_actualizacion + 24h
+                // Mostrar fecha límite si existe
+                let fechaLimiteHtml = '';
+                if (e.fecha_limite_pago) {
+                    const fechaLimite = new Date(e.fecha_limite_pago);
+                    fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
+                }
+
                 let tiempoHtml = '';
-                if (estado === 'Pendiente') {
-                    let fechaLimite = e.fecha_limite_pago ? new Date(e.fecha_limite_pago) : null;
-                    // Si no tiene fecha_limite_pago, la calculamos desde fecha_actualizacion o fecha_solicitud
-                    if (!fechaLimite) {
-                        const baseFecha = e.fecha_actualizacion || e.fecha_solicitud;
-                        if (baseFecha) {
-                            const base = new Date(baseFecha);
-                            fechaLimite = new Date(base.getTime() + 24 * 60 * 60 * 1000);
-                        }
-                    }
-                    if (fechaLimite) {
-                        const diff = fechaLimite - ahora;
-                        if (diff > 0) {
-                            const horas = Math.floor(diff / (1000 * 60 * 60));
-                            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                            const segs = Math.floor((diff % (1000 * 60)) / 1000);
-                            const clase = diff < 3600000 ? 'urgente' : 'ok';
-                            tiempoHtml = `<span class="tiempo-restante ${clase}">⏳ ${horas}h ${mins}m ${segs}s</span>`;
-                        } else {
-                            tiempoHtml = `<span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span>`;
-                            // Cancelar automáticamente si pasó el tiempo y sigue Pendiente
-                            if (estado === 'Pendiente') {
-                                setTimeout(() => cancelarEncargoVencido(e.id), 1000);
-                            }
-                        }
+                if (estado === 'Pendiente' && e.fecha_limite_pago) {
+                    const limite = new Date(e.fecha_limite_pago);
+                    const diff = limite - ahora;
+                    if (diff > 0) {
+                        const horas = Math.floor(diff / (1000 * 60 * 60));
+                        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const segs = Math.floor((diff % (1000 * 60)) / 1000);
+                        const clase = diff < 3600000 ? 'urgente' : 'ok';
+                        tiempoHtml = `<span class="tiempo-restante ${clase}">⏳ ${horas}h ${mins}m ${segs}s</span>`;
+                    } else {
+                        tiempoHtml = `<span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span>`;
+                        // Cancelar automáticamente después de 24h
+                        setTimeout(() => cancelarEncargoVencido(e.id), 2000);
                     }
                 }
 
@@ -1755,6 +1749,7 @@
                             <div class="title">📦 ${producto} (x${cantidad})</div>
                             <div class="sub">👤 ${nombreCliente} • 📞 ${telefono}</div>
                             <div class="sub">📅 ${fecha}</div>
+                            ${fechaLimiteHtml}
                             ${comentario ? `<div class="sub">💬 ${comentario}</div>` : ''}
                             ${tiempoHtml}
                         </div>
@@ -1785,7 +1780,10 @@
             try {
                 await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ estado: 'Cancelado', fecha_actualizacion: new Date().toISOString() })
+                    body: JSON.stringify({ 
+                        estado: 'Cancelado', 
+                        fecha_actualizacion: new Date().toISOString()
+                    })
                 });
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
@@ -1803,25 +1801,31 @@
                     return;
                 }
 
-                let data = { estado: nuevoEstado, fecha_actualizacion: new Date().toISOString() };
+                let data = { 
+                    estado: nuevoEstado, 
+                    fecha_actualizacion: new Date().toISOString()
+                };
 
-                // Si el nuevo estado es "Pendiente", guardamos la fecha límite de pago (24h)
+                // Solo si el nuevo estado es "Pendiente", establecemos fecha_limite_pago
                 if (nuevoEstado === 'Pendiente') {
                     const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                     data.fecha_limite_pago = limite.toISOString();
+                } else {
+                    // Para otros estados, no enviamos fecha_limite_pago
+                    // (evitamos enviar null que puede dar error en PocketBase)
                 }
 
-                await apiRequest(`Encargos/records/${id}`, {
+                console.log('Enviando datos:', data); // Para depuración
+
+                const response = await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
-                // Actualizar caché local
-                encargoActual.estado = nuevoEstado;
-                if (nuevoEstado === 'Pendiente') {
-                    encargoActual.fecha_limite_pago = data.fecha_limite_pago;
-                } else {
-                    delete encargoActual.fecha_limite_pago;
+                // Actualizar caché con los datos devueltos
+                const index = encargosCache.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    encargosCache[index] = { ...encargosCache[index], ...response };
                 }
 
                 await cargarEncargos();
@@ -1952,7 +1956,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA DOMICILIOS Y TIENDA (cambiar estado, WhatsApp)
+        // FUNCIONES PARA DOMICILIOS Y TIENDA
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -3199,10 +3203,10 @@
                     renderReportes(ventasCache);
                 });
 
-                // Temporizador para encargos (cada 30 segundos para más precisión)
+                // Temporizador para encargos (cada 10 segundos para probar, luego cambiar a 60 segundos)
                 setInterval(() => {
                     aplicarFiltrosEncargos();
-                }, 30000);
+                }, 10000);
 
             } catch (e) {
                 console.error('Error inicializando app:', e);
