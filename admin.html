@@ -340,9 +340,6 @@
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
 
-        /* Para compatibilidad con estados anteriores */
-        .estado-completado { background: #d1fae5; color: #059669; }
-
         .estado-select {
             padding: 4px 8px;
             border-radius: 6px;
@@ -1684,7 +1681,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con nuevos estados, incluyendo "En camino")
+        // RENDER ENCARGOS (con nuevos estados)
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1696,7 +1693,6 @@
             const ahora = new Date();
             for (const e of encargos) {
                 const estado = e.estado || 'Pendiente';
-                // Mapeo de clases CSS para badges
                 let badgeClass = 'estado-pendiente';
                 if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
                 else if (estado === 'En proceso') badgeClass = 'estado-en-proceso';
@@ -1729,7 +1725,6 @@
                     }
                 }
 
-                // Opciones del select (todos los estados, excepto "Cancelado" que se añade manual)
                 const opciones = `
                     <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                     <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
@@ -1768,7 +1763,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA ENCARGOS
+        // FUNCIONES PARA ENCARGOS (CORREGIDAS)
         // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
@@ -1795,33 +1790,36 @@
                 }
 
                 let data = { estado: nuevoEstado, fecha_actualizacion: new Date().toISOString() };
-                // Si se cambia a Pendiente, establecer fecha límite de pago (24h)
+
+                // Solo si el nuevo estado es "Pendiente", establecemos fecha_limite_pago
                 if (nuevoEstado === 'Pendiente') {
                     const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                     data.fecha_limite_pago = limite.toISOString();
-                } else {
-                    // Si cambia a otro estado, eliminar fecha_limite_pago (opcional)
-                    data.fecha_limite_pago = null;
                 }
+                // Si el estado NO es "Pendiente", NO enviamos el campo fecha_limite_pago
+                // (así evitamos enviar null que puede dar error)
 
                 await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
+                // Actualizar caché local
                 encargoActual.estado = nuevoEstado;
                 if (nuevoEstado === 'Pendiente') {
                     encargoActual.fecha_limite_pago = data.fecha_limite_pago;
                 } else {
-                    encargoActual.fecha_limite_pago = null;
+                    delete encargoActual.fecha_limite_pago;
                 }
+
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                // Notificar solo si no es Cancelado (ya se notifica aparte)
+                // Notificar solo si no es Cancelado
                 if (nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
+
             } catch (e) {
                 console.error('Error al cambiar estado del encargo:', e);
                 alert('Error: ' + e.message);
