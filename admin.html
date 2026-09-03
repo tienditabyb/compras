@@ -1721,7 +1721,7 @@
                         tiempoHtml = `<span class="tiempo-restante ${clase}">⏳ ${horas}h ${mins}m ${segs}s</span>`;
                     } else {
                         tiempoHtml = `<span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span>`;
-                        setTimeout(() => cancelarEncargoVencido(e.id), 1000);
+                        // Ya se canceló en revisión, pero por si acaso
                     }
                 }
 
@@ -1765,6 +1765,40 @@
         // ============================================================
         // FUNCIONES PARA ENCARGOS (CORREGIDAS)
         // ============================================================
+        // Función que revisa y cancela encargos vencidos (se llama al inicio y cada minuto)
+        async function revisarEncargosVencidos() {
+            try {
+                await cargarEncargos();
+                const ahora = new Date();
+                let cancelados = 0;
+                for (const enc of encargosCache) {
+                    if (enc.estado === 'Pendiente' && enc.fecha_limite_pago) {
+                        const limite = new Date(enc.fecha_limite_pago);
+                        if (limite <= ahora) {
+                            // Cancelar automáticamente
+                            await apiRequest(`Encargos/records/${enc.id}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ 
+                                    estado: 'Cancelado', 
+                                    fecha_actualizacion: new Date().toISOString() 
+                                })
+                            });
+                            cancelados++;
+                            // Notificar al cliente
+                            notificarEncargo(enc.id, true);
+                            console.log(`✅ Encargo ${enc.id} cancelado automáticamente por vencimiento.`);
+                        }
+                    }
+                }
+                if (cancelados > 0) {
+                    await cargarEncargos();
+                    aplicarFiltrosEncargos();
+                }
+            } catch (e) {
+                console.error('Error revisando encargos vencidos:', e);
+            }
+        }
+
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
             if (!enc || enc.estado !== 'Pendiente') return;
@@ -1797,7 +1831,6 @@
                     data.fecha_limite_pago = limite.toISOString();
                 }
                 // Si el estado NO es "Pendiente", NO enviamos el campo fecha_limite_pago
-                // (así evitamos enviar null que puede dar error)
 
                 await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
@@ -3116,6 +3149,9 @@
                 await cargarTienda();
                 await cargarEncargos();
 
+                // Revisión inicial de encargos vencidos (al cargar la página)
+                await revisarEncargosVencidos();
+
                 renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
 
@@ -3188,7 +3224,8 @@
                 });
 
                 // Temporizador para encargos (cada minuto)
-                setInterval(() => {
+                setInterval(async () => {
+                    await revisarEncargosVencidos();
                     aplicarFiltrosEncargos();
                 }, 60000);
 
