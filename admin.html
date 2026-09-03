@@ -1114,6 +1114,7 @@
                         <div><label>Estado:</label>
                             <select id="encFiltroEstado">
                                 <option value="Todos">Todos</option>
+                                <option value="Nuevo Encargo">Nuevo Encargo</option>
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En proceso">En proceso</option>
                                 <option value="En camino">En camino</option>
@@ -1694,7 +1695,8 @@
             for (const e of encargos) {
                 const estado = e.estado || 'Pendiente';
                 let badgeClass = 'estado-pendiente';
-                if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
+                if (estado === 'Nuevo Encargo') badgeClass = 'estado-pendiente';
+                else if (estado === 'Pendiente') badgeClass = 'estado-pendiente';
                 else if (estado === 'En proceso') badgeClass = 'estado-en-proceso';
                 else if (estado === 'En camino') badgeClass = 'estado-en-camino';
                 else if (estado === 'Procesando en aduana de Cuba') badgeClass = 'estado-aduana';
@@ -1709,7 +1711,6 @@
                 const cantidad = e.cantidad || 1;
                 const comentario = e.comentario || '';
 
-                // Mostrar fecha límite si existe
                 let fechaLimiteHtml = '';
                 if (e.fecha_limite_pago) {
                     const fechaLimite = new Date(e.fecha_limite_pago);
@@ -1728,12 +1729,12 @@
                         tiempoHtml = `<span class="tiempo-restante ${clase}">⏳ ${horas}h ${mins}m ${segs}s</span>`;
                     } else {
                         tiempoHtml = `<span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span>`;
-                        // Cancelar automáticamente después de 24h
                         setTimeout(() => cancelarEncargoVencido(e.id), 2000);
                     }
                 }
 
                 const opciones = `
+                    <option value="Nuevo Encargo" ${estado === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo Encargo</option>
                     <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                     <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
                     <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
@@ -1806,23 +1807,16 @@
                     fecha_actualizacion: new Date().toISOString()
                 };
 
-                // Solo si el nuevo estado es "Pendiente", establecemos fecha_limite_pago
                 if (nuevoEstado === 'Pendiente') {
                     const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                     data.fecha_limite_pago = limite.toISOString();
-                } else {
-                    // Para otros estados, no enviamos fecha_limite_pago
-                    // (evitamos enviar null que puede dar error en PocketBase)
                 }
-
-                console.log('Enviando datos:', data); // Para depuración
 
                 const response = await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
-                // Actualizar caché con los datos devueltos
                 const index = encargosCache.findIndex(e => e.id === id);
                 if (index !== -1) {
                     encargosCache[index] = { ...encargosCache[index], ...response };
@@ -1831,7 +1825,6 @@
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                // Notificar solo si no es Cancelado
                 if (nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
@@ -1875,6 +1868,12 @@
                     `Gracias por confiar en B&B.`;
             } else {
                 switch (estado) {
+                    case 'Nuevo Encargo':
+                        mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
+                            `Hemos recibido tu solicitud de encargo para *${producto}* (x${cantidad}).\n` +
+                            `Pronto nos pondremos en contacto para confirmar los detalles del pago.\n\n` +
+                            `Gracias por confiar en B&B. 🙌`;
+                        break;
                     case 'Pendiente':
                         mensaje = `Hola ${enc.usuario_nombre || 'Cliente'} 👋\n` +
                             `Usted ha solicitado un Encargo del siguiente Producto:\n` +
