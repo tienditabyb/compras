@@ -1697,7 +1697,7 @@
                 let estado = e.estado || 'Pendiente';
                 let estadoMostrado = estado;
 
-                // 🔥 Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
+                // Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
                 if (estado === 'Pendiente' && !e.fecha_limite_pago) {
                     estadoMostrado = 'Nuevo Encargo';
                 }
@@ -1726,7 +1726,7 @@
                     fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
                 }
 
-                // 🕒 Temporizador solo si el estado real es 'Pendiente' y tiene fecha límite
+                // Temporizador solo si el estado real es 'Pendiente' y tiene fecha límite
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
                     const limite = new Date(e.fecha_limite_pago);
@@ -1818,13 +1818,13 @@
                     fecha_actualizacion: new Date().toISOString()
                 };
 
-                // 🔥 Lógica para "Nuevo Encargo"
+                // Lógica para "Nuevo Encargo"
                 if (nuevoEstado === 'Nuevo Encargo') {
                     // Lo guardamos como 'Pendiente' pero sin fecha límite
                     data.estado = 'Pendiente';
                     data.fecha_limite_pago = null; // eliminar la fecha si existía
                 }
-                // 🔥 Lógica para "Pendiente"
+                // Lógica para "Pendiente"
                 else if (nuevoEstado === 'Pendiente') {
                     data.estado = 'Pendiente';
                     // Si no tiene fecha límite, la creamos (24h)
@@ -2868,7 +2868,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (ARREGLADO CON jsPDF)
+        // EXPORTAR INVENTARIO A PDF (ARREGLADO - SIN CARACTERES EXTRAÑOS)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2876,23 +2876,23 @@
                 return;
             }
 
-            // Usamos jsPDF directamente, igual que en reportes
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // Título
+            // Título sin emojis ni caracteres especiales
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
-            doc.text('📦 Inventario B&B', 40, 40);
+            doc.text('Inventario B&B', 40, 40);
 
             // Fecha
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#64748b');
-            doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
+            const fecha = new Date().toLocaleString('es-ES', { timeZone: 'America/Havana' });
+            doc.text('Generado: ' + fecha, 40, 58);
 
-            // Preparar datos para la tabla
+            // Preparar datos
             const tableData = [];
             let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
 
@@ -2915,26 +2915,25 @@
                     categoria,
                     codigo,
                     stock,
-                    `$${costo.toFixed(2)}`,
-                    `$${venta.toFixed(2)}`,
-                    `$${oferta.toFixed(2)}`,
-                    `$${ganancia.toFixed(2)}`
+                    '$' + costo.toFixed(2),
+                    '$' + venta.toFixed(2),
+                    '$' + oferta.toFixed(2),
+                    '$' + ganancia.toFixed(2)
                 ]);
             }
 
-            // Añadir fila de totales
+            // Fila de totales
             tableData.push([
                 'TOTALES',
                 '',
                 '',
                 '',
-                `$${totalCosto.toFixed(2)}`,
-                `$${totalVenta.toFixed(2)}`,
+                '$' + totalCosto.toFixed(2),
+                '$' + totalVenta.toFixed(2),
                 '',
-                `$${totalGanancia.toFixed(2)}`
+                '$' + totalGanancia.toFixed(2)
             ]);
 
-            // Generar la tabla
             doc.autoTable({
                 head: [['Producto', 'Categoría', 'Código', 'Stock', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Ganancia x ud']],
                 body: tableData,
@@ -2970,12 +2969,11 @@
                     doc.setFont('helvetica', 'italic');
                     doc.setFontSize(8);
                     doc.setTextColor('#94a3b8');
-                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                    doc.text('Pagina ' + data.pageNumber + ' de ' + pageCount, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
             });
 
-            // Guardar el PDF
-            doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
+            doc.save('inventario_' + new Date().toISOString().slice(0,10) + '.pdf');
         }
 
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
