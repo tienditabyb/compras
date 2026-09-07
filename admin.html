@@ -2868,7 +2868,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF
+        // EXPORTAR INVENTARIO A PDF (ARREGLADO CON jsPDF)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2876,35 +2876,24 @@
                 return;
             }
 
-            let tablaHtml = `
-                <style>
-                    body { font-family: 'Poppins', sans-serif; }
-                    h1 { color: #1a252f; text-align: center; font-size: 24px; margin-bottom: 5px; }
-                    .fecha { text-align: center; color: #64748b; margin-bottom: 20px; }
-                    table { width: 100%; border-collapse: collapse; font-size: 11px; }
-                    th { background: #1a252f; color: white; padding: 6px; text-align: left; }
-                    td { padding: 4px 6px; border-bottom: 1px solid #e2e8f0; }
-                    .totales { font-weight: bold; background: #f1f5f9; }
-                    .totales td { border-top: 2px solid #1a252f; }
-                </style>
-                <h1>📦 Inventario B&amp;B</h1>
-                <div class="fecha">Generado: ${new Date().toLocaleString('es-ES')}</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Categoría</th>
-                            <th>Código de Barras</th>
-                            <th>Stock</th>
-                            <th>Precio Costo</th>
-                            <th>Precio Venta</th>
-                            <th>Precio Oferta</th>
-                            <th>Ganancia x unidad</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            // Usamos jsPDF directamente, igual que en reportes
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'pt', 'a4');
 
+            // Título
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#1a252f');
+            doc.text('📦 Inventario B&B', 40, 40);
+
+            // Fecha
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor('#64748b');
+            doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
+
+            // Preparar datos para la tabla
+            const tableData = [];
             let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
 
             for (const p of productosCache) {
@@ -2921,57 +2910,72 @@
                 totalVenta += stock * venta;
                 totalGanancia += stock * ganancia;
 
-                tablaHtml += `
-                    <tr>
-                        <td>${nombre}</td>
-                        <td>${categoria}</td>
-                        <td>${codigo}</td>
-                        <td style="text-align:center;">${stock}</td>
-                        <td style="text-align:right;">$${costo.toFixed(2)}</td>
-                        <td style="text-align:right;">$${venta.toFixed(2)}</td>
-                        <td style="text-align:right;">$${oferta.toFixed(2)}</td>
-                        <td style="text-align:right;">$${ganancia.toFixed(2)}</td>
-                    </tr>
-                `;
+                tableData.push([
+                    nombre,
+                    categoria,
+                    codigo,
+                    stock,
+                    `$${costo.toFixed(2)}`,
+                    `$${venta.toFixed(2)}`,
+                    `$${oferta.toFixed(2)}`,
+                    `$${ganancia.toFixed(2)}`
+                ]);
             }
 
-            tablaHtml += `
-                    <tr class="totales">
-                        <td colspan="3" style="text-align:right;">TOTALES</td>
-                        <td style="text-align:center;"></td>
-                        <td style="text-align:right;">$${totalCosto.toFixed(2)}</td>
-                        <td style="text-align:right;">$${totalVenta.toFixed(2)}</td>
-                        <td style="text-align:right;"></td>
-                        <td style="text-align:right;">$${totalGanancia.toFixed(2)}</td>
-                    </tr>
-                </tbody></table>
-            `;
+            // Añadir fila de totales
+            tableData.push([
+                'TOTALES',
+                '',
+                '',
+                '',
+                `$${totalCosto.toFixed(2)}`,
+                `$${totalVenta.toFixed(2)}`,
+                '',
+                `$${totalGanancia.toFixed(2)}`
+            ]);
 
-            const container = document.createElement('div');
-            container.innerHTML = tablaHtml;
-            container.style.position = 'fixed';
-            container.style.left = '-9999px';
-            container.style.top = '0';
-            container.style.width = '100%';
-            container.style.background = 'white';
-            container.style.opacity = '0';
-            container.style.pointerEvents = 'none';
-            container.style.zIndex = '-1000';
-            document.body.appendChild(container);
-
-            html2pdf().set({
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `inventario_${new Date().toISOString().slice(0,10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, letterRendering: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-            }).from(container).save().then(() => {
-                document.body.removeChild(container);
-            }).catch((error) => {
-                console.error('Error al generar PDF:', error);
-                alert('Error al generar el PDF: ' + error.message);
-                document.body.removeChild(container);
+            // Generar la tabla
+            doc.autoTable({
+                head: [['Producto', 'Categoría', 'Código', 'Stock', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Ganancia x ud']],
+                body: tableData,
+                startY: 72,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: '#1a252f',
+                    textColor: '#ffffff',
+                    fontStyle: 'bold',
+                    fontSize: 11,
+                    halign: 'center'
+                },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 5,
+                    valign: 'middle',
+                    lineColor: '#d0d7de',
+                    lineWidth: 0.2
+                },
+                columnStyles: {
+                    0: { cellWidth: 100, halign: 'left' },
+                    1: { cellWidth: 70, halign: 'left' },
+                    2: { cellWidth: 70, halign: 'center' },
+                    3: { cellWidth: 50, halign: 'center' },
+                    4: { cellWidth: 70, halign: 'right' },
+                    5: { cellWidth: 70, halign: 'right' },
+                    6: { cellWidth: 70, halign: 'right' },
+                    7: { cellWidth: 70, halign: 'right' }
+                },
+                margin: { left: 40, right: 40 },
+                didDrawPage: function(data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(8);
+                    doc.setTextColor('#94a3b8');
+                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
             });
+
+            // Guardar el PDF
+            doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
