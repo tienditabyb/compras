@@ -59,14 +59,36 @@
         .header__user {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .header__user .user-name {
             font-weight: 500;
             font-size: 0.9rem;
             color: #ffffff;
         }
-        .header__user button {
+        .header__user .notif-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 4px 12px;
+            color: #ffffff;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .header__user .notif-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .header__user .notif-btn .status {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        .header__user .logout-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 30px;
@@ -77,7 +99,7 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .header__user button:hover {
+        .header__user .logout-btn:hover {
             background: rgba(255,255,255,0.25);
             border-color: rgba(255,255,255,0.4);
         }
@@ -213,6 +235,7 @@
             .stats-grid { grid-template-columns: 1fr; }
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
+            .header__user .notif-btn { font-size: 0.7rem; padding: 2px 8px; }
         }
 
         .sidebar .close-sidebar { display: none; }
@@ -938,7 +961,11 @@
                 </div>
                 <div class="header__user">
                     <span class="user-name" id="adminUserName">Administrador</span>
-                    <button id="logoutBtn">Cerrar sesión</button>
+                    <button class="notif-btn" id="notifPermissionBtn">
+                        <span id="notifIcon">🔔</span>
+                        <span id="notifStatus">Activar notificaciones</span>
+                    </button>
+                    <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
                 </div>
             </div>
         </header>
@@ -1262,7 +1289,6 @@
                         if (e.action === 'create') {
                             const nuevoRegistro = e.record;
                             mostrarNotificacion(coleccion, nuevoRegistro);
-                            // Refrescar datos automáticamente
                             refrescarDatos();
                         }
                     });
@@ -1300,7 +1326,7 @@
 
             mostrarToast(titulo, mensaje);
 
-            // Notificación de escritorio
+            // Notificación de escritorio solo si hay permiso
             if (window.Notification && Notification.permission === 'granted') {
                 new Notification(titulo, { body: mensaje, icon: '🛒' });
             }
@@ -1367,6 +1393,65 @@
         }
 
         // ============================================================
+        // GESTIÓN DE PERMISO DE NOTIFICACIONES
+        // ============================================================
+        function actualizarEstadoNotificaciones() {
+            const btn = document.getElementById('notifPermissionBtn');
+            const icon = document.getElementById('notifIcon');
+            const status = document.getElementById('notifStatus');
+            if (!('Notification' in window)) {
+                icon.textContent = '🔕';
+                status.textContent = 'No soportado';
+                btn.style.opacity = '0.5';
+                return;
+            }
+            const perm = Notification.permission;
+            if (perm === 'granted') {
+                icon.textContent = '🔔';
+                status.textContent = 'Notificaciones activas';
+                btn.style.background = 'rgba(46, 204, 113, 0.2)';
+                btn.style.borderColor = '#2ecc71';
+            } else if (perm === 'denied') {
+                icon.textContent = '🔕';
+                status.textContent = 'Bloqueadas (configuración)';
+                btn.style.background = 'rgba(231, 76, 60, 0.2)';
+                btn.style.borderColor = '#e74c3c';
+            } else {
+                icon.textContent = '🔔';
+                status.textContent = 'Activar notificaciones';
+                btn.style.background = 'rgba(255,255,255,0.1)';
+                btn.style.borderColor = 'rgba(255,255,255,0.2)';
+            }
+        }
+
+        function solicitarPermisoNotificaciones() {
+            if (!('Notification' in window)) {
+                alert('Tu navegador no soporta notificaciones de escritorio.');
+                return;
+            }
+            if (Notification.permission === 'granted') {
+                mostrarToast('✅ Notificaciones', 'Ya están activadas.');
+                actualizarEstadoNotificaciones();
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                alert('❌ Las notificaciones están bloqueadas por el navegador.\nPor favor, habilítalas manualmente en la configuración de tu navegador para este sitio.');
+                return;
+            }
+            // Pedir permiso
+            Notification.requestPermission().then(perm => {
+                actualizarEstadoNotificaciones();
+                if (perm === 'granted') {
+                    mostrarToast('🔔 Notificaciones activadas', 'Recibirás alertas en tiempo real.');
+                } else {
+                    alert('No se concedió el permiso. Puedes activarlo más tarde desde la configuración del navegador.');
+                }
+            });
+        }
+
+        document.getElementById('notifPermissionBtn').addEventListener('click', solicitarPermisoNotificaciones);
+
+        // ============================================================
         // AUTH
         // ============================================================
         async function login(email, password) {
@@ -1390,7 +1475,6 @@
                 userData = user;
                 localStorage.setItem('admin_token', authToken);
                 localStorage.setItem('admin_user', JSON.stringify(userData));
-                // Conectar tiempo real
                 iniciarPocketBase();
                 return true;
             } catch (e) {
@@ -3300,6 +3384,9 @@
                 renderEncargos(encargosCache);
                 renderReportes(ventasCache);
 
+                // Actualizar estado de notificaciones al cargar
+                actualizarEstadoNotificaciones();
+
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
                     link.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -3356,7 +3443,7 @@
                     renderReportes(ventasCache);
                 });
 
-                // Fallback: actualizar encargos cada 10 segundos (por si el WebSocket falla)
+                // Fallback: actualizar encargos cada 10 segundos
                 setInterval(() => {
                     aplicarFiltrosEncargos();
                 }, 10000);
@@ -3386,6 +3473,8 @@
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
                 document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                // Actualizar estado de notificaciones tras login
+                actualizarEstadoNotificaciones();
                 initApp();
             } catch (e) {
                 errorEl.textContent = e.message;
@@ -3403,11 +3492,9 @@
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // ============================================================
-        // SOLICITAR PERMISO PARA NOTIFICACIONES DE ESCRITORIO
+        // SOLICITAR PERMISO PARA NOTIFICACIONES DE ESCRITORIO (solo al hacer clic en el botón)
         // ============================================================
-        if (window.Notification && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
+        // Ya se maneja con el evento del botón.
 
         // ============================================================
         // INICIO - VERIFICAR SESIÓN
