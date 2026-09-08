@@ -11,36 +11,236 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        /* ===== ESTILOS COMPLETOS (igual que antes) ===== */
+        /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background-color: #f5f6fa; color: #1e272e; min-height: 100vh; }
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
-        .header { background-color: #1a252f; padding: 10px 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; }
-        .header__container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-        .header__logo { font-size: 1.8rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background-color: #1a252f;
+            padding: 10px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            width: 100%;
+        }
+        .header__container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header__logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
         .header__logo span { color: #74b9ff; }
         .header__logo .admin-badge { font-size: 0.8rem; font-weight: 400; color: #b0c4d9; margin-left: 6px; }
-        .header__user { display: flex; align-items: center; gap: 15px; }
-        .header__user .user-name { font-weight: 500; font-size: 0.9rem; color: #ffffff; }
-        .header__user button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 16px; color: #ffffff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.3s; }
-        .header__user button:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4); }
-        .menu-toggle { display: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.6rem; cursor: pointer; color: #ffffff; padding: 4px 14px; transition: 0.2s; }
+        .header__user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header__user .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #ffffff;
+        }
+        .header__user button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 6px 16px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .header__user button:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .menu-toggle {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: #ffffff;
+            padding: 4px 14px;
+            transition: 0.2s;
+        }
         .menu-toggle:hover { background: rgba(255,255,255,0.25); }
-        .main-content { display: flex; gap: 30px; margin-top: 25px; padding: 0 15px; max-width: 1400px; margin-left: auto; margin-right: auto; position: relative; }
-        .sidebar { width: 220px; flex-shrink: 0; background: white; border-radius: 16px; padding: 20px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 90px; transition: transform 0.3s ease; }
-        .sidebar__title { font-size: 0.9rem; font-weight: 700; color: #1e272e; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; }
+
+        /* ===== NOTIFICACIONES ===== */
+        .notif-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 6px;
+            border-radius: 8px;
+        }
+        .notif-btn:hover { background: rgba(255,255,255,0.15); }
+        .notif-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            line-height: 1.2;
+            min-width: 18px;
+            text-align: center;
+            display: none;
+        }
+        .notif-badge.show { display: block; }
+
+        .notif-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            width: 340px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 200;
+            margin-top: 8px;
+            padding: 12px 0;
+        }
+        .notif-dropdown.open { display: block; }
+        .notif-dropdown .notif-item {
+            padding: 10px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notif-dropdown .notif-item:hover { background: #f8fafc; }
+        .notif-dropdown .notif-item:last-child { border-bottom: none; }
+        .notif-dropdown .notif-item .icon { font-size: 1.2rem; }
+        .notif-dropdown .notif-item .text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: #1e272e;
+        }
+        .notif-dropdown .notif-item .text strong { font-weight: 600; }
+        .notif-dropdown .notif-empty {
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-top: 25px;
+            padding: 0 15px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+            transition: transform 0.3s ease;
+        }
+        .sidebar__title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e272e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
         .sidebar__nav ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-        .sidebar__nav li a { display: block; padding: 8px 12px; border-radius: 8px; color: #64748b; font-size: 0.9rem; font-weight: 500; transition: 0.2s; cursor: pointer; }
+        .sidebar__nav li a {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+        }
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
         .content { flex: 1; min-width: 0; }
+
         @media (max-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; border-radius: 0; padding: 20px; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transform: translateX(-100%); z-index: 200; overflow-y: auto; background: white; transition: transform 0.3s ease; margin-top: 0; top: 0; padding-top: 60px; position: fixed; }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 280px;
+                height: 100vh;
+                border-radius: 0;
+                padding: 20px;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+                transform: translateX(-100%);
+                z-index: 200;
+                overflow-y: auto;
+                background: white;
+                transition: transform 0.3s ease;
+                padding-top: 60px;
+            }
             .sidebar.open { transform: translateX(0); }
-            .sidebar .close-sidebar { display: block; position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #94a3b8; }
+            .sidebar .close-sidebar {
+                display: block;
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 1.8rem;
+                cursor: pointer;
+                color: #94a3b8;
+            }
             .sidebar .close-sidebar:hover { color: #1e272e; }
-            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 150; }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.4);
+                z-index: 150;
+            }
             .sidebar-overlay.active { display: block; }
             .menu-toggle { display: inline-block; }
             .header__user .user-name { display: none; }
@@ -51,10 +251,18 @@
             .list-item { flex-direction: column; align-items: stretch; gap: 6px; }
             .list-item .center { justify-content: flex-start; }
             .modal { max-width: 95%; padding: 20px; }
+            .notif-dropdown { width: 280px; right: -10px; }
         }
-        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } .header__logo { font-size: 1.4rem; } .sidebar { width: 260px; } }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .header__logo { font-size: 1.4rem; }
+            .sidebar { width: 260px; }
+            .notif-dropdown { width: 260px; right: -20px; }
+        }
         .sidebar .close-sidebar { display: none; }
         @media (max-width: 992px) { .sidebar .close-sidebar { display: block; } }
+
+        /* ===== RESTO DE ESTILOS (idénticos) ===== */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
         .stat-card .number { font-size: 2rem; font-weight: 700; color: #2980b9; }
@@ -193,7 +401,7 @@
 </head>
 <body>
 
-    <!-- LOGIN -->
+    <!-- ========== LOGIN ========== -->
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
@@ -210,7 +418,7 @@
         </div>
     </div>
 
-    <!-- PANEL PRINCIPAL -->
+    <!-- ========== PANEL PRINCIPAL ========== -->
     <div id="appContainer" style="display:none;">
         <header class="header">
             <div class="header__container">
@@ -219,6 +427,14 @@
                     <a href="#" class="header__logo">B<span>&amp;</span>B <span class="admin-badge">Admin</span></a>
                 </div>
                 <div class="header__user">
+                    <!-- NOTIFICACIONES -->
+                    <button class="notif-btn" id="notifBtn" title="Notificaciones">
+                        🔔
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div id="notifList"></div>
+                    </div>
                     <span class="user-name" id="adminUserName">Administrador</span>
                     <button id="logoutBtn">Cerrar sesión</button>
                 </div>
@@ -448,7 +664,7 @@
         </div>
     </div>
 
-    <!-- MODALES -->
+    <!-- ========== MODALES ========== -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="close-modal" id="closeDetailModal">✕</button>
@@ -519,6 +735,147 @@
         let categoriasCache = [];
         let carrito = [];
         let ventasFiltradasReporte = [];
+
+        // ============================================================
+        // NOTIFICACIONES
+        // ============================================================
+        let notificaciones = [];
+        const NOTIF_STORAGE_KEY = 'admin_notificaciones_leidas';
+
+        function cargarNotificacionesLeidas() {
+            try {
+                const data = localStorage.getItem(NOTIF_STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch { return []; }
+        }
+
+        function guardarNotificacionesLeidas(lista) {
+            localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(lista));
+        }
+
+        function generarNotificaciones() {
+            const nuevas = [];
+            const leidas = cargarNotificacionesLeidas();
+
+            // Domicilios nuevos
+            for (const d of domiciliosCache) {
+                if (d.Estado === 'Pendiente' && !d.fecha_gestion) {
+                    const id = `dom-${d.id}`;
+                    if (!leidas.includes(id)) {
+                        nuevas.push({
+                            id: id,
+                            tipo: 'domicilio',
+                            texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`,
+                            cliente: d.Cliente_Nombre || 'Cliente',
+                            fecha: d.created
+                        });
+                    }
+                }
+            }
+
+            // Pedidos tienda nuevos
+            for (const p of tiendaCache) {
+                if (p.Estado === 'Pendiente' && !p.fecha_gestion) {
+                    const id = `tienda-${p.id}`;
+                    if (!leidas.includes(id)) {
+                        nuevas.push({
+                            id: id,
+                            tipo: 'tienda',
+                            texto: `Nuevo pedido en tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`,
+                            cliente: p.Cliente_Nombre || 'Cliente',
+                            fecha: p.created
+                        });
+                    }
+                }
+            }
+
+            // Encargos nuevos
+            for (const e of encargosCache) {
+                if (e.estado === 'Pendiente' && !e.fecha_limite_pago) {
+                    const id = `enc-${e.id}`;
+                    if (!leidas.includes(id)) {
+                        nuevas.push({
+                            id: id,
+                            tipo: 'encargo',
+                            texto: `Nuevo encargo de <strong>${e.producto_nombre || 'Producto'}</strong> (${e.usuario_nombre || 'Cliente'})`,
+                            cliente: e.usuario_nombre || 'Cliente',
+                            fecha: e.fecha_solicitud
+                        });
+                    }
+                }
+            }
+
+            // Ordenar por fecha (más reciente primero)
+            nuevas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            notificaciones = nuevas;
+            actualizarBadge();
+            renderNotificaciones();
+        }
+
+        function actualizarBadge() {
+            const badge = document.getElementById('notifBadge');
+            const count = notificaciones.length;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+
+        function renderNotificaciones() {
+            const list = document.getElementById('notifList');
+            if (notificaciones.length === 0) {
+                list.innerHTML = '<div class="notif-empty">✨ No hay notificaciones nuevas</div>';
+                return;
+            }
+            let html = '';
+            for (const n of notificaciones) {
+                let icon = '📦';
+                let tab = 'domicilios';
+                if (n.tipo === 'tienda') { icon = '🏪';
+                    tab = 'tienda'; }
+                if (n.tipo === 'encargo') { icon = '📋';
+                    tab = 'encargos'; }
+                html += `
+                    <div class="notif-item" data-id="${n.id}" data-tab="${tab}">
+                        <span class="icon">${icon}</span>
+                        <span class="text">${n.texto}</span>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+
+            // Click en notificación: marcar como leída y cambiar de pestaña
+            list.querySelectorAll('.notif-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const tab = this.dataset.tab;
+                    // Marcar como leída
+                    const leidas = cargarNotificacionesLeidas();
+                    if (!leidas.includes(id)) {
+                        leidas.push(id);
+                        guardarNotificacionesLeidas(leidas);
+                    }
+                    // Eliminar de la lista local
+                    notificaciones = notificaciones.filter(n => n.id !== id);
+                    actualizarBadge();
+                    renderNotificaciones();
+                    // Cambiar de pestaña
+                    document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
+                    document.querySelector(`.sidebar__nav a[data-tab="${tab}"]`)?.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                    document.getElementById(`tab-${tab}`)?.classList.add('active');
+                    // Cerrar dropdown
+                    document.getElementById('notifDropdown').classList.remove('open');
+                });
+            });
+        }
+
+        function actualizarNotificaciones() {
+            // Recargar datos si es necesario (ya se llamará desde los cargadores)
+            generarNotificaciones();
+        }
 
         // ============================================================
         // AUTH
@@ -615,7 +972,7 @@
         }
 
         // ============================================================
-        // CARGAR DATOS
+        // CARGAR DATOS (con actualización de notificaciones)
         // ============================================================
         async function cargarCategorias() {
             try {
@@ -645,6 +1002,7 @@
             try {
                 const data = await apiRequest('Domicilios/records?sort=-created&perPage=200');
                 domiciliosCache = data.items;
+                actualizarNotificaciones();
                 return domiciliosCache;
             } catch (e) { console.error('Error cargando domicilios:', e); return []; }
         }
@@ -653,6 +1011,7 @@
             try {
                 const data = await apiRequest('PedidosTienda/records?sort=-created&perPage=200');
                 tiendaCache = data.items;
+                actualizarNotificaciones();
                 return tiendaCache;
             } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
         }
@@ -661,6 +1020,7 @@
             try {
                 const data = await apiRequest('Encargos/records?sort=-fecha_solicitud&perPage=200');
                 encargosCache = data.items;
+                actualizarNotificaciones();
                 return encargosCache;
             } catch (e) { console.error('Error cargando encargos:', e); return []; }
         }
@@ -735,7 +1095,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones
+        // RENDERIZAR funciones (igual que antes, solo se añade actualización de notificaciones)
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -872,7 +1232,7 @@
         }
 
         // ============================================================
-        // RENDER DOMICILIOS (usando fecha_gestion)
+        // RENDER DOMICILIOS (con fecha_gestion)
         // ============================================================
         function renderDomicilios(domicilios) {
             const container = document.getElementById('domiciliosContainer');
@@ -885,7 +1245,6 @@
                 let estadoReal = d.Estado || 'Pendiente';
                 let estadoMostrado = estadoReal;
 
-                // Si estado es Pendiente y fecha_gestion está vacío -> Nuevo Domicilio
                 if (estadoReal === 'Pendiente' && !d.fecha_gestion) {
                     estadoMostrado = 'Nuevo Domicilio';
                 }
@@ -932,10 +1291,11 @@
                 `;
             }
             container.innerHTML = html;
+            actualizarNotificaciones();
         }
 
         // ============================================================
-        // RENDER TIENDA (usando fecha_gestion)
+        // RENDER TIENDA (con fecha_gestion)
         // ============================================================
         function renderTienda(pedidos) {
             const container = document.getElementById('tiendaContainer');
@@ -993,10 +1353,11 @@
                 `;
             }
             container.innerHTML = html;
+            actualizarNotificaciones();
         }
 
         // ============================================================
-        // RENDER ENCARGOS (sin cambios)
+        // RENDER ENCARGOS
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1090,6 +1451,7 @@
                 `;
             }
             container.innerHTML = html;
+            actualizarNotificaciones();
         }
 
         // ============================================================
@@ -1301,18 +1663,15 @@
                     return;
                 }
 
-                // Si el nuevo estado es "Nuevo Domicilio", lo tratamos como "Pendiente"
                 if (nuevoEstado === 'Nuevo Domicilio') {
                     nuevoEstado = 'Pendiente';
                 }
 
-                // Siempre actualizamos fecha_gestion para marcar que fue gestionado
                 const data = {
                     Estado: nuevoEstado,
                     fecha_gestion: new Date().toISOString()
                 };
 
-                // Si el nuevo estado es "Entregado", manejamos la venta y descuento
                 if (nuevoEstado === 'Entregado') {
                     const productosPedido = parsearProductosPedido(domActual.productos_pedido);
                     const tieneProductos = productosPedido.length > 0;
@@ -1378,7 +1737,6 @@
                     return;
                 }
 
-                // Para cualquier otro estado (Pendiente, En camino)
                 await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
@@ -2183,6 +2541,25 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
+        // NOTIFICACIONES - Click en campana
+        // ============================================================
+        document.getElementById('notifBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.classList.toggle('open');
+            // Si se abre, marcamos todas como leídas (opcional)
+            // En este diseño, se marcan al hacer clic en cada notificación.
+        });
+
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('notifDropdown');
+            const btn = document.getElementById('notifBtn');
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        // ============================================================
         // EXPORTAR INVENTARIO A PDF (sin emojis)
         // ============================================================
         function exportarInventarioPDF() {
@@ -2512,6 +2889,9 @@
                 renderEncargos(encargosCache);
                 renderReportes(ventasCache);
 
+                // Actualizar notificaciones inicial
+                actualizarNotificaciones();
+
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
                     link.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -2568,9 +2948,12 @@
                     renderReportes(ventasCache);
                 });
 
+                // Actualizar notificaciones cada 30 segundos
                 setInterval(() => {
-                    aplicarFiltrosEncargos();
-                }, 10000);
+                    cargarDomicilios();
+                    cargarTienda();
+                    cargarEncargos();
+                }, 30000);
 
             } catch (e) {
                 console.error('Error inicializando app:', e);
