@@ -1263,7 +1263,6 @@
         // ONESIGNAL CONFIG
         // ============================================================
         const ONESIGNAL_APP_ID = "e939f58c-3df0-48d6-a86b-ee93da88a9c1";
-        const ONESIGNAL_REST_API_KEY = "os_v2_app_5e47ldb56bennkdl52j5vcfjyelitw2ypxuus7ey6gh7dm5btyhvu2uecmbgw6ova4d7hga6gzugdyfyv54zwx7m4wzchew3d27e2wy";
 
         // ============================================================
         // AUTH
@@ -3202,9 +3201,16 @@
         }
 
         // ============================================================
-        // NOTIFICACIONES PUSH (ONESIGNAL) - CORREGIDO
+        // NOTIFICACIONES PUSH (ONESIGNAL) - MEJORADA CON MANEJO DE ERRORES
         // ============================================================
         async function enviarNotificacionOneSignal(titulo, mensaje, url = null) {
+            // 🔑 Puedes probar con dos claves: descomenta la que quieras usar.
+            // CLAVE ACTUAL (v2 - la que me diste):
+            const API_KEY = "os_v2_app_5e47ldb56bennkdl52j5vcfjyelitw2ypxuus7ey6gh7dm5btyhvu2uecmbgw6ova4d7hga6gzugdyfyv54zwx7m4wzchew3d27e2wy";
+            
+            // CLAVE LEGACY (alternativa) - si la v2 falla, descomenta esta línea y comenta la de arriba:
+            // const API_KEY = "1itw2ypxius7ey6gh7dm5btyh";
+
             const body = {
                 app_id: ONESIGNAL_APP_ID,
                 headings: { en: titulo },
@@ -3213,31 +3219,52 @@
                 web_url: url || "https://tienditabyb.github.io/compras/",
                 chrome_web_icon: "https://tienditabyb.github.io/compras/icono-192.png",
             };
+
             try {
                 const resp = await fetch("https://onesignal.com/api/v1/notifications", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Basic ${ONESIGNAL_REST_API_KEY}`
+                        "Authorization": `Basic ${API_KEY}`
                     },
                     body: JSON.stringify(body)
                 });
-                const data = await resp.json();
-                if (data.errors) {
-                    // 🔥 Manejo del error "All included players are not subscribed"
-                    if (data.errors.some(e => e.includes("not subscribed"))) {
-                        alert('⚠️ No hay usuarios suscritos a notificaciones.\n\nPide a los clientes que acepten las notificaciones en la tienda y luego vuelve a intentarlo.\n\nSi eres tú el que quiere probar, abre la tienda (index.html) y acepta el permiso de notificaciones.');
-                    } else {
-                        alert('Error al enviar notificación: ' + JSON.stringify(data.errors));
-                    }
-                    console.error('Error OneSignal:', data.errors);
-                } else {
-                    console.log('✅ Notificación enviada:', data.id);
-                    alert('✅ Notificación enviada a todos los usuarios suscritos.');
+
+                // Si la respuesta no es OK, intentamos leer el error
+                if (!resp.ok) {
+                    const errorText = await resp.text();
+                    let errorMsg = `Código ${resp.status}: ${resp.statusText}`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.errors) {
+                            errorMsg = errorJson.errors.join(', ');
+                        }
+                    } catch (e) {}
+                    throw new Error(errorMsg);
                 }
+
+                const data = await resp.json();
+                console.log('✅ Notificación enviada:', data.id);
+                alert('✅ Notificación enviada a todos los usuarios suscritos.');
+
             } catch (e) {
-                console.error('Error en la solicitud:', e);
-                alert('Error al enviar: ' + e.message);
+                console.error('Error al enviar:', e);
+                // Mensaje amigable según el tipo de error
+                if (e.message.includes('Failed to fetch')) {
+                    alert('❌ Error de conexión: No se pudo contactar con el servidor de OneSignal.\n\n' +
+                          'Posibles causas:\n' +
+                          '1. Tu red (WiFi o datos) está bloqueando la conexión.\n' +
+                          '2. El navegador tiene restricciones de seguridad.\n\n' +
+                          'Prueba a:\n' +
+                          '- Cambiar de red (WiFi a datos móviles).\n' +
+                          '- Usar otro navegador (Chrome es el mejor).\n' +
+                          '- Si estás en un iPhone, Safari no soporta notificaciones push.');
+                } else if (e.message.includes('not subscribed')) {
+                    alert('⚠️ No hay usuarios suscritos a notificaciones.\n\n' +
+                          'Pide a los clientes que acepten las notificaciones en la tienda y vuelve a intentarlo.');
+                } else {
+                    alert('❌ Error al enviar notificación: ' + e.message);
+                }
             }
         }
 
@@ -3379,7 +3406,7 @@
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         // ============================================================
-        // ONESIGNAL SDK - Inicialización
+        // ONESIGNAL SDK - Inicialización (para el panel admin)
         // ============================================================
         (function() {
             const script = document.createElement('script');
