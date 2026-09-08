@@ -333,6 +333,7 @@
             text-transform: uppercase;
         }
         .estado-pendiente { background: #fef3c7; color: #d97706; }
+        .estado-nuevo { background: #dbeafe; color: #2563eb; }
         .estado-en-proceso { background: #dbeafe; color: #2563eb; }
         .estado-en-camino { background: #93c5fd; color: #1d4ed8; }
         .estado-aduana { background: #e0e7ff; color: #4f46e5; }
@@ -1074,6 +1075,7 @@
                         <div><label>Estado:</label>
                             <select id="domFiltroEstado">
                                 <option value="Todos">Todos</option>
+                                <option value="Nuevo Domicilio">Nuevo Domicilio</option>
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="En camino">En camino</option>
                                 <option value="Entregado">Entregado</option>
@@ -1094,6 +1096,7 @@
                         <div><label>Estado:</label>
                             <select id="tiendaFiltroEstado">
                                 <option value="Todos">Todos</option>
+                                <option value="Nuevo Pedido">Nuevo Pedido</option>
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="Vendido">Vendido</option>
                                 <option value="Cancelado">Cancelado</option>
@@ -1458,6 +1461,18 @@
         }
 
         // ============================================================
+        // UTILIDAD: verificar si un registro es reciente (menos de X horas)
+        // ============================================================
+        function esReciente(fechaCreacion, horas = 24) {
+            if (!fechaCreacion) return false;
+            const ahora = new Date();
+            const creado = new Date(fechaCreacion);
+            const diffMs = ahora - creado;
+            const diffHoras = diffMs / (1000 * 60 * 60);
+            return diffHoras < horas;
+        }
+
+        // ============================================================
         // RENDERIZAR funciones
         // ============================================================
         function renderDashboard(ventas, domicilios) {
@@ -1602,14 +1617,33 @@
             }
             let html = '';
             for (const d of domicilios) {
-                const estado = d.Estado || 'Pendiente';
-                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
-                                   estado === 'En camino' ? 'estado-en-camino' : 'estado-entregado';
+                let estadoReal = d.Estado || 'Pendiente';
+                let estadoMostrado = estadoReal;
+
+                // Si es Pendiente y reciente -> mostramos "Nuevo Domicilio"
+                if (estadoReal === 'Pendiente' && esReciente(d.created, 24)) {
+                    estadoMostrado = 'Nuevo Domicilio';
+                }
+
+                let badgeClass = 'estado-pendiente';
+                if (estadoMostrado === 'Nuevo Domicilio') badgeClass = 'estado-nuevo';
+                else if (estadoMostrado === 'Pendiente') badgeClass = 'estado-pendiente';
+                else if (estadoMostrado === 'En camino') badgeClass = 'estado-en-camino';
+                else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
+
                 const fecha = d.created ? new Date(d.created).toLocaleString('es-ES') : 'Sin fecha';
                 let telefono = d.Telefono;
                 if (telefono === null || telefono === undefined) telefono = '';
                 telefono = String(telefono);
-                const isEntregado = (estado === 'Entregado');
+                const isEntregado = (estadoReal === 'Entregado');
+
+                // Opciones del selector (incluimos "Nuevo Domicilio")
+                const opciones = `
+                    <option value="Nuevo Domicilio" ${estadoMostrado === 'Nuevo Domicilio' ? 'selected' : ''}>Nuevo Domicilio</option>
+                    <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="En camino" ${estadoMostrado === 'En camino' ? 'selected' : ''}>En camino</option>
+                    <option value="Entregado" ${estadoMostrado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                `;
 
                 html += `
                     <div class="list-item" id="dom-item-${d.id}">
@@ -1619,13 +1653,11 @@
                             <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
                         </div>
                         <div class="center">
-                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
                             <select class="estado-select" id="estado-select-${d.id}" 
                                     onchange="cambiarEstadoDomicilio('${d.id}', this.value)"
                                     ${isEntregado ? 'disabled' : ''}>
-                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="En camino" ${estado === 'En camino' ? 'selected' : ''}>En camino</option>
-                                <option value="Entregado" ${estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                                ${opciones}
                             </select>
                             <button class="btn-whatsapp" onclick="enviarWhatsAppDom('${d.id}')">💬 Notificar</button>
                         </div>
@@ -1646,13 +1678,30 @@
             }
             let html = '';
             for (const p of pedidos) {
-                const estado = p.Estado || 'Pendiente';
-                const badgeClass = estado === 'Pendiente' ? 'estado-pendiente' :
-                                   estado === 'Vendido' ? 'estado-vendido' : 'estado-cancelado';
+                let estadoReal = p.Estado || 'Pendiente';
+                let estadoMostrado = estadoReal;
+
+                if (estadoReal === 'Pendiente' && esReciente(p.created, 24)) {
+                    estadoMostrado = 'Nuevo Pedido';
+                }
+
+                let badgeClass = 'estado-pendiente';
+                if (estadoMostrado === 'Nuevo Pedido') badgeClass = 'estado-nuevo';
+                else if (estadoMostrado === 'Pendiente') badgeClass = 'estado-pendiente';
+                else if (estadoMostrado === 'Vendido') badgeClass = 'estado-entregado';
+                else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
+
                 const fecha = p.created ? new Date(p.created).toLocaleString('es-ES') : 'Sin fecha';
                 const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleString('es-ES') : 'No definida';
                 const telefono = p.Telefono || 'Sin teléfono';
-                const isVendido = (estado === 'Vendido' || estado === 'Cancelado');
+                const isVendido = (estadoReal === 'Vendido' || estadoReal === 'Cancelado');
+
+                const opciones = `
+                    <option value="Nuevo Pedido" ${estadoMostrado === 'Nuevo Pedido' ? 'selected' : ''}>Nuevo Pedido</option>
+                    <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                    <option value="Vendido" ${estadoMostrado === 'Vendido' ? 'selected' : ''}>Vendido</option>
+                    <option value="Cancelado" ${estadoMostrado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                `;
 
                 html += `
                     <div class="list-item" id="tienda-item-${p.id}">
@@ -1662,13 +1711,11 @@
                             <div class="sub">⏳ Límite: ${fechaLimite}</div>
                         </div>
                         <div class="center">
-                            <span class="estado-badge ${badgeClass}">${estado}</span>
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
                             <select class="estado-select" id="tienda-select-${p.id}" 
                                     onchange="cambiarEstadoTienda('${p.id}', this.value)"
                                     ${isVendido ? 'disabled' : ''}>
-                                <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="Vendido" ${estado === 'Vendido' ? 'selected' : ''}>Vendido</option>
-                                <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                                ${opciones}
                             </select>
                             <button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬 Notificar</button>
                         </div>
@@ -1682,7 +1729,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con nuevos estados y temporizador)
+        // RENDER ENCARGOS (sin cambios relevantes)
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1696,7 +1743,6 @@
                 let estado = e.estado || 'Pendiente';
                 let estadoMostrado = estado;
 
-                // Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
                 if (estado === 'Pendiente' && !e.fecha_limite_pago) {
                     estadoMostrado = 'Nuevo Encargo';
                 }
@@ -1978,7 +2024,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA DOMICILIOS Y TIENDA
+        // FUNCIONES PARA DOMICILIOS Y TIENDA (con nuevos estados)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -1993,6 +2039,11 @@
                     const select = document.getElementById(`estado-select-${id}`);
                     if (select) select.value = 'Entregado';
                     return;
+                }
+
+                // Si el nuevo estado es "Nuevo Domicilio", lo tratamos como "Pendiente"
+                if (nuevoEstado === 'Nuevo Domicilio') {
+                    nuevoEstado = 'Pendiente';
                 }
 
                 if (nuevoEstado === 'Entregado') {
@@ -2060,6 +2111,7 @@
                     return;
                 }
 
+                // Para cualquier otro estado (Pendiente, En camino)
                 await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ Estado: nuevoEstado })
@@ -2125,6 +2177,10 @@
                     const select = document.getElementById(`tienda-select-${id}`);
                     if (select) select.value = pedidoActual.Estado;
                     return;
+                }
+
+                if (nuevoEstado === 'Nuevo Pedido') {
+                    nuevoEstado = 'Pendiente';
                 }
 
                 if (nuevoEstado === 'Vendido') {
@@ -2853,7 +2909,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (CORREGIDO)
+        // EXPORTAR INVENTARIO A PDF (sin emojis)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2864,7 +2920,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // ✅ Título sin emoji para evitar caracteres extraños
             doc.setFont('times', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
@@ -2962,7 +3017,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (CORREGIDO)
+        // EXPORTAR REPORTES A PDF (sin emojis)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -3106,7 +3161,7 @@
         }
 
         // ============================================================
-        // FILTROS
+        // FILTROS (con nuevos estados)
         // ============================================================
         function aplicarFiltrosVentas() {
             let filtradas = [...ventasCache];
@@ -3120,16 +3175,29 @@
         }
 
         function aplicarFiltrosDomicilios() {
-            const estado = document.getElementById('domFiltroEstado').value;
+            const estadoFiltro = document.getElementById('domFiltroEstado').value;
             let filtrados = [...domiciliosCache];
-            if (estado !== 'Todos') filtrados = filtrados.filter(d => (d.Estado || 'Pendiente') === estado);
+            if (estadoFiltro !== 'Todos') {
+                if (estadoFiltro === 'Nuevo Domicilio') {
+                    // Filtrar los que son Pendiente y recientes
+                    filtrados = filtrados.filter(d => d.Estado === 'Pendiente' && esReciente(d.created, 24));
+                } else {
+                    filtrados = filtrados.filter(d => (d.Estado || 'Pendiente') === estadoFiltro);
+                }
+            }
             renderDomicilios(filtrados);
         }
 
         function aplicarFiltrosTienda() {
-            const estado = document.getElementById('tiendaFiltroEstado').value;
+            const estadoFiltro = document.getElementById('tiendaFiltroEstado').value;
             let filtrados = [...tiendaCache];
-            if (estado !== 'Todos') filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estado);
+            if (estadoFiltro !== 'Todos') {
+                if (estadoFiltro === 'Nuevo Pedido') {
+                    filtrados = filtrados.filter(p => p.Estado === 'Pendiente' && esReciente(p.created, 24));
+                } else {
+                    filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estadoFiltro);
+                }
+            }
             renderTienda(filtrados);
         }
 
