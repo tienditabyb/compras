@@ -1609,6 +1609,9 @@
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // RENDER DOMICILIOS (con "Nuevo Domicilio" inteligente)
+        // ============================================================
         function renderDomicilios(domicilios) {
             const container = document.getElementById('domiciliosContainer');
             if (domicilios.length === 0) {
@@ -1620,8 +1623,9 @@
                 let estadoReal = d.Estado || 'Pendiente';
                 let estadoMostrado = estadoReal;
 
-                // Si es Pendiente y reciente -> mostramos "Nuevo Domicilio"
-                if (estadoReal === 'Pendiente' && esReciente(d.created, 24)) {
+                // Si es Pendiente y reciente y NO ha sido modificado manualmente (fecha_actualizacion no existe o es igual a created)
+                const esModificado = d.fecha_actualizacion && new Date(d.fecha_actualizacion) > new Date(d.created);
+                if (estadoReal === 'Pendiente' && esReciente(d.created, 24) && !esModificado) {
                     estadoMostrado = 'Nuevo Domicilio';
                 }
 
@@ -1637,7 +1641,7 @@
                 telefono = String(telefono);
                 const isEntregado = (estadoReal === 'Entregado');
 
-                // Opciones del selector (incluimos "Nuevo Domicilio")
+                // Opciones del selector
                 const opciones = `
                     <option value="Nuevo Domicilio" ${estadoMostrado === 'Nuevo Domicilio' ? 'selected' : ''}>Nuevo Domicilio</option>
                     <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -1670,6 +1674,9 @@
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // RENDER TIENDA (con "Nuevo Pedido" inteligente)
+        // ============================================================
         function renderTienda(pedidos) {
             const container = document.getElementById('tiendaContainer');
             if (pedidos.length === 0) {
@@ -1681,7 +1688,8 @@
                 let estadoReal = p.Estado || 'Pendiente';
                 let estadoMostrado = estadoReal;
 
-                if (estadoReal === 'Pendiente' && esReciente(p.created, 24)) {
+                const esModificado = p.fecha_actualizacion && new Date(p.fecha_actualizacion) > new Date(p.created);
+                if (estadoReal === 'Pendiente' && esReciente(p.created, 24) && !esModificado) {
                     estadoMostrado = 'Nuevo Pedido';
                 }
 
@@ -2024,7 +2032,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA DOMICILIOS Y TIENDA (con nuevos estados)
+        // FUNCIONES PARA DOMICILIOS Y TIENDA (con fecha_actualizacion)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -2046,6 +2054,7 @@
                     nuevoEstado = 'Pendiente';
                 }
 
+                // Si el nuevo estado es "Entregado", manejamos la venta y descuento
                 if (nuevoEstado === 'Entregado') {
                     const productosPedido = parsearProductosPedido(domActual.productos_pedido);
                     const tieneProductos = productosPedido.length > 0;
@@ -2053,7 +2062,10 @@
                     if (!tieneProductos) {
                         await apiRequest(`Domicilios/records/${id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify({ Estado: 'Entregado' })
+                            body: JSON.stringify({ 
+                                Estado: 'Entregado',
+                                fecha_actualizacion: new Date().toISOString()
+                            })
                         });
                         alert('✅ Pedido marcado como Entregado (sin productos para descontar).');
                         await cargarDomicilios();
@@ -2096,7 +2108,10 @@
 
                     await apiRequest(`Domicilios/records/${id}`, {
                         method: 'PATCH',
-                        body: JSON.stringify({ Estado: 'Entregado' })
+                        body: JSON.stringify({ 
+                            Estado: 'Entregado',
+                            fecha_actualizacion: new Date().toISOString()
+                        })
                     });
 
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
@@ -2114,10 +2129,14 @@
                 // Para cualquier otro estado (Pendiente, En camino)
                 await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ Estado: nuevoEstado })
+                    body: JSON.stringify({ 
+                        Estado: nuevoEstado,
+                        fecha_actualizacion: new Date().toISOString()
+                    })
                 });
 
                 domActual.Estado = nuevoEstado;
+                domActual.fecha_actualizacion = new Date().toISOString();
                 await cargarDomicilios();
                 renderDomicilios(domiciliosCache);
                 renderDashboard(ventasCache, domiciliosCache);
@@ -2190,7 +2209,10 @@
                     if (!tieneProductos) {
                         await apiRequest(`PedidosTienda/records/${id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify({ Estado: 'Vendido' })
+                            body: JSON.stringify({ 
+                                Estado: 'Vendido',
+                                fecha_actualizacion: new Date().toISOString()
+                            })
                         });
                         alert('✅ Pedido marcado como Vendido (sin productos para descontar).');
                         await cargarTienda();
@@ -2233,7 +2255,10 @@
 
                     await apiRequest(`PedidosTienda/records/${id}`, {
                         method: 'PATCH',
-                        body: JSON.stringify({ Estado: 'Vendido' })
+                        body: JSON.stringify({ 
+                            Estado: 'Vendido',
+                            fecha_actualizacion: new Date().toISOString()
+                        })
                     });
 
                     alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
@@ -2250,10 +2275,14 @@
 
                 await apiRequest(`PedidosTienda/records/${id}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ Estado: nuevoEstado })
+                    body: JSON.stringify({ 
+                        Estado: nuevoEstado,
+                        fecha_actualizacion: new Date().toISOString()
+                    })
                 });
 
                 pedidoActual.Estado = nuevoEstado;
+                pedidoActual.fecha_actualizacion = new Date().toISOString();
                 await cargarTienda();
                 renderTienda(tiendaCache);
                 renderDashboard(ventasCache, domiciliosCache);
@@ -3179,8 +3208,10 @@
             let filtrados = [...domiciliosCache];
             if (estadoFiltro !== 'Todos') {
                 if (estadoFiltro === 'Nuevo Domicilio') {
-                    // Filtrar los que son Pendiente y recientes
-                    filtrados = filtrados.filter(d => d.Estado === 'Pendiente' && esReciente(d.created, 24));
+                    filtrados = filtrados.filter(d => {
+                        const esModificado = d.fecha_actualizacion && new Date(d.fecha_actualizacion) > new Date(d.created);
+                        return d.Estado === 'Pendiente' && esReciente(d.created, 24) && !esModificado;
+                    });
                 } else {
                     filtrados = filtrados.filter(d => (d.Estado || 'Pendiente') === estadoFiltro);
                 }
@@ -3193,7 +3224,10 @@
             let filtrados = [...tiendaCache];
             if (estadoFiltro !== 'Todos') {
                 if (estadoFiltro === 'Nuevo Pedido') {
-                    filtrados = filtrados.filter(p => p.Estado === 'Pendiente' && esReciente(p.created, 24));
+                    filtrados = filtrados.filter(p => {
+                        const esModificado = p.fecha_actualizacion && new Date(p.fecha_actualizacion) > new Date(p.created);
+                        return p.Estado === 'Pendiente' && esReciente(p.created, 24) && !esModificado;
+                    });
                 } else {
                     filtrados = filtrados.filter(p => (p.Estado || 'Pendiente') === estadoFiltro);
                 }
