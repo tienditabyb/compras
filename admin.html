@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -22,7 +21,6 @@
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
 
-        /* ===== HEADER ===== */
         .header {
             background-color: #1a252f;
             padding: 10px 15px;
@@ -79,7 +77,6 @@
             background: rgba(255,255,255,0.25);
             border-color: rgba(255,255,255,0.4);
         }
-
         .menu-toggle {
             display: none;
             background: rgba(255,255,255,0.1);
@@ -92,7 +89,6 @@
             transition: 0.2s;
         }
         .menu-toggle:hover { background: rgba(255,255,255,0.25); }
-
         .main-content {
             display: flex;
             gap: 30px;
@@ -150,9 +146,7 @@
             color: #2980b9;
             font-weight: 600;
         }
-
         .content { flex: 1; min-width: 0; }
-
         @media (max-width: 992px) {
             .sidebar {
                 position: fixed;
@@ -212,12 +206,10 @@
             .header__logo { font-size: 1.4rem; }
             .sidebar { width: 260px; }
         }
-
         .sidebar .close-sidebar { display: none; }
         @media (max-width: 992px) {
             .sidebar .close-sidebar { display: block; }
         }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -241,7 +233,6 @@
             color: #64748b;
             margin-top: 4px;
         }
-
         .filters {
             background: white;
             padding: 15px 20px;
@@ -284,7 +275,6 @@
         .filters .btn-clear:hover { background: #64748b; }
         .filters .btn-success { background: #059669; }
         .filters .btn-success:hover { background: #047857; }
-
         .list-container {
             background: white;
             border-radius: 12px;
@@ -323,7 +313,6 @@
             color: #2980b9;
         }
         .list-item .right .small { font-size: 0.8rem; font-weight: 400; color: #64748b; }
-
         .estado-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -340,7 +329,6 @@
         .estado-local { background: #d1fae5; color: #059669; }
         .estado-entregado { background: #d1fae5; color: #059669; }
         .estado-cancelado { background: #fee2e2; color: #dc2626; }
-
         .estado-select {
             padding: 4px 8px;
             border-radius: 6px;
@@ -354,7 +342,6 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
-
         .btn-whatsapp {
             background: #25D366;
             color: white;
@@ -370,7 +357,6 @@
             gap: 4px;
         }
         .btn-whatsapp:hover { background: #1da851; }
-
         .product-grid {
             display: grid;
             grid-auto-rows: 1fr;
@@ -382,7 +368,6 @@
         @media (max-width: 1023px) and (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; } }
         @media (max-width: 767px) and (min-width: 481px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; } }
         @media (max-width: 480px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; } }
-
         .product-card {
             background: white;
             border-radius: 10px;
@@ -501,7 +486,6 @@
         .product-card .actions .btn-delete:hover {
             background: #fecaca;
         }
-
         .modal-overlay {
             display: none;
             position: fixed;
@@ -551,7 +535,6 @@
         .modal .detail-row:last-child { border-bottom: none; }
         .modal .detail-row .label { font-weight: 500; color: #64748b; }
         .modal .detail-row .value { font-weight: 600; color: #1e272e; }
-
         .form-group { margin-bottom: 14px; }
         .form-group label {
             display: block;
@@ -624,7 +607,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-
         .btn-primary {
             padding: 10px 24px;
             background: #2980b9;
@@ -673,7 +655,6 @@
             font-size: 0.95rem;
         }
         .btn-clear:hover { background: #64748b; }
-
         .login-container {
             display: flex;
             align-items: center;
@@ -733,10 +714,8 @@
             text-align: center;
         }
         .login-box .error.show { display: block; }
-
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
         .loading {
             text-align: center;
             padding: 40px;
@@ -757,7 +736,6 @@
             padding: 40px;
             color: #94a3b8;
         }
-
         .caja-form {
             background: white;
             border-radius: 12px;
@@ -817,7 +795,6 @@
             font-size: 0.8rem;
             color: #64748b;
         }
-
         .caja-form .carrito-items {
             margin: 15px 0;
         }
@@ -888,7 +865,6 @@
                 order: 3;
             }
         }
-
         .tiempo-restante {
             font-size: 0.75rem;
             color: #dc2626;
@@ -910,7 +886,7 @@
 </head>
 <body>
 
-    <!-- ========== LOGIN ========== -->
+    <!-- LOGIN -->
     <div id="loginContainer" class="login-container">
         <div class="login-box">
             <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
@@ -927,7 +903,7 @@
         </div>
     </div>
 
-    <!-- ========== PANEL PRINCIPAL ========== -->
+    <!-- PANEL PRINCIPAL -->
     <div id="appContainer" style="display:none;">
         <header class="header">
             <div class="header__container">
@@ -996,13 +972,10 @@
                             </div>
                             <button class="btn-primary" id="cajaAgregarBtn">➕ Agregar</button>
                         </div>
-
                         <div class="carrito-items" id="cajaCarrito">
                             <div class="empty">No hay productos agregados.</div>
                         </div>
-
                         <div class="total" id="cajaTotal">Total: $0.00</div>
-
                         <div class="datos-cliente">
                             <div class="form-group">
                                 <label>Nombre</label>
@@ -1017,7 +990,6 @@
                                 <input type="text" id="cajaDireccion" placeholder="Dirección" />
                             </div>
                         </div>
-
                         <div class="acciones">
                             <button class="btn-clear" id="cajaLimpiarBtn">🗑️ Limpiar carrito</button>
                             <button class="btn-success" id="cajaRegistrarBtn">✅ Registrar Venta</button>
@@ -1153,7 +1125,6 @@
                         <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
                         <button class="btn-primary" id="btnExportarReportes" style="margin-left:auto;">📄 Exportar a PDF</button>
                     </div>
-
                     <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:15px;">
                             <div><strong>Total ventas (ingresos):</strong> <span id="repTotalVentas">$0.00</span></div>
@@ -1162,7 +1133,6 @@
                             <div><strong>N° ventas:</strong> <span id="repCount">0</span></div>
                         </div>
                     </div>
-
                     <div class="list-container" id="reportesContainer">
                         <div class="loading"><div class="spinner"></div>Cargando reportes...</div>
                     </div>
@@ -1171,7 +1141,7 @@
         </div>
     </div>
 
-    <!-- ========== MODALES ========== -->
+    <!-- MODALES -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="close-modal" id="closeDetailModal">✕</button>
@@ -1198,13 +1168,11 @@
                 <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
-
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                     <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
                         <input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos
                     </label>
                 </div>
-
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
@@ -1216,7 +1184,6 @@
                         Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
                     </div>
                 </div>
-
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
                     <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
@@ -1610,7 +1577,7 @@
         }
 
         // ============================================================
-        // RENDER DOMICILIOS (con "Nuevo Domicilio" inteligente)
+        // RENDER DOMICILIOS (con "Nuevo Domicilio" usando updated)
         // ============================================================
         function renderDomicilios(domicilios) {
             const container = document.getElementById('domiciliosContainer');
@@ -1623,8 +1590,8 @@
                 let estadoReal = d.Estado || 'Pendiente';
                 let estadoMostrado = estadoReal;
 
-                // Si es Pendiente y reciente y NO ha sido modificado manualmente (fecha_actualizacion no existe o es igual a created)
-                const esModificado = d.fecha_actualizacion && new Date(d.fecha_actualizacion) > new Date(d.created);
+                // Si es Pendiente, reciente y NO ha sido modificado (updated == created o cercano)
+                const esModificado = d.updated && new Date(d.updated) > new Date(d.created);
                 if (estadoReal === 'Pendiente' && esReciente(d.created, 24) && !esModificado) {
                     estadoMostrado = 'Nuevo Domicilio';
                 }
@@ -1641,7 +1608,6 @@
                 telefono = String(telefono);
                 const isEntregado = (estadoReal === 'Entregado');
 
-                // Opciones del selector
                 const opciones = `
                     <option value="Nuevo Domicilio" ${estadoMostrado === 'Nuevo Domicilio' ? 'selected' : ''}>Nuevo Domicilio</option>
                     <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -1675,7 +1641,7 @@
         }
 
         // ============================================================
-        // RENDER TIENDA (con "Nuevo Pedido" inteligente)
+        // RENDER TIENDA (con "Nuevo Pedido" usando updated)
         // ============================================================
         function renderTienda(pedidos) {
             const container = document.getElementById('tiendaContainer');
@@ -1688,7 +1654,7 @@
                 let estadoReal = p.Estado || 'Pendiente';
                 let estadoMostrado = estadoReal;
 
-                const esModificado = p.fecha_actualizacion && new Date(p.fecha_actualizacion) > new Date(p.created);
+                const esModificado = p.updated && new Date(p.updated) > new Date(p.created);
                 if (estadoReal === 'Pendiente' && esReciente(p.created, 24) && !esModificado) {
                     estadoMostrado = 'Nuevo Pedido';
                 }
@@ -1843,8 +1809,7 @@
                 await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ 
-                        estado: 'Cancelado', 
-                        fecha_actualizacion: new Date().toISOString()
+                        estado: 'Cancelado'
                     })
                 });
                 await cargarEncargos();
@@ -1863,9 +1828,7 @@
                     return;
                 }
 
-                let data = { 
-                    fecha_actualizacion: new Date().toISOString()
-                };
+                let data = {};
 
                 if (nuevoEstado === 'Nuevo Encargo') {
                     data.estado = 'Pendiente';
@@ -2006,7 +1969,7 @@
                     <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
                     <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${new Date(data.fecha_solicitud).toLocaleString('es-ES')}</span></div>
                     <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${data.fecha_limite_pago ? new Date(data.fecha_limite_pago).toLocaleString('es-ES') : 'No definida'}</span></div>
-                    <div class="detail-row"><span class="label">Última actualización</span><span class="value">${new Date(data.fecha_actualizacion).toLocaleString('es-ES')}</span></div>
+                    <div class="detail-row"><span class="label">Última actualización</span><span class="value">${new Date(data.updated).toLocaleString('es-ES')}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -2032,7 +1995,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA DOMICILIOS Y TIENDA (con fecha_actualizacion)
+        // FUNCIONES PARA DOMICILIOS Y TIENDA (usando updated automático)
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -2062,10 +2025,7 @@
                     if (!tieneProductos) {
                         await apiRequest(`Domicilios/records/${id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify({ 
-                                Estado: 'Entregado',
-                                fecha_actualizacion: new Date().toISOString()
-                            })
+                            body: JSON.stringify({ Estado: 'Entregado' })
                         });
                         alert('✅ Pedido marcado como Entregado (sin productos para descontar).');
                         await cargarDomicilios();
@@ -2108,10 +2068,7 @@
 
                     await apiRequest(`Domicilios/records/${id}`, {
                         method: 'PATCH',
-                        body: JSON.stringify({ 
-                            Estado: 'Entregado',
-                            fecha_actualizacion: new Date().toISOString()
-                        })
+                        body: JSON.stringify({ Estado: 'Entregado' })
                     });
 
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
@@ -2129,14 +2086,11 @@
                 // Para cualquier otro estado (Pendiente, En camino)
                 await apiRequest(`Domicilios/records/${id}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ 
-                        Estado: nuevoEstado,
-                        fecha_actualizacion: new Date().toISOString()
-                    })
+                    body: JSON.stringify({ Estado: nuevoEstado })
                 });
 
                 domActual.Estado = nuevoEstado;
-                domActual.fecha_actualizacion = new Date().toISOString();
+                // PocketBase actualizará updated automáticamente
                 await cargarDomicilios();
                 renderDomicilios(domiciliosCache);
                 renderDashboard(ventasCache, domiciliosCache);
@@ -2209,10 +2163,7 @@
                     if (!tieneProductos) {
                         await apiRequest(`PedidosTienda/records/${id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify({ 
-                                Estado: 'Vendido',
-                                fecha_actualizacion: new Date().toISOString()
-                            })
+                            body: JSON.stringify({ Estado: 'Vendido' })
                         });
                         alert('✅ Pedido marcado como Vendido (sin productos para descontar).');
                         await cargarTienda();
@@ -2255,10 +2206,7 @@
 
                     await apiRequest(`PedidosTienda/records/${id}`, {
                         method: 'PATCH',
-                        body: JSON.stringify({ 
-                            Estado: 'Vendido',
-                            fecha_actualizacion: new Date().toISOString()
-                        })
+                        body: JSON.stringify({ Estado: 'Vendido' })
                     });
 
                     alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
@@ -2275,14 +2223,10 @@
 
                 await apiRequest(`PedidosTienda/records/${id}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ 
-                        Estado: nuevoEstado,
-                        fecha_actualizacion: new Date().toISOString()
-                    })
+                    body: JSON.stringify({ Estado: nuevoEstado })
                 });
 
                 pedidoActual.Estado = nuevoEstado;
-                pedidoActual.fecha_actualizacion = new Date().toISOString();
                 await cargarTienda();
                 renderTienda(tiendaCache);
                 renderDashboard(ventasCache, domiciliosCache);
@@ -3190,7 +3134,7 @@
         }
 
         // ============================================================
-        // FILTROS (con nuevos estados)
+        // FILTROS (con nuevos estados usando updated)
         // ============================================================
         function aplicarFiltrosVentas() {
             let filtradas = [...ventasCache];
@@ -3209,7 +3153,7 @@
             if (estadoFiltro !== 'Todos') {
                 if (estadoFiltro === 'Nuevo Domicilio') {
                     filtrados = filtrados.filter(d => {
-                        const esModificado = d.fecha_actualizacion && new Date(d.fecha_actualizacion) > new Date(d.created);
+                        const esModificado = d.updated && new Date(d.updated) > new Date(d.created);
                         return d.Estado === 'Pendiente' && esReciente(d.created, 24) && !esModificado;
                     });
                 } else {
@@ -3225,7 +3169,7 @@
             if (estadoFiltro !== 'Todos') {
                 if (estadoFiltro === 'Nuevo Pedido') {
                     filtrados = filtrados.filter(p => {
-                        const esModificado = p.fecha_actualizacion && new Date(p.fecha_actualizacion) > new Date(p.created);
+                        const esModificado = p.updated && new Date(p.updated) > new Date(p.created);
                         return p.Estado === 'Pendiente' && esReciente(p.created, 24) && !esModificado;
                     });
                 } else {
