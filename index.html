@@ -562,10 +562,6 @@
             white-space: nowrap;
         }
         .btn-encargo:hover { background: #d35400; transform: scale(1.02); }
-        .product-card .stock-badge {
-            font-size: 0.7rem;
-            color: #94a3b8;
-        }
         .product-card .encargo-badge {
             font-size: 0.65rem;
             background: #fef3c7;
@@ -689,10 +685,6 @@
             color: #94a3b8;
             font-weight: 400;
             margin-right: 8px;
-        }
-        .detail-page .detail-container .detail-stock {
-            color: #64748b;
-            margin-bottom: 10px;
         }
         .detail-page .detail-container .detail-category {
             color: #64748b;
@@ -887,10 +879,6 @@
             .product-card .price .old {
                 font-size: 0.7rem;
             }
-            .product-card .stock-badge {
-                font-size: 0.55rem;
-                line-height: 1.2;
-            }
             .product-card .product-footer {
                 padding-top: 2px;
                 margin-top: auto;
@@ -927,9 +915,6 @@
             .btn-add, .btn-encargo {
                 font-size: 0.65rem;
                 padding: 3px 6px;
-            }
-            .product-card .stock-badge {
-                font-size: 0.5rem;
             }
             .product-card .product-footer {
                 padding-top: 1px;
@@ -2117,7 +2102,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS
+        //  RENDERIZAR PRODUCTOS (STOCK ELIMINADO)
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2196,7 +2181,6 @@
                                         `<button class="btn-add" data-id="${prod.id}">Agregar</button>`
                                     }
                                 </div>
-                                ${!esEncargo ? `<div class="stock-badge">${parseInt(prod.Stock || 0)} uds</div>` : ''}
                             </div>
                         `;
                     }
@@ -2260,7 +2244,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE
+        //  PÁGINA DE DETALLE (STOCK ELIMINADO)
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2328,7 +2312,6 @@
                     <h2>${prod.Nombre || 'Sin nombre'}</h2>
                     ${esEncargo ? '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>' : ''}
                     ${precioHtml}
-                    ${!esEncargo ? `<div class="detail-stock">📦 Stock: ${parseInt(prod.Stock || 0)} uds</div>` : ''}
                     <div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>
                 `;
 
