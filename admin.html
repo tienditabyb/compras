@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- SDK de PocketBase para tiempo real -->
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.min.js"></script>
     <style>
         /* ===== RESET Y BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1244,6 +1246,127 @@
         let ventasFiltradasReporte = [];
 
         // ============================================================
+        // POCKETBASE TIEMPO REAL
+        // ============================================================
+        let pb = null;
+
+        function iniciarPocketBase() {
+            if (!authToken) return;
+            try {
+                pb = new PocketBase(POCKETBASE_URL);
+                pb.authStore.save(authToken, userData);
+
+                const colecciones = ['Ventas', 'Domicilios', 'PedidosTienda', 'Encargos'];
+                colecciones.forEach(coleccion => {
+                    pb.collection(coleccion).subscribe('*', function(e) {
+                        if (e.action === 'create') {
+                            const nuevoRegistro = e.record;
+                            mostrarNotificacion(coleccion, nuevoRegistro);
+                            // Refrescar datos automáticamente
+                            refrescarDatos();
+                        }
+                    });
+                });
+                console.log('🟢 Conexión en tiempo real establecida.');
+            } catch (e) {
+                console.warn('Error al iniciar PocketBase:', e);
+            }
+        }
+
+        function mostrarNotificacion(coleccion, registro) {
+            let mensaje = '';
+            let titulo = '';
+
+            switch (coleccion) {
+                case 'Ventas':
+                    titulo = '💰 Nueva venta';
+                    mensaje = `Total: $${parseFloat(registro.total || 0).toFixed(2)} - ${registro.productos_json || 'Sin productos'}`;
+                    break;
+                case 'Domicilios':
+                    titulo = '🛵 Nuevo domicilio';
+                    mensaje = `${registro.Cliente_Nombre || 'Cliente'} - ${registro.Direccion_Entrega || 'Sin dirección'}`;
+                    break;
+                case 'PedidosTienda':
+                    titulo = '🏪 Nuevo pedido en tienda';
+                    mensaje = `${registro.Cliente_Nombre || 'Cliente'} - Tel: ${registro.Telefono || 'Sin teléfono'}`;
+                    break;
+                case 'Encargos':
+                    titulo = '📋 Nuevo encargo';
+                    mensaje = `${registro.producto_nombre || 'Producto'} x${registro.cantidad || 1} - ${registro.usuario_nombre || 'Cliente'}`;
+                    break;
+                default:
+                    return;
+            }
+
+            mostrarToast(titulo, mensaje);
+
+            // Notificación de escritorio
+            if (window.Notification && Notification.permission === 'granted') {
+                new Notification(titulo, { body: mensaje, icon: '🛒' });
+            }
+        }
+
+        function mostrarToast(titulo, mensaje) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: #1a252f;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                z-index: 9999;
+                max-width: 350px;
+                font-family: 'Poppins', sans-serif;
+                border-left: 6px solid #74b9ff;
+                animation: slideIn 0.3s ease;
+                cursor: pointer;
+            `;
+            toast.innerHTML = `
+                <strong style="font-size:1rem;">${titulo}</strong>
+                <div style="font-size:0.9rem; margin-top:4px; opacity:0.9;">${mensaje}</div>
+                <div style="font-size:0.7rem; margin-top:6px; color:#94a3b8;">${new Date().toLocaleTimeString()}</div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
+            toast.addEventListener('click', () => toast.remove());
+
+            if (!document.getElementById('toastStyles')) {
+                const style = document.createElement('style');
+                style.id = 'toastStyles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100px); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        async function refrescarDatos() {
+            try {
+                await cargarVentas();
+                await cargarDomicilios();
+                await cargarTienda();
+                await cargarEncargos();
+                const tabActiva = document.querySelector('.tab-content.active');
+                if (tabActiva) {
+                    const id = tabActiva.id;
+                    if (id === 'tab-ventas') aplicarFiltrosVentas();
+                    else if (id === 'tab-domicilios') aplicarFiltrosDomicilios();
+                    else if (id === 'tab-tienda') aplicarFiltrosTienda();
+                    else if (id === 'tab-encargos') aplicarFiltrosEncargos();
+                    else if (id === 'tab-dashboard') renderDashboard(ventasCache, domiciliosCache);
+                }
+            } catch (e) {
+                console.warn('Error al refrescar datos:', e);
+            }
+        }
+
+        // ============================================================
         // AUTH
         // ============================================================
         async function login(email, password) {
@@ -1267,6 +1390,8 @@
                 userData = user;
                 localStorage.setItem('admin_token', authToken);
                 localStorage.setItem('admin_user', JSON.stringify(userData));
+                // Conectar tiempo real
+                iniciarPocketBase();
                 return true;
             } catch (e) {
                 throw e;
@@ -1274,6 +1399,15 @@
         }
 
         function logout() {
+            if (pb) {
+                try {
+                    pb.collection('Ventas').unsubscribe('*');
+                    pb.collection('Domicilios').unsubscribe('*');
+                    pb.collection('PedidosTienda').unsubscribe('*');
+                    pb.collection('Encargos').unsubscribe('*');
+                } catch (e) {}
+                pb = null;
+            }
             authToken = null;
             userData = null;
             localStorage.removeItem('admin_token');
@@ -1299,6 +1433,7 @@
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('appContainer').style.display = 'block';
                     document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                    iniciarPocketBase();
                     initApp();
                     return true;
                 } catch (e) {
@@ -1682,8 +1817,7 @@
         }
 
         // ============================================================
-        // RENDER ENCARGOS (con nuevos estados y temporizador)
-        // MODIFICADO: detecta "Nuevo Encargo" si estado es 'Pendiente' sin fecha_limite_pago
+        // RENDER ENCARGOS
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1697,12 +1831,10 @@
                 let estado = e.estado || 'Pendiente';
                 let estadoMostrado = estado;
 
-                // 🔥 Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
                 if (estado === 'Pendiente' && !e.fecha_limite_pago) {
                     estadoMostrado = 'Nuevo Encargo';
                 }
 
-                // Clase CSS para el badge (usamos estadoMostrado)
                 let badgeClass = 'estado-pendiente';
                 if (estadoMostrado === 'Nuevo Encargo') badgeClass = 'estado-pendiente';
                 else if (estadoMostrado === 'Pendiente') badgeClass = 'estado-pendiente';
@@ -1726,7 +1858,6 @@
                     fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
                 }
 
-                // 🕒 Temporizador solo si el estado real es 'Pendiente' y tiene fecha límite
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
                     const limite = new Date(e.fecha_limite_pago);
@@ -1743,7 +1874,6 @@
                     }
                 }
 
-                // Opciones del selector: la opción seleccionada será estadoMostrado
                 const opciones = `
                     <option value="Nuevo Encargo" ${estadoMostrado === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo Encargo</option>
                     <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -1784,7 +1914,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA ENCARGOS (CORREGIDAS)
+        // FUNCIONES PARA ENCARGOS
         // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
@@ -1805,7 +1935,6 @@
             }
         }
 
-        // Función modificada para manejar correctamente "Nuevo Encargo" y "Pendiente"
         async function cambiarEstadoEncargo(id, nuevoEstado) {
             try {
                 const encargoActual = encargosCache.find(e => e.id === id);
@@ -1818,43 +1947,34 @@
                     fecha_actualizacion: new Date().toISOString()
                 };
 
-                // 🔥 Lógica para "Nuevo Encargo"
                 if (nuevoEstado === 'Nuevo Encargo') {
-                    // Lo guardamos como 'Pendiente' pero sin fecha límite
                     data.estado = 'Pendiente';
-                    data.fecha_limite_pago = null; // eliminar la fecha si existía
+                    data.fecha_limite_pago = null;
                 }
-                // 🔥 Lógica para "Pendiente"
                 else if (nuevoEstado === 'Pendiente') {
                     data.estado = 'Pendiente';
-                    // Si no tiene fecha límite, la creamos (24h)
                     if (!encargoActual.fecha_limite_pago) {
                         const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                         data.fecha_limite_pago = limite.toISOString();
                     }
                 }
-                // Resto de estados (se guardan tal cual)
                 else {
                     data.estado = nuevoEstado;
                 }
 
-                // Enviar actualización
                 const response = await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
-                // Actualizar caché local
                 const index = encargosCache.findIndex(e => e.id === id);
                 if (index !== -1) {
                     encargosCache[index] = { ...encargosCache[index], ...response };
                 }
 
-                // Recargar y re-renderizar
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                // Notificar solo si no es "Nuevo Encargo" ni "Cancelado"
                 if (nuevoEstado !== 'Nuevo Encargo' && nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
@@ -1979,7 +2099,6 @@
             const estado = document.getElementById('encFiltroEstado').value;
             let filtrados = [...encargosCache];
             if (estado !== 'Todos') {
-                // Para filtrar, comparamos con el estado real (Pendiente) o con el mostrado (Nuevo Encargo)
                 if (estado === 'Nuevo Encargo') {
                     filtrados = filtrados.filter(e => {
                         const estadoReal = e.estado || 'Pendiente';
@@ -2868,7 +2987,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (ARREGLADO CON jsPDF)
+        // EXPORTAR INVENTARIO A PDF
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2876,23 +2995,19 @@
                 return;
             }
 
-            // Usamos jsPDF directamente, igual que en reportes
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // Título
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
             doc.text('📦 Inventario B&B', 40, 40);
 
-            // Fecha
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             doc.setTextColor('#64748b');
             doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
 
-            // Preparar datos para la tabla
             const tableData = [];
             let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
 
@@ -2922,7 +3037,6 @@
                 ]);
             }
 
-            // Añadir fila de totales
             tableData.push([
                 'TOTALES',
                 '',
@@ -2934,7 +3048,6 @@
                 `$${totalGanancia.toFixed(2)}`
             ]);
 
-            // Generar la tabla
             doc.autoTable({
                 head: [['Producto', 'Categoría', 'Código', 'Stock', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Ganancia x ud']],
                 body: tableData,
@@ -2974,7 +3087,6 @@
                 }
             });
 
-            // Guardar el PDF
             doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
@@ -3244,6 +3356,7 @@
                     renderReportes(ventasCache);
                 });
 
+                // Fallback: actualizar encargos cada 10 segundos (por si el WebSocket falla)
                 setInterval(() => {
                     aplicarFiltrosEncargos();
                 }, 10000);
@@ -3288,6 +3401,13 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // ============================================================
+        // SOLICITAR PERMISO PARA NOTIFICACIONES DE ESCRITORIO
+        // ============================================================
+        if (window.Notification && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
 
         // ============================================================
         // INICIO - VERIFICAR SESIÓN
