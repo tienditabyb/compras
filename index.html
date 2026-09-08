@@ -2938,5 +2938,28 @@
         init();
         console.log('🏪 B&B cargada correctamente.');
     </script>
+
+    <!-- ============================================================ -->
+    <!-- ===== ONESIGNAL PUSH NOTIFICATIONS (AQUÍ ESTÁ LA SOLUCIÓN) ===== -->
+    <!-- ============================================================ -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "e939f58c-3df0-48d6-a86b-ee93da88a9c1", // TU APP ID
+                serviceWorkerParam: { scope: "/compras/" },
+                serviceWorkerPath: "/compras/OneSignalSDKWorker.js",
+            });
+            // 🔔 ESTO ES LO QUE FALTABA: SOLICITAR PERMISO AL USUARIO
+            OneSignal.Notifications.requestPermission({
+                modal: {
+                    title: "🔔 Recibe notificaciones de B&B",
+                    message: "Te avisaremos cuando tu pedido cambie de estado o tengamos nuevas ofertas.",
+                    buttons: ["✅ Aceptar", "❌ No, gracias"],
+                },
+            });
+        });
+    </script>
 </body>
 </html>
