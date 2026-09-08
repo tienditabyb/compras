@@ -1683,7 +1683,6 @@
 
         // ============================================================
         // RENDER ENCARGOS (con nuevos estados y temporizador)
-        // MODIFICADO: detecta "Nuevo Encargo" si estado es 'Pendiente' sin fecha_limite_pago
         // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
@@ -1697,12 +1696,11 @@
                 let estado = e.estado || 'Pendiente';
                 let estadoMostrado = estado;
 
-                // 🔥 Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
+                // Si es 'Pendiente' pero no tiene fecha límite, lo mostramos como 'Nuevo Encargo'
                 if (estado === 'Pendiente' && !e.fecha_limite_pago) {
                     estadoMostrado = 'Nuevo Encargo';
                 }
 
-                // Clase CSS para el badge (usamos estadoMostrado)
                 let badgeClass = 'estado-pendiente';
                 if (estadoMostrado === 'Nuevo Encargo') badgeClass = 'estado-pendiente';
                 else if (estadoMostrado === 'Pendiente') badgeClass = 'estado-pendiente';
@@ -1726,7 +1724,6 @@
                     fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
                 }
 
-                // 🕒 Temporizador solo si el estado real es 'Pendiente' y tiene fecha límite
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
                     const limite = new Date(e.fecha_limite_pago);
@@ -1743,7 +1740,6 @@
                     }
                 }
 
-                // Opciones del selector: la opción seleccionada será estadoMostrado
                 const opciones = `
                     <option value="Nuevo Encargo" ${estadoMostrado === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo Encargo</option>
                     <option value="Pendiente" ${estadoMostrado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -1784,7 +1780,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA ENCARGOS (CORREGIDAS)
+        // FUNCIONES PARA ENCARGOS
         // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
@@ -1805,7 +1801,6 @@
             }
         }
 
-        // Función modificada para manejar correctamente "Nuevo Encargo" y "Pendiente"
         async function cambiarEstadoEncargo(id, nuevoEstado) {
             try {
                 const encargoActual = encargosCache.find(e => e.id === id);
@@ -1818,43 +1813,34 @@
                     fecha_actualizacion: new Date().toISOString()
                 };
 
-                // 🔥 Lógica para "Nuevo Encargo"
                 if (nuevoEstado === 'Nuevo Encargo') {
-                    // Lo guardamos como 'Pendiente' pero sin fecha límite
                     data.estado = 'Pendiente';
-                    data.fecha_limite_pago = null; // eliminar la fecha si existía
+                    data.fecha_limite_pago = null;
                 }
-                // 🔥 Lógica para "Pendiente"
                 else if (nuevoEstado === 'Pendiente') {
                     data.estado = 'Pendiente';
-                    // Si no tiene fecha límite, la creamos (24h)
                     if (!encargoActual.fecha_limite_pago) {
                         const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
                         data.fecha_limite_pago = limite.toISOString();
                     }
                 }
-                // Resto de estados (se guardan tal cual)
                 else {
                     data.estado = nuevoEstado;
                 }
 
-                // Enviar actualización
                 const response = await apiRequest(`Encargos/records/${id}`, {
                     method: 'PATCH',
                     body: JSON.stringify(data)
                 });
 
-                // Actualizar caché local
                 const index = encargosCache.findIndex(e => e.id === id);
                 if (index !== -1) {
                     encargosCache[index] = { ...encargosCache[index], ...response };
                 }
 
-                // Recargar y re-renderizar
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
 
-                // Notificar solo si no es "Nuevo Encargo" ni "Cancelado"
                 if (nuevoEstado !== 'Nuevo Encargo' && nuevoEstado !== 'Cancelado') {
                     notificarEncargo(id);
                 }
@@ -1979,7 +1965,6 @@
             const estado = document.getElementById('encFiltroEstado').value;
             let filtrados = [...encargosCache];
             if (estado !== 'Todos') {
-                // Para filtrar, comparamos con el estado real (Pendiente) o con el mostrado (Nuevo Encargo)
                 if (estado === 'Nuevo Encargo') {
                     filtrados = filtrados.filter(e => {
                         const estadoReal = e.estado || 'Pendiente';
@@ -2868,7 +2853,7 @@
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (CORREGIDO - FUENTE TIMES)
+        // EXPORTAR INVENTARIO A PDF (CORREGIDO)
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2879,11 +2864,11 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
 
-            // ✅ Fuente 'times' para soportar caracteres especiales
+            // ✅ Título sin emoji para evitar caracteres extraños
             doc.setFont('times', 'bold');
             doc.setFontSize(20);
             doc.setTextColor('#1a252f');
-            doc.text('📦 Inventario B&B', 40, 40);
+            doc.text('Inventario B&B', 40, 40);
 
             doc.setFont('times', 'normal');
             doc.setFontSize(10);
@@ -2977,7 +2962,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (CORREGIDO - FUENTE TIMES)
+        // EXPORTAR REPORTES A PDF (CORREGIDO)
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
