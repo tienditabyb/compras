@@ -682,7 +682,16 @@
             <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId" value="" />
                 <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
-                <div class="form-group"><label>Categoría *</label><select id="prodCategoria" required></select></div>
+                
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <select id="prodCategoria" required style="flex:1;"></select>
+                        <input type="text" id="nuevaCategoriaInput" placeholder="Nueva categoría" style="flex:1; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
+                        <button type="button" id="agregarCategoriaBtn" class="btn-primary" style="padding:8px 16px; font-size:0.85rem;">Agregar</button>
+                    </div>
+                </div>
+
                 <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
                 <div class="form-row">
                     <div class="form-group"><label>Precio Costo *</label><input type="number" id="prodCosto" step="0.01" required /></div>
@@ -2136,6 +2145,65 @@
             renderFotosFormulario();
             document.getElementById('prodFotos').value = '';
         }
+
+        // ============================================================
+        // FUNCIÓN PARA AGREGAR CATEGORÍA
+        // ============================================================
+        async function agregarCategoria(nombre) {
+            if (!nombre || nombre.trim() === '') {
+                alert('Escribe un nombre para la categoría.');
+                return;
+            }
+            const nombreTrim = nombre.trim();
+            // Verificar si ya existe
+            if (categoriasCache.some(c => c.toLowerCase() === nombreTrim.toLowerCase())) {
+                alert('Esta categoría ya existe.');
+                return;
+            }
+            try {
+                await apiRequest('Categoria/records', {
+                    method: 'POST',
+                    body: JSON.stringify({ nombre: nombreTrim })
+                });
+                // Recargar categorías y actualizar selects
+                await cargarCategorias();
+                // Actualizar select de categorías en el modal
+                const catSelect = document.getElementById('prodCategoria');
+                catSelect.innerHTML = '';
+                for (const cat of categoriasCache) {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    catSelect.appendChild(opt);
+                }
+                // Seleccionar la nueva categoría
+                catSelect.value = nombreTrim;
+                // También actualizar el filtro de inventario
+                const invCatSelect = document.getElementById('invCategory');
+                invCatSelect.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                for (const cat of categoriasCache) {
+                    invCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                }
+                // Limpiar campo de nueva categoría
+                document.getElementById('nuevaCategoriaInput').value = '';
+                alert(`✅ Categoría "${nombreTrim}" agregada correctamente.`);
+            } catch (e) {
+                alert('Error al agregar categoría: ' + e.message);
+            }
+        }
+
+        document.getElementById('agregarCategoriaBtn').addEventListener('click', function() {
+            const input = document.getElementById('nuevaCategoriaInput');
+            agregarCategoria(input.value);
+        });
+
+        // También permitir agregar con Enter en el campo
+        document.getElementById('nuevaCategoriaInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarCategoria(this.value);
+            }
+        });
 
         // ============================================================
         // CRUD PRODUCTOS
