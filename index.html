@@ -84,6 +84,34 @@
             flex-shrink: 0;
         }
 
+        /* ===== BOTÓN DE DESCARGA APK (NUEVO) ===== */
+        .download-apk-btn {
+            background: #2ecc71;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.3s;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+        }
+        .download-apk-btn:hover {
+            background: #27ae60;
+            transform: scale(1.02);
+        }
+        @media (max-width: 768px) {
+            .download-apk-btn {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
+        }
+
         /* ===== MENÚ DE CUENTA MODERNO ===== */
         .account-dropdown {
             position: relative;
@@ -1229,8 +1257,16 @@
             width: 100%;
         }
         .footer p {
-            margin: 0;
+            margin: 4px 0;
             opacity: 0.9;
+        }
+        .footer .download-footer {
+            color: #74b9ff;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .footer .download-footer:hover {
+            color: #a8d8ff;
         }
     </style>
 </head>
@@ -1244,6 +1280,10 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
+                <!-- BOTÓN DE DESCARGA APK (NUEVO) -->
+                <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-apk-btn" download>
+                    📲 Descargar APK
+                </a>
                 <div class="account-dropdown" id="accountDropdown">
                     <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
                         <span class="avatar" id="accountAvatar">👤</span>
@@ -1445,6 +1485,11 @@
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
+        <p>
+            <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-footer" download>
+                📲 Descarga nuestra APK
+            </a>
+        </p>
     </footer>
 
     <!-- ============================================================ -->
