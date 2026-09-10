@@ -84,7 +84,7 @@
             flex-shrink: 0;
         }
 
-        /* ===== BOTÓN DE DESCARGA APK (NUEVO) ===== */
+        /* ===== BOTÓN DE DESCARGA APK ===== */
         .download-apk-btn {
             background: #2ecc71;
             color: #fff;
@@ -226,7 +226,6 @@
             margin: 4px 12px;
         }
 
-        /* Submenú perfil (acordeón) */
         .profile-submenu {
             padding: 0 16px 12px;
         }
@@ -390,7 +389,6 @@
             color: #1e272e;
         }
 
-        /* Botón categorías en móvil */
         .toolbar__categories {
             display: none;
             position: relative;
@@ -808,7 +806,6 @@
         .detail-page .detail-container .calificar-section .btn-calificar:hover { background: #0f171e; }
         .detail-page .detail-container .calificar-section .btn-calificar:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* Comentarios */
         .detail-page .detail-container .comentarios {
             margin-top: 25px;
             border-top: 2px solid #f1f5f9;
@@ -1280,7 +1277,6 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
-                <!-- BOTÓN DE DESCARGA APK (NUEVO) -->
                 <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-apk-btn" download>
                     📲 Descargar APK
                 </a>
@@ -1357,7 +1353,6 @@
         </div>
     </div>
 
-    <!-- Modal para solicitar encargo -->
     <div class="modal-overlay" id="encargoModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarEncargoModal()">✕</button>
@@ -2007,7 +2002,6 @@
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
             
-            // Sección "Pedidos Por Encargo" (independiente)
             const encargoLi = document.createElement('li');
             const encargoLink = document.createElement('a');
             encargoLink.textContent = '📦 Pedidos Por Encargo';
@@ -2023,13 +2017,11 @@
             encargoLi.appendChild(encargoLink);
             ul.appendChild(encargoLi);
 
-            // Línea separadora visual
             const sepLi = document.createElement('li');
             sepLi.style.borderTop = '1px solid #e2e8f0';
             sepLi.style.margin = '6px 0';
             ul.appendChild(sepLi);
 
-            // Categorías normales
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo';
@@ -2063,7 +2055,6 @@
                 ul.appendChild(li);
             });
 
-            // Dropdown móvil
             const dropdown = document.getElementById('categoriesDropdown');
             dropdown.innerHTML = '';
             
@@ -2147,7 +2138,7 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         // ============================================================
-        //  RENDERIZAR PRODUCTOS (STOCK ELIMINADO)
+        //  RENDERIZAR PRODUCTOS
         // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
@@ -2158,7 +2149,6 @@
                 if (categoriaSeleccionada === "PedidosPorEncargo") {
                     filtrados = filtrados.filter(p => p.Es_Encargo === true);
                 } else {
-                    // Excluir productos de encargo
                     filtrados = filtrados.filter(p => !p.Es_Encargo);
                     if (categoriaSeleccionada !== "Todas") {
                         filtrados = filtrados.filter(p =>
@@ -2232,7 +2222,6 @@
                     grid.innerHTML = html;
                 }
 
-                // Eventos para botones
                 document.querySelectorAll('.btn-add').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -2289,7 +2278,7 @@
         }
 
         // ============================================================
-        //  PÁGINA DE DETALLE (STOCK ELIMINADO)
+        //  PÁGINA DE DETALLE
         // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
@@ -2790,6 +2779,12 @@
                     console.error('Error al enviar WhatsApp al grupo:', await response.text());
                 }
 
+                // 🔔 NOTIFICAR AL ADMIN POR PUSH (ONESIGNAL)
+                notificarAdminOneSignal(
+                    "🛒 Nueva compra",
+                    `${nombreCompleto} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`
+                );
+
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
@@ -2903,6 +2898,12 @@
                     body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
                 });
 
+                // 🔔 NOTIFICAR AL ADMIN POR PUSH (ONESIGNAL)
+                notificarAdminOneSignal(
+                    "📦 Nuevo encargo",
+                    `${usuarioActual.nombre || usuarioActual.name || 'Cliente'} - ${prod.Nombre} (x${cantidad})`
+                );
+
                 alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
                 cerrarEncargoModal();
 
@@ -2965,6 +2966,45 @@
 
         init();
         console.log('🏪 B&B cargada correctamente.');
+    </script>
+
+    <!-- ========== ONESIGNAL PUSH (CLIENTE) ========== -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e939f58c-3df0-48d6-a86b-ee93da88a9c1",
+          allowLocalhostAsSecureOrigin: true
+        });
+        console.log("✅ OneSignal listo en la página de cliente.");
+      });
+
+      // ============================================================
+      // FUNCIÓN QUE ENVÍA LA NOTIFICACIÓN AL ADMIN
+      // ============================================================
+      async function notificarAdminOneSignal(titulo, mensaje) {
+        try {
+          const resp = await fetch('https://api.onesignal.com/notifications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Key os_v2_app_5e47ldb56bennkdl52j5vcfjyelitw2ypxuus7ey6gh7dm5btyhvu2uecmbgw6ova4d7hga6gzugdyfyv54zwx7m4wzchew3d27e2wy'
+            },
+            body: JSON.stringify({
+              app_id: "e939f58c-3df0-48d6-a86b-ee93da88a9c1",
+              include_aliases: { external_id: ["admin_tiendita_byb"] },
+              target_channel: "push",
+              headings: { en: titulo, es: titulo },
+              contents: { en: mensaje, es: mensaje }
+            })
+          });
+          const data = await resp.json();
+          console.log("📨 Notificación enviada al admin:", data);
+        } catch (e) {
+          console.error("❌ Error al notificar al admin:", e);
+        }
+      }
     </script>
 </body>
 </html>
