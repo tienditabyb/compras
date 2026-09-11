@@ -867,9 +867,12 @@
 
             .products-grid {
                 gap: 4px;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 align-items: stretch;
                 grid-auto-rows: 1fr;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
             }
             .product-card {
                 padding: 4px;
@@ -877,12 +880,16 @@
                 height: 100%;
                 display: flex;
                 flex-direction: column;
+                min-width: 0;
+                max-width: 100%;
+                overflow: hidden;
             }
             .product-card .foto-principal {
                 border-radius: 4px;
                 margin-bottom: 2px;
                 aspect-ratio: 1 / 1;
                 width: 100%;
+                max-width: 100%;
                 object-fit: contain;
             }
             .product-card .product-tag {
@@ -893,6 +900,8 @@
                 font-size: 0.6rem;
                 margin: 2px 0 1px;
                 line-height: 1.2;
+                overflow-wrap: anywhere;
+                word-break: break-word;
             }
             .product-card .product-desc {
                 display: none;
@@ -900,6 +909,7 @@
             .product-card .price {
                 font-size: 0.85rem;
                 line-height: 1.2;
+                overflow-wrap: anywhere;
             }
             .product-card .price .old {
                 font-size: 0.7rem;
@@ -911,18 +921,20 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 2px;
+                max-width: 100%;
             }
             .btn-add, .btn-encargo {
                 font-size: 0.7rem;
                 padding: 3px 8px;
                 border-radius: 16px;
+                max-width: 100%;
             }
         }
 
         @media (max-width: 480px) {
             .products-grid {
                 gap: 3px;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
             .product-card {
                 padding: 3px;
@@ -1264,6 +1276,30 @@
         }
         .footer .download-footer:hover {
             color: #a8d8ff;
+        }
+
+        /* ===== FIX ANTI-DESBORDAMIENTO HORIZONTAL ===== */
+        html, body {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        .main-content,
+        .products-section,
+        .products-grid,
+        .toolbar,
+        .detail-page,
+        .detail-container {
+            max-width: 100% !important;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .products-section {
+            width: 100%;
+        }
+        .product-card,
+        .product-card .product-footer,
+        .product-card h3 {
+            min-width: 0;
         }
     </style>
 </head>
