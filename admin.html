@@ -818,9 +818,6 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- ====================== JAVASCRIPT =========================== -->
-    <!-- ============================================================ -->
     <script>
         // ============================================================
         // CONFIGURACIÓN
@@ -1036,7 +1033,7 @@
         }
 
         // ============================================================
-        // API REQUEST (CORREGIDO)
+        // API REQUEST
         // ============================================================
         async function apiRequest(endpoint, options = {}) {
             const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
@@ -1060,11 +1057,9 @@
                 const err = await resp.json().catch(() => ({}));
                 throw new Error(err.message || `Error ${resp.status}`);
             }
-            // 204 = sin contenido (DELETE exitoso). Devolvemos objeto vacío.
             if (resp.status === 204) {
                 return {};
             }
-            // Leer texto y parsear solo si hay contenido
             const texto = await resp.text();
             if (!texto) return {};
             try {
@@ -1163,9 +1158,6 @@
             return total - costo;
         }
 
-        // ============================================================
-        // OBTENER FOTOS DE UN PRODUCTO
-        // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
@@ -1210,7 +1202,6 @@
             let costoInventario = 0;
             let ventaInventario = 0;
             for (const p of productosCache) {
-                // Los productos de encargo NO cuentan como inventario
                 if (p.Es_Encargo === true) continue;
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
@@ -1252,7 +1243,10 @@
         function renderInventario(productos, categoriaFiltro = 'Todas', busqueda = '') {
             const container = document.getElementById('inventarioContainer');
             let filtrados = productos;
-            if (categoriaFiltro !== 'Todas') {
+            // ⭐ NUEVO: filtro por Encargos
+            if (categoriaFiltro === 'Encargos') {
+                filtrados = filtrados.filter(p => p.Es_Encargo === true);
+            } else if (categoriaFiltro !== 'Todas') {
                 filtrados = filtrados.filter(p => (p.Categoria || 'General') === categoriaFiltro);
             }
             if (busqueda) {
@@ -2287,6 +2281,7 @@
                 catSelect.value = nombreTrim;
                 const invCatSelect = document.getElementById('invCategory');
                 invCatSelect.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                invCatSelect.innerHTML += '<option value="Encargos">📦 Pedidos por Encargo</option>';
                 for (const cat of categoriasCache) {
                     invCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
                 }
@@ -2349,6 +2344,7 @@
 
                 const invCatSelect = document.getElementById('invCategory');
                 invCatSelect.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                invCatSelect.innerHTML += '<option value="Encargos">📦 Pedidos por Encargo</option>';
                 for (const c of categoriasCache) {
                     invCatSelect.innerHTML += `<option value="${c}">${c}</option>`;
                 }
@@ -3120,6 +3116,7 @@
 
                 const catSelectInv = document.getElementById('invCategory');
                 catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                catSelectInv.innerHTML += '<option value="Encargos">📦 Pedidos por Encargo</option>';
                 for (const cat of categoriasCache) {
                     catSelectInv.innerHTML += `<option value="${cat}">${cat}</option>`;
                 }
