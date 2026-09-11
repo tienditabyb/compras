@@ -858,7 +858,21 @@
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
             .toolbar__left { justify-content: space-between; width: 100%; }
             .toolbar__sort { justify-content: flex-start; }
-            .toolbar__categories { display: block; }
+            .toolbar__categories {
+                display: block;
+                position: relative;
+            }
+            .categories-dropdown {
+                left: auto;
+                right: 0;
+                min-width: 200px;
+                max-width: calc(100vw - 24px);
+            }
+            .categories-dropdown a {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
             .account-dropdown-content { right: auto; left: 0; min-width: 260px; }
             .detail-page .detail-container { padding: 15px; }
             .detail-page .detail-container .galeria .miniaturas img { width: 45px; height: 45px; }
@@ -1523,22 +1537,14 @@
         </p>
     </footer>
 
-    <!-- ============================================================ -->
-    <!-- ====================== JAVASCRIPT =========================== -->
-    <!-- ============================================================ -->
     <script>
-        // ============================================================
-        //  CONFIGURACIÓN
-        // ============================================================
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
 
-        // ===== GREEN-API CREDENCIALES =====
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
 
-        // ===== ID DEL GRUPO DE WHATSAPP =====
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
 
         let productos = [];
@@ -1553,9 +1559,6 @@
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // ============================================================
-        //  AUTH
-        // ============================================================
         function setAuthToken(token) {
             if (token) { localStorage.setItem('pb_token', token); authToken = token; }
             else { localStorage.removeItem('pb_token'); authToken = null; }
@@ -1710,9 +1713,6 @@
             }
         });
 
-        // ============================================================
-        //  MODALES
-        // ============================================================
         function abrirModalLogin() {
             modoRegistro = false;
             document.getElementById('authTitle').textContent = 'Iniciar sesión';
@@ -1909,9 +1909,6 @@
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
-        // ============================================================
-        //  API
-        // ============================================================
         async function obtenerProductos() {
             try {
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=500`);
@@ -2012,9 +2009,6 @@
             return (oferta > 0 && oferta < venta) ? oferta : venta;
         }
 
-        // ============================================================
-        //  OBTENER LISTA DE FOTOS
-        // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
@@ -2030,9 +2024,6 @@
             return fotos;
         }
 
-        // ============================================================
-        //  CATEGORÍAS
-        // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
@@ -2167,15 +2158,9 @@
             }
         });
 
-        // ============================================================
-        //  BÚSQUEDA
-        // ============================================================
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
-        // ============================================================
-        //  RENDERIZAR PRODUCTOS
-        // ============================================================
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
@@ -2313,9 +2298,6 @@
             renderizarProductos();
         }
 
-        // ============================================================
-        //  PÁGINA DE DETALLE
-        // ============================================================
         async function mostrarDetalle(productoId) {
             const productsSection = document.getElementById('productsSection');
             const detailPage = document.getElementById('detailPage');
@@ -2514,9 +2496,6 @@
             });
         }
 
-        // ============================================================
-        //  CARRITO
-        // ============================================================
         function mostrarAddToCartModal() { document.getElementById('addToCartModal').classList.add('active'); }
         function cerrarAddToCartModal() { document.getElementById('addToCartModal').classList.remove('active'); }
 
@@ -2599,9 +2578,6 @@
             document.getElementById('cartSidebar').classList.remove('open');
         });
 
-        // ============================================================
-        //  PROCESO DE PEDIDO
-        // ============================================================
         function iniciarProcesoPedido() {
             if (!usuarioActual) {
                 alert('Debes iniciar sesión para realizar un pedido.');
@@ -2682,9 +2658,6 @@
             }
         }
 
-        // ============================================================
-        //  CONFIRMAR PEDIDO FINAL (CON GREEN-API Y GRUPO)
-        // ============================================================
         async function confirmarPedidoFinal() {
             const nombre = document.getElementById('domNombre').value.trim();
             const apellidos = document.getElementById('domApellidos').value.trim();
@@ -2815,7 +2788,6 @@
                     console.error('Error al enviar WhatsApp al grupo:', await response.text());
                 }
 
-                // 🔔 NOTIFICAR AL ADMIN POR PUSH (ONESIGNAL)
                 notificarAdminOneSignal(
                     "🛒 Nueva compra",
                     `${nombreCompleto} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`
@@ -2840,9 +2812,6 @@
 
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
-        // ============================================================
-        //  ENCARGOS
-        // ============================================================
         let encargoProductoId = null;
 
         function abrirModalEncargo(productId) {
@@ -2934,7 +2903,6 @@
                     body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje })
                 });
 
-                // 🔔 NOTIFICAR AL ADMIN POR PUSH (ONESIGNAL)
                 notificarAdminOneSignal(
                     "📦 Nuevo encargo",
                     `${usuarioActual.nombre || usuarioActual.name || 'Cliente'} - ${prod.Nombre} (x${cantidad})`
@@ -2957,9 +2925,6 @@
             if (e.target === this) cerrarEncargoModal();
         });
 
-        // ============================================================
-        //  MANEJO DEL BOTÓN "ATRÁS"
-        // ============================================================
         window.addEventListener('popstate', function(event) {
             if (!event.state || !event.state.productoId) {
                 volverALista();
@@ -2968,9 +2933,6 @@
             }
         });
 
-        // ============================================================
-        //  INICIALIZACIÓN
-        // ============================================================
         async function init() {
             actualizarUIUsuario();
             productos = await obtenerProductos();
@@ -3003,31 +2965,19 @@
         init();
         console.log('🏪 B&B cargada correctamente.');
 
-        // ============================================================
-        //  OCULTAR BOTONES DE DESCARGA DE APK SI ESTAMOS DENTRO DE LA APP
-        // ============================================================
         function estaDentroDeApp() {
             const ua = (navigator.userAgent || '').toLowerCase();
 
-            // 1) Parámetro manual en la URL (el más fiable)
             if (new URLSearchParams(window.location.search).has('app')) return true;
-
-            // 2) Android WebView: contiene "wv"
             if (ua.includes('wv')) return true;
-
-            // 3) iOS WebView: iPhone/iPad sin "safari"
             if ((ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) && !ua.includes('safari')) {
                 return true;
             }
-
-            // 4) Marcas típicas de WebToApp y similares
             const marcasApp = [
                 'webtoapp', 'web2apk', 'median', 'gonative',
                 'cordova', 'capacitor', 'phonegap', 'framework7'
             ];
             if (marcasApp.some(m => ua.includes(m))) return true;
-
-            // 5) Modo standalone (PWA / app instalada)
             if (window.navigator.standalone === true) return true;
             if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
 
@@ -3050,7 +3000,6 @@
         setTimeout(ocultarBotonesDescargaSiEsApp, 500);
     </script>
 
-    <!-- ========== ONESIGNAL PUSH (CLIENTE) ========== -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -3062,9 +3011,6 @@
         console.log("✅ OneSignal listo en la página de cliente.");
       });
 
-      // ============================================================
-      // FUNCIÓN QUE ENVÍA LA NOTIFICACIÓN AL ADMIN
-      // ============================================================
       async function notificarAdminOneSignal(titulo, mensaje) {
         try {
           const resp = await fetch('https://api.onesignal.com/notifications', {
