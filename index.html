@@ -1313,7 +1313,7 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
-                <a href="https://drive.google.com/uc?export=download&id=1mB2dISfKO9AxW2jSA1Ti_GgA2WKj7UKE" class="download-apk-btn" download>
+                <a href="https://drive.google.com/uc?export=download&id=1mB2dISfKO9AxW2jSA1Ti_GgA2WKj7UKE" class="download-apk-btn" id="btnDescargaHeader" download>
                     📲 Descargar APK
                 </a>
                 <div class="account-dropdown" id="accountDropdown">
@@ -1516,8 +1516,8 @@
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
-        <p>
-            <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-footer" download>
+        <p id="footerDescargaParrafo">
+            <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-footer" id="btnDescargaFooter" download>
                 📲 Descarga nuestra APK
             </a>
         </p>
@@ -3002,6 +3002,44 @@
 
         init();
         console.log('🏪 B&B cargada correctamente.');
+
+        // ============================================================
+        //  OCULTAR BOTONES DE DESCARGA DE APK SI ESTAMOS DENTRO DE LA APP
+        // ============================================================
+        function estaDentroDeApp() {
+            const ua = (navigator.userAgent || '').toLowerCase();
+
+            // 1) Android WebView: contiene "wv" en el user agent
+            if (ua.includes('wv')) return true;
+
+            // 2) iOS WebView: iPhone/iPad sin "Safari" en el UA
+            if ((ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) && !ua.includes('safari')) {
+                return true;
+            }
+
+            // 3) WebToApp y similares: modo standalone
+            if (window.navigator.standalone === true) return true;
+
+            // 4) Marca manual: si abres la web con ?app=1, se trata como app
+            if (new URLSearchParams(window.location.search).has('app')) return true;
+
+            return false;
+        }
+
+        function ocultarBotonesDescargaSiEsApp() {
+            if (!estaDentroDeApp()) return;
+
+            const header = document.getElementById('btnDescargaHeader');
+            if (header) header.style.display = 'none';
+
+            const footer = document.getElementById('footerDescargaParrafo');
+            if (footer) footer.style.display = 'none';
+
+            console.log('📱 App detectada: botones de descarga ocultos.');
+        }
+
+        window.addEventListener('load', ocultarBotonesDescargaSiEsApp);
+        setTimeout(ocultarBotonesDescargaSiEsApp, 500);
     </script>
 
     <!-- ========== ONESIGNAL PUSH (CLIENTE) ========== -->
