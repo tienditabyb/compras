@@ -301,7 +301,7 @@
         .btn-whatsapp { background: #25D366; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
         .btn-whatsapp:hover { background: #1da851; }
 
-        /* ===== GRID DE PRODUCTOS (CORREGIDO PARA MÓVIL) ===== */
+        /* ===== GRID DE PRODUCTOS ===== */
         .product-grid { display: grid; grid-auto-rows: 1fr; gap: 12px; padding: 14px; width: 100%; min-width: 0; }
         @media (min-width: 1400px) { .product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
         @media (max-width: 1399px) and (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -509,7 +509,6 @@
                     <a href="#" class="header__logo">B<span>&amp;</span>B <span class="admin-badge">Admin</span></a>
                 </div>
                 <div class="header__user">
-                    <!-- NOTIFICACIONES -->
                     <button class="notif-btn" id="notifBtn" title="Notificaciones">
                         🔔
                         <span class="notif-badge" id="notifBadge">0</span>
@@ -1188,6 +1187,8 @@
             let costoInventario = 0;
             let ventaInventario = 0;
             for (const p of productosCache) {
+                // Los productos de encargo NO cuentan como inventario
+                if (p.Es_Encargo === true) continue;
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
                 const venta = parseFloat(p.Precio_Venta || 0);
@@ -2715,13 +2716,17 @@
                 const venta = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const ganancia = venta - costo;
+                const esEncargo = p.Es_Encargo === true;
 
-                totalCosto += stock * costo;
-                totalVenta += stock * venta;
-                totalGanancia += stock * ganancia;
+                // Los productos de encargo se muestran pero NO suman a los totales
+                if (!esEncargo) {
+                    totalCosto += stock * costo;
+                    totalVenta += stock * venta;
+                    totalGanancia += stock * ganancia;
+                }
 
                 tableData.push([
-                    nombre,
+                    nombre + (esEncargo ? ' (Encargo)' : ''),
                     categoria,
                     codigo,
                     stock,
