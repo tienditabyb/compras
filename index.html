@@ -855,12 +855,21 @@
             .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
-            .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
-            .toolbar__left { justify-content: space-between; width: 100%; }
-            .toolbar__sort { justify-content: flex-start; }
-            .toolbar__left {
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
                 position: relative;
+                z-index: 500;
             }
+            .toolbar__left {
+                justify-content: space-between;
+                width: 100%;
+                position: relative;
+                z-index: 500;
+            }
+            .toolbar__sort { justify-content: flex-start; }
             .toolbar__categories {
                 display: block;
                 position: static;
@@ -875,6 +884,9 @@
                 max-width: 100%;
                 box-sizing: border-box;
                 overflow-x: hidden;
+                z-index: 600;
+                background: #ffffff;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             }
             .categories-dropdown a {
                 white-space: normal;
