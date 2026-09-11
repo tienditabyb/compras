@@ -858,15 +858,23 @@
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
             .toolbar__left { justify-content: space-between; width: 100%; }
             .toolbar__sort { justify-content: flex-start; }
-            .toolbar__categories {
-                display: block;
+            .toolbar__left {
                 position: relative;
             }
+            .toolbar__categories {
+                display: block;
+                position: static;
+            }
             .categories-dropdown {
-                left: auto;
+                position: absolute;
+                top: calc(100% + 6px);
+                left: 0;
                 right: 0;
-                min-width: 200px;
-                max-width: calc(100vw - 24px);
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
             }
             .categories-dropdown a {
                 white-space: normal;
@@ -1318,7 +1326,6 @@
     </style>
 </head>
 <body>
-    <!-- ========== HEADER ========== -->
     <header class="header">
         <div class="header__container">
             <a href="https://tienditabyb.github.io/compras/" class="header__logo">B<span>&amp;</span>B</a>
@@ -1342,13 +1349,11 @@
         </div>
     </header>
 
-    <!-- ========== CARRITO FLOTANTE ========== -->
     <button class="cart-float" id="cartFloatBtn" onclick="abrirCarrito()">
         🛒
         <span class="badge" id="cartFloatBadge">0</span>
     </button>
 
-    <!-- ========== CONTENIDO PRINCIPAL ========== -->
     <div class="main-content" id="mainContent">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar__title">CATEGORÍAS</div>
@@ -1390,7 +1395,6 @@
         </div>
     </div>
 
-    <!-- ========== MODALES ========== -->
     <div class="modal-overlay" id="addToCartModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarAddToCartModal()">✕</button>
@@ -1527,7 +1531,6 @@
         </div>
     </div>
 
-    <!-- ========== FOOTER ========== -->
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
         <p id="footerDescargaParrafo">
