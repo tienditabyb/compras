@@ -333,6 +333,8 @@
         .product-card .stock { font-size: 0.65rem; color: #64748b; }
         .product-card .category { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         .product-card .encargo-label { font-size: 0.6rem; background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
+        .product-card .btn-url-encargo { display: inline-block; font-size: 0.65rem; font-weight: 600; background: #ede9fe; color: #6d28d9; padding: 3px 10px; border-radius: 12px; margin: 4px 0; transition: 0.2s; text-decoration: none; }
+        .product-card .btn-url-encargo:hover { background: #ddd6fe; }
         .product-card .actions { margin-top: auto; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
         .product-card .actions button { padding: 4px 12px; border: none; border-radius: 16px; font-size: 0.65rem; cursor: pointer; font-weight: 600; transition: 0.2s; flex: 0 1 auto; min-width: 0; }
         .product-card .actions .btn-edit { background: #dbeafe; color: #2563eb; }
@@ -786,6 +788,15 @@
                         <input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos
                     </label>
                 </div>
+
+                <div class="form-group" id="urlEncargoGroup" style="display:none; background:#f5f3ff; padding:12px; border-radius:10px; border:1px solid #ddd6fe;">
+                    <label style="color:#6d28d9;">🔗 URL del producto (dónde buscarlo)</label>
+                    <input type="url" id="prodUrlEncargo" placeholder="https://..." />
+                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9;">
+                        Pega aquí el enlace (AliExpress, Amazon, etc.) para saber dónde buscar este producto cuando un cliente lo pida.
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
@@ -1252,6 +1263,7 @@
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
                 const stock = parseInt(p.Stock || 0);
                 const esEncargo = p.Es_Encargo === true;
+                const urlEncargo = (p.URL_Encargo || '').trim();
 
                 let extrasHtml = '';
                 if (fotosExtra.length > 0) {
@@ -1263,6 +1275,10 @@
                     extrasHtml += `</div>`;
                 }
 
+                const urlBtnHtml = (esEncargo && urlEncargo)
+                    ? `<a href="${urlEncargo}" target="_blank" rel="noopener" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver producto</a>`
+                    : '';
+
                 html += `
                     <div class="product-card">
                         <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
@@ -1271,6 +1287,7 @@
                         ${extrasHtml}
                         <h4>${p.Nombre || 'Sin nombre'}</h4>
                         ${esEncargo ? '<div class="encargo-label">📦 Encargo</div>' : ''}
+                        ${urlBtnHtml}
                         <div class="price">$${precioFinal.toFixed(2)}</div>
                         <div class="stock">📦 ${stock} uds</div>
                         <div class="category">${p.Categoria || 'General'}</div>
@@ -1684,6 +1701,11 @@
         async function verDetalleEncargo(id) {
             try {
                 const data = await apiRequest(`Encargos/records/${id}`);
+                const prod = productosCache.find(p => p.id === data.producto_id);
+                const urlEncargo = prod && prod.URL_Encargo ? String(prod.URL_Encargo).trim() : '';
+                const urlHtml = urlEncargo
+                    ? `<a href="${urlEncargo}" target="_blank" rel="noopener" style="color:#6d28d9; font-weight:600;">🔗 Abrir enlace</a>`
+                    : 'No definida';
                 const body = `
                     <div class="detail-row"><span class="label">Producto</span><span class="value">${data.producto_nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
@@ -1691,6 +1713,7 @@
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.usuario_telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.estado || 'Pendiente'}</span></div>
                     <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
+                    <div class="detail-row"><span class="label">🔗 URL del producto</span><span class="value">${urlHtml}</span></div>
                     <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${new Date(data.fecha_solicitud).toLocaleString('es-ES')}</span></div>
                     <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${data.fecha_limite_pago ? new Date(data.fecha_limite_pago).toLocaleString('es-ES') : 'No definida'}</span></div>
                     <div class="detail-row"><span class="label">Última actualización</span><span class="value">${new Date(data.updated).toLocaleString('es-ES')}</span></div>
@@ -1940,7 +1963,7 @@
                         body: JSON.stringify(data)
                     });
 
-                    alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
+                    alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Ventas registrada.');
 
                     await cargarTienda();
                     await cargarProductos();
@@ -2211,6 +2234,18 @@
         }
 
         // ============================================================
+        // MOSTRAR/OCULTAR URL CUANDO MARCAN "ENCARGO"
+        // ============================================================
+        document.getElementById('prodEsEncargo').addEventListener('change', function() {
+            const grupo = document.getElementById('urlEncargoGroup');
+            if (this.checked) {
+                grupo.style.display = 'block';
+            } else {
+                grupo.style.display = 'none';
+            }
+        });
+
+        // ============================================================
         // FUNCIÓN PARA AGREGAR CATEGORÍA
         // ============================================================
         async function agregarCategoria(nombre) {
@@ -2273,6 +2308,10 @@
             document.getElementById('productDeleteBtn').style.display = 'none';
             resetFotosFormulario();
 
+            // Ocultar por defecto el grupo URL Encargo
+            document.getElementById('urlEncargoGroup').style.display = 'none';
+            document.getElementById('prodUrlEncargo').value = '';
+
             const catSelect = document.getElementById('prodCategoria');
             catSelect.innerHTML = '';
             for (const cat of categoriasCache) {
@@ -2295,8 +2334,15 @@
                 document.getElementById('prodOferta').value = producto.Precio_Oferta || '';
                 document.getElementById('prodStock').value = producto.Stock || '';
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
-                document.getElementById('prodEsEncargo').checked = producto.Es_Encargo === true;
+                const esEnc = producto.Es_Encargo === true;
+                document.getElementById('prodEsEncargo').checked = esEnc;
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
+
+                // Si es encargo, mostrar URL y cargar valor
+                if (esEnc) {
+                    document.getElementById('urlEncargoGroup').style.display = 'block';
+                    document.getElementById('prodUrlEncargo').value = producto.URL_Encargo || '';
+                }
 
                 fotosExistentes = obtenerFotosProducto(producto);
                 renderFotosFormulario();
@@ -2310,6 +2356,8 @@
         function cerrarModalProducto() {
             document.getElementById('productModal').classList.remove('active');
             resetFotosFormulario();
+            document.getElementById('urlEncargoGroup').style.display = 'none';
+            document.getElementById('prodUrlEncargo').value = '';
         }
 
         document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
@@ -2330,6 +2378,7 @@
             const stock = document.getElementById('prodStock').value;
             const detalles = document.getElementById('prodDetalles').value.trim();
             const esEncargo = document.getElementById('prodEsEncargo').checked;
+            const urlEncargo = esEncargo ? document.getElementById('prodUrlEncargo').value.trim() : '';
 
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
@@ -2345,7 +2394,8 @@
                 Precio_Oferta: oferta,
                 Stock: stock,
                 Detalles: detalles,
-                Es_Encargo: esEncargo
+                Es_Encargo: esEncargo,
+                URL_Encargo: urlEncargo
             };
 
             try {
