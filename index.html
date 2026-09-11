@@ -1313,7 +1313,7 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
-                <a href="https://drive.google.com/uc?export=download&id=1mB2dISfKO9AxW2jSA1Ti_GgA2WKj7UKE" class="download-apk-btn" id="btnDescargaHeader" download>
+                <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-apk-btn" id="btnDescargaHeader" download>
                     📲 Descargar APK
                 </a>
                 <div class="account-dropdown" id="accountDropdown">
@@ -1517,7 +1517,7 @@
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
         <p id="footerDescargaParrafo">
-            <a href="https://drive.google.com/uc?export=download&id=1cIZ4RWfXKOI2s0vf-dXn56VgrUgXpQar" class="download-footer" id="btnDescargaFooter" download>
+            <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-footer" id="btnDescargaFooter" download>
                 📲 Descarga nuestra APK
             </a>
         </p>
@@ -3009,19 +3009,27 @@
         function estaDentroDeApp() {
             const ua = (navigator.userAgent || '').toLowerCase();
 
-            // 1) Android WebView: contiene "wv" en el user agent
+            // 1) Parámetro manual en la URL (el más fiable)
+            if (new URLSearchParams(window.location.search).has('app')) return true;
+
+            // 2) Android WebView: contiene "wv"
             if (ua.includes('wv')) return true;
 
-            // 2) iOS WebView: iPhone/iPad sin "Safari" en el UA
+            // 3) iOS WebView: iPhone/iPad sin "safari"
             if ((ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) && !ua.includes('safari')) {
                 return true;
             }
 
-            // 3) WebToApp y similares: modo standalone
-            if (window.navigator.standalone === true) return true;
+            // 4) Marcas típicas de WebToApp y similares
+            const marcasApp = [
+                'webtoapp', 'web2apk', 'median', 'gonative',
+                'cordova', 'capacitor', 'phonegap', 'framework7'
+            ];
+            if (marcasApp.some(m => ua.includes(m))) return true;
 
-            // 4) Marca manual: si abres la web con ?app=1, se trata como app
-            if (new URLSearchParams(window.location.search).has('app')) return true;
+            // 5) Modo standalone (PWA / app instalada)
+            if (window.navigator.standalone === true) return true;
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
 
             return false;
         }
