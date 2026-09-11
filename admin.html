@@ -1036,7 +1036,7 @@
         }
 
         // ============================================================
-        // API REQUEST
+        // API REQUEST (CORREGIDO)
         // ============================================================
         async function apiRequest(endpoint, options = {}) {
             const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
@@ -1060,7 +1060,18 @@
                 const err = await resp.json().catch(() => ({}));
                 throw new Error(err.message || `Error ${resp.status}`);
             }
-            return resp.json();
+            // 204 = sin contenido (DELETE exitoso). Devolvemos objeto vacío.
+            if (resp.status === 204) {
+                return {};
+            }
+            // Leer texto y parsear solo si hay contenido
+            const texto = await resp.text();
+            if (!texto) return {};
+            try {
+                return JSON.parse(texto);
+            } catch (e) {
+                return {};
+            }
         }
 
         // ============================================================
