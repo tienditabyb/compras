@@ -856,7 +856,6 @@
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
 
-            /* Permitir que el dropdown salga del toolbar sin recortarse */
             .toolbar,
             .toolbar__left,
             .products-section,
@@ -876,10 +875,24 @@
                 width: 100%;
                 position: relative;
                 z-index: 500;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: nowrap;
+            }
+            .toolbar__left h2 {
+                flex: 1 1 auto;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                margin: 0;
+            }
+            .toolbar__categories {
+                flex: 0 0 auto;
             }
             .toolbar__sort { justify-content: flex-start; }
 
-            /* El dropdown se ancla al botón de categorías y se abre hacia la izquierda */
             .toolbar__categories {
                 display: block;
                 position: relative;
