@@ -768,10 +768,11 @@
                 
                 <div class="form-group">
                     <label>Categoría *</label>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <select id="prodCategoria" required style="flex:1;"></select>
-                        <input type="text" id="nuevaCategoriaInput" placeholder="Nueva categoría" style="flex:1; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <select id="prodCategoria" required style="flex:1; min-width:150px;"></select>
+                        <input type="text" id="nuevaCategoriaInput" placeholder="Nueva categoría" style="flex:1; min-width:120px; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
                         <button type="button" id="agregarCategoriaBtn" class="btn-primary" style="padding:8px 16px; font-size:0.85rem;">Agregar</button>
+                        <button type="button" id="eliminarCategoriaBtn" class="btn-danger" style="padding:8px 16px; font-size:0.85rem;">🗑️ Eliminar</button>
                     </div>
                 </div>
 
@@ -1963,7 +1964,7 @@
                         body: JSON.stringify(data)
                     });
 
-                    alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Ventas registrada.');
+                    alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
 
                     await cargarTienda();
                     await cargarProductos();
@@ -2298,6 +2299,61 @@
         });
 
         // ============================================================
+        // ELIMINAR CATEGORÍA
+        // ============================================================
+        async function eliminarCategoria(nombre) {
+            if (!nombre || nombre.trim() === '') {
+                alert('Selecciona una categoría para eliminar.');
+                return;
+            }
+            const nombreTrim = nombre.trim();
+
+            const productosConCategoria = productosCache.filter(p => (p.Categoria || '') === nombreTrim);
+            const count = productosConCategoria.length;
+
+            let mensaje = `¿Eliminar la categoría "${nombreTrim}"?`;
+            if (count > 0) {
+                mensaje += `\n\n⚠️ Hay ${count} producto(s) usando esta categoría.\nSeguirán mostrándose con esa categoría, pero ya no aparecerá en la lista de categorías.`;
+            }
+            if (!confirm(mensaje)) return;
+
+            try {
+                const data = await apiRequest('Categoria/records?perPage=200');
+                const cat = data.items.find(c => (c.nombre || '').trim().toLowerCase() === nombreTrim.toLowerCase());
+                if (!cat) {
+                    alert('No se encontró la categoría en la base de datos.');
+                    return;
+                }
+                await apiRequest(`Categoria/records/${cat.id}`, { method: 'DELETE' });
+                await cargarCategorias();
+
+                const catSelect = document.getElementById('prodCategoria');
+                catSelect.innerHTML = '';
+                for (const c of categoriasCache) {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    catSelect.appendChild(opt);
+                }
+
+                const invCatSelect = document.getElementById('invCategory');
+                invCatSelect.innerHTML = '<option value="Todas">Todas las categorías</option>';
+                for (const c of categoriasCache) {
+                    invCatSelect.innerHTML += `<option value="${c}">${c}</option>`;
+                }
+
+                alert(`✅ Categoría "${nombreTrim}" eliminada.`);
+            } catch (e) {
+                alert('Error al eliminar categoría: ' + e.message);
+            }
+        }
+
+        document.getElementById('eliminarCategoriaBtn').addEventListener('click', function() {
+            const catSelect = document.getElementById('prodCategoria');
+            eliminarCategoria(catSelect.value);
+        });
+
+        // ============================================================
         // CRUD PRODUCTOS
         // ============================================================
         function abrirModalProducto(producto = null) {
@@ -2308,7 +2364,6 @@
             document.getElementById('productDeleteBtn').style.display = 'none';
             resetFotosFormulario();
 
-            // Ocultar por defecto el grupo URL Encargo
             document.getElementById('urlEncargoGroup').style.display = 'none';
             document.getElementById('prodUrlEncargo').value = '';
 
@@ -2338,7 +2393,6 @@
                 document.getElementById('prodEsEncargo').checked = esEnc;
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
 
-                // Si es encargo, mostrar URL y cargar valor
                 if (esEnc) {
                     document.getElementById('urlEncargoGroup').style.display = 'block';
                     document.getElementById('prodUrlEncargo').value = producto.URL_Encargo || '';
@@ -2768,7 +2822,6 @@
                 const ganancia = venta - costo;
                 const esEncargo = p.Es_Encargo === true;
 
-                // Los productos de encargo se muestran pero NO suman a los totales
                 if (!esEncargo) {
                     totalCosto += stock * costo;
                     totalVenta += stock * venta;
