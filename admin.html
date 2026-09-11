@@ -262,7 +262,7 @@
         .sidebar .close-sidebar { display: none; }
         @media (max-width: 992px) { .sidebar .close-sidebar { display: block; } }
 
-        /* ===== RESTO DE ESTILOS (idénticos) ===== */
+        /* ===== RESTO DE ESTILOS ===== */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
         .stat-card .number { font-size: 2rem; font-weight: 700; color: #2980b9; }
@@ -277,7 +277,7 @@
         .filters .btn-clear:hover { background: #64748b; }
         .filters .btn-success { background: #059669; }
         .filters .btn-success:hover { background: #047857; }
-        .list-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 2px; }
+        .list-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 2px; max-width: 100%; }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px; }
         .list-item:hover { background: #f8fafc; }
         .list-item:last-child { border-bottom: none; }
@@ -300,29 +300,46 @@
         .estado-select:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-whatsapp { background: #25D366; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
         .btn-whatsapp:hover { background: #1da851; }
-        .product-grid { display: grid; grid-auto-rows: 1fr; gap: 12px; padding: 14px; }
-        @media (min-width: 1400px) { .product-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 1399px) and (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 1023px) and (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; } }
-        @media (max-width: 767px) and (min-width: 481px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; } }
-        @media (max-width: 480px) { .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; } }
-        .product-card { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: 0.3s; text-align: center; border: 1px solid #f1f5f9; display: flex; flex-direction: column; height: 100%; }
+
+        /* ===== GRID DE PRODUCTOS (CORREGIDO PARA MÓVIL) ===== */
+        .product-grid { display: grid; grid-auto-rows: 1fr; gap: 12px; padding: 14px; width: 100%; min-width: 0; }
+        @media (min-width: 1400px) { .product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+        @media (max-width: 1399px) and (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        @media (max-width: 1023px) and (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px; } }
+        @media (max-width: 767px) and (min-width: 481px) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 10px; } }
+        @media (max-width: 480px) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px; } }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: 0.3s;
+            text-align: center;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+            overflow: hidden;
+        }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
-        .product-card .foto-principal { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #f1f5f9; border-radius: 6px; cursor: pointer; margin-bottom: 6px; }
+        .product-card .foto-principal { width: 100%; max-width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #f1f5f9; border-radius: 6px; cursor: pointer; margin-bottom: 6px; }
         .product-card .fotos-extra { display: flex; gap: 4px; margin-top: 4px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
-        .product-card .fotos-extra img { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; background: #f1f5f9; cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s; }
+        .product-card .fotos-extra img { width: 28px; height: 28px; max-width: 100%; object-fit: cover; border-radius: 4px; background: #f1f5f9; cursor: pointer; border: 1px solid #e2e8f0; transition: 0.2s; }
         .product-card .fotos-extra img:hover { transform: scale(1.1); border-color: #2980b9; }
-        .product-card h4 { font-size: 0.8rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; min-height: 2.2em; }
-        .product-card .price { font-size: 0.9rem; font-weight: 700; color: #2980b9; }
+        .product-card h4 { font-size: 0.8rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; min-height: 2.2em; overflow-wrap: anywhere; word-break: break-word; }
+        .product-card .price { font-size: 0.9rem; font-weight: 700; color: #2980b9; overflow-wrap: anywhere; }
         .product-card .stock { font-size: 0.65rem; color: #64748b; }
-        .product-card .category { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-card .category { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         .product-card .encargo-label { font-size: 0.6rem; background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
         .product-card .actions { margin-top: auto; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        .product-card .actions button { padding: 4px 12px; border: none; border-radius: 16px; font-size: 0.65rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .product-card .actions button { padding: 4px 12px; border: none; border-radius: 16px; font-size: 0.65rem; cursor: pointer; font-weight: 600; transition: 0.2s; flex: 0 1 auto; min-width: 0; }
         .product-card .actions .btn-edit { background: #dbeafe; color: #2563eb; }
         .product-card .actions .btn-edit:hover { background: #bfdbfe; }
         .product-card .actions .btn-delete { background: #fee2e2; color: #dc2626; }
         .product-card .actions .btn-delete:hover { background: #fecaca; }
+
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 20px; padding: 30px; max-width: 650px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
@@ -766,7 +783,6 @@
             const nuevas = [];
             const leidas = cargarNotificacionesLeidas();
 
-            // Domicilios nuevos
             for (const d of domiciliosCache) {
                 if (d.Estado === 'Pendiente' && !d.fecha_gestion) {
                     const id = `dom-${d.id}`;
@@ -782,7 +798,6 @@
                 }
             }
 
-            // Pedidos tienda nuevos
             for (const p of tiendaCache) {
                 if (p.Estado === 'Pendiente' && !p.fecha_gestion) {
                     const id = `tienda-${p.id}`;
@@ -798,7 +813,6 @@
                 }
             }
 
-            // Encargos nuevos
             for (const e of encargosCache) {
                 if (e.estado === 'Pendiente' && !e.fecha_limite_pago) {
                     const id = `enc-${e.id}`;
@@ -814,7 +828,6 @@
                 }
             }
 
-            // Ordenar por fecha (más reciente primero)
             nuevas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             notificaciones = nuevas;
             actualizarBadge();
@@ -855,34 +868,28 @@
             }
             list.innerHTML = html;
 
-            // Click en notificación: marcar como leída y cambiar de pestaña
             list.querySelectorAll('.notif-item').forEach(el => {
                 el.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const tab = this.dataset.tab;
-                    // Marcar como leída
                     const leidas = cargarNotificacionesLeidas();
                     if (!leidas.includes(id)) {
                         leidas.push(id);
                         guardarNotificacionesLeidas(leidas);
                     }
-                    // Eliminar de la lista local
                     notificaciones = notificaciones.filter(n => n.id !== id);
                     actualizarBadge();
                     renderNotificaciones();
-                    // Cambiar de pestaña
                     document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
                     document.querySelector(`.sidebar__nav a[data-tab="${tab}"]`)?.classList.add('active');
                     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
                     document.getElementById(`tab-${tab}`)?.classList.add('active');
-                    // Cerrar dropdown
                     document.getElementById('notifDropdown').classList.remove('open');
                 });
             });
         }
 
         function actualizarNotificaciones() {
-            // Recargar datos si es necesario (ya se llamará desde los cargadores)
             generarNotificaciones();
         }
 
@@ -981,7 +988,7 @@
         }
 
         // ============================================================
-        // CARGAR DATOS (con actualización de notificaciones)
+        // CARGAR DATOS
         // ============================================================
         async function cargarCategorias() {
             try {
@@ -1070,7 +1077,7 @@
         }
 
         // ============================================================
-        // OBTENER FOTOS DE UN PRODUCTO (ARRAY SEGURO)
+        // OBTENER FOTOS DE UN PRODUCTO
         // ============================================================
         function obtenerFotosProducto(prod) {
             let fotos = [];
@@ -1104,7 +1111,7 @@
         }
 
         // ============================================================
-        // RENDERIZAR funciones (igual que antes, solo se añade actualización de notificaciones)
+        // RENDERIZAR
         // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
@@ -1240,9 +1247,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================================
-        // RENDER DOMICILIOS (con fecha_gestion)
-        // ============================================================
         function renderDomicilios(domicilios) {
             const container = document.getElementById('domiciliosContainer');
             if (domicilios.length === 0) {
@@ -1303,9 +1307,6 @@
             actualizarNotificaciones();
         }
 
-        // ============================================================
-        // RENDER TIENDA (con fecha_gestion)
-        // ============================================================
         function renderTienda(pedidos) {
             const container = document.getElementById('tiendaContainer');
             if (pedidos.length === 0) {
@@ -1365,9 +1366,6 @@
             actualizarNotificaciones();
         }
 
-        // ============================================================
-        // RENDER ENCARGOS
-        // ============================================================
         function renderEncargos(encargos) {
             const container = document.getElementById('encargosContainer');
             if (encargos.length === 0) {
@@ -1655,7 +1653,7 @@
         }
 
         // ============================================================
-        // FUNCIONES PARA DOMICILIOS Y TIENDA (con fecha_gestion)
+        // FUNCIONES PARA DOMICILIOS Y TIENDA
         // ============================================================
         async function cambiarEstadoDomicilio(id, nuevoEstado) {
             try {
@@ -2155,7 +2153,6 @@
                 return;
             }
             const nombreTrim = nombre.trim();
-            // Verificar si ya existe
             if (categoriasCache.some(c => c.toLowerCase() === nombreTrim.toLowerCase())) {
                 alert('Esta categoría ya existe.');
                 return;
@@ -2165,9 +2162,7 @@
                     method: 'POST',
                     body: JSON.stringify({ nombre: nombreTrim })
                 });
-                // Recargar categorías y actualizar selects
                 await cargarCategorias();
-                // Actualizar select de categorías en el modal
                 const catSelect = document.getElementById('prodCategoria');
                 catSelect.innerHTML = '';
                 for (const cat of categoriasCache) {
@@ -2176,15 +2171,12 @@
                     opt.textContent = cat;
                     catSelect.appendChild(opt);
                 }
-                // Seleccionar la nueva categoría
                 catSelect.value = nombreTrim;
-                // También actualizar el filtro de inventario
                 const invCatSelect = document.getElementById('invCategory');
                 invCatSelect.innerHTML = '<option value="Todas">Todas las categorías</option>';
                 for (const cat of categoriasCache) {
                     invCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
                 }
-                // Limpiar campo de nueva categoría
                 document.getElementById('nuevaCategoriaInput').value = '';
                 alert(`✅ Categoría "${nombreTrim}" agregada correctamente.`);
             } catch (e) {
@@ -2197,7 +2189,6 @@
             agregarCategoria(input.value);
         });
 
-        // También permitir agregar con Enter en el campo
         document.getElementById('nuevaCategoriaInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -2615,8 +2606,6 @@
             e.stopPropagation();
             const dropdown = document.getElementById('notifDropdown');
             dropdown.classList.toggle('open');
-            // Si se abre, marcamos todas como leídas (opcional)
-            // En este diseño, se marcan al hacer clic en cada notificación.
         });
 
         document.addEventListener('click', function(e) {
@@ -2628,7 +2617,7 @@
         });
 
         // ============================================================
-        // EXPORTAR INVENTARIO A PDF (sin emojis)
+        // EXPORTAR INVENTARIO A PDF
         // ============================================================
         function exportarInventarioPDF() {
             if (productosCache.length === 0) {
@@ -2736,7 +2725,7 @@
         document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
 
         // ============================================================
-        // EXPORTAR REPORTES A PDF (sin emojis)
+        // EXPORTAR REPORTES A PDF
         // ============================================================
         function exportarReportesPDF() {
             const ventas = ventasFiltradasReporte;
@@ -2830,7 +2819,7 @@
         document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
 
         // ============================================================
-        // REPORTES (renderizado con guardado de filtrados)
+        // REPORTES
         // ============================================================
         function renderReportes(ventas) {
             ventasFiltradasReporte = ventas;
@@ -2880,7 +2869,7 @@
         }
 
         // ============================================================
-        // FILTROS (con nuevos estados)
+        // FILTROS
         // ============================================================
         function aplicarFiltrosVentas() {
             let filtradas = [...ventasCache];
@@ -2957,7 +2946,6 @@
                 renderEncargos(encargosCache);
                 renderReportes(ventasCache);
 
-                // Actualizar notificaciones inicial
                 actualizarNotificaciones();
 
                 document.querySelectorAll('.sidebar__nav a').forEach(link => {
@@ -3016,7 +3004,6 @@
                     renderReportes(ventasCache);
                 });
 
-                // Actualizar notificaciones cada 30 segundos
                 setInterval(() => {
                     cargarDomicilios();
                     cargarTienda();
@@ -3071,6 +3058,21 @@
             document.getElementById('loginContainer').style.display = 'flex';
             document.getElementById('appContainer').style.display = 'none';
         }
+    </script>
+
+    <!-- ========== ONESIGNAL PUSH (ADMIN) ========== -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e939f58c-3df0-48d6-a86b-ee93da88a9c1",
+          allowLocalhostAsSecureOrigin: true
+        });
+
+        await OneSignal.login("admin_tiendita_byb");
+        console.log("✅ OneSignal listo. Admin identificado.");
+      });
     </script>
 </body>
 </html>
