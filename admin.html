@@ -3072,21 +3072,5 @@
             document.getElementById('appContainer').style.display = 'none';
         }
     </script>
-
-    <!-- ========== ONESIGNAL PUSH (ADMIN) ========== -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "e939f58c-3df0-48d6-a86b-ee93da88a9c1",
-          allowLocalhostAsSecureOrigin: true
-        });
-
-        // Identificarse como el administrador único
-        await OneSignal.login("admin_tiendita_byb");
-        console.log("✅ OneSignal listo. Admin identificado.");
-      });
-    </script>
 </body>
 </html>
