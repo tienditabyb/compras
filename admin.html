@@ -578,6 +578,7 @@
     <script>
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const ADMIN_EMAIL = "byb@gmail.com";
+        const TIENDA_URL = "https://tienditabyb.github.io/compras/";
         let authToken = null;
         let userData = null;
         let productosCache = [];
@@ -797,6 +798,18 @@
             return [];
         }
 
+        function renderProductosPedidoConLinks(productosPedido) {
+            const items = parsearProductosPedido(productosPedido);
+            if (items.length === 0) return '';
+            let html = '<div class="sub" style="margin-top:6px;"><strong>🛍️ Productos:</strong></div>';
+            items.forEach(item => {
+                const link = `${TIENDA_URL}?id=${item.id}`;
+                const subtotal = (parseFloat(item.precio || 0) * (item.cantidad || 1)).toFixed(2);
+                html += `<div class="sub" style="padding-left:12px;">• <a href="${link}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">${item.nombre || 'Producto'}</a> x${item.cantidad || 1} - $${subtotal}</div>`;
+            });
+            return html;
+        }
+
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
             const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
@@ -807,7 +820,6 @@
             let costoInventario = 0;
             let ventaInventario = 0;
             for (const p of productosCache) {
-                // 🔥 Excluir productos de Encargo Y de Proveedor
                 if (p.Es_Encargo === true || p.Es_Proveedor === true) continue;
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
@@ -855,7 +867,6 @@
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
                 const fotosExtra = fotos.slice(1);
                 const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
-
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
@@ -874,18 +885,11 @@
                     });
                     extrasHtml += `</div>`;
                 }
-
                 const urlBtnHtml = (esEncargo && urlEncargo)
                     ? `<a href="${urlEncargo}" target="_blank" rel="noopener" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver producto</a>`
                     : '';
-
-                const proveedorLabelHtml = esProveedor
-                    ? `<div class="proveedor-label">🏭 Proveedor</div>`
-                    : '';
-
-                const proveedorNombreHtml = (esProveedor && proveedor)
-                    ? `<div class="proveedor">${proveedor}</div>`
-                    : '';
+                const proveedorLabelHtml = esProveedor ? `<div class="proveedor-label">🏭 Proveedor</div>` : '';
+                const proveedorNombreHtml = (esProveedor && proveedor) ? `<div class="proveedor">${proveedor}</div>` : '';
 
                 html += `
                     <div class="product-card">
@@ -919,7 +923,7 @@
             for (const v of ventas) {
                 const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
-                const icono = tipo === 'Domicilio' ? '🛵' : (tipo === 'Tienda' ? '🏪' : '🏪');
+                const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
                 const ganancia = calcularGananciaVenta(v);
                 html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fecha} • ${icono} ${tipo}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="small">Ganancia: $${ganancia.toFixed(2)}</div></div></div>`;
             }
@@ -947,7 +951,24 @@
                     <option value="En camino" ${estadoMostrado === 'En camino' ? 'selected' : ''}>En camino</option>
                     <option value="Entregado" ${estadoMostrado === 'Entregado' ? 'selected' : ''}>Entregado</option>
                 `;
-                html += `<div class="list-item" id="dom-item-${d.id}"><div class="left"><div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div><div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div><div class="sub">📞 ${telefono || 'Sin teléfono'}</div></div><div class="center"><span class="estado-badge ${badgeClass}">${estadoMostrado}</span><select class="estado-select" id="estado-select-${d.id}" onchange="cambiarEstadoDomicilio('${d.id}', this.value)" ${isEntregado ? 'disabled' : ''}>${opciones}</select><button class="btn-whatsapp" onclick="enviarWhatsAppDom('${d.id}')">💬 Notificar</button></div><div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span></div></div>`;
+                html += `
+                    <div class="list-item" id="dom-item-${d.id}">
+                        <div class="left">
+                            <div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div>
+                            <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div>
+                            <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
+                            ${renderProductosPedidoConLinks(d.productos_pedido)}
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
+                            <select class="estado-select" id="estado-select-${d.id}" onchange="cambiarEstadoDomicilio('${d.id}', this.value)" ${isEntregado ? 'disabled' : ''}>${opciones}</select>
+                            <button class="btn-whatsapp" onclick="enviarWhatsAppDom('${d.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
             }
             container.innerHTML = html;
             actualizarNotificaciones();
@@ -975,7 +996,24 @@
                     <option value="Vendido" ${estadoMostrado === 'Vendido' ? 'selected' : ''}>Vendido</option>
                     <option value="Cancelado" ${estadoMostrado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                 `;
-                html += `<div class="list-item" id="tienda-item-${p.id}"><div class="left"><div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div><div class="sub">📞 ${telefono} • ${fecha}</div><div class="sub">⏳ Límite: ${fechaLimite}</div></div><div class="center"><span class="estado-badge ${badgeClass}">${estadoMostrado}</span><select class="estado-select" id="tienda-select-${p.id}" onchange="cambiarEstadoTienda('${p.id}', this.value)" ${isVendido ? 'disabled' : ''}>${opciones}</select><button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬 Notificar</button></div><div class="right" onclick="verDetalleTienda('${p.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span></div></div>`;
+                html += `
+                    <div class="list-item" id="tienda-item-${p.id}">
+                        <div class="left">
+                            <div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div>
+                            <div class="sub">📞 ${telefono} • ${fecha}</div>
+                            <div class="sub">⏳ Límite: ${fechaLimite}</div>
+                            ${renderProductosPedidoConLinks(p.productos_pedido)}
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
+                            <select class="estado-select" id="tienda-select-${p.id}" onchange="cambiarEstadoTienda('${p.id}', this.value)" ${isVendido ? 'disabled' : ''}>${opciones}</select>
+                            <button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleTienda('${p.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
             }
             container.innerHTML = html;
             actualizarNotificaciones();
@@ -997,12 +1035,14 @@
                 else if (estadoMostrado === 'En el local TienditaB&B lista para la entrega') badgeClass = 'estado-local';
                 else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
                 else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
+
                 const fecha = e.fecha_solicitud ? new Date(e.fecha_solicitud).toLocaleString('es-ES') : 'Sin fecha';
                 const telefono = e.usuario_telefono || 'Sin teléfono';
                 const nombreCliente = e.usuario_nombre || 'Cliente';
                 const producto = e.producto_nombre || 'Producto';
                 const cantidad = e.cantidad || 1;
                 const comentario = e.comentario || '';
+
                 let fechaLimiteHtml = '';
                 if (e.fecha_limite_pago) {
                     const fechaLimite = new Date(e.fecha_limite_pago);
@@ -1033,7 +1073,32 @@
                     <option value="Entregado" ${estadoMostrado === 'Entregado' ? 'selected' : ''}>Entregado</option>
                     <option value="Cancelado" ${estadoMostrado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                 `;
-                html += `<div class="list-item" id="encargo-item-${e.id}"><div class="left"><div class="title">📦 ${producto} (x${cantidad})</div><div class="sub">👤 ${nombreCliente} • 📞 ${telefono}</div><div class="sub">📅 ${fecha}</div>${fechaLimiteHtml}${comentario ? `<div class="sub">💬 ${comentario}</div>` : ''}${tiempoHtml}</div><div class="center"><span class="estado-badge ${badgeClass}">${estadoMostrado}</span><select class="estado-select" id="encargo-select-${e.id}" onchange="cambiarEstadoEncargo('${e.id}', this.value)" ${estado === 'Entregado' || estado === 'Cancelado' ? 'disabled' : ''}>${opciones}</select><button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬 Notificar</button></div><div class="right" onclick="verDetalleEncargo('${e.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span></div></div>`;
+
+                const linkProducto = e.producto_id
+                    ? `<div class="sub">🔗 <a href="${TIENDA_URL}?id=${e.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">Ver producto</a></div>`
+                    : '';
+
+                html += `
+                    <div class="list-item" id="encargo-item-${e.id}">
+                        <div class="left">
+                            <div class="title">📦 ${producto} (x${cantidad})</div>
+                            <div class="sub">👤 ${nombreCliente} • 📞 ${telefono}</div>
+                            <div class="sub">📅 ${fecha}</div>
+                            ${linkProducto}
+                            ${fechaLimiteHtml}
+                            ${comentario ? `<div class="sub">💬 ${comentario}</div>` : ''}
+                            ${tiempoHtml}
+                        </div>
+                        <div class="center">
+                            <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
+                            <select class="estado-select" id="encargo-select-${e.id}" onchange="cambiarEstadoEncargo('${e.id}', this.value)" ${estado === 'Entregado' || estado === 'Cancelado' ? 'disabled' : ''}>${opciones}</select>
+                            <button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬 Notificar</button>
+                        </div>
+                        <div class="right" onclick="verDetalleEncargo('${e.id}')" style="cursor:pointer;">
+                            <span style="font-size:0.8rem; color:#64748b;">Ver detalle →</span>
+                        </div>
+                    </div>
+                `;
             }
             container.innerHTML = html;
             actualizarNotificaciones();
@@ -1110,6 +1175,7 @@
                 const prod = productosCache.find(p => p.id === data.producto_id);
                 const urlEncargo = prod && prod.URL_Encargo ? String(prod.URL_Encargo).trim() : '';
                 const urlHtml = urlEncargo ? `<a href="${urlEncargo}" target="_blank" rel="noopener" style="color:#6d28d9; font-weight:600;">🔗 Abrir enlace</a>` : 'No definida';
+                const linkProducto = data.producto_id ? `<a href="${TIENDA_URL}?id=${data.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600;">🔗 Ver en tienda</a>` : 'No definido';
                 const body = `
                     <div class="detail-row"><span class="label">Producto</span><span class="value">${data.producto_nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
@@ -1117,6 +1183,7 @@
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.usuario_telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.estado || 'Pendiente'}</span></div>
                     <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
+                    <div class="detail-row"><span class="label">🔗 Ver producto en tienda</span><span class="value">${linkProducto}</span></div>
                     <div class="detail-row"><span class="label">🔗 URL del producto</span><span class="value">${urlHtml}</span></div>
                     <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${new Date(data.fecha_solicitud).toLocaleString('es-ES')}</span></div>
                     <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${data.fecha_limite_pago ? new Date(data.fecha_limite_pago).toLocaleString('es-ES') : 'No definida'}</span></div>
@@ -1131,9 +1198,8 @@
             const estado = document.getElementById('encFiltroEstado').value;
             let filtrados = [...encargosCache];
             if (estado !== 'Todos') {
-                if (estado === 'Nuevo Encargo') {
-                    filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === 'Pendiente' && !e.fecha_limite_pago);
-                } else filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
+                if (estado === 'Nuevo Encargo') filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === 'Pendiente' && !e.fecha_limite_pago);
+                else filtrados = filtrados.filter(e => (e.estado || 'Pendiente') === estado);
             }
             renderEncargos(filtrados);
         }
@@ -1170,15 +1236,10 @@
                     const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
                     const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
                     const productosIds = productosPedido.map(p => p.id).join(',');
-                    await apiRequest('Ventas/records', {
-                        method: 'POST',
-                        body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null })
-                    });
+                    await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null }) });
                     await apiRequest(`Domicilios/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
-                    await cargarDomicilios();
-                    await cargarProductos();
-                    await cargarVentas();
+                    await cargarDomicilios(); await cargarProductos(); await cargarVentas();
                     renderDomicilios(domiciliosCache);
                     renderDashboard(ventasCache, domiciliosCache);
                     enviarWhatsAppDom(id);
@@ -1247,15 +1308,10 @@
                     const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
                     const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
                     const productosIds = productosPedido.map(p => p.id).join(',');
-                    await apiRequest('Ventas/records', {
-                        method: 'POST',
-                        body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Tienda', usuario_id: pedidoActual.usuario_id || null })
-                    });
+                    await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Tienda', usuario_id: pedidoActual.usuario_id || null }) });
                     await apiRequest(`PedidosTienda/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
                     alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
-                    await cargarTienda();
-                    await cargarProductos();
-                    await cargarVentas();
+                    await cargarTienda(); await cargarProductos(); await cargarVentas();
                     renderTienda(tiendaCache);
                     renderDashboard(ventasCache, domiciliosCache);
                     enviarWhatsAppTienda(id);
@@ -1331,6 +1387,15 @@
             try {
                 const data = await apiRequest(`Domicilios/records/${id}`);
                 const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
+                const productosPedido = parsearProductosPedido(data.productos_pedido);
+                let productosHtml = 'Sin productos';
+                if (productosPedido.length > 0) {
+                    productosHtml = '<ul style="padding-left:18px;">';
+                    productosPedido.forEach(p => {
+                        productosHtml += `<li><a href="${TIENDA_URL}?id=${p.id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">${p.nombre || 'Producto'}</a> x${p.cantidad || 1} - $${(parseFloat(p.precio || 0) * (p.cantidad || 1)).toFixed(2)}</li>`;
+                    });
+                    productosHtml += '</ul>';
+                }
                 const body = `
                     <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
                     <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.Cliente_Nombre || 'Sin nombre'}</span></div>
@@ -1338,6 +1403,7 @@
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.Telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.Estado || 'Pendiente'}</span></div>
                     <div class="detail-row"><span class="label">Detalles</span><span class="value">${data.Detalles || 'Sin detalles'}</span></div>
+                    <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label" style="margin-bottom:4px;">🛍️ Productos</span><span class="value" style="text-align:left;">${productosHtml}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1353,8 +1419,10 @@
                 const fechaLimite = data.fecha_limite ? new Date(data.fecha_limite).toLocaleString('es-ES') : 'No definida';
                 let productosHtml = 'Sin productos';
                 if (productos.length > 0) {
-                    productosHtml = '<ul>';
-                    productos.forEach(p => productosHtml += `<li>${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}</li>`);
+                    productosHtml = '<ul style="padding-left:18px;">';
+                    productos.forEach(p => {
+                        productosHtml += `<li><a href="${TIENDA_URL}?id=${p.id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">${p.nombre || 'Producto'}</a> x${p.cantidad || 1} - $${(parseFloat(p.precio || 0) * (p.cantidad || 1)).toFixed(2)}</li>`;
+                    });
                     productosHtml += '</ul>';
                 }
                 const body = `
@@ -1362,7 +1430,7 @@
                     <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.Cliente_Nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.Telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.Estado || 'Pendiente'}</span></div>
-                    <div class="detail-row"><span class="label">Productos</span><span class="value">${productosHtml}</span></div>
+                    <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label" style="margin-bottom:4px;">🛍️ Productos</span><span class="value" style="text-align:left;">${productosHtml}</span></div>
                     <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(total).toFixed(2)}</span></div>
                     <div class="detail-row"><span class="label">Fecha límite</span><span class="value">${fechaLimite}</span></div>
                 `;
@@ -1432,7 +1500,6 @@
         document.getElementById('prodEsEncargo').addEventListener('change', function() {
             document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none';
         });
-
         document.getElementById('prodEsProveedor').addEventListener('change', function() {
             document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none';
         });
@@ -1516,7 +1583,6 @@
                 opt.textContent = cat;
                 catSelect.appendChild(opt);
             }
-
             if (producto) {
                 document.getElementById('productModalTitle').textContent = '✏️ Editar Producto';
                 document.getElementById('productId').value = producto.id;
@@ -1532,19 +1598,16 @@
                 document.getElementById('prodDetalles').value = producto.Detalles || '';
                 document.getElementById('prodEsEncargo').checked = producto.Es_Encargo === true;
                 document.getElementById('productDeleteBtn').style.display = 'inline-block';
-
                 if (producto.Es_Encargo === true) {
                     document.getElementById('urlEncargoGroup').style.display = 'block';
                     document.getElementById('prodUrlEncargo').value = producto.URL_Encargo || '';
                 }
-
                 const esProv = producto.Es_Proveedor === true;
                 document.getElementById('prodEsProveedor').checked = esProv;
                 if (esProv) {
                     document.getElementById('proveedorGroup').style.display = 'block';
                     document.getElementById('prodProveedor').value = producto.Proveedor || '';
                 }
-
                 fotosExistentes = obtenerFotosProducto(producto);
                 renderFotosFormulario();
             } else {
@@ -1554,7 +1617,6 @@
             }
             modal.classList.add('active');
         }
-
         function cerrarModalProducto() {
             document.getElementById('productModal').classList.remove('active');
             resetFotosFormulario();
@@ -1563,7 +1625,6 @@
             document.getElementById('proveedorGroup').style.display = 'none';
             document.getElementById('prodProveedor').value = '';
         }
-
         document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
         document.getElementById('productCancelBtn').addEventListener('click', cerrarModalProducto);
         document.getElementById('productModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) cerrarModalProducto(); });
@@ -1583,38 +1644,23 @@
             const urlEncargo = esEncargo ? document.getElementById('prodUrlEncargo').value.trim() : '';
             const esProveedor = document.getElementById('prodEsProveedor').checked;
             const proveedor = esProveedor ? document.getElementById('prodProveedor').value.trim() : '';
-
             if (!nombre || !categoria || !costo || !venta || stock === '') {
                 alert('Por favor completa todos los campos obligatorios.');
                 return;
             }
-
             const data = {
-                Nombre: nombre,
-                Categoria: categoria,
-                Codigo_de_Barras: codigo,
-                Precio_Costo: costo,
-                Precio_Venta: venta,
-                Precio_Oferta: oferta,
-                Stock: stock,
-                Detalles: detalles,
-                Es_Encargo: esEncargo,
-                URL_Encargo: urlEncargo,
-                Es_Proveedor: esProveedor,
-                Proveedor: proveedor
+                Nombre: nombre, Categoria: categoria, Codigo_de_Barras: codigo,
+                Precio_Costo: costo, Precio_Venta: venta, Precio_Oferta: oferta,
+                Stock: stock, Detalles: detalles, Es_Encargo: esEncargo, URL_Encargo: urlEncargo,
+                Es_Proveedor: esProveedor, Proveedor: proveedor
             };
-
             try {
                 const formData = new FormData();
                 for (const key in data) formData.append(key, data[key]);
                 fotosExistentes.forEach(f => formData.append('Fotos', f));
                 fotosNuevas.forEach(file => formData.append('Fotos', file));
-
-                if (id) {
-                    await apiRequest(`productos/records/${id}`, { method: 'PATCH', body: formData, headers: {} });
-                } else {
-                    await apiRequest('productos/records', { method: 'POST', body: formData, headers: {} });
-                }
+                if (id) await apiRequest(`productos/records/${id}`, { method: 'PATCH', body: formData, headers: {} });
+                else await apiRequest('productos/records', { method: 'POST', body: formData, headers: {} });
                 alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
                 cerrarModalProducto();
                 await cargarProductos();
@@ -1633,26 +1679,22 @@
                 renderDashboard(ventasCache, domiciliosCache);
             } catch (e) { alert('Error al eliminar: ' + e.message); }
         }
-
         function editarProducto(id) {
             const producto = productosCache.find(p => p.id === id);
             if (producto) abrirModalProducto(producto);
             else alert('Producto no encontrado.');
         }
-
         document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-
         function toggleMenu() { sidebar.classList.toggle('open'); overlay.classList.toggle('active'); }
         function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
         menuToggle.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', closeMenu);
         closeSidebarBtn.addEventListener('click', closeMenu);
-
         document.querySelectorAll('.sidebar__nav a').forEach(link => {
             link.addEventListener('click', () => { if (window.innerWidth <= 992) closeMenu(); });
         });
@@ -1684,7 +1726,6 @@
                 });
             });
         }
-
         function agregarDesdeBoton() {
             const busqueda = document.getElementById('cajaBusqueda');
             const selectedId = busqueda.dataset.selectedId;
@@ -1710,9 +1751,7 @@
             busqueda.dataset.selectedStock = '';
             document.getElementById('cajaSugerencias').style.display = 'none';
         }
-
         function eliminarItemCarrito(index) { carrito.splice(index, 1); renderizarCarrito(); }
-
         function renderizarCarrito() {
             const container = document.getElementById('cajaCarrito');
             if (carrito.length === 0) {
@@ -1730,16 +1769,12 @@
             container.innerHTML = html;
             document.getElementById('cajaTotal').textContent = `Total: $${total.toFixed(2)}`;
         }
-
         async function registrarVentaManual() {
             if (carrito.length === 0) { alert('Agrega al menos un producto al carrito.'); return; }
             for (const item of carrito) {
                 const prod = productosCache.find(p => p.id === item.id);
                 if (!prod) { alert(`El producto ${item.nombre} ya no existe.`); return; }
-                if (item.cantidad > parseInt(prod.Stock || 0)) {
-                    alert(`Stock insuficiente para ${item.nombre}.`);
-                    return;
-                }
+                if (item.cantidad > parseInt(prod.Stock || 0)) { alert(`Stock insuficiente para ${item.nombre}.`); return; }
             }
             const nombreCliente = document.getElementById('cajaCliente').value.trim();
             const telefono = document.getElementById('cajaTelefono').value.trim();
@@ -1758,10 +1793,7 @@
                 const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad}`).join(', ');
                 const productosIds = carrito.map(item => item.id).join(',');
                 const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-                await apiRequest('Ventas/records', {
-                    method: 'POST',
-                    body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Local', usuario_id: userData ? userData.id : null, cliente: clienteStr })
-                });
+                await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Local', usuario_id: userData ? userData.id : null, cliente: clienteStr }) });
                 alert('✅ Venta registrada correctamente.\n✅ Stock actualizado.');
                 carrito = [];
                 renderizarCarrito();
@@ -1774,7 +1806,6 @@
                 renderDashboard(ventasCache, domiciliosCache);
             } catch (e) { alert('Error al registrar la venta: ' + e.message); }
         }
-
         function limpiarCarrito() {
             if (carrito.length === 0) return;
             if (confirm('¿Limpiar todo el carrito?')) {
@@ -1785,7 +1816,6 @@
                 document.getElementById('cajaDireccion').value = '';
             }
         }
-
         document.getElementById('cajaBusqueda').addEventListener('input', function() { mostrarSugerencias(this.value); });
         document.addEventListener('click', function(e) {
             const sugerencias = document.getElementById('cajaSugerencias');
@@ -1810,14 +1840,8 @@
             if (productosCache.length === 0) { alert('No hay productos en el inventario para exportar.'); return; }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
-            doc.setFont('times', 'bold');
-            doc.setFontSize(20);
-            doc.setTextColor('#1a252f');
-            doc.text('Inventario B&B', 40, 40);
-            doc.setFont('times', 'normal');
-            doc.setFontSize(10);
-            doc.setTextColor('#64748b');
-            doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
+            doc.setFont('times', 'bold'); doc.setFontSize(20); doc.setTextColor('#1a252f'); doc.text('Inventario B&B', 40, 40);
+            doc.setFont('times', 'normal'); doc.setFontSize(10); doc.setTextColor('#64748b'); doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
             const tableData = [];
             let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
             for (const p of productosCache) {
@@ -1832,51 +1856,23 @@
                 const ganancia = venta - costo;
                 const esEncargo = p.Es_Encargo === true;
                 const esProveedor = p.Es_Proveedor === true;
-                if (!esEncargo && !esProveedor) {
-                    totalCosto += stock * costo;
-                    totalVenta += stock * venta;
-                    totalGanancia += stock * ganancia;
-                }
+                if (!esEncargo && !esProveedor) { totalCosto += stock * costo; totalVenta += stock * venta; totalGanancia += stock * ganancia; }
                 let etiqueta = '';
                 if (esEncargo) etiqueta = ' (Encargo)';
                 else if (esProveedor) etiqueta = ' (Proveedor)';
-                tableData.push([
-                    nombre + etiqueta,
-                    categoria,
-                    proveedor,
-                    codigo,
-                    stock,
-                    `$${costo.toFixed(2)}`,
-                    `$${venta.toFixed(2)}`,
-                    `$${oferta.toFixed(2)}`,
-                    `$${ganancia.toFixed(2)}`
-                ]);
+                tableData.push([nombre + etiqueta, categoria, proveedor, codigo, stock, `$${costo.toFixed(2)}`, `$${venta.toFixed(2)}`, `$${oferta.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
             }
             tableData.push(['TOTALES', '', '', '', '', `$${totalCosto.toFixed(2)}`, `$${totalVenta.toFixed(2)}`, '', `$${totalGanancia.toFixed(2)}`]);
             doc.autoTable({
                 head: [['Producto', 'Categoría', 'Proveedor', 'Código', 'Stock', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Ganancia x ud']],
-                body: tableData,
-                startY: 72,
-                theme: 'striped',
+                body: tableData, startY: 72, theme: 'striped',
                 headStyles: { fillColor: '#1a252f', textColor: '#ffffff', fontStyle: 'bold', fontSize: 10, halign: 'center', font: 'times' },
                 styles: { fontSize: 8, cellPadding: 4, valign: 'middle', lineColor: '#d0d7de', lineWidth: 0.2, font: 'times' },
-                columnStyles: {
-                    0: { cellWidth: 95, halign: 'left' },
-                    1: { cellWidth: 60, halign: 'left' },
-                    2: { cellWidth: 70, halign: 'left' },
-                    3: { cellWidth: 60, halign: 'center' },
-                    4: { cellWidth: 40, halign: 'center' },
-                    5: { cellWidth: 60, halign: 'right' },
-                    6: { cellWidth: 60, halign: 'right' },
-                    7: { cellWidth: 55, halign: 'right' },
-                    8: { cellWidth: 60, halign: 'right' }
-                },
+                columnStyles: { 0: { cellWidth: 95, halign: 'left' }, 1: { cellWidth: 60, halign: 'left' }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 60, halign: 'center' }, 4: { cellWidth: 40, halign: 'center' }, 5: { cellWidth: 60, halign: 'right' }, 6: { cellWidth: 60, halign: 'right' }, 7: { cellWidth: 55, halign: 'right' }, 8: { cellWidth: 60, halign: 'right' } },
                 margin: { left: 30, right: 30 },
                 didDrawPage: function(data) {
                     const pageCount = doc.internal.getNumberOfPages();
-                    doc.setFont('times', 'italic');
-                    doc.setFontSize(8);
-                    doc.setTextColor('#94a3b8');
+                    doc.setFont('times', 'italic'); doc.setFontSize(8); doc.setTextColor('#94a3b8');
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
             });
@@ -1889,14 +1885,8 @@
             if (ventas.length === 0) { alert('No hay ventas en el reporte para exportar.'); return; }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'pt', 'a4');
-            doc.setFont('times', 'bold');
-            doc.setFontSize(20);
-            doc.setTextColor('#1a252f');
-            doc.text('Reporte de Ventas - B&B', 40, 40);
-            doc.setFont('times', 'normal');
-            doc.setFontSize(10);
-            doc.setTextColor('#64748b');
-            doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
+            doc.setFont('times', 'bold'); doc.setFontSize(20); doc.setTextColor('#1a252f'); doc.text('Reporte de Ventas - B&B', 40, 40);
+            doc.setFont('times', 'normal'); doc.setFontSize(10); doc.setTextColor('#64748b'); doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 40, 58);
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
             for (const v of ventas) {
@@ -1904,35 +1894,25 @@
                 const tipo = v.Tipo || 'Local';
                 const total = parseFloat(v.total || 0);
                 const ganancia = calcularGananciaVenta(v);
-                totalIngresos += total;
-                totalGanancia += ganancia;
+                totalIngresos += total; totalGanancia += ganancia;
                 tableData.push([fecha, tipo, v.productos_json || 'Sin productos', `$${total.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
             }
             doc.autoTable({
                 head: [['Fecha', 'Tipo', 'Productos', 'Total (USD)', 'Ganancia (USD)']],
-                body: tableData,
-                startY: 72,
-                theme: 'striped',
+                body: tableData, startY: 72, theme: 'striped',
                 headStyles: { fillColor: '#1a252f', textColor: '#ffffff', fontStyle: 'bold', fontSize: 11, halign: 'center', font: 'times' },
                 styles: { fontSize: 9, cellPadding: 5, valign: 'middle', lineColor: '#d0d7de', lineWidth: 0.2, font: 'times' },
                 columnStyles: { 0: { cellWidth: 100, halign: 'center' }, 1: { cellWidth: 70, halign: 'center' }, 2: { cellWidth: 'auto', halign: 'left' }, 3: { cellWidth: 80, halign: 'right' }, 4: { cellWidth: 80, halign: 'right' } },
                 margin: { left: 40, right: 40 },
                 didDrawPage: function(data) {
                     const pageCount = doc.internal.getNumberOfPages();
-                    doc.setFont('times', 'italic');
-                    doc.setFontSize(8);
-                    doc.setTextColor('#94a3b8');
+                    doc.setFont('times', 'italic'); doc.setFontSize(8); doc.setTextColor('#94a3b8');
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
                 }
             });
             const finalY = doc.lastAutoTable.finalY + 25;
-            doc.setFont('times', 'bold');
-            doc.setFontSize(14);
-            doc.setTextColor('#1a252f');
-            doc.text('Resumen', 40, finalY);
-            doc.setFont('times', 'normal');
-            doc.setFontSize(11);
-            doc.setTextColor('#1e272e');
+            doc.setFont('times', 'bold'); doc.setFontSize(14); doc.setTextColor('#1a252f'); doc.text('Resumen', 40, finalY);
+            doc.setFont('times', 'normal'); doc.setFontSize(11); doc.setTextColor('#1e272e');
             doc.text(`N° Ventas: ${ventas.length}`, 40, finalY + 18);
             doc.text(`Ingresos totales: $${totalIngresos.toFixed(2)}`, 40, finalY + 36);
             doc.text(`Ganancia total: $${totalGanancia.toFixed(2)}`, 40, finalY + 54);
@@ -1983,7 +1963,6 @@
             if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
             renderVentas(filtradas);
         }
-
         function aplicarFiltrosDomicilios() {
             const estadoFiltro = document.getElementById('domFiltroEstado').value;
             let filtrados = [...domiciliosCache];
@@ -1993,7 +1972,6 @@
             }
             renderDomicilios(filtrados);
         }
-
         function aplicarFiltrosTienda() {
             const estadoFiltro = document.getElementById('tiendaFiltroEstado').value;
             let filtrados = [...tiendaCache];
@@ -2003,7 +1981,6 @@
             }
             renderTienda(filtrados);
         }
-
         function aplicarFiltrosReportes() {
             let filtradas = [...ventasCache];
             const desde = document.getElementById('repFechaDesde').value;
@@ -2100,32 +2077,26 @@
                     cargarTienda();
                     cargarEncargos();
                 }, 30000);
-            } catch (e) { console.error('Error inicializando app:', e); alert('Error al cargar datos: ' + e.message); }
+            } catch (e) {
+                console.error('Error inicializando app:', e);
+                alert('Error al cargar datos: ' + e.message);
+            }
         }
 
         document.getElementById('loginBtn').addEventListener('click', async function() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const errorEl = document.getElementById('loginError');
-            errorEl.classList.remove('show');
-            errorEl.textContent = '';
-            if (!email || !password) {
-                errorEl.textContent = 'Ingresa email y contraseña.';
-                errorEl.classList.add('show');
-                return;
-            }
+            errorEl.classList.remove('show'); errorEl.textContent = '';
+            if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
             try {
                 await login(email, password);
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
                 document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
                 initApp();
-            } catch (e) {
-                errorEl.textContent = e.message;
-                errorEl.classList.add('show');
-            }
+            } catch (e) { errorEl.textContent = e.message; errorEl.classList.add('show'); }
         });
-
         document.getElementById('loginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('loginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('logoutBtn').addEventListener('click', logout);
