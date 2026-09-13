@@ -35,14 +35,29 @@
         .download-apk-btn:hover { background: #27ae60; transform: scale(1.02); }
         @media (max-width: 768px) { .download-apk-btn { font-size: 0.75rem; padding: 4px 10px; } }
 
-        .account-dropdown { position: relative; }
+        .account-dropdown {
+            position: relative;
+            z-index: 800;
+        }
         .account-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; color: #ffffff; font-weight: 500; font-size: 0.9rem; transition: 0.3s; cursor: pointer; white-space: nowrap; }
         .account-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4); }
         .account-btn .avatar { width: 28px; height: 28px; border-radius: 50%; background: #74b9ff; color: #1a252f; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
         .account-btn .arrow { font-size: 0.65rem; transition: transform 0.3s; margin-left: 4px; }
         .account-btn.open .arrow { transform: rotate(180deg); }
 
-        .account-dropdown-content { display: none; position: absolute; right: 0; top: 115%; background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); min-width: 280px; padding: 8px 0; z-index: 200; overflow: hidden; }
+        .account-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 115%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 280px;
+            padding: 8px 0;
+            z-index: 900;
+            overflow: hidden;
+        }
         .account-dropdown-content.open { display: block; }
 
         .account-dropdown-content .dropdown-header { padding: 14px 20px 10px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
