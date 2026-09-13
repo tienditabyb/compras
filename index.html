@@ -308,6 +308,65 @@
         .main-content, .products-section, .products-grid, .toolbar, .detail-page, .detail-container { max-width: 100% !important; box-sizing: border-box; overflow-x: hidden; }
         .products-section { width: 100%; }
         .product-card, .product-card .product-footer, .product-card h3 { min-width: 0; }
+
+        /* ===== ZOOM DE FOTO (LIGHTBOX) ===== */
+        .zoom-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            cursor: zoom-out;
+            touch-action: pinch-zoom;
+        }
+        .zoom-overlay.active { display: flex; }
+        .zoom-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+        .zoom-overlay .zoom-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            font-size: 1.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .zoom-overlay .zoom-close:hover { background: rgba(255,255,255,0.3); }
+        .zoom-overlay .zoom-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            text-align: center;
+            pointer-events: none;
+            padding: 6px 14px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+        }
+        .product-card .foto-principal[data-zoom="1"] { cursor: zoom-in; }
+        .detail-page .imagen-principal[data-zoom="1"] { cursor: zoom-in; }
     </style>
 </head>
 <body>
@@ -526,6 +585,13 @@
         </p>
     </footer>
 
+    <!-- ========== ZOOM DE FOTO (LIGHTBOX) ========== -->
+    <div class="zoom-overlay" id="zoomOverlay" onclick="cerrarZoom(event)">
+        <button class="zoom-close" onclick="cerrarZoom(event)" title="Cerrar">✕</button>
+        <img id="zoomImg" src="" alt="Zoom" onclick="event.stopPropagation()" />
+        <div class="zoom-hint">🔍 Toca fuera para cerrar</div>
+    </div>
+
     <script>
         const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const PRODUCTOS_POR_PAGINA = 12;
@@ -546,6 +612,28 @@
         let estrellaSeleccionada = 0;
 
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ============================================================
+        // ZOOM DE FOTOS
+        // ============================================================
+        function abrirZoom(url) {
+            if (!url) return;
+            const overlay = document.getElementById('zoomOverlay');
+            const img = document.getElementById('zoomImg');
+            img.src = url;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function cerrarZoom(e) {
+            if (e) e.stopPropagation();
+            const overlay = document.getElementById('zoomOverlay');
+            overlay.classList.remove('active');
+            document.getElementById('zoomImg').src = '';
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarZoom();
+        });
 
         function setAuthToken(token) {
             if (token) { localStorage.setItem('pb_token', token); authToken = token; }
@@ -1046,10 +1134,15 @@
                         else precioHtml += `$${venta.toFixed(2)}`;
                         precioHtml += `</span>`;
                         const esEncargo = prod.Es_Encargo === true;
+
+                        const cardImgAttrs = fotoUrl
+                            ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');" data-zoom="1"`
+                            : '';
+
                         html += `
                             <div class="product-card" data-id="${prod.id}">
                                 <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
-                                     alt="${prod.Nombre || 'Producto'}" />
+                                     alt="${prod.Nombre || 'Producto'}" ${cardImgAttrs} />
                                 ${esEncargo ? '<div class="encargo-badge">📦 Pedido por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
@@ -1082,6 +1175,7 @@
                 document.querySelectorAll('.product-card').forEach(card => {
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
+                        if (e.target.dataset.zoom === '1') return;
                         const id = this.dataset.id;
                         window.history.pushState({ productoId: id }, '', `?id=${id}`);
                         mostrarDetalle(id);
@@ -1131,7 +1225,12 @@
                 else precioHtml += `$${venta.toFixed(2)}`;
                 precioHtml += `</span>`;
                 const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
-                let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" /><div class="miniaturas" id="detalleMiniaturas">`;
+
+                const detalleImgAttrs = fotoUrl
+                    ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)" data-zoom="1"`
+                    : '';
+
+                let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" ${detalleImgAttrs} /><div class="miniaturas" id="detalleMiniaturas">`;
                 fotos.forEach((f, index) => {
                     const url = `${POCKETBASE_URL}/api/files/productos/${prod.id}/${f}`;
                     const active = index === 0 ? 'active' : '';
