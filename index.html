@@ -35,29 +35,14 @@
         .download-apk-btn:hover { background: #27ae60; transform: scale(1.02); }
         @media (max-width: 768px) { .download-apk-btn { font-size: 0.75rem; padding: 4px 10px; } }
 
-        .account-dropdown {
-            position: relative;
-            z-index: 800;
-        }
+        .account-dropdown { position: relative; z-index: 800; }
         .account-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 16px; display: flex; align-items: center; gap: 8px; color: #ffffff; font-weight: 500; font-size: 0.9rem; transition: 0.3s; cursor: pointer; white-space: nowrap; }
         .account-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4); }
         .account-btn .avatar { width: 28px; height: 28px; border-radius: 50%; background: #74b9ff; color: #1a252f; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
         .account-btn .arrow { font-size: 0.65rem; transition: transform 0.3s; margin-left: 4px; }
         .account-btn.open .arrow { transform: rotate(180deg); }
 
-        .account-dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 115%;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            min-width: 280px;
-            padding: 8px 0;
-            z-index: 900;
-            overflow: hidden;
-        }
+        .account-dropdown-content { display: none; position: absolute; right: 0; top: 115%; background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); min-width: 280px; padding: 8px 0; z-index: 900; overflow: hidden; }
         .account-dropdown-content.open { display: block; }
 
         .account-dropdown-content .dropdown-header { padding: 14px 20px 10px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
@@ -190,6 +175,15 @@
             .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
+
+            /* 🔑 IMPORTANTE: Permitir que el dropdown de categorías se vea sobre los productos */
+            .main-content,
+            .products-section,
+            .toolbar,
+            .toolbar__left {
+                overflow: visible !important;
+            }
+
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; position: relative; z-index: 500; }
             .toolbar__left { justify-content: space-between; width: 100%; position: relative; z-index: 500; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
             .toolbar__left h2 { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
@@ -598,16 +592,7 @@
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
                 const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        apellidos: apellidos,
-                        name: nombreCompleto,
-                        email,
-                        password,
-                        passwordConfirm,
-                        telefono,
-                        direccion
-                    })
+                    body: JSON.stringify({ nombre, apellidos, name: nombreCompleto, email, password, passwordConfirm, telefono, direccion })
                 });
                 if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al registrar'); }
                 return await login(email, password);
@@ -752,28 +737,15 @@
                     errorEl.textContent = 'Nombre, apellidos, teléfono y dirección son obligatorios.';
                     errorEl.classList.add('show'); return;
                 }
-                if (password !== passwordConfirm) {
-                    errorEl.textContent = 'Las contraseñas no coinciden.';
-                    errorEl.classList.add('show'); return;
-                }
-                if (password.length < 8) {
-                    errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.';
-                    errorEl.classList.add('show'); return;
-                }
+                if (password !== passwordConfirm) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
+                if (password.length < 8) { errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
                 const result = await registrar(nombre, apellidos, email, telefono, direccion, password, passwordConfirm);
-                if (result.success) {
-                    cerrarModal(); actualizarUIUsuario(); renderizarProductos();
-                    alert('✅ Registro exitoso. ¡Bienvenido!');
-                } else {
-                    errorEl.textContent = result.error; errorEl.classList.add('show');
-                }
+                if (result.success) { cerrarModal(); actualizarUIUsuario(); renderizarProductos(); alert('✅ Registro exitoso. ¡Bienvenido!'); }
+                else { errorEl.textContent = result.error; errorEl.classList.add('show'); }
             } else {
                 const result = await login(email, password);
-                if (result.success) {
-                    cerrarModal(); actualizarUIUsuario(); renderizarProductos();
-                } else {
-                    errorEl.textContent = result.error; errorEl.classList.add('show');
-                }
+                if (result.success) { cerrarModal(); actualizarUIUsuario(); renderizarProductos(); }
+                else { errorEl.textContent = result.error; errorEl.classList.add('show'); }
             }
         }
 
