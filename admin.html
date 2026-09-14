@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background-color: #f5f6fa; color: #1e272e; min-height: 100vh; }
@@ -575,11 +574,75 @@
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            getDocs, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            query, 
+            where, 
+            orderBy, 
+            serverTimestamp,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
+            authDomain: "tiendita-byb.firebaseapp.com",
+            projectId: "tiendita-byb",
+            storageBucket: "tiendita-byb.firebasestorage.app",
+            messagingSenderId: "257958619653",
+            appId: "1:257958619653:web:0367858d644596c4b50a6c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseFns = {
+            signInWithEmailAndPassword, signOut, onAuthStateChanged,
+            collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
+            query, where, orderBy, serverTimestamp, setDoc
+        };
+
+        // ☁️ Configuración de Cloudinary (para las fotos)
+        window.CLOUDINARY_CLOUD_NAME = "amhnlgl";
+        window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
+
+        // Función global para subir una foto a Cloudinary
+        window.subirFotoCloudinary = async function(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', window.CLOUDINARY_UPLOAD_PRESET);
+            const url = `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const resp = await fetch(url, { method: 'POST', body: formData });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.error?.message || 'Error al subir foto a Cloudinary');
+            }
+            const data = await resp.json();
+            return data.secure_url;
+        };
+    </script>
+
     <script>
-        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
         const ADMIN_EMAIL = "byb@gmail.com";
         const TIENDA_URL = "https://tienditabyb.github.io/compras/";
-        let authToken = null;
+
         let userData = null;
         let productosCache = [];
         let ventasCache = [];
@@ -610,7 +673,7 @@
                 if (d.Estado === 'Pendiente' && !d.fecha_gestion) {
                     const id = `dom-${d.id}`;
                     if (!leidas.includes(id)) {
-                        nuevas.push({ id, tipo: 'domicilio', texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`, fecha: d.created });
+                        nuevas.push({ id, tipo: 'domicilio', texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`, fecha: d.fecha });
                     }
                 }
             }
@@ -618,7 +681,7 @@
                 if (p.Estado === 'Pendiente' && !p.fecha_gestion) {
                     const id = `tienda-${p.id}`;
                     if (!leidas.includes(id)) {
-                        nuevas.push({ id, tipo: 'tienda', texto: `Nuevo pedido en tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`, fecha: p.created });
+                        nuevas.push({ id, tipo: 'tienda', texto: `Nuevo pedido en tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`, fecha: p.fecha });
                     }
                 }
             }
@@ -630,7 +693,11 @@
                     }
                 }
             }
-            nuevas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            nuevas.sort((a, b) => {
+                const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
+                const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
+                return fb - fa;
+            });
             notificaciones = nuevas;
             actualizarBadge();
             renderNotificaciones();
@@ -671,90 +738,119 @@
         }
         function actualizarNotificaciones() { generarNotificaciones(); }
 
-        async function login(email, password) {
-            const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identity: email, password })
-            });
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.message || 'Error de autenticación');
-            const user = data.record;
-            if (user.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) throw new Error('Acceso denegado');
-            authToken = data.token;
-            userData = user;
-            localStorage.setItem('admin_token', authToken);
-            localStorage.setItem('admin_user', JSON.stringify(userData));
-            return true;
-        }
-        function logout() {
-            authToken = null; userData = null;
-            localStorage.removeItem('admin_token');
-            localStorage.removeItem('admin_user');
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('appContainer').style.display = 'none';
-            document.getElementById('loginError').textContent = '';
-            document.getElementById('loginError').classList.remove('show');
-        }
-        function checkAuth() {
-            const token = localStorage.getItem('admin_token');
-            const user = localStorage.getItem('admin_user');
-            if (token && user) {
-                try {
-                    const parsedUser = JSON.parse(user);
-                    if (parsedUser.email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) { logout(); return false; }
-                    authToken = token; userData = parsedUser;
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'block';
-                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
-                    initApp();
-                    return true;
-                } catch (e) { logout(); return false; }
+        // ============================================================
+        // AUTENTICACIÓN ADMIN
+        // ============================================================
+        window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
+            if (user) {
+                if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                    await window.firebaseFns.signOut(window.firebaseAuth);
+                    document.getElementById('loginError').textContent = 'Acceso denegado. No eres administrador.';
+                    document.getElementById('loginError').classList.add('show');
+                    return;
+                }
+                userData = { id: user.uid, email: user.email, name: user.displayName || user.email };
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                initApp();
+            } else {
+                userData = null;
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('appContainer').style.display = 'none';
             }
-            return false;
-        }
+        });
 
-        async function apiRequest(endpoint, options = {}) {
-            const url = `${POCKETBASE_URL}/api/collections/${endpoint}`;
-            const headers = { ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) };
-            const isFormData = options.body instanceof FormData;
-            if (!isFormData) headers['Content-Type'] = 'application/json';
-            const resp = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
-            if (resp.status === 401) { logout(); throw new Error('Sesión expirada. Inicia sesión nuevamente.'); }
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.message || `Error ${resp.status}`);
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            errorEl.classList.remove('show'); errorEl.textContent = '';
+            if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
+            try {
+                const { signInWithEmailAndPassword } = window.firebaseFns;
+                await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            } catch (e) {
+                let msg = 'Error de autenticación';
+                if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
+                else if (e.code === 'auth/wrong-password') msg = 'Contraseña incorrecta.';
+                else if (e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
+                errorEl.textContent = msg; errorEl.classList.add('show');
             }
-            if (resp.status === 204) return {};
-            const texto = await resp.text();
-            if (!texto) return {};
-            try { return JSON.parse(texto); } catch (e) { return {}; }
-        }
+        });
+        document.getElementById('loginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
+        document.getElementById('loginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            await window.firebaseFns.signOut(window.firebaseAuth);
+        });
 
+        // ============================================================
+        // CARGA DE DATOS DESDE FIRESTORE
+        // ============================================================
         async function cargarCategorias() {
-            try { const data = await apiRequest('Categoria/records'); categoriasCache = data.items.map(c => c.nombre).filter(Boolean); return categoriasCache; }
-            catch (e) { console.error('Error cargando categorías:', e); return []; }
-        }
-        async function cargarProductos() {
-            try { const data = await apiRequest('productos/records?perPage=200'); productosCache = data.items; return productosCache; }
-            catch (e) { console.error('Error cargando productos:', e); return []; }
-        }
-        async function cargarVentas() {
-            try { const data = await apiRequest('Ventas/records?sort=-created&perPage=200'); ventasCache = data.items; return ventasCache; }
-            catch (e) { console.error('Error cargando ventas:', e); return []; }
-        }
-        async function cargarDomicilios() {
-            try { const data = await apiRequest('Domicilios/records?sort=-created&perPage=200'); domiciliosCache = data.items; actualizarNotificaciones(); return domiciliosCache; }
-            catch (e) { console.error('Error cargando domicilios:', e); return []; }
-        }
-        async function cargarTienda() {
-            try { const data = await apiRequest('PedidosTienda/records?sort=-created&perPage=200'); tiendaCache = data.items; actualizarNotificaciones(); return tiendaCache; }
-            catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
-        }
-        async function cargarEncargos() {
-            try { const data = await apiRequest('Encargos/records?sort=-fecha_solicitud&perPage=200'); encargosCache = data.items; actualizarNotificaciones(); return encargosCache; }
-            catch (e) { console.error('Error cargando encargos:', e); return []; }
+            try {
+                const { collection, getDocs } = window.firebaseFns;
+                const snap = await getDocs(collection(window.firebaseDb, 'Categoria'));
+                categoriasCache = snap.docs.map(d => d.data().nombre).filter(Boolean);
+                return categoriasCache;
+            } catch (e) { console.error('Error cargando categorías:', e); return []; }
         }
 
+        async function cargarProductos() {
+            try {
+                const { collection, getDocs } = window.firebaseFns;
+                const snap = await getDocs(collection(window.firebaseDb, 'productos'));
+                productosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                return productosCache;
+            } catch (e) { console.error('Error cargando productos:', e); return []; }
+        }
+
+        async function cargarVentas() {
+            try {
+                const { collection, getDocs, orderBy, query } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Ventas'), orderBy('fecha', 'desc'));
+                const snap = await getDocs(q);
+                ventasCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                return ventasCache;
+            } catch (e) { console.error('Error cargando ventas:', e); return []; }
+        }
+
+        async function cargarDomicilios() {
+            try {
+                const { collection, getDocs, orderBy, query } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Domicilios'), orderBy('fecha', 'desc'));
+                const snap = await getDocs(q);
+                domiciliosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                actualizarNotificaciones();
+                return domiciliosCache;
+            } catch (e) { console.error('Error cargando domicilios:', e); return []; }
+        }
+
+        async function cargarTienda() {
+            try {
+                const { collection, getDocs, orderBy, query } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'PedidosTienda'), orderBy('fecha', 'desc'));
+                const snap = await getDocs(q);
+                tiendaCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                actualizarNotificaciones();
+                return tiendaCache;
+            } catch (e) { console.error('Error cargando pedidos tienda:', e); return []; }
+        }
+
+        async function cargarEncargos() {
+            try {
+                const { collection, getDocs, orderBy, query } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Encargos'), orderBy('fecha_solicitud', 'desc'));
+                const snap = await getDocs(q);
+                encargosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                actualizarNotificaciones();
+                return encargosCache;
+            } catch (e) { console.error('Error cargando encargos:', e); return []; }
+        }
+
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
         function normalizarNombre(nombre) {
             if (!nombre) return "";
             let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
@@ -810,6 +906,9 @@
             return html;
         }
 
+        // ============================================================
+        // RENDERIZADO
+        // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
             const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
@@ -841,7 +940,7 @@
             if (ultimas.length === 0) { container.innerHTML = '<div class="empty">No hay ventas recientes.</div>'; return; }
             let html = '';
             for (const v of ultimas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fecha} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
             }
             container.innerHTML = html;
@@ -865,8 +964,7 @@
             for (const p of filtrados) {
                 const fotos = obtenerFotosProducto(p);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                const fotosExtra = fotos.slice(1);
-                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${p.id}/${fotoPrincipal}` : '';
+                const fotoUrl = fotoPrincipal || '';
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
@@ -877,11 +975,10 @@
                 const proveedor = (p.Proveedor || '').trim();
 
                 let extrasHtml = '';
-                if (fotosExtra.length > 0) {
+                if (fotos.length > 1) {
                     extrasHtml = `<div class="fotos-extra">`;
-                    fotosExtra.forEach(f => {
-                        const url = `${POCKETBASE_URL}/api/files/productos/${p.id}/${f}`;
-                        extrasHtml += `<img src="${url}" alt="Extra" onclick="event.stopPropagation(); window.open('${url}','_blank')" />`;
+                    fotos.slice(1).forEach(f => {
+                        extrasHtml += `<img src="${f}" alt="Extra" onclick="event.stopPropagation(); window.open('${f}','_blank')" />`;
                     });
                     extrasHtml += `</div>`;
                 }
@@ -921,7 +1018,7 @@
             if (ventas.length === 0) { container.innerHTML = '<div class="empty">No hay ventas.</div>'; return; }
             let html = '';
             for (const v of ventas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
                 const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
                 const ganancia = calcularGananciaVenta(v);
@@ -942,7 +1039,7 @@
                 if (estadoMostrado === 'Nuevo Domicilio') badgeClass = 'estado-nuevo';
                 else if (estadoMostrado === 'En camino') badgeClass = 'estado-en-camino';
                 else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
-                const fecha = d.created ? new Date(d.created).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = d.fecha ? (d.fecha.seconds ? new Date(d.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(d.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 let telefono = d.Telefono == null ? '' : String(d.Telefono);
                 const isEntregado = (estadoReal === 'Entregado');
                 const opciones = `
@@ -986,8 +1083,8 @@
                 if (estadoMostrado === 'Nuevo Pedido') badgeClass = 'estado-nuevo';
                 else if (estadoMostrado === 'Vendido') badgeClass = 'estado-entregado';
                 else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
-                const fecha = p.created ? new Date(p.created).toLocaleString('es-ES') : 'Sin fecha';
-                const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleString('es-ES') : 'No definida';
+                const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(p.fecha).toLocaleString('es-ES')) : 'Sin fecha';
+                const fechaLimite = p.fecha_limite ? (p.fecha_limite.seconds ? new Date(p.fecha_limite.seconds * 1000).toLocaleString('es-ES') : new Date(p.fecha_limite).toLocaleString('es-ES')) : 'No definida';
                 const telefono = p.Telefono || 'Sin teléfono';
                 const isVendido = (estadoReal === 'Vendido' || estadoReal === 'Cancelado');
                 const opciones = `
@@ -1036,7 +1133,7 @@
                 else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
                 else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
 
-                const fecha = e.fecha_solicitud ? new Date(e.fecha_solicitud).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = e.fecha_solicitud ? (e.fecha_solicitud.seconds ? new Date(e.fecha_solicitud.seconds * 1000).toLocaleString('es-ES') : new Date(e.fecha_solicitud).toLocaleString('es-ES')) : 'Sin fecha';
                 const telefono = e.usuario_telefono || 'Sin teléfono';
                 const nombreCliente = e.usuario_nombre || 'Cliente';
                 const producto = e.producto_nombre || 'Producto';
@@ -1045,12 +1142,12 @@
 
                 let fechaLimiteHtml = '';
                 if (e.fecha_limite_pago) {
-                    const fechaLimite = new Date(e.fecha_limite_pago);
-                    fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fechaLimite.toLocaleString('es-ES')}</div>`;
+                    const fl = e.fecha_limite_pago.seconds ? new Date(e.fecha_limite_pago.seconds * 1000) : new Date(e.fecha_limite_pago);
+                    fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fl.toLocaleString('es-ES')}</div>`;
                 }
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
-                    const limite = new Date(e.fecha_limite_pago);
+                    const limite = e.fecha_limite_pago.seconds ? new Date(e.fecha_limite_pago.seconds * 1000) : new Date(e.fecha_limite_pago);
                     const diff = limite - ahora;
                     if (diff > 0) {
                         const horas = Math.floor(diff / (1000 * 60 * 60));
@@ -1104,11 +1201,15 @@
             actualizarNotificaciones();
         }
 
+        // ============================================================
+        // ACCIONES
+        // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
             if (!enc || enc.estado !== 'Pendiente') return;
             try {
-                await apiRequest(`Encargos/records/${id}`, { method: 'PATCH', body: JSON.stringify({ estado: 'Cancelado' }) });
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                await updateDoc(doc(window.firebaseDb, 'Encargos', id), { estado: 'Cancelado', fecha_actualizacion: serverTimestamp() });
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
                 notificarEncargo(id, true);
@@ -1119,18 +1220,18 @@
             try {
                 const encargoActual = encargosCache.find(e => e.id === id);
                 if (!encargoActual) { alert('Encargo no encontrado.'); return; }
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
                 let data = {};
                 if (nuevoEstado === 'Nuevo Encargo') { data.estado = 'Pendiente'; data.fecha_limite_pago = null; }
                 else if (nuevoEstado === 'Pendiente') {
                     data.estado = 'Pendiente';
                     if (!encargoActual.fecha_limite_pago) {
                         const limite = new Date(Date.now() + 24 * 60 * 60 * 1000);
-                        data.fecha_limite_pago = limite.toISOString();
+                        data.fecha_limite_pago = limite;
                     }
                 } else data.estado = nuevoEstado;
-                const response = await apiRequest(`Encargos/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-                const index = encargosCache.findIndex(e => e.id === id);
-                if (index !== -1) encargosCache[index] = { ...encargosCache[index], ...response };
+                data.fecha_actualizacion = serverTimestamp();
+                await updateDoc(doc(window.firebaseDb, 'Encargos', id), data);
                 await cargarEncargos();
                 aplicarFiltrosEncargos();
                 if (nuevoEstado !== 'Nuevo Encargo' && nuevoEstado !== 'Cancelado') notificarEncargo(id);
@@ -1171,11 +1272,16 @@
 
         async function verDetalleEncargo(id) {
             try {
-                const data = await apiRequest(`Encargos/records/${id}`);
+                const { doc, getDoc } = window.firebaseFns;
+                const docSnap = await getDoc(doc(window.firebaseDb, 'Encargos', id));
+                if (!docSnap.exists()) { alert('Encargo no encontrado.'); return; }
+                const data = docSnap.data();
                 const prod = productosCache.find(p => p.id === data.producto_id);
                 const urlEncargo = prod && prod.URL_Encargo ? String(prod.URL_Encargo).trim() : '';
                 const urlHtml = urlEncargo ? `<a href="${urlEncargo}" target="_blank" rel="noopener" style="color:#6d28d9; font-weight:600;">🔗 Abrir enlace</a>` : 'No definida';
                 const linkProducto = data.producto_id ? `<a href="${TIENDA_URL}?id=${data.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600;">🔗 Ver en tienda</a>` : 'No definido';
+                const fechaSol = data.fecha_solicitud ? (data.fecha_solicitud.seconds ? new Date(data.fecha_solicitud.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_solicitud).toLocaleString('es-ES')) : 'Sin fecha';
+                const fechaLim = data.fecha_limite_pago ? (data.fecha_limite_pago.seconds ? new Date(data.fecha_limite_pago.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_limite_pago).toLocaleString('es-ES')) : 'No definida';
                 const body = `
                     <div class="detail-row"><span class="label">Producto</span><span class="value">${data.producto_nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
@@ -1185,9 +1291,8 @@
                     <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
                     <div class="detail-row"><span class="label">🔗 Ver producto en tienda</span><span class="value">${linkProducto}</span></div>
                     <div class="detail-row"><span class="label">🔗 URL del producto</span><span class="value">${urlHtml}</span></div>
-                    <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${new Date(data.fecha_solicitud).toLocaleString('es-ES')}</span></div>
-                    <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${data.fecha_limite_pago ? new Date(data.fecha_limite_pago).toLocaleString('es-ES') : 'No definida'}</span></div>
-                    <div class="detail-row"><span class="label">Última actualización</span><span class="value">${new Date(data.updated).toLocaleString('es-ES')}</span></div>
+                    <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${fechaSol}</span></div>
+                    <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${fechaLim}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1208,54 +1313,44 @@
             try {
                 const domActual = domiciliosCache.find(d => d.id === id);
                 if (!domActual) { alert('Domicilio no encontrado.'); return; }
-                if (domActual.Estado === 'Entregado') {
-                    alert('Este domicilio ya fue entregado y no se puede modificar.');
-                    const select = document.getElementById(`estado-select-${id}`);
-                    if (select) select.value = 'Entregado';
-                    return;
-                }
+                if (domActual.Estado === 'Entregado') { alert('Este domicilio ya fue entregado y no se puede modificar.'); return; }
                 if (nuevoEstado === 'Nuevo Domicilio') nuevoEstado = 'Pendiente';
-                const data = { Estado: nuevoEstado, fecha_gestion: new Date().toISOString() };
+                const { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } = window.firebaseFns;
+                const data = { Estado: nuevoEstado, fecha_gestion: serverTimestamp() };
                 if (nuevoEstado === 'Entregado') {
                     const productosPedido = parsearProductosPedido(domActual.productos_pedido);
                     if (productosPedido.length === 0) {
-                        await apiRequest(`Domicilios/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+                        await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
                         alert('✅ Pedido marcado como Entregado (sin productos para descontar).');
-                        await cargarDomicilios();
-                        renderDomicilios(domiciliosCache);
-                        renderDashboard(ventasCache, domiciliosCache);
+                        await cargarDomicilios(); renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache);
                         enviarWhatsAppDom(id);
                         return;
                     }
                     for (const item of productosPedido) {
-                        const prodResp = await apiRequest(`productos/records/${item.id}`);
-                        const stockActual = parseInt(prodResp.Stock) || 0;
-                        const nuevoStock = Math.max(0, stockActual - (item.cantidad || 1));
-                        await apiRequest(`productos/records/${item.id}`, { method: 'PATCH', body: JSON.stringify({ Stock: nuevoStock }) });
+                        const prodSnap = await getDoc(doc(window.firebaseDb, 'productos', item.id));
+                        if (prodSnap.exists()) {
+                            const stockActual = parseInt(prodSnap.data().Stock) || 0;
+                            const nuevoStock = Math.max(0, stockActual - (item.cantidad || 1));
+                            await updateDoc(doc(window.firebaseDb, 'productos', item.id), { Stock: nuevoStock });
+                        }
                     }
                     const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
                     const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
                     const productosIds = productosPedido.map(p => p.id).join(',');
-                    await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null }) });
-                    await apiRequest(`Domicilios/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+                    await addDoc(collection(window.firebaseDb, 'Ventas'), {
+                        productos_json: productosStr, productos_ids: productosIds, total, fecha: serverTimestamp(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null
+                    });
+                    await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
                     await cargarDomicilios(); await cargarProductos(); await cargarVentas();
-                    renderDomicilios(domiciliosCache);
-                    renderDashboard(ventasCache, domiciliosCache);
+                    renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache);
                     enviarWhatsAppDom(id);
                     return;
                 }
-                await apiRequest(`Domicilios/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-                domActual.Estado = nuevoEstado;
-                domActual.fecha_gestion = new Date().toISOString();
-                await cargarDomicilios();
-                renderDomicilios(domiciliosCache);
-                renderDashboard(ventasCache, domiciliosCache);
+                await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
+                await cargarDomicilios(); renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache);
                 enviarWhatsAppDom(id);
-            } catch (e) {
-                console.error('Error en cambiarEstadoDomicilio:', e);
-                alert('Error al cambiar estado: ' + e.message);
-            }
+            } catch (e) { console.error('Error en cambiarEstadoDomicilio:', e); alert('Error al cambiar estado: ' + e.message); }
         }
 
         function enviarWhatsAppDom(id) {
@@ -1280,55 +1375,45 @@
             try {
                 const pedidoActual = tiendaCache.find(p => p.id === id);
                 if (!pedidoActual) { alert('Pedido no encontrado.'); return; }
-                if (pedidoActual.Estado === 'Vendido' || pedidoActual.Estado === 'Cancelado') {
-                    alert('Este pedido ya está vendido o cancelado.');
-                    const select = document.getElementById(`tienda-select-${id}`);
-                    if (select) select.value = pedidoActual.Estado;
-                    return;
-                }
+                if (pedidoActual.Estado === 'Vendido' || pedidoActual.Estado === 'Cancelado') { alert('Este pedido ya está vendido o cancelado.'); return; }
                 if (nuevoEstado === 'Nuevo Pedido') nuevoEstado = 'Pendiente';
-                const data = { Estado: nuevoEstado, fecha_gestion: new Date().toISOString() };
+                const { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } = window.firebaseFns;
+                const data = { Estado: nuevoEstado, fecha_gestion: serverTimestamp() };
                 if (nuevoEstado === 'Vendido') {
                     const productosPedido = parsearProductosPedido(pedidoActual.productos_pedido);
                     if (productosPedido.length === 0) {
-                        await apiRequest(`PedidosTienda/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+                        await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), data);
                         alert('✅ Pedido marcado como Vendido (sin productos para descontar).');
-                        await cargarTienda();
-                        renderTienda(tiendaCache);
-                        renderDashboard(ventasCache, domiciliosCache);
+                        await cargarTienda(); renderTienda(tiendaCache); renderDashboard(ventasCache, domiciliosCache);
                         enviarWhatsAppTienda(id);
                         return;
                     }
                     for (const item of productosPedido) {
-                        const prodResp = await apiRequest(`productos/records/${item.id}`);
-                        const stockActual = parseInt(prodResp.Stock) || 0;
-                        const nuevoStock = Math.max(0, stockActual - (item.cantidad || 1));
-                        await apiRequest(`productos/records/${item.id}`, { method: 'PATCH', body: JSON.stringify({ Stock: nuevoStock }) });
+                        const prodSnap = await getDoc(doc(window.firebaseDb, 'productos', item.id));
+                        if (prodSnap.exists()) {
+                            const stockActual = parseInt(prodSnap.data().Stock) || 0;
+                            const nuevoStock = Math.max(0, stockActual - (item.cantidad || 1));
+                            await updateDoc(doc(window.firebaseDb, 'productos', item.id), { Stock: nuevoStock });
+                        }
                     }
                     const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
                     const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
                     const productosIds = productosPedido.map(p => p.id).join(',');
-                    await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Tienda', usuario_id: pedidoActual.usuario_id || null }) });
-                    await apiRequest(`PedidosTienda/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+                    await addDoc(collection(window.firebaseDb, 'Ventas'), {
+                        productos_json: productosStr, productos_ids: productosIds, total, fecha: serverTimestamp(), Tipo: 'Tienda', usuario_id: pedidoActual.usuario_id || null
+                    });
+                    await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), data);
                     alert('✅ Pedido vendido.\n✅ Stock descontado.\n✅ Venta registrada.');
                     await cargarTienda(); await cargarProductos(); await cargarVentas();
-                    renderTienda(tiendaCache);
-                    renderDashboard(ventasCache, domiciliosCache);
+                    renderTienda(tiendaCache); renderDashboard(ventasCache, domiciliosCache);
                     enviarWhatsAppTienda(id);
                     return;
                 }
-                await apiRequest(`PedidosTienda/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-                pedidoActual.Estado = nuevoEstado;
-                pedidoActual.fecha_gestion = new Date().toISOString();
-                await cargarTienda();
-                renderTienda(tiendaCache);
-                renderDashboard(ventasCache, domiciliosCache);
+                await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), data);
+                await cargarTienda(); renderTienda(tiendaCache); renderDashboard(ventasCache, domiciliosCache);
                 if (nuevoEstado === 'Cancelado') enviarWhatsAppTiendaCancelado(id);
                 else enviarWhatsAppTienda(id);
-            } catch (e) {
-                console.error('Error en cambiarEstadoTienda:', e);
-                alert('Error al cambiar estado: ' + e.message);
-            }
+            } catch (e) { console.error('Error en cambiarEstadoTienda:', e); alert('Error al cambiar estado: ' + e.message); }
         }
 
         function enviarWhatsAppTienda(id) {
@@ -1366,9 +1451,12 @@
 
         async function verDetalleVenta(id) {
             try {
-                const data = await apiRequest(`Ventas/records/${id}`);
+                const { doc, getDoc } = window.firebaseFns;
+                const docSnap = await getDoc(doc(window.firebaseDb, 'Ventas', id));
+                if (!docSnap.exists()) { alert('Venta no encontrada.'); return; }
+                const data = docSnap.data();
                 const total = parseFloat(data.total || 0);
-                const fecha = data.fecha ? new Date(data.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = data.Tipo || 'Local';
                 const ganancia = calcularGananciaVenta(data);
                 const body = `
@@ -1385,8 +1473,11 @@
 
         async function verDetalleDomicilio(id) {
             try {
-                const data = await apiRequest(`Domicilios/records/${id}`);
-                const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
+                const { doc, getDoc } = window.firebaseFns;
+                const docSnap = await getDoc(doc(window.firebaseDb, 'Domicilios', id));
+                if (!docSnap.exists()) { alert('Domicilio no encontrado.'); return; }
+                const data = docSnap.data();
+                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const productosPedido = parsearProductosPedido(data.productos_pedido);
                 let productosHtml = 'Sin productos';
                 if (productosPedido.length > 0) {
@@ -1412,11 +1503,14 @@
 
         async function verDetalleTienda(id) {
             try {
-                const data = await apiRequest(`PedidosTienda/records/${id}`);
+                const { doc, getDoc } = window.firebaseFns;
+                const docSnap = await getDoc(doc(window.firebaseDb, 'PedidosTienda', id));
+                if (!docSnap.exists()) { alert('Pedido no encontrado.'); return; }
+                const data = docSnap.data();
                 const productos = parsearProductosPedido(data.productos_pedido);
                 const total = data.total || 0;
-                const fecha = data.created ? new Date(data.created).toLocaleString('es-ES') : 'Sin fecha';
-                const fechaLimite = data.fecha_limite ? new Date(data.fecha_limite).toLocaleString('es-ES') : 'No definida';
+                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
+                const fechaLimite = data.fecha_limite ? (data.fecha_limite.seconds ? new Date(data.fecha_limite.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_limite).toLocaleString('es-ES')) : 'No definida';
                 let productosHtml = 'Sin productos';
                 if (productos.length > 0) {
                     productosHtml = '<ul style="padding-left:18px;">';
@@ -1449,11 +1543,10 @@
             const container = document.getElementById('prodFotosPreview');
             container.innerHTML = '';
             fotosExistentes.forEach((f, index) => {
-                const productoId = document.getElementById('productId').value;
-                const url = `${POCKETBASE_URL}/api/files/productos/${productoId}/${f}`;
+                const url = f || '';
                 const div = document.createElement('div');
                 div.className = 'foto-item';
-                div.innerHTML = `<img src="${url}" alt="${f}" /><button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>`;
+                div.innerHTML = `<img src="${url}" alt="Foto" /><button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>`;
                 container.appendChild(div);
             });
             fotosNuevas.forEach((file, index) => {
@@ -1509,14 +1602,14 @@
             const nombreTrim = nombre.trim();
             if (categoriasCache.some(c => c.toLowerCase() === nombreTrim.toLowerCase())) { alert('Esta categoría ya existe.'); return; }
             try {
-                await apiRequest('Categoria/records', { method: 'POST', body: JSON.stringify({ nombre: nombreTrim }) });
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
+                await addDoc(collection(window.firebaseDb, 'Categoria'), { nombre: nombreTrim, fecha_creacion: serverTimestamp() });
                 await cargarCategorias();
                 const catSelect = document.getElementById('prodCategoria');
                 catSelect.innerHTML = '';
                 for (const cat of categoriasCache) {
                     const opt = document.createElement('option');
-                    opt.value = cat;
-                    opt.textContent = cat;
+                    opt.value = cat; opt.textContent = cat;
                     catSelect.appendChild(opt);
                 }
                 catSelect.value = nombreTrim;
@@ -1541,17 +1634,18 @@
             if (productosConCategoria.length > 0) mensaje += `\n\n⚠️ Hay ${productosConCategoria.length} producto(s) usando esta categoría.\nSeguirán mostrándose con esa categoría, pero ya no aparecerá en la lista.`;
             if (!confirm(mensaje)) return;
             try {
-                const data = await apiRequest('Categoria/records?perPage=200');
-                const cat = data.items.find(c => (c.nombre || '').trim().toLowerCase() === nombreTrim.toLowerCase());
-                if (!cat) { alert('No se encontró la categoría en la base de datos.'); return; }
-                await apiRequest(`Categoria/records/${cat.id}`, { method: 'DELETE' });
+                const { collection, getDocs, doc, deleteDoc } = window.firebaseFns;
+                const snap = await getDocs(collection(window.firebaseDb, 'Categoria'));
+                let catDoc = null;
+                snap.forEach(d => { if ((d.data().nombre || '').trim().toLowerCase() === nombreTrim.toLowerCase()) catDoc = d; });
+                if (!catDoc) { alert('No se encontró la categoría en la base de datos.'); return; }
+                await deleteDoc(doc(window.firebaseDb, 'Categoria', catDoc.id));
                 await cargarCategorias();
                 const catSelect = document.getElementById('prodCategoria');
                 catSelect.innerHTML = '';
                 for (const c of categoriasCache) {
                     const opt = document.createElement('option');
-                    opt.value = c;
-                    opt.textContent = c;
+                    opt.value = c; opt.textContent = c;
                     catSelect.appendChild(opt);
                 }
                 const invCatSelect = document.getElementById('invCategory');
@@ -1579,8 +1673,7 @@
             catSelect.innerHTML = '';
             for (const cat of categoriasCache) {
                 const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat;
+                opt.value = cat; opt.textContent = cat;
                 catSelect.appendChild(opt);
             }
             if (producto) {
@@ -1648,31 +1741,56 @@
                 alert('Por favor completa todos los campos obligatorios.');
                 return;
             }
-            const data = {
-                Nombre: nombre, Categoria: categoria, Codigo_de_Barras: codigo,
-                Precio_Costo: costo, Precio_Venta: venta, Precio_Oferta: oferta,
-                Stock: stock, Detalles: detalles, Es_Encargo: esEncargo, URL_Encargo: urlEncargo,
-                Es_Proveedor: esProveedor, Proveedor: proveedor
-            };
+            const btnSubmit = document.getElementById('productSubmitBtn');
+            const textoOriginal = btnSubmit.textContent;
+            btnSubmit.disabled = true;
             try {
-                const formData = new FormData();
-                for (const key in data) formData.append(key, data[key]);
-                fotosExistentes.forEach(f => formData.append('Fotos', f));
-                fotosNuevas.forEach(file => formData.append('Fotos', file));
-                if (id) await apiRequest(`productos/records/${id}`, { method: 'PATCH', body: formData, headers: {} });
-                else await apiRequest('productos/records', { method: 'POST', body: formData, headers: {} });
+                const { collection, addDoc, doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                
+                // Subir fotos nuevas a Cloudinary
+                const urlsNuevas = [];
+                if (fotosNuevas.length > 0) {
+                    btnSubmit.textContent = '⏳ Subiendo fotos...';
+                    for (const file of fotosNuevas) {
+                        const url = await window.subirFotoCloudinary(file);
+                        urlsNuevas.push(url);
+                    }
+                }
+                const fotosFinales = [...fotosExistentes, ...urlsNuevas];
+
+                btnSubmit.textContent = '⏳ Guardando...';
+                const data = {
+                    Nombre: nombre, Categoria: categoria, Codigo_de_Barras: codigo,
+                    Precio_Costo: parseFloat(costo), Precio_Venta: parseFloat(venta), Precio_Oferta: parseFloat(oferta),
+                    Stock: parseInt(stock), Detalles: detalles, Es_Encargo: esEncargo, URL_Encargo: urlEncargo,
+                    Es_Proveedor: esProveedor, Proveedor: proveedor,
+                    Fotos: fotosFinales,
+                    fecha_actualizacion: serverTimestamp()
+                };
+                if (id) {
+                    await updateDoc(doc(window.firebaseDb, 'productos', id), data);
+                } else {
+                    data.fecha_creacion = serverTimestamp();
+                    await addDoc(collection(window.firebaseDb, 'productos'), data);
+                }
                 alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
                 cerrarModalProducto();
                 await cargarProductos();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
                 renderDashboard(ventasCache, domiciliosCache);
-            } catch (e) { alert('Error al guardar: ' + e.message); }
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = textoOriginal;
+            }
         });
 
         async function eliminarProducto(id) {
             if (!confirm('¿Estás seguro de eliminar este producto?')) return;
             try {
-                await apiRequest(`productos/records/${id}`, { method: 'DELETE' });
+                const { doc, deleteDoc } = window.firebaseFns;
+                await deleteDoc(doc(window.firebaseDb, 'productos', id));
                 alert('Producto eliminado.');
                 await cargarProductos();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
@@ -1785,23 +1903,25 @@
             if (direccion) { if (clienteStr) clienteStr += ' - '; clienteStr += direccion; }
             if (!clienteStr) clienteStr = 'Cliente sin datos';
             try {
+                const { doc, updateDoc, addDoc, collection, serverTimestamp, getDoc } = window.firebaseFns;
                 for (const item of carrito) {
-                    const prod = productosCache.find(p => p.id === item.id);
-                    const stockActual = parseInt(prod.Stock || 0);
-                    await apiRequest(`productos/records/${item.id}`, { method: 'PATCH', body: JSON.stringify({ Stock: stockActual - item.cantidad }) });
+                    const prodSnap = await getDoc(doc(window.firebaseDb, 'productos', item.id));
+                    if (prodSnap.exists()) {
+                        const stockActual = parseInt(prodSnap.data().Stock || 0);
+                        await updateDoc(doc(window.firebaseDb, 'productos', item.id), { Stock: stockActual - item.cantidad });
+                    }
                 }
                 const productosStr = carrito.map(item => `${item.nombre} x${item.cantidad}`).join(', ');
                 const productosIds = carrito.map(item => item.id).join(',');
                 const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-                await apiRequest('Ventas/records', { method: 'POST', body: JSON.stringify({ productos_json: productosStr, productos_ids: productosIds, total, fecha: new Date().toISOString(), Tipo: 'Local', usuario_id: userData ? userData.id : null, cliente: clienteStr }) });
+                await addDoc(collection(window.firebaseDb, 'Ventas'), { productos_json: productosStr, productos_ids: productosIds, total, fecha: serverTimestamp(), Tipo: 'Local', usuario_id: userData ? userData.id : null, cliente: clienteStr });
                 alert('✅ Venta registrada correctamente.\n✅ Stock actualizado.');
                 carrito = [];
                 renderizarCarrito();
                 document.getElementById('cajaCliente').value = '';
                 document.getElementById('cajaTelefono').value = '';
                 document.getElementById('cajaDireccion').value = '';
-                await cargarProductos();
-                await cargarVentas();
+                await cargarProductos(); await cargarVentas();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
                 renderDashboard(ventasCache, domiciliosCache);
             } catch (e) { alert('Error al registrar la venta: ' + e.message); }
@@ -1890,7 +2010,7 @@
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
             for (const v of ventas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
                 const total = parseFloat(v.total || 0);
                 const ganancia = calcularGananciaVenta(v);
@@ -1944,7 +2064,7 @@
             document.getElementById('repCount').textContent = ventas.length;
             let html = '';
             for (const v of ventas) {
-                const fecha = v.fecha ? new Date(v.fecha).toLocaleString('es-ES') : 'Sin fecha';
+                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
                 const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
                 const ganancia = calcularGananciaVenta(v);
@@ -1958,8 +2078,8 @@
             const desde = document.getElementById('ventasFechaDesde').value;
             const hasta = document.getElementById('ventasFechaHasta').value;
             const tipo = document.getElementById('ventasTipo').value;
-            if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
-            if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+            if (desde) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) >= desde);
+            if (hasta) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) <= hasta);
             if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
             renderVentas(filtradas);
         }
@@ -1986,8 +2106,8 @@
             const desde = document.getElementById('repFechaDesde').value;
             const hasta = document.getElementById('repFechaHasta').value;
             const tipo = document.getElementById('repTipo').value;
-            if (desde) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) >= desde);
-            if (hasta) filtradas = filtradas.filter(v => v.fecha && v.fecha.slice(0,10) <= hasta);
+            if (desde) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) >= desde);
+            if (hasta) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) <= hasta);
             if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
             renderReportes(filtradas);
         }
@@ -2081,29 +2201,6 @@
                 console.error('Error inicializando app:', e);
                 alert('Error al cargar datos: ' + e.message);
             }
-        }
-
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const errorEl = document.getElementById('loginError');
-            errorEl.classList.remove('show'); errorEl.textContent = '';
-            if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
-            try {
-                await login(email, password);
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
-                initApp();
-            } catch (e) { errorEl.textContent = e.message; errorEl.classList.add('show'); }
-        });
-        document.getElementById('loginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
-        document.getElementById('loginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-
-        if (!checkAuth()) {
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('appContainer').style.display = 'none';
         }
     </script>
 
