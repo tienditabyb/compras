@@ -584,14 +584,12 @@
         </p>
     </footer>
 
-    <!-- ========== ZOOM DE FOTO (LIGHTBOX) ========== -->
     <div class="zoom-overlay" id="zoomOverlay" onclick="cerrarZoom(event)">
         <button class="zoom-close" onclick="cerrarZoom(event)" title="Cerrar">✕</button>
         <img id="zoomImg" src="" alt="Zoom" onclick="event.stopPropagation()" />
         <div class="zoom-hint">🔍 Toca fuera para cerrar</div>
     </div>
 
-    <!-- ========== FIREBASE SDK ========== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
@@ -644,9 +642,6 @@
     </script>
 
     <script>
-        // ============================================================
-        // CONFIGURACIÓN GLOBAL
-        // ============================================================
         const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
 
@@ -665,9 +660,6 @@
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // ============================================================
-        // ZOOM DE FOTOS
-        // ============================================================
         function abrirZoom(url) {
             if (!url) return;
             const overlay = document.getElementById('zoomOverlay');
@@ -687,9 +679,6 @@
             if (e.key === 'Escape') cerrarZoom();
         });
 
-        // ============================================================
-        // AUTENTICACIÓN CON FIREBASE
-        // ============================================================
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
@@ -1045,9 +1034,6 @@
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
-        // ============================================================
-        // DATOS (Firestore)
-        // ============================================================
         async function obtenerProductos() {
             try {
                 const { collection, getDocs } = window.firebaseFns;
@@ -1142,9 +1128,6 @@
             return fotos;
         }
 
-        // ============================================================
-        // RENDERIZADO
-        // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
@@ -1603,6 +1586,8 @@
                         Estado: 'Pendiente',
                         usuario_id: usuarioActual.id,
                         productos_pedido: JSON.stringify(productosPedido),
+                        subtotal: subtotal,
+                        envio: envio,
                         total: totalFinal,
                         fecha: serverTimestamp()
                     };
@@ -1615,6 +1600,8 @@
                         Cliente_Nombre: nombreCompleto,
                         Telefono: telefono,
                         productos_pedido: JSON.stringify(productosPedido),
+                        subtotal: subtotal,
+                        envio: 0,
                         total: totalFinal,
                         Estado: 'Pendiente',
                         fecha: serverTimestamp(),
@@ -1740,9 +1727,6 @@
             else mostrarDetalle(event.state.productoId);
         });
 
-        // ============================================================
-        // INICIO (ESPERA A QUE FIREBASE ESTÉ LISTO)
-        // ============================================================
         async function init() {
             actualizarUIUsuario();
             productos = await obtenerProductos();
@@ -1762,7 +1746,6 @@
             });
         }
 
-        // Esperar a que Firebase esté listo antes de iniciar
         (function esperarFirebaseInit() {
             if (window.firebaseFns && window.firebaseAuth) {
                 iniciarListenerAuth();
