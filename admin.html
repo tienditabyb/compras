@@ -619,11 +619,10 @@
             query, where, orderBy, serverTimestamp, setDoc
         };
 
-        // ☁️ Configuración de Cloudinary (para las fotos)
+        // ☁️ Cloudinary para subir fotos (sin tarjeta de crédito)
         window.CLOUDINARY_CLOUD_NAME = "amhnlgl";
         window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
 
-        // Función global para subir una foto a Cloudinary
         window.subirFotoCloudinary = async function(file) {
             const formData = new FormData();
             formData.append('file', file);
@@ -637,6 +636,9 @@
             const data = await resp.json();
             return data.secure_url;
         };
+
+        // Avisar al segundo script que Firebase ya está listo
+        window.dispatchEvent(new Event('firebase-listo'));
     </script>
 
     <script>
@@ -739,27 +741,38 @@
         function actualizarNotificaciones() { generarNotificaciones(); }
 
         // ============================================================
-        // AUTENTICACIÓN ADMIN
+        // AUTENTICACIÓN ADMIN (espera a que Firebase esté listo)
         // ============================================================
-        window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
-            if (user) {
-                if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-                    await window.firebaseFns.signOut(window.firebaseAuth);
-                    document.getElementById('loginError').textContent = 'Acceso denegado. No eres administrador.';
-                    document.getElementById('loginError').classList.add('show');
-                    return;
+        function iniciarListenerAuth() {
+            window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                if (user) {
+                    if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                        await window.firebaseFns.signOut(window.firebaseAuth);
+                        document.getElementById('loginError').textContent = 'Acceso denegado. No eres administrador.';
+                        document.getElementById('loginError').classList.add('show');
+                        return;
+                    }
+                    userData = { id: user.uid, email: user.email, name: user.displayName || user.email };
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'block';
+                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
+                    initApp();
+                } else {
+                    userData = null;
+                    document.getElementById('loginContainer').style.display = 'flex';
+                    document.getElementById('appContainer').style.display = 'none';
                 }
-                userData = { id: user.uid, email: user.email, name: user.displayName || user.email };
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
-                initApp();
+            });
+        }
+
+        // Esperar a que Firebase esté disponible (viene del script module)
+        (function esperarFirebase() {
+            if (window.firebaseFns && window.firebaseAuth) {
+                iniciarListenerAuth();
             } else {
-                userData = null;
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('appContainer').style.display = 'none';
+                setTimeout(esperarFirebase, 100);
             }
-        });
+        })();
 
         document.getElementById('loginBtn').addEventListener('click', async function() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -767,6 +780,7 @@
             const errorEl = document.getElementById('loginError');
             errorEl.classList.remove('show'); errorEl.textContent = '';
             if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
+            if (!window.firebaseFns) { errorEl.textContent = 'Firebase aún no ha cargado. Espera un momento...'; errorEl.classList.add('show'); return; }
             try {
                 const { signInWithEmailAndPassword } = window.firebaseFns;
                 await signInWithEmailAndPassword(window.firebaseAuth, email, password);
@@ -775,6 +789,9 @@
                 if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
                 else if (e.code === 'auth/wrong-password') msg = 'Contraseña incorrecta.';
                 else if (e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
+                else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+                else if (e.code === 'auth/network-request-failed') msg = 'Error de red. Revisa tu conexión.';
+                else if (e.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera un poco.';
                 errorEl.textContent = msg; errorEl.classList.add('show');
             }
         });
@@ -1747,7 +1764,6 @@
             try {
                 const { collection, addDoc, doc, updateDoc, serverTimestamp } = window.firebaseFns;
                 
-                // Subir fotos nuevas a Cloudinary
                 const urlsNuevas = [];
                 if (fotosNuevas.length > 0) {
                     btnSubmit.textContent = '⏳ Subiendo fotos...';
