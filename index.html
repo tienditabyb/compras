@@ -138,7 +138,7 @@
         .detail-page .detail-container .calificar-section .stars-input span { color: #d1d5db; transition: 0.2s; }
         .detail-page .detail-container .calificar-section .stars-input span.active { color: #f1c40f; }
         .detail-page .detail-container .calificar-section textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit; }
-        .detail-page .detail-container .calificar-section .btn-calificar { padding: 8px 24px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 0.95rem; }
+        .detail-page .detail-container .calificar-section .btn-calificar { padding: 8px 24px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.95rem; }
         .detail-page .detail-container .comentarios { margin-top: 25px; border-top: 2px solid #f1f5f9; padding-top: 20px; }
         .detail-page .detail-container .comentario-item { background: #f8fafc; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
         .detail-page .detail-container .comentario-item .comentario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
@@ -225,8 +225,7 @@
         .modal .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #1e272e; margin-bottom: 4px; }
         .modal .form-group input, .modal .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; }
         .modal .form-group input:focus, .modal .form-group textarea:focus { border-color: #2980b9; }
-        .modal .btn-primary { width: 100%; padding: 10px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
-        .modal .btn-primary:hover { background: #0f171e; }
+        .modal .btn-primary { width: 100%; padding: 10px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
         .modal .switch-auth { text-align: center; margin-top: 12px; font-size: 0.85rem; color: #64748b; }
         .modal .switch-auth a { color: #2980b9; font-weight: 600; cursor: pointer; }
         .modal .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; display: none; }
@@ -463,7 +462,7 @@
             <div class="delivery-form" id="deliveryForm">
                 <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" required minlength="2" placeholder="Tu nombre" /></div>
                 <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" required minlength="2" placeholder="Tus apellidos" /></div>
-                <div class="form-group"><label>Teléfono *</label><input type="tel" id="domTelefono" required pattern="[0-9+\-\s]{6,20}" placeholder="Ej: 3001234567" title="Solo números, mínimo 6 dígitos" /></div>
+                <div class="form-group"><label>Teléfono *</label><input type="tel" id="domTelefono" required pattern="[0-9+\-\s]{6,20}" placeholder="Ej: 3001234567" /></div>
                 <div id="domDireccionGroup">
                     <div class="form-group"><label>Dirección completa *</label><input type="text" id="domDireccion" required minlength="5" placeholder="Calle, número, barrio, ciudad" /></div>
                     <div class="form-group"><label>Referencias (opcional)</label><textarea id="domReferencias" rows="2" placeholder="Ej: Tocar timbre, portón azul, etc."></textarea></div>
@@ -479,31 +478,13 @@
             <h2 id="authTitle">Iniciar sesión</h2>
             <div id="authForm">
                 <div id="registerFields" style="display:none;">
-                    <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" id="regNombre" required minlength="2" maxlength="50" placeholder="Tu nombre" />
-                    </div>
-                    <div class="form-group">
-                        <label>Apellidos *</label>
-                        <input type="text" id="regApellidos" required minlength="2" maxlength="50" placeholder="Tus apellidos" />
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono *</label>
-                        <input type="tel" id="regTelefono" required pattern="[0-9+\-\s]{6,20}" placeholder="Ej: 3001234567" title="Solo números, mínimo 6 dígitos" />
-                    </div>
-                    <div class="form-group">
-                        <label>Dirección *</label>
-                        <input type="text" id="regDireccion" required minlength="5" maxlength="150" placeholder="Calle, número, barrio, ciudad" />
-                    </div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" required minlength="2" maxlength="50" placeholder="Tu nombre" /></div>
+                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" required minlength="2" maxlength="50" placeholder="Tus apellidos" /></div>
+                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" required pattern="[0-9+\-\s]{6,20}" placeholder="Ej: 3001234567" /></div>
+                    <div class="form-group"><label>Dirección *</label><input type="text" id="regDireccion" required minlength="5" maxlength="150" placeholder="Calle, número, barrio, ciudad" /></div>
                 </div>
-                <div class="form-group">
-                    <label>Correo electrónico *</label>
-                    <input type="email" id="authEmail" required placeholder="tu@email.com" />
-                </div>
-                <div class="form-group">
-                    <label>Contraseña *</label>
-                    <input type="password" id="authPassword" required minlength="8" placeholder="Mínimo 8 caracteres" />
-                </div>
+                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" required placeholder="tu@email.com" /></div>
+                <div class="form-group"><label>Contraseña *</label><input type="password" id="authPassword" required minlength="8" placeholder="Mínimo 8 caracteres" /></div>
                 <div id="registerPasswordConfirm" style="display:none;">
                     <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" required minlength="8" placeholder="Repite tu contraseña" /></div>
                 </div>
@@ -552,7 +533,7 @@
         try {
             await setPersistence(auth, browserLocalPersistence);
             console.log('✅ Persistencia de sesión configurada');
-        } catch (e) { console.error('❌ No se pudo establecer persistencia:', e); }
+        } catch (e) { console.error('❌ Persistencia:', e); }
 
         window.firebaseAuth = auth;
         window.firebaseDb = db;
@@ -801,14 +782,8 @@
             const errorEl = document.getElementById('authError');
             errorEl.classList.remove('show');
 
-            if (!email || !password) {
-                errorEl.textContent = '⚠️ Completa todos los campos.';
-                errorEl.classList.add('show'); return;
-            }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                errorEl.textContent = '⚠️ Escribe un correo electrónico válido.';
-                errorEl.classList.add('show'); return;
-            }
+            if (!email || !password) { errorEl.textContent = '⚠️ Completa todos los campos.'; errorEl.classList.add('show'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errorEl.textContent = '⚠️ Escribe un correo electrónico válido.'; errorEl.classList.add('show'); return; }
 
             if (modoRegistro) {
                 const nombre = document.getElementById('regNombre').value.trim();
@@ -817,44 +792,17 @@
                 const direccion = document.getElementById('regDireccion').value.trim();
                 const pc = document.getElementById('authPasswordConfirm').value;
 
-                // ✅ Validar cada campo obligatorio por separado
-                if (!nombre || nombre.length < 2) {
-                    errorEl.textContent = '⚠️ El nombre es obligatorio (mínimo 2 letras).';
-                    errorEl.classList.add('show'); return;
-                }
-                if (!apellidos || apellidos.length < 2) {
-                    errorEl.textContent = '⚠️ Los apellidos son obligatorios (mínimo 2 letras).';
-                    errorEl.classList.add('show'); return;
-                }
-                if (!telefono || telefono.length < 6) {
-                    errorEl.textContent = '⚠️ El teléfono es obligatorio (mínimo 6 dígitos).';
-                    errorEl.classList.add('show'); return;
-                }
-                if (!/^[0-9+\-\s]+$/.test(telefono)) {
-                    errorEl.textContent = '⚠️ El teléfono solo puede tener números.';
-                    errorEl.classList.add('show'); return;
-                }
-                if (!direccion || direccion.length < 5) {
-                    errorEl.textContent = '⚠️ La dirección es obligatoria (mínimo 5 caracteres).';
-                    errorEl.classList.add('show'); return;
-                }
-                if (password.length < 8) {
-                    errorEl.textContent = '⚠️ La contraseña debe tener al menos 8 caracteres.';
-                    errorEl.classList.add('show'); return;
-                }
-                if (password !== pc) {
-                    errorEl.textContent = '⚠️ Las contraseñas no coinciden.';
-                    errorEl.classList.add('show'); return;
-                }
+                if (!nombre || nombre.length < 2) { errorEl.textContent = '⚠️ El nombre es obligatorio (mínimo 2 letras).'; errorEl.classList.add('show'); return; }
+                if (!apellidos || apellidos.length < 2) { errorEl.textContent = '⚠️ Los apellidos son obligatorios (mínimo 2 letras).'; errorEl.classList.add('show'); return; }
+                if (!telefono || telefono.length < 6) { errorEl.textContent = '⚠️ El teléfono es obligatorio (mínimo 6 dígitos).'; errorEl.classList.add('show'); return; }
+                if (!/^[0-9+\-\s]+$/.test(telefono)) { errorEl.textContent = '⚠️ El teléfono solo puede tener números.'; errorEl.classList.add('show'); return; }
+                if (!direccion || direccion.length < 5) { errorEl.textContent = '⚠️ La dirección es obligatoria (mínimo 5 caracteres).'; errorEl.classList.add('show'); return; }
+                if (password.length < 8) { errorEl.textContent = '⚠️ La contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
+                if (password !== pc) { errorEl.textContent = '⚠️ Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
 
                 const result = await registrar(nombre, apellidos, email, telefono, direccion, password, pc);
-                if (result.success) {
-                    cerrarModal(); actualizarUIUsuario(); renderizarProductos();
-                    alert('✅ Registro exitoso. ¡Bienvenido!');
-                } else {
-                    errorEl.textContent = result.error;
-                    errorEl.classList.add('show');
-                }
+                if (result.success) { cerrarModal(); actualizarUIUsuario(); renderizarProductos(); alert('✅ Registro exitoso. ¡Bienvenido!'); }
+                else { errorEl.textContent = result.error; errorEl.classList.add('show'); }
             } else {
                 const result = await login(email, password);
                 if (result.success) { cerrarModal(); actualizarUIUsuario(); renderizarProductos(); }
@@ -1344,7 +1292,6 @@
             const direccion = document.getElementById('domDireccion').value.trim();
             const referencias = document.getElementById('domReferencias').value.trim();
 
-            // ✅ Validaciones con mensajes específicos
             if (!nombre || nombre.length < 2) { alert('⚠️ El nombre es obligatorio (mínimo 2 letras).'); return; }
             if (!apellidos || apellidos.length < 2) { alert('⚠️ Los apellidos son obligatorios (mínimo 2 letras).'); return; }
             if (!telefono || telefono.length < 6) { alert('⚠️ El teléfono es obligatorio (mínimo 6 dígitos).'); return; }
@@ -1401,7 +1348,7 @@
                 mensaje += `📊 Ganancia: $${gananciaCarrito.toFixed(2)}\n💵 Total: $${totalFinal.toFixed(2)}\n\n🆔 ID: #${pedidoId}\n📅 ${new Date().toLocaleString('es-ES')}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
                 try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) { console.warn('WA fail:', err); }
-                notificarAdminOneSignal("🛒 Nueva compra", `${nc} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`);
+
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
@@ -1449,7 +1396,6 @@
                 const mensaje = `*📦 Nuevo encargo*\n\n👤 ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n📞 ${usuarioActual.telefono || 'Sin teléfono'}\n🛒 ${prod.Nombre}\n🔢 Cantidad: ${cantidad}\n💬 ${comentario || 'Sin comentario'}\n🆔 ${docRef.id.slice(-6)}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
                 try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) {}
-                notificarAdminOneSignal("📦 Nuevo encargo", `${usuarioActual.nombre || 'Cliente'} - ${prod.Nombre} (x${cantidad})`);
                 alert('✅ Encargo solicitado. Pronto te contactamos.');
                 cerrarEncargoModal();
             } catch (e) {
@@ -1459,14 +1405,12 @@
         });
         document.getElementById('encargoModal').addEventListener('click', function(e) { if (e.target === this) cerrarEncargoModal(); });
 
-        // Navegación entre detalle y lista
         window.addEventListener('popstate', function(event) {
             if (!event.state || (!event.state.productoId && !event.state.page)) return;
             if (event.state.productoId) mostrarDetalle(event.state.productoId);
             else if (event.state.page === 'tienda') volverALista();
         });
 
-        // 🔔 Aviso antes de cerrar/recargar la página si hay carrito con productos
         window.addEventListener('beforeunload', function(e) {
             if (carrito.length > 0) {
                 e.preventDefault();
@@ -1475,7 +1419,6 @@
             }
         });
 
-        // 🔔 Confirmación al presionar "atrás" en el teléfono
         try {
             if (!history.state || !history.state.page) {
                 history.pushState({ page: 'tienda' }, '', window.location.href);
@@ -1530,25 +1473,6 @@
         }
         window.addEventListener('load', ocultarBotonesDescargaSiEsApp);
         setTimeout(ocultarBotonesDescargaSiEsApp, 500);
-    </script>
-
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({ appId: "e939f58c-3df0-48d6-a86b-ee93da88a9c1", allowLocalhostAsSecureOrigin: true });
-        console.log("✅ OneSignal listo en la página de cliente.");
-      });
-      async function notificarAdminOneSignal(titulo, mensaje) {
-        try {
-          const resp = await fetch('https://api.onesignal.com/notifications', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Key os_v2_app_5e47ldb56bennkdl52j5vcfjyelitw2ypxuus7ey6gh7dm5btyhvu2uecmbgw6ova4d7hga6gzugdyfyv54zwx7m4wzchew3d27e2wy' },
-            body: JSON.stringify({ app_id: "e939f58c-3df0-48d6-a86b-ee93da88a9c1", include_aliases: { external_id: ["admin_tiendita_byb"] }, target_channel: "push", headings: { en: titulo, es: titulo }, contents: { en: mensaje, es: mensaje } })
-          });
-          console.log("📨 Notificación enviada:", await resp.json());
-        } catch (e) { console.error("❌ Error:", e); }
-      }
     </script>
 </body>
 </html>
