@@ -9,14 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-            max-width: 100%;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f5f6fa;
-            color: #1e272e;
-        }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; font-family: 'Poppins', sans-serif; background-color: #f5f6fa; color: #1e272e; }
         a { text-decoration: none; color: inherit; }
         button { cursor: pointer; font-family: inherit; }
 
@@ -44,16 +37,13 @@
 
         .account-dropdown-content { display: none; position: absolute; right: 0; top: 115%; background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); min-width: 280px; padding: 8px 0; z-index: 900; overflow: hidden; }
         .account-dropdown-content.open { display: block; }
-
         .account-dropdown-content .dropdown-header { padding: 14px 20px 10px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
         .account-dropdown-content .dropdown-header .avatar-lg { width: 44px; height: 44px; border-radius: 50%; background: #2980b9; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
         .account-dropdown-content .dropdown-header .user-name { font-weight: 600; color: #1e272e; }
         .account-dropdown-content .dropdown-header .user-email { font-size: 0.8rem; color: #64748b; }
-
         .account-dropdown-content .dropdown-item { display: block; padding: 10px 20px; color: #1e272e; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; display: flex; align-items: center; gap: 10px; }
         .account-dropdown-content .dropdown-item:hover { background: #f1f5f9; }
         .account-dropdown-content .dropdown-item .icon { font-size: 1.1rem; }
-
         .account-dropdown-content .dropdown-divider { height: 1px; background: #e2e8f0; margin: 4px 12px; }
 
         .profile-submenu { padding: 0 16px 12px; }
@@ -107,7 +97,6 @@
         .product-card { background: white; border-radius: 14px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; height: 100%; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
         .product-card .foto-principal { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f1f5f9; border-radius: 10px; margin-bottom: 8px; }
-        .product-card .product-tag { font-size: 0.7rem; font-weight: 600; color: #e67e22; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .product-card h3 { font-size: 0.95rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .product-card .product-desc { font-size: 0.8rem; color: #64748b; line-height: 1.3; margin-bottom: 6px; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .product-card .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: auto; }
@@ -153,13 +142,8 @@
         .detail-page .detail-container .calificar-section .stars-input span { color: #d1d5db; transition: 0.2s; }
         .detail-page .detail-container .calificar-section .stars-input span.active { color: #f1c40f; }
         .detail-page .detail-container .calificar-section textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; resize: vertical; min-height: 60px; outline: none; font-family: inherit; }
-        .detail-page .detail-container .calificar-section textarea:focus { border-color: #2980b9; }
         .detail-page .detail-container .calificar-section .btn-calificar { padding: 8px 24px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 0.95rem; }
-        .detail-page .detail-container .calificar-section .btn-calificar:hover { background: #0f171e; }
-        .detail-page .detail-container .calificar-section .btn-calificar:disabled { background: #94a3b8; cursor: not-allowed; }
-
         .detail-page .detail-container .comentarios { margin-top: 25px; border-top: 2px solid #f1f5f9; padding-top: 20px; }
-        .detail-page .detail-container .comentarios h4 { font-size: 1.1rem; margin-bottom: 15px; }
         .detail-page .detail-container .comentario-item { background: #f8fafc; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
         .detail-page .detail-container .comentario-item .comentario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .detail-page .detail-container .comentario-item .comentario-nombre { font-weight: 600; color: #1e272e; }
@@ -183,14 +167,11 @@
             .toolbar__sort { justify-content: flex-start; }
             .toolbar__categories { display: block; position: relative; }
             .btn-categories { font-size: 0.85rem; padding: 6px 14px; font-weight: 600; }
-            .btn-categories .icon { font-size: 1rem; }
             .categories-dropdown { position: absolute; top: calc(100% + 8px); right: 0; left: auto; width: 270px; max-width: calc(100vw - 20px); min-width: 0; box-sizing: border-box; overflow-x: hidden; z-index: 600; background: #ffffff; box-shadow: 0 14px 40px rgba(0,0,0,0.25); border-radius: 14px; padding: 6px 0; max-height: 75vh; overflow-y: auto; }
             .categories-dropdown a { display: block; padding: 14px 20px; font-size: 1rem; font-weight: 500; line-height: 1.3; border-bottom: 1px solid #f1f5f9; white-space: normal; overflow-wrap: anywhere; word-break: break-word; color: #1e272e; }
-            .categories-dropdown a:last-child { border-bottom: none; }
             .categories-dropdown a.active { background: #e6f0fa; color: #2980b9; font-weight: 700; }
             .account-dropdown-content { right: auto; left: 0; min-width: 260px; }
             .detail-page .detail-container { padding: 15px; }
-            .detail-page .detail-container .galeria .miniaturas img { width: 45px; height: 45px; }
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
             .products-grid { gap: 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; grid-auto-rows: 1fr; width: 100%; max-width: 100%; min-width: 0; }
@@ -232,7 +213,6 @@
         .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
         .resumen-pedido .envio.gratis { color: #059669; font-weight: 700; }
         .history-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; }
-        .history-item:last-child { border-bottom: none; }
         .history-item .order-date { font-size: 0.8rem; color: #94a3b8; }
         .history-item .order-products { font-weight: 500; margin: 4px 0; }
         .history-item .order-products ul { list-style: none; padding-left: 0; font-weight: 400; font-size: 0.85rem; }
@@ -244,13 +224,11 @@
         .modal { background: white; border-radius: 20px; padding: 25px; max-width: 460px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
         .modal.modal-lg { max-width: 650px; }
         .modal .close-modal { position: absolute; top: 12px; right: 18px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #94a3b8; }
-        .modal .close-modal:hover { color: #1e272e; }
         .modal h2 { font-size: 1.3rem; margin-bottom: 16px; color: #1e272e; text-align: center; }
         .modal .form-group { margin-bottom: 12px; }
         .modal .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #1e272e; margin-bottom: 4px; }
-        .modal .form-group input, .modal .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; transition: 0.3s; font-family: inherit; }
+        .modal .form-group input, .modal .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; }
         .modal .form-group input:focus, .modal .form-group textarea:focus { border-color: #2980b9; }
-        .modal .form-group textarea { resize: vertical; min-height: 50px; }
         .modal .btn-primary { width: 100%; padding: 10px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
         .modal .btn-primary:hover { background: #0f171e; }
         .modal .switch-auth { text-align: center; margin-top: 12px; font-size: 0.85rem; color: #64748b; }
@@ -262,9 +240,7 @@
         .add-cart-actions { display: flex; gap: 10px; margin-top: 16px; }
         .add-cart-actions .btn-primary { flex: 1; }
         .add-cart-actions .btn-primary.green { background: #2ecc71; }
-        .add-cart-actions .btn-primary.green:hover { background: #27ae60; }
         .contact-info { background: #f8fafc; border-radius: 10px; padding: 12px; margin: 8px 0; line-height: 1.7; font-size: 0.9rem; }
-        .contact-info strong { color: #1e272e; }
 
         .about-content { font-size: 0.95rem; line-height: 1.7; color: #475569; }
         .about-content p { margin-bottom: 12px; }
@@ -278,41 +254,29 @@
         .cart-sidebar .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; }
         .cart-sidebar .cart-header h2 { font-size: 1.2rem; color: #1e272e; }
         .cart-sidebar .cart-header .close-cart { background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #94a3b8; }
-        .cart-sidebar .cart-header .close-cart:hover { color: #1e272e; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 10px 0; }
         .cart-item .item-info { flex: 1; }
         .cart-item .item-name { font-weight: 500; color: #1e272e; font-size: 0.9rem; }
         .cart-item .item-price { color: #2980b9; font-weight: 600; font-size: 0.85rem; }
         .cart-item .item-actions { display: flex; align-items: center; gap: 4px; }
-        .cart-item .item-actions button { background: #f1f5f9; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .cart-item .item-actions button:hover { background: #e2e8f0; }
+        .cart-item .item-actions button { background: #f1f5f9; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .cart-item .item-actions .remove { background: #fee2e2; color: #e74c3c; }
-        .cart-item .item-actions .remove:hover { background: #fecaca; }
         .cart-total { font-size: 1.2rem; font-weight: 700; color: #2980b9; text-align: center; padding: 12px 0; border-top: 2px solid #f1f5f9; margin-top: 8px; }
-        .cart-sidebar .checkout-btn { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.3s; margin-top: 8px; }
-        .cart-sidebar .checkout-btn:hover { background: #0f171e; }
-        .cart-sidebar .checkout-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        .cart-sidebar .checkout-btn { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
 
-        .footer { background-color: #1a252f; color: #ffffff; text-align: center; padding: 15px 10px; margin-top: 30px; font-size: 0.9rem; border-top: 1px solid #3a5068; width: 100%; }
+        .footer { background-color: #1a252f; color: #ffffff; text-align: center; padding: 15px 10px; margin-top: 30px; font-size: 0.9rem; width: 100%; }
         .footer p { margin: 4px 0; opacity: 0.9; }
         .footer .download-footer { color: #74b9ff; text-decoration: underline; font-weight: 500; }
-        .footer .download-footer:hover { color: #a8d8ff; }
         .footer .about-link { color: #74b9ff; text-decoration: underline; font-weight: 500; cursor: pointer; }
-        .footer .about-link:hover { color: #a8d8ff; }
 
         html, body { max-width: 100% !important; overflow-x: hidden !important; }
         .main-content, .products-section, .products-grid, .toolbar, .detail-page, .detail-container { max-width: 100% !important; box-sizing: border-box; overflow-x: hidden; }
-        .products-section { width: 100%; }
-        .product-card, .product-card .product-footer, .product-card h3 { min-width: 0; }
 
-        .zoom-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; touch-action: pinch-zoom; }
+        .zoom-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
         .zoom-overlay.active { display: flex; }
-        .zoom-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); cursor: default; }
-        .zoom-overlay .zoom-close { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; width: 46px; height: 46px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; backdrop-filter: blur(4px); }
-        .zoom-overlay .zoom-close:hover { background: rgba(255,255,255,0.3); }
-        .zoom-overlay .zoom-hint { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.8rem; text-align: center; pointer-events: none; padding: 6px 14px; background: rgba(0,0,0,0.4); border-radius: 20px; }
-        .product-card .foto-principal[data-zoom="1"] { cursor: zoom-in; }
-        .detail-page .imagen-principal[data-zoom="1"] { cursor: zoom-in; }
+        .zoom-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
+        .zoom-overlay .zoom-close { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; width: 46px; height: 46px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .zoom-overlay .zoom-hint { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.8rem; padding: 6px 14px; background: rgba(0,0,0,0.4); border-radius: 20px; }
     </style>
 </head>
 <body>
@@ -324,9 +288,7 @@
                 <button type="submit">Buscar</button>
             </form>
             <div class="header__actions">
-                <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-apk-btn" id="btnDescargaHeader" download>
-                    📲 Descargar APK
-                </a>
+                <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-apk-btn" id="btnDescargaHeader" download>📲 Descargar APK</a>
                 <div class="account-dropdown" id="accountDropdown">
                     <button class="account-btn" id="accountBtn" onclick="toggleAccountDropdown()">
                         <span class="avatar" id="accountAvatar">👤</span>
@@ -339,10 +301,7 @@
         </div>
     </header>
 
-    <button class="cart-float" id="cartFloatBtn" onclick="abrirCarrito()">
-        🛒
-        <span class="badge" id="cartFloatBadge">0</span>
-    </button>
+    <button class="cart-float" id="cartFloatBtn" onclick="abrirCarrito()">🛒<span class="badge" id="cartFloatBadge">0</span></button>
 
     <div class="main-content" id="mainContent">
         <aside class="sidebar" id="sidebar">
@@ -355,9 +314,7 @@
                 <div class="toolbar__left">
                     <h2 id="sectionTitle">Productos</h2>
                     <div class="toolbar__categories">
-                        <button class="btn-categories" onclick="toggleCategoriesDropdown()">
-                            <span class="icon">☰</span> Categorías
-                        </button>
+                        <button class="btn-categories" onclick="toggleCategoriesDropdown()"><span class="icon">☰</span> Categorías</button>
                         <div class="categories-dropdown" id="categoriesDropdown"></div>
                     </div>
                 </div>
@@ -431,13 +388,11 @@
         <div class="modal">
             <button class="close-modal" onclick="cerrarChangePasswordModal()">✕</button>
             <h2>🔑 Cambiar contraseña</h2>
-            <div id="changePassForm">
-                <div class="form-group"><label>Contraseña actual *</label><input type="password" id="oldPassword" placeholder="Escribe tu contraseña actual" /></div>
-                <div class="form-group"><label>Nueva contraseña *</label><input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" /></div>
-                <div class="form-group"><label>Confirmar nueva contraseña *</label><input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" /></div>
-                <div id="passError" class="error-msg"></div>
-                <button class="btn-primary" onclick="cambiarPassword()">Actualizar contraseña</button>
-            </div>
+            <div class="form-group"><label>Contraseña actual *</label><input type="password" id="oldPassword" /></div>
+            <div class="form-group"><label>Nueva contraseña *</label><input type="password" id="newPassword" placeholder="Mínimo 8 caracteres" /></div>
+            <div class="form-group"><label>Confirmar nueva contraseña *</label><input type="password" id="confirmPassword" /></div>
+            <div id="passError" class="error-msg"></div>
+            <button class="btn-primary" onclick="cambiarPassword()">Actualizar contraseña</button>
         </div>
     </div>
 
@@ -470,9 +425,7 @@
                     <li><strong>Retiro en tienda:</strong> puedes pasar a buscarlo cuando te convenga.</li>
                 </ul>
                 <h3>📅 Sobre los encargos</h3>
-                <div class="highlight">
-                    Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>. Al confirmar el pedido, el cliente debe abonar la mitad del costo en un plazo de 24h.
-                </div>
+                <div class="highlight">Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>. Al confirmar el pedido, el cliente debe abonar la mitad del costo en un plazo de 24h.</div>
                 <h3>📍 Visítanos</h3>
                 <p>Estamos ubicados en <strong>Paseo de la Paz #457 entre 2da y 3ra, Loma de Belén, Santa Clara, Villa Clara, Cuba</strong>. Puedes llamarnos al <strong>+53 58388494 (Yoandy)</strong> o <strong>+53 53803134 (Carmen)</strong>, o escribirnos a <strong>bribry457@gmail.com</strong>.</p>
                 <p style="text-align:center; margin-top:20px; font-style:italic; color:#94a3b8;">💙 Gracias por confiar en B&amp;B</p>
@@ -503,12 +456,8 @@
             <button class="close-modal" onclick="cerrarDeliveryModal()">✕</button>
             <h2>📦 Elige tu método de entrega</h2>
             <div class="delivery-options">
-                <button onclick="seleccionarEntrega('Domicilio')">
-                    <span class="icon">🚚</span><span class="label">Domicilio</span><span class="sub">(Envío a tu dirección)</span>
-                </button>
-                <button onclick="seleccionarEntrega('Tienda')">
-                    <span class="icon">🏪</span><span class="label">Retiro en tienda</span><span class="sub">(Pasas a buscar)</span>
-                </button>
+                <button onclick="seleccionarEntrega('Domicilio')"><span class="icon">🚚</span><span class="label">Domicilio</span><span class="sub">(Envío a tu dirección)</span></button>
+                <button onclick="seleccionarEntrega('Tienda')"><span class="icon">🏪</span><span class="label">Retiro en tienda</span><span class="sub">(Pasas a buscar)</span></button>
             </div>
             <div class="resumen-pedido" id="resumenPedido">
                 <div class="linea"><span>Subtotal</span> <span id="resumenSubtotal">$0.00</span></div>
@@ -516,12 +465,12 @@
                 <div class="linea total"><span>Total</span> <span id="resumenTotal">$0.00</span></div>
             </div>
             <div class="delivery-form" id="deliveryForm">
-                <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" placeholder="Tu nombre" /></div>
-                <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" placeholder="Tus apellidos" /></div>
-                <div class="form-group"><label>Teléfono *</label><input type="tel" id="domTelefono" placeholder="Ej: 3001234567" /></div>
+                <div class="form-group"><label>Nombre *</label><input type="text" id="domNombre" /></div>
+                <div class="form-group"><label>Apellidos *</label><input type="text" id="domApellidos" /></div>
+                <div class="form-group"><label>Teléfono *</label><input type="tel" id="domTelefono" /></div>
                 <div id="domDireccionGroup">
-                    <div class="form-group"><label>Dirección completa *</label><input type="text" id="domDireccion" placeholder="Calle, número, barrio, ciudad" /></div>
-                    <div class="form-group"><label>Referencias (opcional)</label><textarea id="domReferencias" placeholder="Ej: Tocar timbre, portón azul, etc." rows="2"></textarea></div>
+                    <div class="form-group"><label>Dirección completa *</label><input type="text" id="domDireccion" /></div>
+                    <div class="form-group"><label>Referencias (opcional)</label><textarea id="domReferencias" rows="2"></textarea></div>
                 </div>
                 <button class="btn-primary" id="confirmarPedidoBtn" onclick="confirmarPedidoFinal()">✅ Confirmar pedido</button>
             </div>
@@ -534,15 +483,15 @@
             <h2 id="authTitle">Iniciar sesión</h2>
             <div id="authForm">
                 <div id="registerFields" style="display:none;">
-                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" placeholder="Tu nombre" /></div>
-                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" placeholder="Tus apellidos" /></div>
-                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" placeholder="Ej: 3001234567" /></div>
-                    <div class="form-group"><label>Dirección *</label><input type="text" id="regDireccion" placeholder="Calle, número, barrio, ciudad" /></div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="regNombre" /></div>
+                    <div class="form-group"><label>Apellidos *</label><input type="text" id="regApellidos" /></div>
+                    <div class="form-group"><label>Teléfono *</label><input type="tel" id="regTelefono" /></div>
+                    <div class="form-group"><label>Dirección *</label><input type="text" id="regDireccion" /></div>
                 </div>
-                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" placeholder="tu@email.com" /></div>
+                <div class="form-group"><label>Correo electrónico *</label><input type="email" id="authEmail" /></div>
                 <div class="form-group"><label>Contraseña *</label><input type="password" id="authPassword" placeholder="Mínimo 8 caracteres" /></div>
                 <div id="registerPasswordConfirm" style="display:none;">
-                    <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" placeholder="Repite tu contraseña" /></div>
+                    <div class="form-group"><label>Confirmar contraseña *</label><input type="password" id="authPasswordConfirm" /></div>
                 </div>
                 <div id="authError" class="error-msg"></div>
                 <button class="btn-primary" id="authSubmitBtn" onclick="handleAuth()">Iniciar sesión</button>
@@ -558,9 +507,7 @@
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
         <p><span class="about-link" onclick="abrirAboutModal()">🏪 Sobre Nosotros</span></p>
         <p id="footerDescargaParrafo">
-            <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-footer" id="btnDescargaFooter" download>
-                📲 Descarga nuestra APK
-            </a>
+            <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-footer" id="btnDescargaFooter" download>📲 Descarga nuestra APK</a>
         </p>
     </footer>
 
@@ -572,34 +519,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { 
-            getAuth, 
-            setPersistence,
-            browserLocalPersistence,
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            updatePassword,
-            EmailAuthProvider,
-            reauthenticateWithCredential,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            getDoc, 
-            getDocs, 
-            addDoc, 
-            updateDoc, 
-            deleteDoc, 
-            query, 
-            where, 
-            orderBy, 
-            serverTimestamp,
-            setDoc
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
@@ -617,9 +538,7 @@
         try {
             await setPersistence(auth, browserLocalPersistence);
             console.log('✅ Persistencia de sesión configurada');
-        } catch (e) {
-            console.error('❌ No se pudo establecer persistencia:', e);
-        }
+        } catch (e) { console.error('❌ No se pudo establecer persistencia:', e); }
 
         window.firebaseAuth = auth;
         window.firebaseDb = db;
@@ -634,8 +553,7 @@
     <script>
         const PRODUCTOS_POR_PAGINA = 12;
         let ENVIO_COSTO = 1.00;
-        let ENVIO_GRATIS_DESDE = 5.00; // 🆕 Ahora se refiere a la GANANCIA total del pedido
-
+        let ENVIO_GRATIS_DESDE = 5.00;
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
@@ -654,36 +572,16 @@
                 const stored = localStorage.getItem('bb_user_data');
                 if (stored) {
                     const user = JSON.parse(stored);
-                    if (user && user.id) {
-                        usuarioActual = user;
-                        console.log('✅ Usuario restaurado de localStorage:', user.email);
-                    }
+                    if (user && user.id) { usuarioActual = user; console.log('✅ Usuario restaurado:', user.email); }
                 }
-            } catch (e) {
-                console.error('Error restaurando usuario:', e);
-            }
+            } catch (e) { console.error('Error restaurando usuario:', e); }
         })();
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        function abrirZoom(url) {
-            if (!url) return;
-            const overlay = document.getElementById('zoomOverlay');
-            const img = document.getElementById('zoomImg');
-            img.src = url;
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function cerrarZoom(e) {
-            if (e) e.stopPropagation();
-            const overlay = document.getElementById('zoomOverlay');
-            overlay.classList.remove('active');
-            document.getElementById('zoomImg').src = '';
-            document.body.style.overflow = '';
-        }
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') cerrarZoom();
-        });
+        function abrirZoom(url) { if (!url) return; const o = document.getElementById('zoomOverlay'); document.getElementById('zoomImg').src = url; o.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function cerrarZoom(e) { if (e) e.stopPropagation(); document.getElementById('zoomOverlay').classList.remove('active'); document.getElementById('zoomImg').src = ''; document.body.style.overflow = ''; }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarZoom(); });
 
         function abrirAboutModal() { document.getElementById('aboutModal').classList.add('active'); }
         function cerrarAboutModal() { document.getElementById('aboutModal').classList.remove('active'); }
@@ -703,12 +601,10 @@
             const email = document.getElementById('recuperarEmail').value.trim();
             const errorEl = document.getElementById('recuperarError');
             const exitoEl = document.getElementById('recuperarExito');
-            errorEl.classList.remove('show');
-            exitoEl.classList.remove('show');
+            errorEl.classList.remove('show'); exitoEl.classList.remove('show');
             if (!email) { errorEl.textContent = 'Escribe tu correo electrónico.'; errorEl.classList.add('show'); return; }
             const btn = document.getElementById('recuperarBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Enviando...';
+            btn.disabled = true; btn.textContent = '⏳ Enviando...';
             try {
                 const { sendPasswordResetEmail } = window.firebaseFns;
                 await sendPasswordResetEmail(window.firebaseAuth, email);
@@ -719,13 +615,8 @@
                 let msg = 'Error al enviar el correo.';
                 if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con ese correo.';
                 else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
-                else if (e.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera unos minutos.';
-                errorEl.textContent = msg;
-                errorEl.classList.add('show');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '📧 Enviar enlace';
-            }
+                errorEl.textContent = msg; errorEl.classList.add('show');
+            } finally { btn.disabled = false; btn.textContent = '📧 Enviar enlace'; }
         }
 
         function iniciarListenerAuth() {
@@ -733,14 +624,8 @@
                 if (user) {
                     try {
                         const { doc, getDoc } = window.firebaseFns;
-                        const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
-                        const userDoc = await getDoc(userDocRef);
-                        let userData = {
-                            id: user.uid,
-                            email: user.email,
-                            name: user.displayName || user.email,
-                            nombre: '', apellidos: '', telefono: '', direccion: ''
-                        };
+                        const userDoc = await getDoc(doc(window.firebaseDb, 'usuarios', user.uid));
+                        let userData = { id: user.uid, email: user.email, name: user.displayName || user.email, nombre: '', apellidos: '', telefono: '', direccion: '' };
                         if (userDoc.exists()) {
                             const data = userDoc.data();
                             userData.nombre = data.nombre || '';
@@ -765,88 +650,66 @@
         async function login(email, password) {
             try {
                 const { signInWithEmailAndPassword, doc, getDoc } = window.firebaseFns;
-                const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
-                const user = userCredential.user;
-                const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
-                const userDoc = await getDoc(userDocRef);
-                let userData = {
-                    id: user.uid, email: user.email, name: user.displayName || user.email,
-                    nombre: '', apellidos: '', telefono: '', direccion: ''
-                };
+                const uc = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = uc.user;
+                const userDoc = await getDoc(doc(window.firebaseDb, 'usuarios', user.uid));
+                let userData = { id: user.uid, email: user.email, name: user.displayName || user.email, nombre: '', apellidos: '', telefono: '', direccion: '' };
                 if (userDoc.exists()) {
                     const data = userDoc.data();
-                    userData = {
-                        id: user.uid, email: user.email,
-                        name: data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email,
-                        nombre: data.nombre || '', apellidos: data.apellidos || '',
-                        telefono: data.telefono || '', direccion: data.direccion || ''
-                    };
+                    userData = { id: user.uid, email: user.email, name: data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email, nombre: data.nombre || '', apellidos: data.apellidos || '', telefono: data.telefono || '', direccion: data.direccion || '' };
                 }
                 guardarUsuarioLocal(userData);
                 actualizarUIUsuario();
                 return { success: true };
             } catch (e) {
-                let mensajeError = 'Error al iniciar sesión';
-                if (e.code === 'auth/user-not-found') mensajeError = 'No existe una cuenta con este correo.';
-                else if (e.code === 'auth/wrong-password') mensajeError = 'Contraseña incorrecta.';
-                else if (e.code === 'auth/invalid-credential') mensajeError = 'Correo o contraseña incorrectos.';
-                else if (e.code === 'auth/invalid-email') mensajeError = 'El correo electrónico no es válido.';
-                else if (e.code === 'auth/too-many-requests') mensajeError = 'Demasiados intentos. Espera unos minutos.';
-                return { success: false, error: mensajeError };
+                let msg = 'Error al iniciar sesión';
+                if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
+                else if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
+                else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+                return { success: false, error: msg };
             }
         }
 
         async function registrar(nombre, apellidos, email, telefono, direccion, password, passwordConfirm) {
             try {
                 const { createUserWithEmailAndPassword, doc, setDoc, serverTimestamp } = window.firebaseFns;
-                const nombreCompleto = `${nombre} ${apellidos}`.trim();
-                const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
-                const user = userCredential.user;
-                const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
-                await setDoc(userDocRef, {
-                    nombre, apellidos, name: nombreCompleto, email, telefono, direccion,
-                    fecha_registro: serverTimestamp()
-                });
+                const nc = `${nombre} ${apellidos}`.trim();
+                const uc = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                await setDoc(doc(window.firebaseDb, 'usuarios', uc.user.uid), { nombre, apellidos, name: nc, email, telefono, direccion, fecha_registro: serverTimestamp() });
                 return await login(email, password);
             } catch (e) {
-                let mensajeError = 'Error al registrar';
-                if (e.code === 'auth/email-already-in-use') mensajeError = 'Este correo ya está registrado.';
-                else if (e.code === 'auth/invalid-email') mensajeError = 'El correo electrónico no es válido.';
-                else if (e.code === 'auth/weak-password') mensajeError = 'La contraseña es muy débil (mínimo 6 caracteres).';
-                return { success: false, error: mensajeError };
+                let msg = 'Error al registrar';
+                if (e.code === 'auth/email-already-in-use') msg = 'Este correo ya está registrado.';
+                else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+                else if (e.code === 'auth/weak-password') msg = 'La contraseña es muy débil.';
+                return { success: false, error: msg };
             }
         }
 
         async function cerrarSesion() {
-            try {
-                const { signOut } = window.firebaseFns;
-                await signOut(window.firebaseAuth);
-                guardarUsuarioLocal(null);
-                actualizarUIUsuario();
-                renderizarProductos();
-                cerrarAccountDropdown();
-            } catch (e) { console.error('Error al cerrar sesión:', e); }
+            try { await window.firebaseFns.signOut(window.firebaseAuth); guardarUsuarioLocal(null); actualizarUIUsuario(); renderizarProductos(); cerrarAccountDropdown(); }
+            catch (e) { console.error('Error al cerrar sesión:', e); }
         }
 
         function actualizarUIUsuario() {
             const user = usuarioActual;
-            const dropdownContent = document.getElementById('accountDropdownContent');
+            const dd = document.getElementById('accountDropdownContent');
             const avatar = document.getElementById('accountAvatar');
             const label = document.getElementById('accountLabel');
             if (user) {
-                let nombreCompleto = '';
-                if (user.nombre && user.apellidos) nombreCompleto = `${user.nombre} ${user.apellidos}`.trim();
-                else if (user.nombre) nombreCompleto = user.nombre;
-                else if (user.name) nombreCompleto = user.name;
-                else nombreCompleto = user.email || 'Usuario';
-                const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() : (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
+                let nc = '';
+                if (user.nombre && user.apellidos) nc = `${user.nombre} ${user.apellidos}`.trim();
+                else if (user.nombre) nc = user.nombre;
+                else if (user.name) nc = user.name;
+                else nc = user.email || 'Usuario';
+                const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() : 'U');
                 avatar.textContent = inicial;
-                label.textContent = `Hola, ${nombreCompleto}`;
-                dropdownContent.innerHTML = `
+                label.textContent = `Hola, ${nc}`;
+                dd.innerHTML = `
                     <div class="dropdown-header">
                         <div class="avatar-lg">${inicial}</div>
                         <div>
-                            <div class="user-name">${nombreCompleto}</div>
+                            <div class="user-name">${nc}</div>
                             <div class="user-email">${user.email}</div>
                         </div>
                     </div>
@@ -870,29 +733,17 @@
             } else {
                 avatar.textContent = '👤';
                 label.textContent = 'Iniciar sesión';
-                dropdownContent.innerHTML = `
+                dd.innerHTML = `
                     <button class="dropdown-item" onclick="abrirModalLogin()"><span class="icon">🔑</span> Iniciar sesión</button>
                     <button class="dropdown-item" onclick="abrirAboutModal()"><span class="icon">🏪</span> Sobre nosotros</button>
                 `;
             }
         }
 
-        function toggleProfileSubmenu() {
-            const sub = document.getElementById('profileSubmenu');
-            if (sub) sub.style.display = sub.style.display === 'none' ? 'block' : 'none';
-        }
-        function toggleAccountDropdown() {
-            document.getElementById('accountDropdownContent').classList.toggle('open');
-            document.getElementById('accountBtn').classList.toggle('open');
-        }
-        function cerrarAccountDropdown() {
-            document.getElementById('accountDropdownContent').classList.remove('open');
-            document.getElementById('accountBtn').classList.remove('open');
-        }
-        document.addEventListener('click', function(e) {
-            const container = document.getElementById('accountDropdown');
-            if (container && !container.contains(e.target)) cerrarAccountDropdown();
-        });
+        function toggleProfileSubmenu() { const s = document.getElementById('profileSubmenu'); if (s) s.style.display = s.style.display === 'none' ? 'block' : 'none'; }
+        function toggleAccountDropdown() { document.getElementById('accountDropdownContent').classList.toggle('open'); document.getElementById('accountBtn').classList.toggle('open'); }
+        function cerrarAccountDropdown() { document.getElementById('accountDropdownContent').classList.remove('open'); document.getElementById('accountBtn').classList.remove('open'); }
+        document.addEventListener('click', function(e) { const c = document.getElementById('accountDropdown'); if (c && !c.contains(e.target)) cerrarAccountDropdown(); });
 
         function abrirModalLogin() {
             modoRegistro = false;
@@ -934,17 +785,17 @@
             const password = document.getElementById('authPassword').value;
             const errorEl = document.getElementById('authError');
             errorEl.classList.remove('show');
-            if (!email || !password) { errorEl.textContent = 'Completa todos los campos obligatorios.'; errorEl.classList.add('show'); return; }
+            if (!email || !password) { errorEl.textContent = 'Completa todos los campos.'; errorEl.classList.add('show'); return; }
             if (modoRegistro) {
                 const nombre = document.getElementById('regNombre').value.trim();
                 const apellidos = document.getElementById('regApellidos').value.trim();
                 const telefono = document.getElementById('regTelefono').value.trim();
                 const direccion = document.getElementById('regDireccion').value.trim();
-                const passwordConfirm = document.getElementById('authPasswordConfirm').value;
-                if (!nombre || !apellidos || !telefono || !direccion) { errorEl.textContent = 'Nombre, apellidos, teléfono y dirección son obligatorios.'; errorEl.classList.add('show'); return; }
-                if (password !== passwordConfirm) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
+                const pc = document.getElementById('authPasswordConfirm').value;
+                if (!nombre || !apellidos || !telefono || !direccion) { errorEl.textContent = 'Todos los campos son obligatorios.'; errorEl.classList.add('show'); return; }
+                if (password !== pc) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
                 if (password.length < 8) { errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
-                const result = await registrar(nombre, apellidos, email, telefono, direccion, password, passwordConfirm);
+                const result = await registrar(nombre, apellidos, email, telefono, direccion, password, pc);
                 if (result.success) { cerrarModal(); actualizarUIUsuario(); renderizarProductos(); alert('✅ Registro exitoso. ¡Bienvenido!'); }
                 else { errorEl.textContent = result.error; errorEl.classList.add('show'); }
             } else {
@@ -955,7 +806,7 @@
         }
 
         function abrirCambiarPassword() {
-            if (!usuarioActual) { alert('Debes iniciar sesión para cambiar la contraseña.'); abrirModalLogin(); return; }
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
             document.getElementById('oldPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
@@ -980,14 +831,12 @@
                 const credential = EmailAuthProvider.credential(user.email, oldPass);
                 await reauthenticateWithCredential(user, credential);
                 await updatePassword(user, newPass);
-                alert('✅ Contraseña actualizada correctamente.');
+                alert('✅ Contraseña actualizada.');
                 cerrarChangePasswordModal();
             } catch (e) {
-                let mensajeError = 'Error al cambiar la contraseña';
-                if (e.code === 'auth/wrong-password') mensajeError = 'La contraseña actual es incorrecta.';
-                else if (e.code === 'auth/too-many-requests') mensajeError = 'Demasiados intentos. Espera unos minutos.';
-                errorEl.textContent = mensajeError;
-                errorEl.classList.add('show');
+                let msg = 'Error al cambiar la contraseña';
+                if (e.code === 'auth/wrong-password') msg = 'La contraseña actual es incorrecta.';
+                errorEl.textContent = msg; errorEl.classList.add('show');
             }
         }
 
@@ -995,7 +844,7 @@
         function cerrarContactModal() { document.getElementById('contactModal').classList.remove('active'); }
 
         async function abrirHistoryModal() {
-            if (!usuarioActual) { alert('Debes iniciar sesión para ver tu historial.'); abrirModalLogin(); return; }
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
             const modal = document.getElementById('historyModal');
             const content = document.getElementById('historyContent');
             content.innerHTML = '<p style="color:#94a3b8; text-align:center;">Cargando historial...</p>';
@@ -1003,9 +852,9 @@
             try {
                 const { collection, query, where, getDocs } = window.firebaseFns;
                 const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', usuarioActual.id));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) { content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos realizados aún.</p>'; return; }
-                const docs = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                const qs = await getDocs(q);
+                if (qs.empty) { content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos aún.</p>'; return; }
+                const docs = qs.docs.map(d => ({ id: d.id, ...d.data() }));
                 docs.sort((a, b) => {
                     const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
                     const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
@@ -1013,13 +862,13 @@
                 });
                 let html = '';
                 docs.forEach((p) => {
-                    const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date(p.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : 'Sin fecha';
-                    let productosLista = [];
-                    if (p.productos_json) productosLista = p.productos_json.split(',').map(item => item.trim());
-                    let productosHtml = '<ul>';
-                    productosLista.forEach(item => { productosHtml += `<li>📦 ${item}</li>`; });
-                    productosHtml += '</ul>';
-                    html += `<div class="history-item"><div class="order-date">📅 ${fecha}</div><div class="order-products">${productosHtml}</div><div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div><div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div></div>`;
+                    const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(p.fecha).toLocaleString('es-ES')) : 'Sin fecha';
+                    let items = [];
+                    if (p.productos_json) items = p.productos_json.split(',').map(i => i.trim());
+                    let itemsHtml = '<ul>';
+                    items.forEach(i => { itemsHtml += `<li>📦 ${i}</li>`; });
+                    itemsHtml += '</ul>';
+                    html += `<div class="history-item"><div class="order-date">📅 ${fecha}</div><div class="order-products">${itemsHtml}</div><div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div><div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div></div>`;
                 });
                 content.innerHTML = html;
             } catch (e) { content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`; }
@@ -1029,228 +878,135 @@
         async function cargarConfiguracion() {
             try {
                 const { doc, getDoc } = window.firebaseFns;
-                const configRef = doc(window.firebaseDb, 'config', 'general');
-                const snap = await getDoc(configRef);
+                const snap = await getDoc(doc(window.firebaseDb, 'config', 'general'));
                 if (snap.exists()) {
                     const data = snap.data();
                     if (typeof data.envio_costo === 'number') ENVIO_COSTO = data.envio_costo;
                     if (typeof data.envio_gratis_desde === 'number') ENVIO_GRATIS_DESDE = data.envio_gratis_desde;
-                    console.log('✅ Config cargada:', { ENVIO_COSTO, ENVIO_GRATIS_DESDE });
                 }
             } catch (e) { console.warn('No se pudo cargar la config:', e); }
         }
 
         async function obtenerProductos() {
-            try {
-                const { collection, getDocs } = window.firebaseFns;
-                const querySnapshot = await getDocs(collection(window.firebaseDb, 'productos'));
-                return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (e) { console.error('Error al obtener productos:', e); return []; }
+            try { const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'productos')); return s.docs.map(d => ({ id: d.id, ...d.data() })); }
+            catch (e) { return []; }
         }
         async function obtenerCategorias() {
-            try {
-                const { collection, getDocs } = window.firebaseFns;
-                const querySnapshot = await getDocs(collection(window.firebaseDb, 'Categoria'));
-                return querySnapshot.docs.map(doc => doc.data().nombre).filter(Boolean);
-            } catch (e) { console.error('Error al obtener categorías:', e); return []; }
+            try { const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria')); return s.docs.map(d => d.data().nombre).filter(Boolean); }
+            catch (e) { return []; }
         }
-        async function obtenerCalificaciones(productoId) {
-            try {
-                const { collection, query, where, getDocs } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'Calificaciones'), where('producto_id', '==', productoId));
-                const querySnapshot = await getDocs(q);
-                return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } catch (e) { return []; }
+        async function obtenerCalificaciones(pid) {
+            try { const { collection, query, where, getDocs } = window.firebaseFns; const q = query(collection(window.firebaseDb, 'Calificaciones'), where('producto_id', '==', pid)); const s = await getDocs(q); return s.docs.map(d => ({ id: d.id, ...d.data() })); }
+            catch (e) { return []; }
         }
-        async function obtenerNombresUsuarios(userIds) {
-            if (!userIds || userIds.length === 0) return {};
+        async function obtenerNombresUsuarios(uids) {
+            if (!uids || uids.length === 0) return {};
             const map = {};
             try {
-                const { doc, getDoc } = window.firebaseFns;
-                for (const uid of userIds) {
-                    const userDoc = await getDoc(doc(window.firebaseDb, 'usuarios', uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        let nombreCompleto = '';
-                        if (data.nombre && data.apellidos) nombreCompleto = `${data.nombre} ${data.apellidos}`.trim();
-                        else if (data.nombre) nombreCompleto = data.nombre;
-                        else if (data.name) nombreCompleto = data.name;
-                        else nombreCompleto = data.email || 'Usuario';
-                        map[uid] = nombreCompleto;
-                    } else { map[uid] = 'Usuario'; }
+                for (const uid of uids) {
+                    const ud = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'usuarios', uid));
+                    if (ud.exists()) {
+                        const data = ud.data();
+                        let nc = '';
+                        if (data.nombre && data.apellidos) nc = `${data.nombre} ${data.apellidos}`.trim();
+                        else if (data.nombre) nc = data.nombre;
+                        else if (data.name) nc = data.name;
+                        else nc = data.email || 'Usuario';
+                        map[uid] = nc;
+                    } else map[uid] = 'Usuario';
                 }
             } catch (e) { }
             return map;
         }
-        async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
-            try {
-                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
-                await addDoc(collection(window.firebaseDb, 'Calificaciones'), {
-                    producto_id: productoId, usuario_id: usuarioId, puntuacion,
-                    comentario: comentario || '', fecha: serverTimestamp()
-                });
-                return { success: true };
-            } catch (e) { return { success: false, error: e.message }; }
+        async function guardarCalificacion(pid, uid, p, c) {
+            try { await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Calificaciones'), { producto_id: pid, usuario_id: uid, puntuacion: p, comentario: c || '', fecha: window.firebaseFns.serverTimestamp() }); return { success: true }; }
+            catch (e) { return { success: false, error: e.message }; }
         }
-        async function verificarCompra(usuarioId, productoId) {
+        async function verificarCompra(uid, pid) {
             try {
                 const { collection, query, where, getDocs } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', usuarioId));
-                const querySnapshot = await getDocs(q);
-                let comprado = false;
-                querySnapshot.forEach(doc => {
-                    const v = doc.data();
-                    if (v.productos_ids) {
-                        const ids = v.productos_ids.split(',').map(id => id.trim());
-                        if (ids.includes(productoId)) comprado = true;
-                    }
-                });
-                return comprado;
+                const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', uid));
+                const s = await getDocs(q);
+                let c = false;
+                s.forEach(doc => { const v = doc.data(); if (v.productos_ids) { const ids = v.productos_ids.split(',').map(i => i.trim()); if (ids.includes(pid)) c = true; } });
+                return c;
             } catch (e) { return false; }
         }
         function precioFinal(prod) {
-            const venta = parseFloat(prod.Precio_Venta || 0);
-            const oferta = parseFloat(prod.Precio_Oferta || 0);
-            return (oferta > 0 && oferta < venta) ? oferta : venta;
+            const v = parseFloat(prod.Precio_Venta || 0);
+            const o = parseFloat(prod.Precio_Oferta || 0);
+            return (o > 0 && o < v) ? o : v;
         }
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
                 if (Array.isArray(prod.Fotos)) fotos = prod.Fotos;
-                else if (typeof prod.Fotos === 'string') { try { const parsed = JSON.parse(prod.Fotos); if (Array.isArray(parsed)) fotos = parsed; } catch (e) {} }
+                else if (typeof prod.Fotos === 'string') { try { const p = JSON.parse(prod.Fotos); if (Array.isArray(p)) fotos = p; } catch (e) {} }
             }
             return fotos;
         }
-
-        // 🆕 Calcular la GANANCIA total del carrito
         function calcularGananciaCarrito() {
-            let ganancia = 0;
+            let g = 0;
             for (const item of carrito) {
                 const prod = productos.find(p => p.id === item.id);
                 if (prod) {
                     const costo = parseFloat(prod.Precio_Costo || 0);
-                    const venta = item.precio; // Ya incluye oferta si aplica
-                    ganancia += (venta - costo) * (item.cantidad || 1);
+                    const venta = item.precio;
+                    g += (venta - costo) * (item.cantidad || 1);
                 }
             }
-            return ganancia;
+            return g;
         }
 
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
-            const encargoLi = document.createElement('li');
-            const encargoLink = document.createElement('a');
-            encargoLink.textContent = '📦 Pedidos Por Encargo';
-            encargoLink.dataset.categoria = 'PedidosPorEncargo';
-            encargoLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'PedidosPorEncargo';
-                actualizarCategoriaActiva(encargoLink);
-                document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo';
-                paginaActual = 1;
-                renderizarProductos();
-            });
-            encargoLi.appendChild(encargoLink);
-            ul.appendChild(encargoLi);
-            const sepLi = document.createElement('li');
-            sepLi.style.borderTop = '1px solid #e2e8f0';
-            sepLi.style.margin = '6px 0';
-            ul.appendChild(sepLi);
+            const encLi = document.createElement('li');
+            const encLink = document.createElement('a');
+            encLink.textContent = '📦 Pedidos Por Encargo';
+            encLink.dataset.categoria = 'PedidosPorEncargo';
+            encLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encLink); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; paginaActual = 1; renderizarProductos(); });
+            encLi.appendChild(encLink); ul.appendChild(encLi);
+            const sepLi = document.createElement('li'); sepLi.style.borderTop = '1px solid #e2e8f0'; sepLi.style.margin = '6px 0'; ul.appendChild(sepLi);
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
-            allLink.textContent = 'Todo';
-            allLink.dataset.categoria = 'Todas';
-            allLink.classList.add('active');
-            allLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'Todas';
-                actualizarCategoriaActiva(allLink);
-                document.getElementById('sectionTitle').textContent = 'Productos';
-                paginaActual = 1;
-                renderizarProductos();
-            });
-            allLi.appendChild(allLink);
-            ul.appendChild(allLi);
+            allLink.textContent = 'Todo'; allLink.dataset.categoria = 'Todas'; allLink.classList.add('active');
+            allLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Todas'; actualizarCategoriaActiva(allLink); document.getElementById('sectionTitle').textContent = 'Productos'; paginaActual = 1; renderizarProductos(); });
+            allLi.appendChild(allLink); ul.appendChild(allLi);
             cats.forEach(cat => {
                 const li = document.createElement('li');
                 const a = document.createElement('a');
-                a.textContent = cat;
-                a.dataset.categoria = cat;
-                a.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    categoriaSeleccionada = cat;
-                    actualizarCategoriaActiva(a);
-                    document.getElementById('sectionTitle').textContent = cat;
-                    paginaActual = 1;
-                    renderizarProductos();
-                });
-                li.appendChild(a);
-                ul.appendChild(li);
+                a.textContent = cat; a.dataset.categoria = cat;
+                a.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = cat; actualizarCategoriaActiva(a); document.getElementById('sectionTitle').textContent = cat; paginaActual = 1; renderizarProductos(); });
+                li.appendChild(a); ul.appendChild(li);
             });
-            const dropdown = document.getElementById('categoriesDropdown');
-            dropdown.innerHTML = '';
-            const encargoDrop = document.createElement('a');
-            encargoDrop.textContent = '📦 Pedidos Por Encargo';
-            encargoDrop.dataset.categoria = 'PedidosPorEncargo';
-            if (categoriaSeleccionada === 'PedidosPorEncargo') encargoDrop.classList.add('active');
-            encargoDrop.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'PedidosPorEncargo';
-                actualizarCategoriaActiva(encargoDrop);
-                document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo';
-                paginaActual = 1;
-                renderizarProductos();
-                cerrarDropdownCategorias();
-            });
-            dropdown.appendChild(encargoDrop);
-            const sepDrop = document.createElement('div');
-            sepDrop.style.borderTop = '1px solid #e2e8f0';
-            sepDrop.style.margin = '4px 12px';
-            dropdown.appendChild(sepDrop);
-            const allLinkDrop = document.createElement('a');
-            allLinkDrop.textContent = '📂 Todas';
-            allLinkDrop.dataset.categoria = 'Todas';
-            if (categoriaSeleccionada === 'Todas') allLinkDrop.classList.add('active');
-            allLinkDrop.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoriaSeleccionada = 'Todas';
-                actualizarCategoriaActiva(allLinkDrop);
-                document.getElementById('sectionTitle').textContent = 'Productos';
-                paginaActual = 1;
-                renderizarProductos();
-                cerrarDropdownCategorias();
-            });
-            dropdown.appendChild(allLinkDrop);
+            const dd = document.getElementById('categoriesDropdown');
+            dd.innerHTML = '';
+            const encD = document.createElement('a');
+            encD.textContent = '📦 Pedidos Por Encargo'; encD.dataset.categoria = 'PedidosPorEncargo';
+            if (categoriaSeleccionada === 'PedidosPorEncargo') encD.classList.add('active');
+            encD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encD); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; paginaActual = 1; renderizarProductos(); cerrarDropdownCategorias(); });
+            dd.appendChild(encD);
+            const sepD = document.createElement('div'); sepD.style.borderTop = '1px solid #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
+            const allD = document.createElement('a');
+            allD.textContent = '📂 Todas'; allD.dataset.categoria = 'Todas';
+            if (categoriaSeleccionada === 'Todas') allD.classList.add('active');
+            allD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Todas'; actualizarCategoriaActiva(allD); document.getElementById('sectionTitle').textContent = 'Productos'; paginaActual = 1; renderizarProductos(); cerrarDropdownCategorias(); });
+            dd.appendChild(allD);
             cats.forEach(cat => {
                 const a = document.createElement('a');
-                a.textContent = `📁 ${cat}`;
-                a.dataset.categoria = cat;
+                a.textContent = `📁 ${cat}`; a.dataset.categoria = cat;
                 if (cat === categoriaSeleccionada) a.classList.add('active');
-                a.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    categoriaSeleccionada = cat;
-                    actualizarCategoriaActiva(a);
-                    document.getElementById('sectionTitle').textContent = cat;
-                    paginaActual = 1;
-                    renderizarProductos();
-                    cerrarDropdownCategorias();
-                });
-                dropdown.appendChild(a);
+                a.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = cat; actualizarCategoriaActiva(a); document.getElementById('sectionTitle').textContent = cat; paginaActual = 1; renderizarProductos(); cerrarDropdownCategorias(); });
+                dd.appendChild(a);
             });
         }
 
-        function actualizarCategoriaActiva(activo) {
-            document.querySelectorAll('#categoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active'));
-            if (activo) activo.classList.add('active');
-        }
+        function actualizarCategoriaActiva(a) { document.querySelectorAll('#categoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active')); if (a) a.classList.add('active'); }
         function toggleCategoriesDropdown() { document.getElementById('categoriesDropdown').classList.toggle('open'); }
         function cerrarDropdownCategorias() { document.getElementById('categoriesDropdown').classList.remove('open'); }
-        document.addEventListener('click', function(e) {
-            const container = document.querySelector('.toolbar__categories');
-            if (container && !container.contains(e.target)) cerrarDropdownCategorias();
-        });
+        document.addEventListener('click', function(e) { const c = document.querySelector('.toolbar__categories'); if (c && !c.contains(e.target)) cerrarDropdownCategorias(); });
 
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
@@ -1267,29 +1023,24 @@
                 }
                 const busqueda = getBusqueda();
                 if (busqueda) filtrados = filtrados.filter(p => (p.Nombre || '').toLowerCase().includes(busqueda) || (p.Descripcion || '').toLowerCase().includes(busqueda));
-
                 const sortValue = document.getElementById('sortSelect').value;
                 switch (sortValue) {
                     case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
                     case 'price_desc': filtrados.sort((a, b) => precioFinal(b) - precioFinal(a)); break;
                     case 'name_asc': filtrados.sort((a, b) => (a.Nombre || '').localeCompare(b.Nombre || '')); break;
                     case 'name_desc': filtrados.sort((a, b) => (b.Nombre || '').localeCompare(a.Nombre || '')); break;
-                    default: break;
                 }
                 const total = filtrados.length;
                 const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
                 if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
                 const inicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA;
-                const fin = inicio + PRODUCTOS_POR_PAGINA;
-                const paginaItems = filtrados.slice(inicio, fin);
+                const paginaItems = filtrados.slice(inicio, inicio + PRODUCTOS_POR_PAGINA);
                 if (paginaItems.length === 0) grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px 0;">No se encontraron productos.</p>`;
                 else {
                     let html = '';
                     for (const prod of paginaItems) {
                         const fotos = obtenerFotosProducto(prod);
-                        const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                        const fotoUrl = fotoPrincipal || '';
-                        const precio = precioFinal(prod);
+                        const fotoUrl = fotos.length > 0 ? fotos[0] : '';
                         const venta = parseFloat(prod.Precio_Venta || 0);
                         const oferta = parseFloat(prod.Precio_Oferta || 0);
                         const tieneOferta = (oferta > 0 && oferta < venta);
@@ -1298,12 +1049,10 @@
                         else precioHtml += `$${venta.toFixed(2)}`;
                         precioHtml += `</span>`;
                         const esEncargo = prod.Es_Encargo === true;
-                        const cardImgAttrs = fotoUrl ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');" data-zoom="1"` : '';
-
+                        const cardImgAttrs = fotoUrl ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');"` : '';
                         html += `
                             <div class="product-card" data-id="${prod.id}">
-                                <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" 
-                                     alt="${prod.Nombre || 'Producto'}" ${cardImgAttrs} />
+                                <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" alt="${prod.Nombre || 'Producto'}" ${cardImgAttrs} />
                                 ${esEncargo ? '<div class="encargo-badge">📦 Pedido por encargo</div>' : ''}
                                 <h3>${prod.Nombre || 'Sin nombre'}</h3>
                                 <div class="product-desc">${prod.Descripcion || ''}</div>
@@ -1320,9 +1069,8 @@
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
                         const id = this.dataset.id;
-                        if (!usuarioActual) { alert('Debes iniciar sesión para agregar productos al carrito.'); abrirModalLogin(); return; }
-                        agregarAlCarrito(id);
-                        mostrarAddToCartModal();
+                        if (!usuarioActual) { alert('Debes iniciar sesión para agregar productos.'); abrirModalLogin(); return; }
+                        agregarAlCarrito(id); mostrarAddToCartModal();
                     });
                 });
                 document.querySelectorAll('.btn-encargo').forEach(btn => {
@@ -1336,7 +1084,6 @@
                 document.querySelectorAll('.product-card').forEach(card => {
                     card.addEventListener('click', function(e) {
                         if (e.target.tagName === 'BUTTON') return;
-                        if (e.target.dataset.zoom === '1') return;
                         const id = this.dataset.id;
                         window.history.pushState({ productoId: id }, '', `?id=${id}`);
                         mostrarDetalle(id);
@@ -1344,8 +1091,7 @@
                 });
                 const pagContainer = document.getElementById('pagination');
                 if (totalPaginas <= 1) { pagContainer.innerHTML = ''; return; }
-                let pagHtml = '';
-                pagHtml += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
+                let pagHtml = `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual <= 1 ? 'disabled' : ''}>◀</button>`;
                 pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
                 pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
                 pagContainer.innerHTML = pagHtml;
@@ -1355,29 +1101,27 @@
         function cambiarPagina(pag) {
             if (pag < 1) return;
             const total = productos.length;
-            const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA);
-            if (pag > totalPaginas) return;
-            paginaActual = pag;
-            renderizarProductos();
+            const tp = Math.ceil(total / PRODUCTOS_POR_PAGINA);
+            if (pag > tp) return;
+            paginaActual = pag; renderizarProductos();
         }
 
         async function mostrarDetalle(productoId) {
-            const productsSection = document.getElementById('productsSection');
-            const detailPage = document.getElementById('detailPage');
+            const ps = document.getElementById('productsSection');
+            const dp = document.getElementById('detailPage');
             const container = document.getElementById('detailContainer');
-            productsSection.style.display = 'none';
-            detailPage.classList.add('active');
-            container.innerHTML = '<div class="detail-loading">🔄 Cargando detalles del producto...</div>';
+            ps.style.display = 'none';
+            dp.classList.add('active');
+            container.innerHTML = '<div class="detail-loading">🔄 Cargando detalles...</div>';
             try {
                 const prod = productos.find(p => p.id === productoId);
-                if (!prod) { container.innerHTML = `<p style="text-align:center; color:#e74c3c;">❌ Producto no encontrado.</p><div style="text-align:center; margin-top:20px;"><button class="btn-add" onclick="volverALista()" style="width:auto;">← Volver a productos</button></div>`; return; }
+                if (!prod) { container.innerHTML = `<p style="text-align:center; color:#e74c3c;">❌ Producto no encontrado.</p><div style="text-align:center; margin-top:20px;"><button class="btn-add" onclick="volverALista()" style="width:auto;">← Volver</button></div>`; return; }
                 const calificaciones = await obtenerCalificaciones(productoId);
-                const promedio = calificaciones.length > 0 ? calificaciones.reduce((sum, c) => sum + c.puntuacion, 0) / calificaciones.length : 0;
+                const promedio = calificaciones.length > 0 ? calificaciones.reduce((s, c) => s + c.puntuacion, 0) / calificaciones.length : 0;
                 const userIds = [...new Set(calificaciones.map(c => c.usuario_id).filter(id => id))];
                 const nombresMap = await obtenerNombresUsuarios(userIds);
                 const fotos = obtenerFotosProducto(prod);
-                const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                const fotoUrl = fotoPrincipal || '';
+                const fotoUrl = fotos.length > 0 ? fotos[0] : '';
                 const venta = parseFloat(prod.Precio_Venta || 0);
                 const oferta = parseFloat(prod.Precio_Oferta || 0);
                 const tieneOferta = (oferta > 0 && oferta < venta);
@@ -1386,13 +1130,9 @@
                 else precioHtml += `$${venta.toFixed(2)}`;
                 precioHtml += `</span>`;
                 const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
-                const detalleImgAttrs = fotoUrl ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)" data-zoom="1"` : '';
+                const detalleImgAttrs = fotoUrl ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)"` : '';
                 let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" ${detalleImgAttrs} /><div class="miniaturas" id="detalleMiniaturas">`;
-                fotos.forEach((f, index) => {
-                    const url = f;
-                    const active = index === 0 ? 'active' : '';
-                    galeriaHtml += `<img src="${url}" alt="Foto ${index+1}" class="${active}" onclick="cambiarFotoDetalle('${url}', this)" />`;
-                });
+                fotos.forEach((f, index) => { const active = index === 0 ? 'active' : ''; galeriaHtml += `<img src="${f}" alt="Foto ${index+1}" class="${active}" onclick="cambiarFotoDetalle('${f}', this)" />`; });
                 galeriaHtml += `</div></div>`;
                 const esEncargo = prod.Es_Encargo === true;
                 let html = `<button class="back-link" onclick="volverALista()">← Volver a productos</button>${galeriaHtml}<h2>${prod.Nombre || 'Sin nombre'}</h2>${esEncargo ? '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>' : ''}${precioHtml}<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
@@ -1409,104 +1149,90 @@
                     else if (!haComprado) html += `<p style="color:#94a3b8; margin-top:15px;">Compra este producto para poder calificarlo.</p>`;
                 }
                 html += `<div class="comentarios"><h4>💬 Comentarios de clientes</h4>`;
-                if (calificaciones.length === 0) html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
+                if (calificaciones.length === 0) html += `<p style="color:#94a3b8;">No hay comentarios aún.</p>`;
                 else {
                     calificaciones.forEach(c => {
                         const fecha = c.fecha ? (c.fecha.seconds ? new Date(c.fecha.seconds * 1000).toLocaleDateString('es-ES') : new Date(c.fecha).toLocaleDateString('es-ES')) : 'Sin fecha';
-                        const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
-                        const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
-                        html += `<div class="comentario-item"><div class="comentario-header"><span class="comentario-nombre">${nombreReal}</span><span class="comentario-estrellas">${estrellasCom}</span></div><div class="comentario-texto">${c.comentario || 'Sin comentario'}</div><div class="comentario-fecha">${fecha}</div></div>`;
+                        const ec = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
+                        const nr = nombresMap[c.usuario_id] || 'Anónimo';
+                        html += `<div class="comentario-item"><div class="comentario-header"><span class="comentario-nombre">${nr}</span><span class="comentario-estrellas">${ec}</span></div><div class="comentario-texto">${c.comentario || 'Sin comentario'}</div><div class="comentario-fecha">${fecha}</div></div>`;
                     });
                 }
                 html += `</div>`;
                 container.innerHTML = html;
                 if (document.getElementById('starsInput')) estrellaSeleccionada = 0;
             } catch (error) {
-                console.error('Error al cargar detalle:', error);
-                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">❌ Error al cargar los detalles del producto.</p><div style="text-align:center; margin-top:20px;"><button class="btn-add" onclick="volverALista()" style="width:auto;">← Volver a productos</button></div>`;
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">❌ Error al cargar los detalles.</p>`;
             }
         }
 
         function cambiarFotoDetalle(url, elemento) {
             document.getElementById('detalleImgPrincipal').src = url;
-            document.querySelectorAll('#detalleMiniaturas img').forEach(img => img.classList.remove('active'));
+            document.querySelectorAll('#detalleMiniaturas img').forEach(i => i.classList.remove('active'));
             if (elemento) elemento.classList.add('active');
         }
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
-            window.history.pushState({}, document.title, window.location.pathname);
+            window.history.pushState({ page: 'tienda' }, '', window.location.pathname);
             renderizarProductos();
         }
-        async function enviarCalificacionDesdeDetalle(productoId) {
-            if (!usuarioActual) { alert('Debes iniciar sesión para calificar.'); return; }
-            if (estrellaSeleccionada === 0) { alert('Selecciona una calificación (1-5 estrellas).'); return; }
-            const comentario = document.getElementById('comentarioCalificacion').value.trim();
-            const result = await guardarCalificacion(productoId, usuarioActual.id, estrellaSeleccionada, comentario);
-            if (result.success) { alert('✅ Calificación enviada correctamente. ¡Gracias!'); mostrarDetalle(productoId); }
-            else alert('Error al calificar: ' + result.error);
+        async function enviarCalificacionDesdeDetalle(pid) {
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); return; }
+            if (estrellaSeleccionada === 0) { alert('Selecciona una calificación.'); return; }
+            const c = document.getElementById('comentarioCalificacion').value.trim();
+            const r = await guardarCalificacion(pid, usuarioActual.id, estrellaSeleccionada, c);
+            if (r.success) { alert('✅ Calificación enviada.'); mostrarDetalle(pid); }
+            else alert('Error: ' + r.error);
         }
-        function seleccionarEstrella(valor) {
-            estrellaSeleccionada = valor;
-            const spans = document.querySelectorAll('#starsInput span');
-            spans.forEach((span, index) => {
-                span.textContent = (index < valor) ? '★' : '☆';
-                span.classList.toggle('active', index < valor);
-            });
+        function seleccionarEstrella(v) {
+            estrellaSeleccionada = v;
+            document.querySelectorAll('#starsInput span').forEach((s, i) => { s.textContent = (i < v) ? '★' : '☆'; s.classList.toggle('active', i < v); });
         }
         function mostrarAddToCartModal() { document.getElementById('addToCartModal').classList.add('active'); }
         function cerrarAddToCartModal() { document.getElementById('addToCartModal').classList.remove('active'); }
 
         function cargarCarritoLocal() {
-            try { const guardado = localStorage.getItem('tiendita_carrito'); if (guardado) carrito = JSON.parse(guardado); }
-            catch (e) { carrito = []; }
+            try { const g = localStorage.getItem('tiendita_carrito'); if (g) carrito = JSON.parse(g); } catch (e) { carrito = []; }
             actualizarCarritoUI();
         }
-        function guardarCarritoLocal() {
-            localStorage.setItem('tiendita_carrito', JSON.stringify(carrito));
-            actualizarCarritoUI();
-        }
-        function agregarAlCarrito(productId) {
-            const prod = productos.find(p => p.id === productId);
+        function guardarCarritoLocal() { localStorage.setItem('tiendita_carrito', JSON.stringify(carrito)); actualizarCarritoUI(); }
+        function agregarAlCarrito(pid) {
+            const prod = productos.find(p => p.id === pid);
             if (!prod) return;
-            const existente = carrito.find(item => item.id === productId);
-            if (existente) existente.cantidad = (existente.cantidad || 1) + 1;
+            const ex = carrito.find(i => i.id === pid);
+            if (ex) ex.cantidad = (ex.cantidad || 1) + 1;
             else carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
             guardarCarritoLocal();
         }
-        function eliminarDelCarrito(index) { carrito.splice(index, 1); guardarCarritoLocal(); }
-        function incrementarCantidad(index) { if (carrito[index]) { carrito[index].cantidad = (carrito[index].cantidad || 1) + 1; guardarCarritoLocal(); } }
-        function decrementarCantidad(index) {
-            if (carrito[index]) { if (carrito[index].cantidad > 1) carrito[index].cantidad--; else carrito.splice(index, 1); guardarCarritoLocal(); }
-        }
+        function eliminarDelCarrito(i) { carrito.splice(i, 1); guardarCarritoLocal(); }
+        function incrementarCantidad(i) { if (carrito[i]) { carrito[i].cantidad = (carrito[i].cantidad || 1) + 1; guardarCarritoLocal(); } }
+        function decrementarCantidad(i) { if (carrito[i]) { if (carrito[i].cantidad > 1) carrito[i].cantidad--; else carrito.splice(i, 1); guardarCarritoLocal(); } }
+
         function actualizarCarritoUI() {
-            const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-            document.getElementById('cartFloatBadge').textContent = totalItems;
-            const container = document.getElementById('cartItems');
-            if (carrito.length === 0) {
-                container.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:15px 0;">El carrito está vacío.</p>';
-                document.getElementById('cartTotal').textContent = '💰 Subtotal: $0.00';
-                return;
-            }
-            let html = '', subtotal = 0;
+            const ti = carrito.reduce((s, i) => s + (i.cantidad || 1), 0);
+            document.getElementById('cartFloatBadge').textContent = ti;
+            const c = document.getElementById('cartItems');
+            if (carrito.length === 0) { c.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:15px 0;">El carrito está vacío.</p>'; document.getElementById('cartTotal').textContent = '💰 Subtotal: $0.00'; return; }
+            let html = '', sub = 0;
             carrito.forEach((item, idx) => {
-                const subtotalItem = item.precio * (item.cantidad || 1);
-                subtotal += subtotalItem;
+                const st = item.precio * (item.cantidad || 1); sub += st;
                 html += `<div class="cart-item"><div class="item-info"><div class="item-name">${item.nombre}</div><div class="item-price">$${item.precio.toFixed(2)} x ${item.cantidad || 1}</div></div><div class="item-actions"><button onclick="decrementarCantidad(${idx})">−</button><span style="font-weight:600; min-width:20px; text-align:center;">${item.cantidad || 1}</span><button onclick="incrementarCantidad(${idx})">+</button><button class="remove" onclick="eliminarDelCarrito(${idx})">✕</button></div></div>`;
             });
-            container.innerHTML = html;
-            document.getElementById('cartTotal').textContent = `💰 Subtotal: $${subtotal.toFixed(2)}`;
-            window.subtotalCarrito = subtotal;
+            c.innerHTML = html;
+            document.getElementById('cartTotal').textContent = `💰 Subtotal: $${sub.toFixed(2)}`;
+            window.subtotalCarrito = sub;
         }
+
         function abrirCarrito() { document.getElementById('cartSidebar').classList.add('open'); }
         document.getElementById('closeCartBtn').addEventListener('click', () => { document.getElementById('cartSidebar').classList.remove('open'); });
 
         function iniciarProcesoPedido() {
-            if (!usuarioActual) { alert('Debes iniciar sesión para realizar un pedido.'); abrirModalLogin(); return; }
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
             if (carrito.length === 0) { alert('El carrito está vacío.'); return; }
-            let subtotal = 0;
-            carrito.forEach(item => { subtotal += item.precio * (item.cantidad || 1); });
-            window.subtotalCarrito = subtotal;
+            let sub = 0;
+            carrito.forEach(i => { sub += i.precio * (i.cantidad || 1); });
+            window.subtotalCarrito = sub;
             document.getElementById('deliveryModal').classList.add('active');
             document.getElementById('deliveryForm').classList.remove('active');
             document.getElementById('confirmarPedidoBtn').style.display = 'none';
@@ -1520,9 +1246,9 @@
                 document.getElementById('domTelefono').value = usuarioActual.telefono || '';
                 document.getElementById('domDireccion').value = usuarioActual.direccion || '';
             }
-            document.getElementById('resumenSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('resumenSubtotal').textContent = `$${sub.toFixed(2)}`;
             document.getElementById('resumenEnvioMonto').textContent = `$0.00`;
-            document.getElementById('resumenTotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('resumenTotal').textContent = `$${sub.toFixed(2)}`;
             tipoEntregaSeleccionado = null;
         }
         function cerrarDeliveryModal() { document.getElementById('deliveryModal').classList.remove('active'); }
@@ -1534,38 +1260,21 @@
             const dirGroup = document.getElementById('domDireccionGroup');
             form.classList.add('active');
             confirmBtn.style.display = 'block';
-            const subtotal = window.subtotalCarrito || 0;
-            // 🆕 Envío gratis según la GANANCIA del carrito
-            const gananciaCarrito = calcularGananciaCarrito();
-            let envio = 0;
-            let esGratis = false;
+            const sub = window.subtotalCarrito || 0;
+            const ganancia = calcularGananciaCarrito();
+            let envio = 0, esGratis = false;
             if (tipo === 'Domicilio') {
-                if (ENVIO_GRATIS_DESDE > 0 && gananciaCarrito >= ENVIO_GRATIS_DESDE) {
-                    envio = 0;
-                    esGratis = true;
-                } else {
-                    envio = ENVIO_COSTO;
-                }
+                if (ENVIO_GRATIS_DESDE > 0 && ganancia >= ENVIO_GRATIS_DESDE) { envio = 0; esGratis = true; }
+                else { envio = ENVIO_COSTO; }
             }
-            const total = subtotal + envio;
-            document.getElementById('resumenSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            const total = sub + envio;
+            document.getElementById('resumenSubtotal').textContent = `$${sub.toFixed(2)}`;
             const envioEl = document.getElementById('resumenEnvioMonto');
             const envioLinea = document.getElementById('resumenEnvio');
             if (tipo === 'Domicilio') {
-                if (esGratis) {
-                    envioEl.textContent = '¡GRATIS! 🎉';
-                    envioEl.style.color = '#059669';
-                    envioLinea.className = 'linea envio gratis';
-                } else {
-                    envioEl.textContent = `$${envio.toFixed(2)}`;
-                    envioEl.style.color = '#2980b9';
-                    envioLinea.className = 'linea envio domicilio';
-                }
-            } else {
-                envioEl.textContent = '$0.00';
-                envioEl.style.color = '#64748b';
-                envioLinea.className = 'linea envio';
-            }
+                if (esGratis) { envioEl.textContent = '¡GRATIS! 🎉'; envioEl.style.color = '#059669'; envioLinea.className = 'linea envio gratis'; }
+                else { envioEl.textContent = `$${envio.toFixed(2)}`; envioEl.style.color = '#2980b9'; envioLinea.className = 'linea envio domicilio'; }
+            } else { envioEl.textContent = '$0.00'; envioEl.style.color = '#64748b'; envioLinea.className = 'linea envio'; }
             document.getElementById('resumenTotal').textContent = `$${total.toFixed(2)}`;
             if (tipo === 'Domicilio') { dirGroup.style.display = 'block'; confirmBtn.textContent = '✅ Confirmar pedido a domicilio'; }
             else { dirGroup.style.display = 'none'; confirmBtn.textContent = '✅ Confirmar pedido en tienda'; }
@@ -1577,68 +1286,45 @@
             const telefono = document.getElementById('domTelefono').value.trim();
             const direccion = document.getElementById('domDireccion').value.trim();
             const referencias = document.getElementById('domReferencias').value.trim();
-            if (!nombre || !apellidos || !telefono) { alert('Por favor, completa Nombre, Apellidos y Teléfono.'); return; }
-            if (tipoEntregaSeleccionado === 'Domicilio' && !direccion) { alert('Por favor, ingresa una dirección de entrega.'); return; }
-            const nombreCompleto = `${nombre} ${apellidos}`.trim();
+            if (!nombre || !apellidos || !telefono) { alert('Completa Nombre, Apellidos y Teléfono.'); return; }
+            if (tipoEntregaSeleccionado === 'Domicilio' && !direccion) { alert('Ingresa una dirección de entrega.'); return; }
+            const nc = `${nombre} ${apellidos}`.trim();
             cerrarDeliveryModal();
-            let subtotal = 0;
-            const productosPedido = carrito.map(item => {
-                const cantidad = item.cantidad || 1;
-                const precio = item.precio;
-                subtotal += precio * cantidad;
-                return { id: item.id, nombre: item.nombre, cantidad, precio };
+            let sub = 0;
+            const productosPedido = carrito.map(i => {
+                const c = i.cantidad || 1;
+                sub += i.precio * c;
+                return { id: i.id, nombre: i.nombre, cantidad: c, precio: i.precio };
             });
-            // 🆕 Envío gratis según la GANANCIA del carrito
             const gananciaCarrito = calcularGananciaCarrito();
             let envio = 0;
             if (tipoEntregaSeleccionado === 'Domicilio') {
                 envio = (ENVIO_GRATIS_DESDE > 0 && gananciaCarrito >= ENVIO_GRATIS_DESDE) ? 0 : ENVIO_COSTO;
             }
-            const totalFinal = subtotal + envio;
+            const totalFinal = sub + envio;
             try {
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
                 let pedidoId = '';
                 if (tipoEntregaSeleccionado === 'Domicilio') {
-                    const domData = {
-                        Cliente_Nombre: nombreCompleto,
-                        Direccion_Entrega: direccion,
-                        Telefono: telefono,
-                        Detalles: referencias || '',
-                        Estado: 'Pendiente',
-                        usuario_id: usuarioActual.id,
-                        productos_pedido: JSON.stringify(productosPedido),
-                        subtotal: subtotal,
-                        envio: envio,
-                        ganancia: gananciaCarrito,
-                        total: totalFinal,
-                        fecha: serverTimestamp()
-                    };
-                    const docRef = await addDoc(collection(window.firebaseDb, 'Domicilios'), domData);
+                    const docRef = await addDoc(collection(window.firebaseDb, 'Domicilios'), {
+                        Cliente_Nombre: nc, Direccion_Entrega: direccion, Telefono: telefono,
+                        Detalles: referencias || '', Estado: 'Pendiente', usuario_id: usuarioActual.id,
+                        productos_pedido: JSON.stringify(productosPedido), subtotal: sub, envio: envio,
+                        ganancia: gananciaCarrito, total: totalFinal, fecha: serverTimestamp()
+                    });
                     pedidoId = docRef.id.slice(-6);
                 } else {
                     const ahora = new Date();
-                    const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
-                    const tiendaData = {
-                        Cliente_Nombre: nombreCompleto,
-                        Telefono: telefono,
-                        productos_pedido: JSON.stringify(productosPedido),
-                        subtotal: subtotal,
-                        envio: 0,
-                        ganancia: gananciaCarrito,
-                        total: totalFinal,
-                        Estado: 'Pendiente',
-                        fecha: serverTimestamp(),
-                        usuario_id: usuarioActual.id,
-                        fecha_limite: fechaLimite
-                    };
-                    const docRef = await addDoc(collection(window.firebaseDb, 'PedidosTienda'), tiendaData);
+                    const fl = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+                    const docRef = await addDoc(collection(window.firebaseDb, 'PedidosTienda'), {
+                        Cliente_Nombre: nc, Telefono: telefono, productos_pedido: JSON.stringify(productosPedido),
+                        subtotal: sub, envio: 0, ganancia: gananciaCarrito, total: totalFinal, Estado: 'Pendiente',
+                        fecha: serverTimestamp(), usuario_id: usuarioActual.id, fecha_limite: fl
+                    });
                     pedidoId = docRef.id.slice(-6);
                 }
 
-                let mensaje = `*🆕 Nuevo pedido*\n\n`;
-                mensaje += `👤 Cliente: ${nombreCompleto}\n`;
-                mensaje += `📞 Teléfono: ${telefono}\n`;
-                mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
+                let mensaje = `*🆕 Nuevo pedido*\n\n👤 Cliente: ${nc}\n📞 Teléfono: ${telefono}\n📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
                 mensaje += `📦 Tipo: ${tipoEntregaSeleccionado === 'Domicilio' ? 'Domicilio' : 'Retiro en tienda'}\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     mensaje += `📍 Dirección: ${direccion}\n`;
@@ -1646,41 +1332,32 @@
                     mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}${envio === 0 && ENVIO_GRATIS_DESDE > 0 ? ' (GRATIS 🎉)' : ''}\n`;
                 }
                 mensaje += `\n📋 Productos:\n`;
-                productosPedido.forEach(item => { mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`; });
-                mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
+                productosPedido.forEach(i => { mensaje += `- ${i.nombre}: $${i.precio.toFixed(2)} x ${i.cantidad} = $${(i.precio * i.cantidad).toFixed(2)}\n`; });
+                mensaje += `\n💰 Subtotal: $${sub.toFixed(2)}\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
-                mensaje += `📊 Ganancia del pedido: $${gananciaCarrito.toFixed(2)}\n`;
-                mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
-                mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
-                mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
+                mensaje += `📊 Ganancia: $${gananciaCarrito.toFixed(2)}\n💵 Total: $${totalFinal.toFixed(2)}\n\n🆔 ID: #${pedidoId}\n📅 ${new Date().toLocaleString('es-ES')}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                try {
-                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
-                } catch (err) { console.warn('No se pudo enviar WhatsApp:', err); }
-
-                notificarAdminOneSignal("🛒 Nueva compra", `${nombreCompleto} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`);
-
+                try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) { console.warn('WA fail:', err); }
+                notificarAdminOneSignal("🛒 Nueva compra", `${nc} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`);
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
-                alert('✅ Pedido realizado con éxito. ¡Gracias por comprar en La Tiendita B&B!');
+                alert('✅ Pedido realizado con éxito. ¡Gracias!');
                 productos = await obtenerProductos();
                 renderizarProductos();
             } catch (e) {
-                console.error('Error en confirmarPedidoFinal:', e);
+                console.error('Error:', e);
                 alert('Error al procesar el pedido: ' + e.message);
-                productos = await obtenerProductos();
-                renderizarProductos();
             }
         }
         document.getElementById('checkoutBtn').addEventListener('click', iniciarProcesoPedido);
 
         let encargoProductoId = null;
-        function abrirModalEncargo(productId) {
-            if (!usuarioActual) { alert('Debes iniciar sesión para solicitar un encargo.'); abrirModalLogin(); return; }
-            const prod = productos.find(p => p.id === productId);
+        function abrirModalEncargo(pid) {
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
+            const prod = productos.find(p => p.id === pid);
             if (!prod) { alert('Producto no encontrado.'); return; }
-            encargoProductoId = productId;
+            encargoProductoId = pid;
             document.getElementById('encargoProductoNombre').value = prod.Nombre || 'Sin nombre';
             document.getElementById('encargoCantidad').value = 1;
             document.getElementById('encargoComentario').value = '';
@@ -1690,62 +1367,57 @@
         function cerrarEncargoModal() { document.getElementById('encargoModal').classList.remove('active'); encargoProductoId = null; }
 
         document.getElementById('encargoConfirmarBtn').addEventListener('click', async function() {
-            if (!encargoProductoId) { alert('Error: no se ha seleccionado un producto.'); return; }
+            if (!encargoProductoId) { alert('Error: no hay producto.'); return; }
             const cantidad = parseInt(document.getElementById('encargoCantidad').value) || 1;
-            if (cantidad < 1) { document.getElementById('encargoError').textContent = 'La cantidad debe ser al menos 1.'; document.getElementById('encargoError').classList.add('show'); return; }
+            if (cantidad < 1) { document.getElementById('encargoError').textContent = 'Cantidad mínima 1.'; document.getElementById('encargoError').classList.add('show'); return; }
             const comentario = document.getElementById('encargoComentario').value.trim();
             const prod = productos.find(p => p.id === encargoProductoId);
             if (!prod) { alert('Producto no encontrado.'); return; }
             const btn = this;
-            btn.disabled = true;
-            btn.textContent = '⏳ Enviando...';
+            btn.disabled = true; btn.textContent = '⏳ Enviando...';
             try {
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
-                const encargoData = {
-                    producto_id: prod.id,
-                    producto_nombre: prod.Nombre || 'Sin nombre',
-                    usuario_id: usuarioActual.id,
-                    usuario_nombre: usuarioActual.nombre || usuarioActual.name || 'Usuario',
-                    usuario_telefono: usuarioActual.telefono || 'Sin teléfono',
-                    cantidad, comentario,
-                    estado: 'Pendiente',
-                    fecha_solicitud: serverTimestamp(),
-                    fecha_actualizacion: serverTimestamp()
-                };
-                const docRef = await addDoc(collection(window.firebaseDb, 'Encargos'), encargoData);
-                const resultId = docRef.id;
-                const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
-                    `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
-                    `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
-                    `📧 Email: ${usuarioActual.email || 'Sin email'}\n` +
-                    `🛒 Producto: ${prod.Nombre}\n` +
-                    `🔢 Cantidad: ${cantidad}\n` +
-                    `💬 Comentario: ${comentario || 'Sin comentario'}\n` +
-                    `📅 Fecha: ${new Date().toLocaleString('es-ES')}\n` +
-                    `🆔 ID Encargo: ${resultId.slice(-6)}`;
+                const docRef = await addDoc(collection(window.firebaseDb, 'Encargos'), {
+                    producto_id: prod.id, producto_nombre: prod.Nombre || 'Sin nombre',
+                    usuario_id: usuarioActual.id, usuario_nombre: usuarioActual.nombre || usuarioActual.name || 'Usuario',
+                    usuario_telefono: usuarioActual.telefono || 'Sin teléfono', cantidad, comentario,
+                    estado: 'Pendiente', fecha_solicitud: serverTimestamp(), fecha_actualizacion: serverTimestamp()
+                });
+                const mensaje = `*📦 Nuevo encargo*\n\n👤 ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n📞 ${usuarioActual.telefono || 'Sin teléfono'}\n🛒 ${prod.Nombre}\n🔢 Cantidad: ${cantidad}\n💬 ${comentario || 'Sin comentario'}\n🆔 ${docRef.id.slice(-6)}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                try {
-                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
-                } catch (err) { console.warn('No se pudo enviar WhatsApp:', err); }
-                notificarAdminOneSignal("📦 Nuevo encargo", `${usuarioActual.nombre || usuarioActual.name || 'Cliente'} - ${prod.Nombre} (x${cantidad})`);
-                alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
+                try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) {}
+                notificarAdminOneSignal("📦 Nuevo encargo", `${usuarioActual.nombre || 'Cliente'} - ${prod.Nombre} (x${cantidad})`);
+                alert('✅ Encargo solicitado. Pronto te contactamos.');
                 cerrarEncargoModal();
             } catch (e) {
-                console.error('Error al enviar encargo:', e);
-                document.getElementById('encargoError').textContent = 'Error al enviar: ' + e.message;
+                document.getElementById('encargoError').textContent = 'Error: ' + e.message;
                 document.getElementById('encargoError').classList.add('show');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '✅ Enviar solicitud';
+            } finally { btn.disabled = false; btn.textContent = '✅ Enviar solicitud'; }
+        });
+        document.getElementById('encargoModal').addEventListener('click', function(e) { if (e.target === this) cerrarEncargoModal(); });
+
+        // Navegación entre detalle y lista
+        window.addEventListener('popstate', function(event) {
+            if (!event.state || (!event.state.productoId && !event.state.page)) return;
+            if (event.state.productoId) mostrarDetalle(event.state.productoId);
+            else if (event.state.page === 'tienda') volverALista();
+        });
+
+        // 🔔 Aviso antes de cerrar/recargar la página si hay carrito con productos
+        window.addEventListener('beforeunload', function(e) {
+            if (carrito.length > 0) {
+                e.preventDefault();
+                e.returnValue = 'Tienes productos en el carrito. ¿Seguro que quieres salir?';
+                return e.returnValue;
             }
         });
 
-        document.getElementById('encargoModal').addEventListener('click', function(e) { if (e.target === this) cerrarEncargoModal(); });
-
-        window.addEventListener('popstate', function(event) {
-            if (!event.state || !event.state.productoId) volverALista();
-            else mostrarDetalle(event.state.productoId);
-        });
+        // 🔔 Confirmación al presionar "atrás" en el teléfono
+        try {
+            if (!history.state || !history.state.page) {
+                history.pushState({ page: 'tienda' }, '', window.location.href);
+            }
+        } catch (err) { console.warn('pushState no disponible:', err); }
 
         async function init() {
             actualizarUIUsuario();
@@ -1790,11 +1462,8 @@
         }
         function ocultarBotonesDescargaSiEsApp() {
             if (!estaDentroDeApp()) return;
-            const header = document.getElementById('btnDescargaHeader');
-            if (header) header.style.display = 'none';
-            const footer = document.getElementById('footerDescargaParrafo');
-            if (footer) footer.style.display = 'none';
-            console.log('📱 App detectada: botones de descarga ocultos.');
+            const h = document.getElementById('btnDescargaHeader'); if (h) h.style.display = 'none';
+            const f = document.getElementById('footerDescargaParrafo'); if (f) f.style.display = 'none';
         }
         window.addEventListener('load', ocultarBotonesDescargaSiEsApp);
         setTimeout(ocultarBotonesDescargaSiEsApp, 500);
@@ -1814,9 +1483,8 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Key os_v2_app_5e47ldb56bennkdl52j5vcfjyelitw2ypxuus7ey6gh7dm5btyhvu2uecmbgw6ova4d7hga6gzugdyfyv54zwx7m4wzchew3d27e2wy' },
             body: JSON.stringify({ app_id: "e939f58c-3df0-48d6-a86b-ee93da88a9c1", include_aliases: { external_id: ["admin_tiendita_byb"] }, target_channel: "push", headings: { en: titulo, es: titulo }, contents: { en: mensaje, es: mensaje } })
           });
-          const data = await resp.json();
-          console.log("📨 Notificación enviada al admin:", data);
-        } catch (e) { console.error("❌ Error al notificar al admin:", e); }
+          console.log("📨 Notificación enviada:", await resp.json());
+        } catch (e) { console.error("❌ Error:", e); }
       }
     </script>
 </body>
