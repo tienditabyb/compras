@@ -728,14 +728,6 @@
                 renderizarProductos();
             });
         }
-        
-        (function esperarFirebase() {
-            if (window.firebaseFns && window.firebaseAuth) {
-                iniciarListenerAuth();
-            } else {
-                setTimeout(esperarFirebase, 100);
-            }
-        })();
 
         function guardarUsuarioLocal(user) {
             if (user) { localStorage.setItem('bb_user_data', JSON.stringify(user)); usuarioActual = user; }
@@ -1748,6 +1740,9 @@
             else mostrarDetalle(event.state.productoId);
         });
 
+        // ============================================================
+        // INICIO (ESPERA A QUE FIREBASE ESTÉ LISTO)
+        // ============================================================
         async function init() {
             actualizarUIUsuario();
             productos = await obtenerProductos();
@@ -1766,8 +1761,17 @@
                 }
             });
         }
-        init();
-        console.log('🏪 B&B cargada correctamente.');
+
+        // Esperar a que Firebase esté listo antes de iniciar
+        (function esperarFirebaseInit() {
+            if (window.firebaseFns && window.firebaseAuth) {
+                iniciarListenerAuth();
+                init();
+                console.log('🏪 B&B cargada correctamente.');
+            } else {
+                setTimeout(esperarFirebaseInit, 100);
+            }
+        })();
 
         function estaDentroDeApp() {
             const ua = (navigator.userAgent || '').toLowerCase();
