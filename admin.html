@@ -38,7 +38,6 @@
         .notif-dropdown .notif-item:last-child { border-bottom: none; }
         .notif-dropdown .notif-item .icon { font-size: 1.2rem; }
         .notif-dropdown .notif-item .text { flex: 1; font-size: 0.85rem; color: #1e272e; }
-        .notif-dropdown .notif-item .text strong { font-weight: 600; }
         .notif-dropdown .notif-empty { text-align: center; color: #94a3b8; padding: 20px 0; font-size: 0.9rem; }
 
         .main-content { display: flex; gap: 30px; margin-top: 25px; padding: 0 15px; max-width: 1400px; margin-left: auto; margin-right: auto; position: relative; }
@@ -54,7 +53,6 @@
             .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; border-radius: 0; padding: 20px; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transform: translateX(-100%); z-index: 200; overflow-y: auto; background: white; transition: transform 0.3s ease; padding-top: 60px; }
             .sidebar.open { transform: translateX(0); }
             .sidebar .close-sidebar { display: block; position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #94a3b8; }
-            .sidebar .close-sidebar:hover { color: #1e272e; }
             .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 150; }
             .sidebar-overlay.active { display: block; }
             .menu-toggle { display: inline-block; }
@@ -91,6 +89,13 @@
         .filters .btn-clear:hover { background: #64748b; }
         .filters .btn-success { background: #059669; }
         .filters .btn-success:hover { background: #047857; }
+
+        /* Rangos rápidos (#8) */
+        .rango-rapido { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
+        .rango-rapido button { padding: 6px 14px; background: #eef2f6; color: #1e272e; border: 1px solid #e2e8f0; border-radius: 20px; font-weight: 500; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+        .rango-rapido button:hover { background: #2980b9; color: white; border-color: #2980b9; }
+        .rango-rapido button.active { background: #2980b9; color: white; border-color: #2980b9; }
+
         .list-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 2px; max-width: 100%; }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; flex-wrap: wrap; gap: 10px; }
         .list-item:hover { background: #f8fafc; }
@@ -213,11 +218,41 @@
         .caja-form .total { font-size: 1.3rem; font-weight: 700; text-align: right; margin: 15px 0; padding-top: 10px; border-top: 2px solid #e2e8f0; }
         .caja-form .acciones { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
         .caja-form .datos-cliente { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        @media (max-width: 600px) { .caja-form .datos-cliente { grid-template-columns: 1fr !important; gap: 10px; } .caja-form .datos-cliente .form-group { grid-column: span 1 !important; } .caja-form .datos-cliente .form-group:first-child { order: 1; } .caja-form .datos-cliente .form-group:nth-child(2) { order: 2; } .caja-form .datos-cliente .form-group:nth-child(3) { order: 3; } }
+        @media (max-width: 600px) { .caja-form .datos-cliente { grid-template-columns: 1fr !important; gap: 10px; } .caja-form .datos-cliente .form-group { grid-column: span 1 !important; } }
         .tiempo-restante { font-size: 0.75rem; color: #dc2626; font-weight: 600; }
         .tiempo-restante.ok { color: #059669; }
         .tiempo-restante.urgente { color: #dc2626; animation: parpadear 1s infinite; }
         @keyframes parpadear { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* ===== ESTADÍSTICAS (#4) ===== */
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card-new { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #2980b9; }
+        .stat-card-new .value { font-size: 1.8rem; font-weight: 700; color: #1e272e; }
+        .stat-card-new .label { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .stat-card-new.green { border-left-color: #059669; }
+        .stat-card-new.orange { border-left-color: #d97706; }
+        .stat-card-new.purple { border-left-color: #7c3aed; }
+        .stat-card-new.red { border-left-color: #dc2626; }
+
+        .ranking-list { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
+        .ranking-list h3 { margin-bottom: 15px; font-weight: 600; color: #1e272e; font-size: 1.1rem; }
+        .ranking-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .ranking-item:last-child { border-bottom: none; }
+        .ranking-item .rank-num { width: 30px; height: 30px; border-radius: 50%; background: #eef2f6; color: #1e272e; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+        .ranking-item .rank-num.top1 { background: #ffd700; color: #7d6608; }
+        .ranking-item .rank-num.top2 { background: #c0c0c0; color: #333; }
+        .ranking-item .rank-num.top3 { background: #cd7f32; color: #fff; }
+        .ranking-item .rank-info { flex: 1; min-width: 0; }
+        .ranking-item .rank-name { font-weight: 500; color: #1e272e; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ranking-item .rank-sub { font-size: 0.8rem; color: #64748b; }
+        .ranking-item .rank-value { text-align: right; font-weight: 700; color: #2980b9; font-size: 0.95rem; }
+
+        /* Configuración */
+        .config-section { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .config-section h3 { font-size: 1.1rem; margin-bottom: 15px; color: #1e272e; display: flex; align-items: center; gap: 8px; }
+        .config-section .help { font-size: 0.8rem; color: #64748b; margin-top: 6px; }
+        .config-success { background: #d1fae5; color: #059669; padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; display: none; }
+        .config-success.show { display: block; }
 
         html, body { max-width: 100% !important; width: 100%; overflow-x: hidden !important; position: relative; }
         .main-content, .content, .tab-content, .list-container, .product-grid, .filters, .caja-form { max-width: 100% !important; box-sizing: border-box; overflow-x: hidden; }
@@ -283,13 +318,15 @@
                 <nav class="sidebar__nav">
                     <ul>
                         <li><a class="active" data-tab="dashboard">📊 Dashboard</a></li>
+                        <li><a data-tab="estadisticas">📈 Estadísticas</a></li>
                         <li><a data-tab="caja">💳 Caja</a></li>
                         <li><a data-tab="inventario">📦 Inventario</a></li>
                         <li><a data-tab="ventas">💰 Ventas</a></li>
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
                         <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
                         <li><a data-tab="encargos">📋 Encargos</a></li>
-                        <li><a data-tab="reportes">📈 Reportes</a></li>
+                        <li><a data-tab="reportes">📄 Reportes</a></li>
+                        <li><a data-tab="configuracion">⚙️ Configuración</a></li>
                     </ul>
                 </nav>
             </aside>
@@ -308,6 +345,27 @@
                     <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
                         <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
                         <div id="ultimasVentas"></div>
+                    </div>
+                </div>
+
+                <!-- ===== ESTADÍSTICAS (#4) ===== -->
+                <div id="tab-estadisticas" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">📈 Estadísticas de Ventas</h2>
+                    <div class="filters">
+                        <div class="rango-rapido">
+                            <button onclick="aplicarRangoEst('hoy')">Hoy</button>
+                            <button onclick="aplicarRangoEst('7dias')">Últimos 7 días</button>
+                            <button onclick="aplicarRangoEst('30dias')">Últimos 30 días</button>
+                            <button onclick="aplicarRangoEst('mes')">Este mes</button>
+                            <button onclick="aplicarRangoEst('todo')">Todo</button>
+                        </div>
+                        <div><label>Desde:</label> <input type="date" id="estFechaDesde" /></div>
+                        <div><label>Hasta:</label> <input type="date" id="estFechaHasta" /></div>
+                        <button id="estFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="estLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div id="estadisticasContenido">
+                        <div class="loading"><div class="spinner"></div>Cargando estadísticas...</div>
                     </div>
                 </div>
 
@@ -331,18 +389,9 @@
                         </div>
                         <div class="total" id="cajaTotal">Total: $0.00</div>
                         <div class="datos-cliente">
-                            <div class="form-group">
-                                <label>Nombre</label>
-                                <input type="text" id="cajaCliente" placeholder="Nombre" />
-                            </div>
-                            <div class="form-group">
-                                <label>Teléfono</label>
-                                <input type="text" id="cajaTelefono" placeholder="Número de teléfono" />
-                            </div>
-                            <div class="form-group" style="grid-column: span 2;">
-                                <label>Dirección</label>
-                                <input type="text" id="cajaDireccion" placeholder="Dirección" />
-                            </div>
+                            <div class="form-group"><label>Nombre</label><input type="text" id="cajaCliente" placeholder="Nombre" /></div>
+                            <div class="form-group"><label>Teléfono</label><input type="text" id="cajaTelefono" placeholder="Número de teléfono" /></div>
+                            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="cajaDireccion" placeholder="Dirección" /></div>
                         </div>
                         <div class="acciones">
                             <button class="btn-clear" id="cajaLimpiarBtn">🗑️ Limpiar carrito</button>
@@ -457,8 +506,15 @@
                 </div>
 
                 <div id="tab-reportes" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">📈 Reportes de Ventas</h2>
+                    <h2 style="margin-bottom:15px; font-weight:600;">📄 Reportes de Ventas</h2>
                     <div class="filters">
+                        <div class="rango-rapido">
+                            <button onclick="aplicarRangoReporte('hoy')">Hoy</button>
+                            <button onclick="aplicarRangoReporte('7dias')">Últimos 7 días</button>
+                            <button onclick="aplicarRangoReporte('30dias')">Últimos 30 días</button>
+                            <button onclick="aplicarRangoReporte('mes')">Este mes</button>
+                            <button onclick="aplicarRangoReporte('mesAnterior')">Mes anterior</button>
+                        </div>
                         <div><label>Desde:</label> <input type="date" id="repFechaDesde" /></div>
                         <div><label>Hasta:</label> <input type="date" id="repFechaHasta" /></div>
                         <div><label>Tipo:</label>
@@ -485,6 +541,37 @@
                         <div class="loading"><div class="spinner"></div>Cargando reportes...</div>
                     </div>
                 </div>
+
+                <!-- ===== CONFIGURACIÓN (#2) ===== -->
+                <div id="tab-configuracion" class="tab-content">
+                    <h2 style="margin-bottom:20px; font-weight:600;">⚙️ Configuración de la Tienda</h2>
+
+                    <div class="config-section">
+                        <h3>🚚 Envío a domicilio</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Costo de envío (USD)</label>
+                                <input type="number" id="configEnvioCosto" step="0.01" min="0" placeholder="1.00" />
+                                <div class="help">Costo que se cobra al cliente por el envío a domicilio.</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Envío gratis a partir de (USD)</label>
+                                <input type="number" id="configEnvioGratis" step="0.01" min="0" placeholder="20.00" />
+                                <div class="help">Si el subtotal del pedido es mayor o igual a este monto, el envío es gratis. Pon 0 para desactivar esta función.</div>
+                            </div>
+                        </div>
+                        <button class="btn-success" id="guardarConfigBtn" style="margin-top:10px;">💾 Guardar Configuración</button>
+                        <div class="config-success" id="configSuccess">✅ Configuración guardada correctamente.</div>
+                    </div>
+
+                    <div class="config-section" style="background:#f8fafc;">
+                        <h3>ℹ️ Información</h3>
+                        <p style="font-size:0.9rem; color:#64748b; line-height:1.6;">
+                            Estos cambios se aplican <strong>inmediatamente</strong> en la tienda pública.
+                            Si quieres cambiar el costo de envío o el monto para envío gratis, edítalos aquí y guarda.
+                        </p>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
@@ -492,10 +579,7 @@
     <div class="modal-overlay" id="detailModal">
         <div class="modal">
             <button class="close-modal" id="closeDetailModal">✕</button>
-            <div id="detailContent">
-                <h2>Detalle</h2>
-                <div id="detailBody"></div>
-            </div>
+            <div id="detailContent"><h2>Detalle</h2><div id="detailBody"></div></div>
         </div>
     </div>
 
@@ -517,9 +601,7 @@
                 </div>
                 <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                        <input type="checkbox" id="prodEsProveedor" /> 🏭 Es producto de Proveedor (no cuenta en inventario)
-                    </label>
+                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsProveedor" /> 🏭 Es producto de Proveedor (no cuenta en inventario)</label>
                 </div>
                 <div class="form-group" id="proveedorGroup" style="display:none; background:#eff6ff; padding:12px; border-radius:10px; border:1px solid #bfdbfe;">
                     <label style="color:#1e40af;">🏭 Nombre del Proveedor</label>
@@ -534,14 +616,12 @@
                 <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                        <input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos
-                    </label>
+                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos</label>
                 </div>
                 <div class="form-group" id="urlEncargoGroup" style="display:none; background:#f5f3ff; padding:12px; border-radius:10px; border:1px solid #ddd6fe;">
                     <label style="color:#6d28d9;">🔗 URL del producto (dónde buscarlo)</label>
                     <input type="url" id="prodUrlEncargo" placeholder="https://..." />
-                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9;">Pega aquí el enlace (AliExpress, Amazon, etc.) para saber dónde buscar este producto cuando un cliente lo pida.</div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9;">Pega aquí el enlace para saber dónde buscar este producto cuando un cliente lo pida.</div>
                 </div>
                 <div class="form-group">
                     <label>Fotos del producto</label>
@@ -550,7 +630,7 @@
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
                     <div class="file-preview-grid" id="prodFotosPreview"></div>
-                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.</div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">Puedes seleccionar varias fotos a la vez.</div>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
@@ -620,19 +700,16 @@
         let categoriasCache = [];
         let carrito = [];
         let ventasFiltradasReporte = [];
+        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 20.00 };
 
         let notificaciones = [];
         const NOTIF_STORAGE_KEY = 'admin_notificaciones_leidas';
 
         function cargarNotificacionesLeidas() {
-            try {
-                const data = localStorage.getItem(NOTIF_STORAGE_KEY);
-                return data ? JSON.parse(data) : [];
-            } catch { return []; }
+            try { const data = localStorage.getItem(NOTIF_STORAGE_KEY); return data ? JSON.parse(data) : []; }
+            catch { return []; }
         }
-        function guardarNotificacionesLeidas(lista) {
-            localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(lista));
-        }
+        function guardarNotificacionesLeidas(lista) { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(lista)); }
 
         function generarNotificaciones() {
             const nuevas = [];
@@ -640,25 +717,19 @@
             for (const d of domiciliosCache) {
                 if (d.Estado === 'Pendiente' && !d.fecha_gestion) {
                     const id = `dom-${d.id}`;
-                    if (!leidas.includes(id)) {
-                        nuevas.push({ id, tipo: 'domicilio', texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`, fecha: d.fecha });
-                    }
+                    if (!leidas.includes(id)) nuevas.push({ id, tipo: 'domicilio', texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`, fecha: d.fecha });
                 }
             }
             for (const p of tiendaCache) {
                 if (p.Estado === 'Pendiente' && !p.fecha_gestion) {
                     const id = `tienda-${p.id}`;
-                    if (!leidas.includes(id)) {
-                        nuevas.push({ id, tipo: 'tienda', texto: `Nuevo pedido en tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`, fecha: p.fecha });
-                    }
+                    if (!leidas.includes(id)) nuevas.push({ id, tipo: 'tienda', texto: `Nuevo pedido en tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`, fecha: p.fecha });
                 }
             }
             for (const e of encargosCache) {
                 if (e.estado === 'Pendiente' && !e.fecha_limite_pago) {
                     const id = `enc-${e.id}`;
-                    if (!leidas.includes(id)) {
-                        nuevas.push({ id, tipo: 'encargo', texto: `Nuevo encargo de <strong>${e.producto_nombre || 'Producto'}</strong> (${e.usuario_nombre || 'Cliente'})`, fecha: e.fecha_solicitud });
-                    }
+                    if (!leidas.includes(id)) nuevas.push({ id, tipo: 'encargo', texto: `Nuevo encargo de <strong>${e.producto_nombre || 'Producto'}</strong> (${e.usuario_nombre || 'Cliente'})`, fecha: e.fecha_solicitud });
                 }
             }
             nuevas.sort((a, b) => {
@@ -706,6 +777,9 @@
         }
         function actualizarNotificaciones() { generarNotificaciones(); }
 
+        // ============================================================
+        // AUTENTICACIÓN
+        // ============================================================
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
@@ -727,13 +801,9 @@
                 }
             });
         }
-
         (function esperarFirebase() {
-            if (window.firebaseFns && window.firebaseAuth) {
-                iniciarListenerAuth();
-            } else {
-                setTimeout(esperarFirebase, 100);
-            }
+            if (window.firebaseFns && window.firebaseAuth) iniciarListenerAuth();
+            else setTimeout(esperarFirebase, 100);
         })();
 
         document.getElementById('loginBtn').addEventListener('click', async function() {
@@ -753,7 +823,6 @@
                 else if (e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
                 else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
                 else if (e.code === 'auth/network-request-failed') msg = 'Error de red. Revisa tu conexión.';
-                else if (e.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera un poco.';
                 errorEl.textContent = msg; errorEl.classList.add('show');
             }
         });
@@ -763,6 +832,9 @@
             await window.firebaseFns.signOut(window.firebaseAuth);
         });
 
+        // ============================================================
+        // CARGA DE DATOS
+        // ============================================================
         async function cargarCategorias() {
             try {
                 const { collection, getDocs } = window.firebaseFns;
@@ -824,6 +896,56 @@
             } catch (e) { console.error('Error cargando encargos:', e); return []; }
         }
 
+        // ===== CONFIGURACIÓN (#2) =====
+        async function cargarConfigGeneral() {
+            try {
+                const { doc, getDoc } = window.firebaseFns;
+                const snap = await getDoc(doc(window.firebaseDb, 'config', 'general'));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (typeof data.envio_costo === 'number') configGeneral.envio_costo = data.envio_costo;
+                    if (typeof data.envio_gratis_desde === 'number') configGeneral.envio_gratis_desde = data.envio_gratis_desde;
+                }
+                document.getElementById('configEnvioCosto').value = configGeneral.envio_costo;
+                document.getElementById('configEnvioGratis').value = configGeneral.envio_gratis_desde;
+            } catch (e) {
+                console.error('Error cargando configuración:', e);
+                document.getElementById('configEnvioCosto').value = configGeneral.envio_costo;
+                document.getElementById('configEnvioGratis').value = configGeneral.envio_gratis_desde;
+            }
+        }
+
+        document.getElementById('guardarConfigBtn').addEventListener('click', async function() {
+            const costo = parseFloat(document.getElementById('configEnvioCosto').value);
+            const gratis = parseFloat(document.getElementById('configEnvioGratis').value);
+            if (isNaN(costo) || costo < 0) { alert('El costo de envío debe ser un número mayor o igual a 0.'); return; }
+            if (isNaN(gratis) || gratis < 0) { alert('El monto de envío gratis debe ser un número mayor o igual a 0.'); return; }
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = '⏳ Guardando...';
+            try {
+                const { doc, setDoc } = window.firebaseFns;
+                await setDoc(doc(window.firebaseDb, 'config', 'general'), {
+                    envio_costo: costo,
+                    envio_gratis_desde: gratis,
+                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
+                }, { merge: true });
+                configGeneral.envio_costo = costo;
+                configGeneral.envio_gratis_desde = gratis;
+                const successEl = document.getElementById('configSuccess');
+                successEl.classList.add('show');
+                setTimeout(() => successEl.classList.remove('show'), 3000);
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Guardar Configuración';
+            }
+        });
+
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
         function normalizarNombre(nombre) {
             if (!nombre) return "";
             let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
@@ -848,7 +970,6 @@
             const costo = calcularCostoVenta(venta);
             return total - costo;
         }
-
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
@@ -866,6 +987,21 @@
             if (typeof valor === 'string') { try { const parsed = JSON.parse(valor); return Array.isArray(parsed) ? parsed : []; } catch (e) { return []; } }
             return [];
         }
+        function fechaToDate(f) {
+            if (!f) return null;
+            if (f.seconds) return new Date(f.seconds * 1000);
+            return new Date(f);
+        }
+        function fechaToStr(f) {
+            const d = fechaToDate(f);
+            if (!d) return 'Sin fecha';
+            return d.toLocaleString('es-ES');
+        }
+        function fechaToISO(f) {
+            const d = fechaToDate(f);
+            if (!d) return '';
+            return d.toISOString().slice(0,10);
+        }
 
         function renderProductosPedidoConLinks(productosPedido) {
             const items = parsearProductosPedido(productosPedido);
@@ -879,43 +1015,209 @@
             return html;
         }
 
+        // ============================================================
+        // DASHBOARD
+        // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
             const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
             let gananciaTotal = 0;
             for (const v of ventas) gananciaTotal += calcularGananciaVenta(v);
             const pendientes = domicilios.filter(d => d.Estado === 'Pendiente').length;
-
-            let costoInventario = 0;
-            let ventaInventario = 0;
+            let costoInventario = 0, ventaInventario = 0;
             for (const p of productosCache) {
                 if (p.Es_Encargo === true || p.Es_Proveedor === true) continue;
                 const stock = parseInt(p.Stock || 0);
-                const costo = parseFloat(p.Precio_Costo || 0);
-                const venta = parseFloat(p.Precio_Venta || 0);
-                costoInventario += stock * costo;
-                ventaInventario += stock * venta;
+                costoInventario += stock * parseFloat(p.Precio_Costo || 0);
+                ventaInventario += stock * parseFloat(p.Precio_Venta || 0);
             }
             const gananciaPotencial = ventaInventario - costoInventario;
-
             document.getElementById('statVentas').textContent = totalVentas;
             document.getElementById('statTotal').textContent = `$${ingresos.toFixed(2)}`;
             document.getElementById('statGanancia').textContent = `$${gananciaTotal.toFixed(2)}`;
             document.getElementById('statDomicilios').textContent = pendientes;
             document.getElementById('statCostoInventario').textContent = `$${costoInventario.toFixed(2)}`;
             document.getElementById('statGananciaPotencial').textContent = `$${gananciaPotencial.toFixed(2)}`;
-
             const ultimas = ventas.slice(0, 5);
             const container = document.getElementById('ultimasVentas');
             if (ultimas.length === 0) { container.innerHTML = '<div class="empty">No hay ventas recientes.</div>'; return; }
             let html = '';
             for (const v of ultimas) {
-                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
-                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fecha} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
+                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
             }
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // ESTADÍSTICAS (#4)
+        // ============================================================
+        function aplicarRangoEst(rango) {
+            const hoy = new Date();
+            let desde = new Date();
+            const hasta = new Date();
+            switch (rango) {
+                case 'hoy':
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+                    break;
+                case '7dias':
+                    desde = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '30dias':
+                    desde = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'mes':
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    break;
+                case 'todo':
+                    document.getElementById('estFechaDesde').value = '';
+                    document.getElementById('estFechaHasta').value = '';
+                    document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active'));
+                    event.target.classList.add('active');
+                    renderizarEstadisticas();
+                    return;
+            }
+            document.getElementById('estFechaDesde').value = desde.toISOString().slice(0,10);
+            document.getElementById('estFechaHasta').value = hasta.toISOString().slice(0,10);
+            document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizarEstadisticas();
+        }
+
+        function renderizarEstadisticas() {
+            const desde = document.getElementById('estFechaDesde').value;
+            const hasta = document.getElementById('estFechaHasta').value;
+            let filtradas = [...ventasCache];
+            if (desde) filtradas = filtradas.filter(v => fechaToISO(v.fecha) >= desde);
+            if (hasta) filtradas = filtradas.filter(v => fechaToISO(v.fecha) <= hasta);
+
+            const container = document.getElementById('estadisticasContenido');
+            if (filtradas.length === 0) {
+                container.innerHTML = '<div class="empty">No hay ventas en el período seleccionado.</div>';
+                return;
+            }
+
+            let totalIngresos = 0, totalGanancia = 0, totalCosto = 0;
+            const productCount = {}; // { nombre: { cantidad, ingresos } }
+            const catCount = {}; // { categoria: { cantidad, ingresos } }
+            const ventasPorDia = {}; // { 'YYYY-MM-DD': { ventas, ingresos } }
+
+            for (const v of filtradas) {
+                totalIngresos += parseFloat(v.total || 0);
+                const costo = calcularCostoVenta(v);
+                totalCosto += costo;
+                totalGanancia += (parseFloat(v.total || 0) - costo);
+
+                const items = extraerNombresProductos(v.productos_json || '');
+                for (const nombre of items) {
+                    const m = nombre.match(/^(.+?)\s*x\s*(\d+)$/);
+                    let prodNombre, cantidad;
+                    if (m) { prodNombre = m[1].trim(); cantidad = parseInt(m[2]); }
+                    else { prodNombre = nombre; cantidad = 1; }
+
+                    if (!productCount[prodNombre]) productCount[prodNombre] = { cantidad: 0, ingresos: 0 };
+                    productCount[prodNombre].cantidad += cantidad;
+
+                    const prod = productosCache.find(p => normalizarNombre(p.Nombre) === normalizarNombre(prodNombre));
+                    const precio = prod ? parseFloat(prod.Precio_Venta || 0) : 0;
+                    productCount[prodNombre].ingresos += precio * cantidad;
+
+                    const cat = prod ? (prod.Categoria || 'General') : 'General';
+                    if (!catCount[cat]) catCount[cat] = { cantidad: 0, ingresos: 0 };
+                    catCount[cat].cantidad += cantidad;
+                    catCount[cat].ingresos += precio * cantidad;
+                }
+
+                const iso = fechaToISO(v.fecha);
+                if (iso) {
+                    if (!ventasPorDia[iso]) ventasPorDia[iso] = { ventas: 0, ingresos: 0 };
+                    ventasPorDia[iso].ventas += 1;
+                    ventasPorDia[iso].ingresos += parseFloat(v.total || 0);
+                }
+            }
+
+            const topProductos = Object.entries(productCount).sort((a,b) => b[1].cantidad - a[1].cantidad).slice(0, 10);
+            const topCategorias = Object.entries(catCount).sort((a,b) => b[1].cantidad - a[1].cantidad).slice(0, 8);
+            const promedioVenta = totalIngresos / filtradas.length;
+            const ticketMedio = totalIngresos / filtradas.length;
+            const dias = Object.keys(ventasPorDia).length;
+            const promedioDiario = dias > 0 ? totalIngresos / dias : 0;
+
+            let html = `
+                <div class="stats-cards">
+                    <div class="stat-card-new">
+                        <div class="value">${filtradas.length}</div>
+                        <div class="label">🛒 Ventas totales</div>
+                    </div>
+                    <div class="stat-card-new green">
+                        <div class="value">$${totalIngresos.toFixed(2)}</div>
+                        <div class="label">💰 Ingresos</div>
+                    </div>
+                    <div class="stat-card-new orange">
+                        <div class="value">$${totalGanancia.toFixed(2)}</div>
+                        <div class="label">📈 Ganancia</div>
+                    </div>
+                    <div class="stat-card-new purple">
+                        <div class="value">$${ticketMedio.toFixed(2)}</div>
+                        <div class="label">🎫 Ticket promedio</div>
+                    </div>
+                    <div class="stat-card-new">
+                        <div class="value">$${promedioDiario.toFixed(2)}</div>
+                        <div class="label">📅 Promedio diario</div>
+                    </div>
+                    <div class="stat-card-new red">
+                        <div class="value">$${totalCosto.toFixed(2)}</div>
+                        <div class="label">📦 Costo de productos</div>
+                    </div>
+                </div>
+            `;
+
+            html += `<div class="ranking-list"><h3>🏆 Top 10 productos más vendidos</h3>`;
+            if (topProductos.length === 0) html += `<div class="empty">Sin datos.</div>`;
+            else {
+                topProductos.forEach(([nombre, data], i) => {
+                    const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+                    html += `<div class="ranking-item">
+                        <div class="rank-num ${rankClass}">${i+1}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">${nombre}</div>
+                            <div class="rank-sub">${data.cantidad} unidades vendidas</div>
+                        </div>
+                        <div class="rank-value">$${data.ingresos.toFixed(2)}</div>
+                    </div>`;
+                });
+            }
+            html += `</div>`;
+
+            html += `<div class="ranking-list"><h3>📂 Top categorías por unidades vendidas</h3>`;
+            if (topCategorias.length === 0) html += `<div class="empty">Sin datos.</div>`;
+            else {
+                topCategorias.forEach(([cat, data], i) => {
+                    html += `<div class="ranking-item">
+                        <div class="rank-num">${i+1}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">${cat}</div>
+                            <div class="rank-sub">${data.cantidad} unidades vendidas</div>
+                        </div>
+                        <div class="rank-value">$${data.ingresos.toFixed(2)}</div>
+                    </div>`;
+                });
+            }
+            html += `</div>`;
+
+            container.innerHTML = html;
+        }
+
+        document.getElementById('estFiltrarBtn').addEventListener('click', renderizarEstadisticas);
+        document.getElementById('estLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('estFechaDesde').value = '';
+            document.getElementById('estFechaHasta').value = '';
+            document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active'));
+            renderizarEstadisticas();
+        });
+
+        // ============================================================
+        // RENDERIZADO INVENTARIO, VENTAS, DOMICILIOS, TIENDA, ENCARGOS
+        // ============================================================
         function renderInventario(productos, categoriaFiltro = 'Todas', busqueda = '') {
             const container = document.getElementById('inventarioContainer');
             let filtrados = productos;
@@ -933,8 +1235,7 @@
             let html = '<div class="product-grid">';
             for (const p of filtrados) {
                 const fotos = obtenerFotosProducto(p);
-                const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                const fotoUrl = fotoPrincipal || '';
+                const fotoUrl = fotos.length > 0 ? fotos[0] : '';
                 const precio = parseFloat(p.Precio_Venta || 0);
                 const oferta = parseFloat(p.Precio_Oferta || 0);
                 const precioFinal = (oferta > 0 && oferta < precio) ? oferta : precio;
@@ -953,8 +1254,7 @@
                     extrasHtml += `</div>`;
                 }
                 const urlBtnHtml = (esEncargo && urlEncargo)
-                    ? `<a href="${urlEncargo}" target="_blank" rel="noopener" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver producto</a>`
-                    : '';
+                    ? `<a href="${urlEncargo}" target="_blank" rel="noopener" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver producto</a>` : '';
                 const proveedorLabelHtml = esProveedor ? `<div class="proveedor-label">🏭 Proveedor</div>` : '';
                 const proveedorNombreHtml = (esProveedor && proveedor) ? `<div class="proveedor">${proveedor}</div>` : '';
 
@@ -988,11 +1288,10 @@
             if (ventas.length === 0) { container.innerHTML = '<div class="empty">No hay ventas.</div>'; return; }
             let html = '';
             for (const v of ventas) {
-                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
                 const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
                 const ganancia = calcularGananciaVenta(v);
-                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fecha} • ${icono} ${tipo}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="small">Ganancia: $${ganancia.toFixed(2)}</div></div></div>`;
+                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${icono} ${tipo}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="small">Ganancia: $${ganancia.toFixed(2)}</div></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -1009,7 +1308,6 @@
                 if (estadoMostrado === 'Nuevo Domicilio') badgeClass = 'estado-nuevo';
                 else if (estadoMostrado === 'En camino') badgeClass = 'estado-en-camino';
                 else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
-                const fecha = d.fecha ? (d.fecha.seconds ? new Date(d.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(d.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 let telefono = d.Telefono == null ? '' : String(d.Telefono);
                 const isEntregado = (estadoReal === 'Entregado');
                 const opciones = `
@@ -1022,7 +1320,7 @@
                     <div class="list-item" id="dom-item-${d.id}">
                         <div class="left">
                             <div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div>
-                            <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div>
+                            <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fechaToStr(d.fecha)}</div>
                             <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
                             ${renderProductosPedidoConLinks(d.productos_pedido)}
                             <div class="sub" style="margin-top:8px; padding:6px 10px; background:#f8fafc; border-radius:6px; display:inline-block;">
@@ -1058,8 +1356,6 @@
                 if (estadoMostrado === 'Nuevo Pedido') badgeClass = 'estado-nuevo';
                 else if (estadoMostrado === 'Vendido') badgeClass = 'estado-entregado';
                 else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
-                const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(p.fecha).toLocaleString('es-ES')) : 'Sin fecha';
-                const fechaLimite = p.fecha_limite ? (p.fecha_limite.seconds ? new Date(p.fecha_limite.seconds * 1000).toLocaleString('es-ES') : new Date(p.fecha_limite).toLocaleString('es-ES')) : 'No definida';
                 const telefono = p.Telefono || 'Sin teléfono';
                 const isVendido = (estadoReal === 'Vendido' || estadoReal === 'Cancelado');
                 const opciones = `
@@ -1072,8 +1368,8 @@
                     <div class="list-item" id="tienda-item-${p.id}">
                         <div class="left">
                             <div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div>
-                            <div class="sub">📞 ${telefono} • ${fecha}</div>
-                            <div class="sub">⏳ Límite: ${fechaLimite}</div>
+                            <div class="sub">📞 ${telefono} • ${fechaToStr(p.fecha)}</div>
+                            <div class="sub">⏳ Límite: ${fechaToStr(p.fecha_limite)}</div>
                             ${renderProductosPedidoConLinks(p.productos_pedido)}
                         </div>
                         <div class="center">
@@ -1108,7 +1404,6 @@
                 else if (estadoMostrado === 'Entregado') badgeClass = 'estado-entregado';
                 else if (estadoMostrado === 'Cancelado') badgeClass = 'estado-cancelado';
 
-                const fecha = e.fecha_solicitud ? (e.fecha_solicitud.seconds ? new Date(e.fecha_solicitud.seconds * 1000).toLocaleString('es-ES') : new Date(e.fecha_solicitud).toLocaleString('es-ES')) : 'Sin fecha';
                 const telefono = e.usuario_telefono || 'Sin teléfono';
                 const nombreCliente = e.usuario_nombre || 'Cliente';
                 const producto = e.producto_nombre || 'Producto';
@@ -1117,12 +1412,12 @@
 
                 let fechaLimiteHtml = '';
                 if (e.fecha_limite_pago) {
-                    const fl = e.fecha_limite_pago.seconds ? new Date(e.fecha_limite_pago.seconds * 1000) : new Date(e.fecha_limite_pago);
+                    const fl = fechaToDate(e.fecha_limite_pago);
                     fechaLimiteHtml = `<div class="sub">⏳ Límite pago: ${fl.toLocaleString('es-ES')}</div>`;
                 }
                 let tiempoHtml = '';
                 if (estado === 'Pendiente' && e.fecha_limite_pago) {
-                    const limite = e.fecha_limite_pago.seconds ? new Date(e.fecha_limite_pago.seconds * 1000) : new Date(e.fecha_limite_pago);
+                    const limite = fechaToDate(e.fecha_limite_pago);
                     const diff = limite - ahora;
                     if (diff > 0) {
                         const horas = Math.floor(diff / (1000 * 60 * 60));
@@ -1145,17 +1440,15 @@
                     <option value="Entregado" ${estadoMostrado === 'Entregado' ? 'selected' : ''}>Entregado</option>
                     <option value="Cancelado" ${estadoMostrado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                 `;
-
                 const linkProducto = e.producto_id
-                    ? `<div class="sub">🔗 <a href="${TIENDA_URL}?id=${e.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">Ver producto</a></div>`
-                    : '';
+                    ? `<div class="sub">🔗 <a href="${TIENDA_URL}?id=${e.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600; text-decoration:underline;">Ver producto</a></div>` : '';
 
                 html += `
                     <div class="list-item" id="encargo-item-${e.id}">
                         <div class="left">
                             <div class="title">📦 ${producto} (x${cantidad})</div>
                             <div class="sub">👤 ${nombreCliente} • 📞 ${telefono}</div>
-                            <div class="sub">📅 ${fecha}</div>
+                            <div class="sub">📅 ${fechaToStr(e.fecha_solicitud)}</div>
                             ${linkProducto}
                             ${fechaLimiteHtml}
                             ${comentario ? `<div class="sub">💬 ${comentario}</div>` : ''}
@@ -1176,15 +1469,16 @@
             actualizarNotificaciones();
         }
 
+        // ============================================================
+        // ACCIONES
+        // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
             if (!enc || enc.estado !== 'Pendiente') return;
             try {
                 const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
                 await updateDoc(doc(window.firebaseDb, 'Encargos', id), { estado: 'Cancelado', fecha_actualizacion: serverTimestamp() });
-                await cargarEncargos();
-                aplicarFiltrosEncargos();
-                notificarEncargo(id, true);
+                await cargarEncargos(); aplicarFiltrosEncargos(); notificarEncargo(id, true);
             } catch (e) { console.error('Error cancelando encargo vencido:', e); }
         }
 
@@ -1204,8 +1498,7 @@
                 } else data.estado = nuevoEstado;
                 data.fecha_actualizacion = serverTimestamp();
                 await updateDoc(doc(window.firebaseDb, 'Encargos', id), data);
-                await cargarEncargos();
-                aplicarFiltrosEncargos();
+                await cargarEncargos(); aplicarFiltrosEncargos();
                 if (nuevoEstado !== 'Nuevo Encargo' && nuevoEstado !== 'Cancelado') notificarEncargo(id);
             } catch (e) { console.error('Error al cambiar estado del encargo:', e); alert('Error: ' + e.message); }
         }
@@ -1252,8 +1545,6 @@
                 const urlEncargo = prod && prod.URL_Encargo ? String(prod.URL_Encargo).trim() : '';
                 const urlHtml = urlEncargo ? `<a href="${urlEncargo}" target="_blank" rel="noopener" style="color:#6d28d9; font-weight:600;">🔗 Abrir enlace</a>` : 'No definida';
                 const linkProducto = data.producto_id ? `<a href="${TIENDA_URL}?id=${data.producto_id}" target="_blank" rel="noopener" style="color:#2980b9; font-weight:600;">🔗 Ver en tienda</a>` : 'No definido';
-                const fechaSol = data.fecha_solicitud ? (data.fecha_solicitud.seconds ? new Date(data.fecha_solicitud.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_solicitud).toLocaleString('es-ES')) : 'Sin fecha';
-                const fechaLim = data.fecha_limite_pago ? (data.fecha_limite_pago.seconds ? new Date(data.fecha_limite_pago.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_limite_pago).toLocaleString('es-ES')) : 'No definida';
                 const body = `
                     <div class="detail-row"><span class="label">Producto</span><span class="value">${data.producto_nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Cantidad</span><span class="value">${data.cantidad || 1}</span></div>
@@ -1261,10 +1552,10 @@
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.usuario_telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.estado || 'Pendiente'}</span></div>
                     <div class="detail-row"><span class="label">Comentario</span><span class="value">${data.comentario || 'Ninguno'}</span></div>
-                    <div class="detail-row"><span class="label">🔗 Ver producto en tienda</span><span class="value">${linkProducto}</span></div>
-                    <div class="detail-row"><span class="label">🔗 URL del producto</span><span class="value">${urlHtml}</span></div>
-                    <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${fechaSol}</span></div>
-                    <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${fechaLim}</span></div>
+                    <div class="detail-row"><span class="label">🔗 Ver producto</span><span class="value">${linkProducto}</span></div>
+                    <div class="detail-row"><span class="label">🔗 URL externa</span><span class="value">${urlHtml}</span></div>
+                    <div class="detail-row"><span class="label">Fecha solicitud</span><span class="value">${fechaToStr(data.fecha_solicitud)}</span></div>
+                    <div class="detail-row"><span class="label">Fecha límite pago</span><span class="value">${data.fecha_limite_pago ? fechaToStr(data.fecha_limite_pago) : 'No definida'}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1428,11 +1719,10 @@
                 if (!docSnap.exists()) { alert('Venta no encontrada.'); return; }
                 const data = docSnap.data();
                 const total = parseFloat(data.total || 0);
-                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = data.Tipo || 'Local';
                 const ganancia = calcularGananciaVenta(data);
                 const body = `
-                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(data.fecha)}</span></div>
                     <div class="detail-row"><span class="label">Tipo</span><span class="value">${tipo}</span></div>
                     <div class="detail-row"><span class="label">Productos</span><span class="value">${data.productos_json || 'Sin productos'}</span></div>
                     <div class="detail-row"><span class="label">Total</span><span class="value">$${total.toFixed(2)}</span></div>
@@ -1449,7 +1739,6 @@
                 const docSnap = await getDoc(doc(window.firebaseDb, 'Domicilios', id));
                 if (!docSnap.exists()) { alert('Domicilio no encontrado.'); return; }
                 const data = docSnap.data();
-                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const productosPedido = parsearProductosPedido(data.productos_pedido);
                 let productosHtml = 'Sin productos';
                 if (productosPedido.length > 0) {
@@ -1463,7 +1752,7 @@
                 const envioGuardado = parseFloat(data.envio || 0);
                 const totalGuardado = parseFloat(data.total || 0);
                 const body = `
-                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(data.fecha)}</span></div>
                     <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.Cliente_Nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Dirección</span><span class="value">${data.Direccion_Entrega || 'Sin dirección'}</span></div>
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.Telefono || 'Sin teléfono'}</span></div>
@@ -1487,8 +1776,6 @@
                 const data = docSnap.data();
                 const productos = parsearProductosPedido(data.productos_pedido);
                 const total = data.total || 0;
-                const fecha = data.fecha ? (data.fecha.seconds ? new Date(data.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha).toLocaleString('es-ES')) : 'Sin fecha';
-                const fechaLimite = data.fecha_limite ? (data.fecha_limite.seconds ? new Date(data.fecha_limite.seconds * 1000).toLocaleString('es-ES') : new Date(data.fecha_limite).toLocaleString('es-ES')) : 'No definida';
                 let productosHtml = 'Sin productos';
                 if (productos.length > 0) {
                     productosHtml = '<ul style="padding-left:18px;">';
@@ -1498,13 +1785,13 @@
                     productosHtml += '</ul>';
                 }
                 const body = `
-                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(data.fecha)}</span></div>
                     <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.Cliente_Nombre || 'Sin nombre'}</span></div>
                     <div class="detail-row"><span class="label">Teléfono</span><span class="value">${data.Telefono || 'Sin teléfono'}</span></div>
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.Estado || 'Pendiente'}</span></div>
                     <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label" style="margin-bottom:4px;">🛍️ Productos</span><span class="value" style="text-align:left;">${productosHtml}</span></div>
                     <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(total).toFixed(2)}</span></div>
-                    <div class="detail-row"><span class="label">Fecha límite</span><span class="value">${fechaLimite}</span></div>
+                    <div class="detail-row"><span class="label">Fecha límite</span><span class="value">${fechaToStr(data.fecha_limite)}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1514,6 +1801,9 @@
         document.getElementById('closeDetailModal').addEventListener('click', () => document.getElementById('detailModal').classList.remove('active'));
         document.getElementById('detailModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) document.getElementById('detailModal').classList.remove('active'); });
 
+        // ============================================================
+        // PRODUCTOS (Form + Cloudinary)
+        // ============================================================
         let fotosExistentes = [];
         let fotosNuevas = [];
 
@@ -1521,10 +1811,9 @@
             const container = document.getElementById('prodFotosPreview');
             container.innerHTML = '';
             fotosExistentes.forEach((f, index) => {
-                const url = f || '';
                 const div = document.createElement('div');
                 div.className = 'foto-item';
-                div.innerHTML = `<img src="${url}" alt="Foto" /><button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>`;
+                div.innerHTML = `<img src="${f}" alt="Foto" /><button type="button" class="btn-remove" data-index="${index}" title="Eliminar foto">✕</button>`;
                 container.appendChild(div);
             });
             fotosNuevas.forEach((file, index) => {
@@ -1691,10 +1980,6 @@
         function cerrarModalProducto() {
             document.getElementById('productModal').classList.remove('active');
             resetFotosFormulario();
-            document.getElementById('urlEncargoGroup').style.display = 'none';
-            document.getElementById('prodUrlEncargo').value = '';
-            document.getElementById('proveedorGroup').style.display = 'none';
-            document.getElementById('prodProveedor').value = '';
         }
         document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
         document.getElementById('productCancelBtn').addEventListener('click', cerrarModalProducto);
@@ -1742,12 +2027,8 @@
                     Fotos: fotosFinales,
                     fecha_actualizacion: serverTimestamp()
                 };
-                if (id) {
-                    await updateDoc(doc(window.firebaseDb, 'productos', id), data);
-                } else {
-                    data.fecha_creacion = serverTimestamp();
-                    await addDoc(collection(window.firebaseDb, 'productos'), data);
-                }
+                if (id) await updateDoc(doc(window.firebaseDb, 'productos', id), data);
+                else { data.fecha_creacion = serverTimestamp(); await addDoc(collection(window.firebaseDb, 'productos'), data); }
                 alert(id ? '✅ Producto actualizado correctamente.' : '✅ Producto creado correctamente.');
                 cerrarModalProducto();
                 await cargarProductos();
@@ -1792,13 +2073,11 @@
             link.addEventListener('click', () => { if (window.innerWidth <= 992) closeMenu(); });
         });
 
+        // CAJA
         function mostrarSugerencias(texto) {
             const sugerenciasDiv = document.getElementById('cajaSugerencias');
             if (!texto.trim()) { sugerenciasDiv.style.display = 'none'; return; }
-            const filtrados = productosCache.filter(p => {
-                const nombre = (p.Nombre || '').toLowerCase();
-                return nombre.includes(texto.toLowerCase()) && parseInt(p.Stock || 0) > 0;
-            });
+            const filtrados = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(texto.toLowerCase()) && parseInt(p.Stock || 0) > 0);
             if (filtrados.length === 0) { sugerenciasDiv.style.display = 'none'; return; }
             let html = '';
             filtrados.slice(0, 10).forEach(p => {
@@ -1833,9 +2112,7 @@
                 const nuevaCant = existente.cantidad + cantidad;
                 if (nuevaCant > stock) { alert(`No puedes agregar más. Stock disponible: ${stock}, ya tienes ${existente.cantidad}.`); return; }
                 existente.cantidad = nuevaCant;
-            } else {
-                carrito.push({ id: selectedId, nombre: busqueda.value.trim(), precio, cantidad, stockDisponible: stock });
-            }
+            } else carrito.push({ id: selectedId, nombre: busqueda.value.trim(), precio, cantidad, stockDisponible: stock });
             renderizarCarrito();
             document.getElementById('cajaCantidad').value = 1;
             busqueda.value = '';
@@ -1852,8 +2129,7 @@
                 document.getElementById('cajaTotal').textContent = 'Total: $0.00';
                 return;
             }
-            let html = '';
-            let total = 0;
+            let html = '', total = 0;
             carrito.forEach((item, index) => {
                 const subtotal = item.precio * item.cantidad;
                 total += subtotal;
@@ -1921,6 +2197,7 @@
         document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
         document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
 
+        // NOTIFICACIONES
         document.getElementById('notifBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             document.getElementById('notifDropdown').classList.toggle('open');
@@ -1931,6 +2208,7 @@
             if (!btn.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.remove('open');
         });
 
+        // EXPORTAR PDFs
         function exportarInventarioPDF() {
             if (productosCache.length === 0) { alert('No hay productos en el inventario para exportar.'); return; }
             const { jsPDF } = window.jspdf;
@@ -1940,10 +2218,6 @@
             const tableData = [];
             let totalCosto = 0, totalVenta = 0, totalGanancia = 0;
             for (const p of productosCache) {
-                const nombre = p.Nombre || 'Sin nombre';
-                const categoria = p.Categoria || 'General';
-                const codigo = p.Codigo_de_Barras || '';
-                const proveedor = p.Proveedor || '';
                 const stock = parseInt(p.Stock || 0);
                 const costo = parseFloat(p.Precio_Costo || 0);
                 const venta = parseFloat(p.Precio_Venta || 0);
@@ -1952,24 +2226,16 @@
                 const esEncargo = p.Es_Encargo === true;
                 const esProveedor = p.Es_Proveedor === true;
                 if (!esEncargo && !esProveedor) { totalCosto += stock * costo; totalVenta += stock * venta; totalGanancia += stock * ganancia; }
-                let etiqueta = '';
-                if (esEncargo) etiqueta = ' (Encargo)';
-                else if (esProveedor) etiqueta = ' (Proveedor)';
-                tableData.push([nombre + etiqueta, categoria, proveedor, codigo, stock, `$${costo.toFixed(2)}`, `$${venta.toFixed(2)}`, `$${oferta.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
+                let etiqueta = esEncargo ? ' (Encargo)' : (esProveedor ? ' (Proveedor)' : '');
+                tableData.push([(p.Nombre || 'Sin nombre') + etiqueta, p.Categoria || 'General', p.Proveedor || '', p.Codigo_de_Barras || '', stock, `$${costo.toFixed(2)}`, `$${venta.toFixed(2)}`, `$${oferta.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
             }
             tableData.push(['TOTALES', '', '', '', '', `$${totalCosto.toFixed(2)}`, `$${totalVenta.toFixed(2)}`, '', `$${totalGanancia.toFixed(2)}`]);
             doc.autoTable({
-                head: [['Producto', 'Categoría', 'Proveedor', 'Código', 'Stock', 'Precio Costo', 'Precio Venta', 'Precio Oferta', 'Ganancia x ud']],
+                head: [['Producto', 'Categoría', 'Proveedor', 'Código', 'Stock', 'Costo', 'Venta', 'Oferta', 'Ganancia']],
                 body: tableData, startY: 72, theme: 'striped',
                 headStyles: { fillColor: '#1a252f', textColor: '#ffffff', fontStyle: 'bold', fontSize: 10, halign: 'center', font: 'times' },
                 styles: { fontSize: 8, cellPadding: 4, valign: 'middle', lineColor: '#d0d7de', lineWidth: 0.2, font: 'times' },
-                columnStyles: { 0: { cellWidth: 95, halign: 'left' }, 1: { cellWidth: 60, halign: 'left' }, 2: { cellWidth: 70, halign: 'left' }, 3: { cellWidth: 60, halign: 'center' }, 4: { cellWidth: 40, halign: 'center' }, 5: { cellWidth: 60, halign: 'right' }, 6: { cellWidth: 60, halign: 'right' }, 7: { cellWidth: 55, halign: 'right' }, 8: { cellWidth: 60, halign: 'right' } },
-                margin: { left: 30, right: 30 },
-                didDrawPage: function(data) {
-                    const pageCount = doc.internal.getNumberOfPages();
-                    doc.setFont('times', 'italic'); doc.setFontSize(8); doc.setTextColor('#94a3b8');
-                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                }
+                margin: { left: 30, right: 30 }
             });
             doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
         }
@@ -1985,25 +2251,17 @@
             const tableData = [];
             let totalIngresos = 0, totalGanancia = 0;
             for (const v of ventas) {
-                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
-                const tipo = v.Tipo || 'Local';
                 const total = parseFloat(v.total || 0);
                 const ganancia = calcularGananciaVenta(v);
                 totalIngresos += total; totalGanancia += ganancia;
-                tableData.push([fecha, tipo, v.productos_json || 'Sin productos', `$${total.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
+                tableData.push([fechaToStr(v.fecha), v.Tipo || 'Local', v.productos_json || 'Sin productos', `$${total.toFixed(2)}`, `$${ganancia.toFixed(2)}`]);
             }
             doc.autoTable({
                 head: [['Fecha', 'Tipo', 'Productos', 'Total (USD)', 'Ganancia (USD)']],
                 body: tableData, startY: 72, theme: 'striped',
                 headStyles: { fillColor: '#1a252f', textColor: '#ffffff', fontStyle: 'bold', fontSize: 11, halign: 'center', font: 'times' },
                 styles: { fontSize: 9, cellPadding: 5, valign: 'middle', lineColor: '#d0d7de', lineWidth: 0.2, font: 'times' },
-                columnStyles: { 0: { cellWidth: 100, halign: 'center' }, 1: { cellWidth: 70, halign: 'center' }, 2: { cellWidth: 'auto', halign: 'left' }, 3: { cellWidth: 80, halign: 'right' }, 4: { cellWidth: 80, halign: 'right' } },
-                margin: { left: 40, right: 40 },
-                didDrawPage: function(data) {
-                    const pageCount = doc.internal.getNumberOfPages();
-                    doc.setFont('times', 'italic'); doc.setFontSize(8); doc.setTextColor('#94a3b8');
-                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
-                }
+                margin: { left: 40, right: 40 }
             });
             const finalY = doc.lastAutoTable.finalY + 25;
             doc.setFont('times', 'bold'); doc.setFontSize(14); doc.setTextColor('#1a252f'); doc.text('Resumen', 40, finalY);
@@ -2015,6 +2273,7 @@
         }
         document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
 
+        // REPORTES
         function renderReportes(ventas) {
             ventasFiltradasReporte = ventas;
             const container = document.getElementById('reportesContainer');
@@ -2039,13 +2298,41 @@
             document.getElementById('repCount').textContent = ventas.length;
             let html = '';
             for (const v of ventas) {
-                const fecha = v.fecha ? (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toLocaleString('es-ES') : new Date(v.fecha).toLocaleString('es-ES')) : 'Sin fecha';
                 const tipo = v.Tipo || 'Local';
                 const icono = tipo === 'Domicilio' ? '🛵' : '🏪';
                 const ganancia = calcularGananciaVenta(v);
-                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fecha} • ${icono} ${tipo}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="small">Ganancia: $${ganancia.toFixed(2)}</div></div></div>`;
+                html += `<div class="list-item" onclick="verDetalleVenta('${v.id}')"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${icono} ${tipo}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="small">Ganancia: $${ganancia.toFixed(2)}</div></div></div>`;
             }
             container.innerHTML = html;
+        }
+
+        // ===== RANGOS RÁPIDOS DE REPORTES (#8) =====
+        function aplicarRangoReporte(rango) {
+            const hoy = new Date();
+            let desde = new Date(), hasta = new Date();
+            switch (rango) {
+                case 'hoy':
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+                    break;
+                case '7dias':
+                    desde = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case '30dias':
+                    desde = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'mes':
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    break;
+                case 'mesAnterior':
+                    desde = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+                    hasta = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+                    break;
+            }
+            document.getElementById('repFechaDesde').value = desde.toISOString().slice(0,10);
+            document.getElementById('repFechaHasta').value = hasta.toISOString().slice(0,10);
+            document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            aplicarFiltrosReportes();
         }
 
         function aplicarFiltrosVentas() {
@@ -2053,8 +2340,8 @@
             const desde = document.getElementById('ventasFechaDesde').value;
             const hasta = document.getElementById('ventasFechaHasta').value;
             const tipo = document.getElementById('ventasTipo').value;
-            if (desde) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) >= desde);
-            if (hasta) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) <= hasta);
+            if (desde) filtradas = filtradas.filter(v => fechaToISO(v.fecha) >= desde);
+            if (hasta) filtradas = filtradas.filter(v => fechaToISO(v.fecha) <= hasta);
             if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
             renderVentas(filtradas);
         }
@@ -2081,14 +2368,18 @@
             const desde = document.getElementById('repFechaDesde').value;
             const hasta = document.getElementById('repFechaHasta').value;
             const tipo = document.getElementById('repTipo').value;
-            if (desde) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) >= desde);
-            if (hasta) filtradas = filtradas.filter(v => v.fecha && (v.fecha.seconds ? new Date(v.fecha.seconds * 1000).toISOString().slice(0,10) : new Date(v.fecha).toISOString().slice(0,10)) <= hasta);
+            if (desde) filtradas = filtradas.filter(v => fechaToISO(v.fecha) >= desde);
+            if (hasta) filtradas = filtradas.filter(v => fechaToISO(v.fecha) <= hasta);
             if (tipo !== 'Todos') filtradas = filtradas.filter(v => (v.Tipo || 'Local') === tipo);
             renderReportes(filtradas);
         }
 
+        // ============================================================
+        // INIT
+        // ============================================================
         async function initApp() {
             try {
+                await cargarConfigGeneral();
                 await cargarCategorias();
                 await cargarProductos();
                 await cargarVentas();
@@ -2098,6 +2389,7 @@
 
                 renderDashboard(ventasCache, domiciliosCache);
                 renderInventario(productosCache);
+                renderizarEstadisticas();
 
                 const catSelectInv = document.getElementById('invCategory');
                 catSelectInv.innerHTML = '<option value="Todas">Todas las categorías</option>';
@@ -2119,6 +2411,7 @@
                         this.classList.add('active');
                         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
                         document.getElementById(`tab-${tab}`).classList.add('active');
+                        if (tab === 'estadisticas') renderizarEstadisticas();
                     });
                 });
 
@@ -2164,6 +2457,7 @@
                     document.getElementById('repFechaDesde').value = '';
                     document.getElementById('repFechaHasta').value = '';
                     document.getElementById('repTipo').value = 'Todos';
+                    document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
                     renderReportes(ventasCache);
                 });
 
