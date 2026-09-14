@@ -63,6 +63,7 @@
         .filters input, .filters select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; background: white; color: #1e272e; }
         .filters button { padding: 8px 20px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }
         .filters .btn-clear { background: #94a3b8; }
+        .filters .btn-success { background: #059669; }
         .rango-rapido { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
         .rango-rapido button { padding: 6px 14px; background: #eef2f6; color: #1e272e; border: 1px solid #e2e8f0; border-radius: 20px; font-weight: 500; font-size: 0.8rem; }
         .rango-rapido button.active { background: #2980b9; color: white; border-color: #2980b9; }
@@ -534,9 +535,6 @@
                     <input type="file" id="prodFotos" accept="image/*" multiple style="margin-bottom:8px;" />
                     <span id="prodFotosCount" style="font-size:0.85rem; color:#64748b;">Seleccionar archivos</span>
                     <div class="file-preview-grid" id="prodFotosPreview"></div>
-                    <div style="margin-top:6px; font-size:0.75rem; color:#94a3b8;">
-                        💡 Las fotos eliminadas aquí se borrarán automáticamente de Cloudinary al guardar.
-                    </div>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
@@ -596,40 +594,15 @@
         window.CLOUDINARY_CLOUD_NAME = "natkrios";
         window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
 
-        // Subir foto: devuelve { url, token }
         window.subirFotoCloudinary = async function(file) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', window.CLOUDINARY_UPLOAD_PRESET);
-            formData.append('return_delete_token', 'true');
             const url = `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`;
             const resp = await fetch(url, { method: 'POST', body: formData });
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.error?.message || 'Error Cloudinary');
-            }
+            if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error?.message || 'Error Cloudinary'); }
             const data = await resp.json();
-            return { url: data.secure_url, token: data.delete_token || null };
-        };
-
-        // Borrar foto de Cloudinary por token
-        window.borrarFotoCloudinary = async function(token) {
-            if (!token) return false;
-            try {
-                const formData = new FormData();
-                formData.append('token', token);
-                const url = `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/delete_by_token`;
-                const resp = await fetch(url, { method: 'POST', body: formData });
-                if (!resp.ok) {
-                    console.warn('⚠️ No se pudo borrar la foto de Cloudinary');
-                    return false;
-                }
-                console.log('🗑️ Foto borrada de Cloudinary');
-                return true;
-            } catch (e) {
-                console.warn('Error al borrar de Cloudinary:', e);
-                return false;
-            }
+            return data.secure_url;
         };
 
         window.dispatchEvent(new Event('firebase-listo'));
@@ -849,7 +822,6 @@
             return s;
         }
         function calcularGananciaVenta(v) { return parseFloat(v.total || 0) - calcularCostoVenta(v); }
-
         function obtenerFotosProducto(p) {
             let f = [];
             if (p.Fotos) {
@@ -858,20 +830,6 @@
             }
             return f;
         }
-
-        // Fotos con tokens: [{ url, token }]
-        function obtenerFotosConTokens(p) {
-            const urls = obtenerFotosProducto(p);
-            let tokens = [];
-            if (p.Fotos_Tokens) {
-                if (Array.isArray(p.Fotos_Tokens)) tokens = p.Fotos_Tokens;
-                else if (typeof p.Fotos_Tokens === 'string') {
-                    try { const x = JSON.parse(p.Fotos_Tokens); if (Array.isArray(x)) tokens = x; } catch (e) {}
-                }
-            }
-            return urls.map((url, i) => ({ url, token: tokens[i] || null }));
-        }
-
         function parsearProductosPedido(v) {
             if (!v) return [];
             if (Array.isArray(v)) return v;
@@ -1475,8 +1433,8 @@
         document.getElementById('closeDetailModal').addEventListener('click', () => document.getElementById('detailModal').classList.remove('active'));
         document.getElementById('detailModal').addEventListener('click', e => { if (e.target === e.currentTarget) document.getElementById('detailModal').classList.remove('active'); });
 
-        let fotosExistentes = []; // [{ url, token }]
-        let fotosNuevas = [];     // [{ file, preview }]
+        let fotosExistentes = [];
+        let fotosNuevas = [];
 
         function renderFotosFormulario() {
             const c = document.getElementById('prodFotosPreview');
@@ -1484,38 +1442,24 @@
             fotosExistentes.forEach((f, i) => {
                 const d = document.createElement('div');
                 d.className = 'foto-item';
-                d.innerHTML = `<img src="${f.url}" /><button type="button" class="btn-remove" data-index="${i}">✕</button>`;
+                d.innerHTML = `<img src="${f}" /><button type="button" class="btn-remove" data-index="${i}">✕</button>`;
                 c.appendChild(d);
             });
-            fotosNuevas.forEach((item, i) => {
+            fotosNuevas.forEach((file, i) => {
+                const url = URL.createObjectURL(file);
                 const d = document.createElement('div');
                 d.className = 'foto-item';
-                d.innerHTML = `<img src="${item.preview}" /><button type="button" class="btn-remove" data-nuevo="${i}">✕</button>`;
+                d.innerHTML = `<img src="${url}" /><button type="button" class="btn-remove" data-nuevo="${i}">✕</button>`;
                 c.appendChild(d);
             });
-            c.querySelectorAll('.btn-remove[data-index]').forEach(b => b.addEventListener('click', async function(e) {
-                e.stopPropagation();
-                const idx = parseInt(this.dataset.index);
-                const foto = fotosExistentes[idx];
-                if (foto && foto.token) {
-                    if (confirm('¿Borrar esta foto también de Cloudinary?')) {
-                        await window.borrarFotoCloudinary(foto.token);
-                    }
-                }
-                fotosExistentes.splice(idx, 1);
-                renderFotosFormulario();
-            }));
-            c.querySelectorAll('.btn-remove[data-nuevo]').forEach(b => b.addEventListener('click', function(e) {
-                e.stopPropagation();
-                fotosNuevas.splice(parseInt(this.dataset.nuevo), 1);
-                renderFotosFormulario();
-            }));
+            c.querySelectorAll('.btn-remove[data-index]').forEach(b => b.addEventListener('click', function(e) { e.stopPropagation(); fotosExistentes.splice(parseInt(this.dataset.index), 1); renderFotosFormulario(); }));
+            c.querySelectorAll('.btn-remove[data-nuevo]').forEach(b => b.addEventListener('click', function(e) { e.stopPropagation(); fotosNuevas.splice(parseInt(this.dataset.nuevo), 1); renderFotosFormulario(); }));
             document.getElementById('prodFotosCount').textContent = (fotosExistentes.length + fotosNuevas.length) > 0 ? `${fotosExistentes.length + fotosNuevas.length} foto(s)` : 'Seleccionar archivos';
         }
         document.getElementById('prodFotos').addEventListener('change', function() {
             const files = Array.from(this.files);
             if (files.length === 0) return;
-            files.forEach(f => { fotosNuevas.push({ file: f, preview: URL.createObjectURL(f) }); });
+            fotosNuevas = fotosNuevas.concat(files);
             renderFotosFormulario();
             this.value = '';
         });
@@ -1595,7 +1539,7 @@
                 const ep = p.Es_Proveedor === true;
                 document.getElementById('prodEsProveedor').checked = ep;
                 if (ep) { document.getElementById('proveedorGroup').style.display = 'block'; document.getElementById('prodProveedor').value = p.Proveedor || ''; }
-                fotosExistentes = obtenerFotosConTokens(p);
+                fotosExistentes = obtenerFotosProducto(p);
                 renderFotosFormulario();
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
@@ -1630,27 +1574,11 @@
             btn.disabled = true;
             try {
                 const { collection, addDoc, doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                const urlsNuevas = [];
-                const tokensNuevos = [];
-                if (fotosNuevas.length > 0) {
-                    btn.textContent = '⏳ Subiendo fotos...';
-                    for (const item of fotosNuevas) {
-                        const res = await window.subirFotoCloudinary(item.file);
-                        urlsNuevas.push(res.url);
-                        tokensNuevos.push(res.token);
-                    }
-                }
-                const ff = [...fotosExistentes.map(f => f.url), ...urlsNuevas];
-                const fTokens = [...fotosExistentes.map(f => f.token), ...tokensNuevos];
+                const urls = [];
+                if (fotosNuevas.length > 0) { btn.textContent = '⏳ Subiendo fotos...'; for (const f of fotosNuevas) { const u = await window.subirFotoCloudinary(f); urls.push(u); } }
+                const ff = [...fotosExistentes, ...urls];
                 btn.textContent = '⏳ Guardando...';
-                const data = {
-                    Nombre: n, Categoria: c, Codigo_de_Barras: cod,
-                    Precio_Costo: parseFloat(co), Precio_Venta: parseFloat(v), Precio_Oferta: parseFloat(of),
-                    Stock: parseInt(s), Detalles: d, Es_Encargo: ee, URL_Encargo: ue,
-                    Es_Proveedor: ep, Proveedor: pr,
-                    Fotos: ff, Fotos_Tokens: fTokens,
-                    fecha_actualizacion: serverTimestamp()
-                };
+                const data = { Nombre: n, Categoria: c, Codigo_de_Barras: cod, Precio_Costo: parseFloat(co), Precio_Venta: parseFloat(v), Precio_Oferta: parseFloat(of), Stock: parseInt(s), Detalles: d, Es_Encargo: ee, URL_Encargo: ue, Es_Proveedor: ep, Proveedor: pr, Fotos: ff, fecha_actualizacion: serverTimestamp() };
                 if (id) await updateDoc(doc(window.firebaseDb, 'productos', id), data);
                 else { data.fecha_creacion = serverTimestamp(); await addDoc(collection(window.firebaseDb, 'productos'), data); }
                 alert(id ? '✅ Actualizado.' : '✅ Creado.');
@@ -1663,22 +1591,10 @@
         });
 
         async function eliminarProducto(id) {
-            if (!confirm('¿Eliminar este producto? También se borrarán sus fotos de Cloudinary.')) return;
+            if (!confirm('¿Eliminar este producto?')) return;
             try {
-                const p = productosCache.find(x => x.id === id);
-                if (p) {
-                    const fotos = obtenerFotosConTokens(p);
-                    let borradas = 0;
-                    for (const foto of fotos) {
-                        if (foto.token) {
-                            const ok = await window.borrarFotoCloudinary(foto.token);
-                            if (ok) borradas++;
-                        }
-                    }
-                    console.log(`🗑️ ${borradas} fotos borradas de Cloudinary`);
-                }
                 await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'productos', id));
-                alert('✅ Producto e imágenes eliminados.');
+                alert('Eliminado.');
                 await cargarProductos();
                 renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
                 renderDashboard(ventasCache, domiciliosCache);
