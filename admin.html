@@ -620,7 +620,7 @@
         };
 
         // ☁️ Cloudinary para subir fotos (sin tarjeta de crédito)
-        window.CLOUDINARY_CLOUD_NAME = "amhnlgl";
+        window.CLOUDINARY_CLOUD_NAME = "natkrios";
         window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
 
         window.subirFotoCloudinary = async function(file) {
@@ -637,7 +637,6 @@
             return data.secure_url;
         };
 
-        // Avisar al segundo script que Firebase ya está listo
         window.dispatchEvent(new Event('firebase-listo'));
     </script>
 
@@ -765,7 +764,6 @@
             });
         }
 
-        // Esperar a que Firebase esté disponible (viene del script module)
         (function esperarFirebase() {
             if (window.firebaseFns && window.firebaseAuth) {
                 iniciarListenerAuth();
