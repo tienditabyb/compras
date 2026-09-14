@@ -176,7 +176,6 @@
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
 
-            /* 🔑 IMPORTANTE: Permitir que el dropdown de categorías se vea sobre los productos */
             .main-content,
             .products-section,
             .toolbar,
@@ -592,8 +591,62 @@
         <div class="zoom-hint">🔍 Toca fuera para cerrar</div>
     </div>
 
+    <!-- ========== FIREBASE SDK ========== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged,
+            updatePassword,
+            EmailAuthProvider,
+            reauthenticateWithCredential
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDoc, 
+            getDocs, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            query, 
+            where, 
+            orderBy, 
+            serverTimestamp,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
+            authDomain: "tiendita-byb.firebaseapp.com",
+            projectId: "tiendita-byb",
+            storageBucket: "tiendita-byb.firebasestorage.app",
+            messagingSenderId: "257958619653",
+            appId: "1:257958619653:web:0367858d644596c4b50a6c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseFns = {
+            createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+            updatePassword, EmailAuthProvider, reauthenticateWithCredential,
+            collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
+            query, where, orderBy, serverTimestamp, setDoc
+        };
+    </script>
+
     <script>
-        const POCKETBASE_URL = "https://tienditabyb.up.railway.app";
+        // ============================================================
+        // CONFIGURACIÓN GLOBAL
+        // ============================================================
         const PRODUCTOS_POR_PAGINA = 12;
         const ENVIO_COSTO = 1.00;
 
@@ -606,7 +659,6 @@
         let categoriaSeleccionada = "Todas";
         let paginaActual = 1;
         let usuarioActual = null;
-        let authToken = null;
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
         let estrellaSeleccionada = 0;
@@ -635,25 +687,55 @@
             if (e.key === 'Escape') cerrarZoom();
         });
 
-        function setAuthToken(token) {
-            if (token) { localStorage.setItem('pb_token', token); authToken = token; }
-            else { localStorage.removeItem('pb_token'); authToken = null; }
-        }
-        function getAuthToken() { return localStorage.getItem('pb_token') || null; }
-
-        function getCurrentUserFromToken() {
-            const token = getAuthToken();
-            if (!token) return null;
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const stored = localStorage.getItem('bb_user_data');
-                if (stored) {
-                    const userData = JSON.parse(stored);
-                    if (userData.id === payload.id) return userData;
+        // ============================================================
+        // AUTENTICACIÓN CON FIREBASE
+        // ============================================================
+        function iniciarListenerAuth() {
+            window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                if (user) {
+                    try {
+                        const { doc, getDoc } = window.firebaseFns;
+                        const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        
+                        let userData = {
+                            id: user.uid,
+                            email: user.email,
+                            name: user.displayName || user.email,
+                            nombre: '',
+                            apellidos: '',
+                            telefono: '',
+                            direccion: ''
+                        };
+                        
+                        if (userDoc.exists()) {
+                            const data = userDoc.data();
+                            userData.nombre = data.nombre || '';
+                            userData.apellidos = data.apellidos || '';
+                            userData.telefono = data.telefono || '';
+                            userData.direccion = data.direccion || '';
+                            userData.name = data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email;
+                        }
+                        
+                        guardarUsuarioLocal(userData);
+                    } catch (e) {
+                        console.error('Error al cargar datos del usuario:', e);
+                    }
+                } else {
+                    guardarUsuarioLocal(null);
                 }
-                return { id: payload.id, email: payload.email, name: payload.name || payload.email };
-            } catch (e) { return null; }
+                actualizarUIUsuario();
+                renderizarProductos();
+            });
         }
+        
+        (function esperarFirebase() {
+            if (window.firebaseFns && window.firebaseAuth) {
+                iniciarListenerAuth();
+            } else {
+                setTimeout(esperarFirebase, 100);
+            }
+        })();
 
         function guardarUsuarioLocal(user) {
             if (user) { localStorage.setItem('bb_user_data', JSON.stringify(user)); usuarioActual = user; }
@@ -662,39 +744,94 @@
 
         async function login(email, password) {
             try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identity: email, password })
-                });
-                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Credenciales incorrectas'); }
-                const data = await resp.json();
-                setAuthToken(data.token);
-                guardarUsuarioLocal(data.record);
+                const { signInWithEmailAndPassword, doc, getDoc } = window.firebaseFns;
+                const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+
+                const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                let userData = {
+                    id: user.uid,
+                    email: user.email,
+                    name: user.displayName || user.email,
+                    nombre: '',
+                    apellidos: '',
+                    telefono: '',
+                    direccion: ''
+                };
+
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    userData = {
+                        id: user.uid,
+                        email: user.email,
+                        name: data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email,
+                        nombre: data.nombre || '',
+                        apellidos: data.apellidos || '',
+                        telefono: data.telefono || '',
+                        direccion: data.direccion || ''
+                    };
+                }
+
+                guardarUsuarioLocal(userData);
                 actualizarUIUsuario();
                 return { success: true };
-            } catch (e) { return { success: false, error: e.message }; }
+            } catch (e) {
+                let mensajeError = 'Error al iniciar sesión';
+                if (e.code === 'auth/user-not-found') mensajeError = 'No existe una cuenta con este correo.';
+                else if (e.code === 'auth/wrong-password') mensajeError = 'Contraseña incorrecta.';
+                else if (e.code === 'auth/invalid-credential') mensajeError = 'Correo o contraseña incorrectos.';
+                else if (e.code === 'auth/invalid-email') mensajeError = 'El correo electrónico no es válido.';
+                else if (e.code === 'auth/too-many-requests') mensajeError = 'Demasiados intentos. Espera unos minutos.';
+                return { success: false, error: mensajeError };
+            }
         }
 
         async function registrar(nombre, apellidos, email, telefono, direccion, password, passwordConfirm) {
             try {
+                const { createUserWithEmailAndPassword, doc, setDoc, serverTimestamp } = window.firebaseFns;
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, apellidos, name: nombreCompleto, email, password, passwordConfirm, telefono, direccion })
+
+                const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+
+                const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
+                await setDoc(userDocRef, {
+                    nombre: nombre,
+                    apellidos: apellidos,
+                    name: nombreCompleto,
+                    email: email,
+                    telefono: telefono,
+                    direccion: direccion,
+                    fecha_registro: serverTimestamp()
                 });
-                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al registrar'); }
+
                 return await login(email, password);
-            } catch (e) { return { success: false, error: e.message }; }
+            } catch (e) {
+                let mensajeError = 'Error al registrar';
+                if (e.code === 'auth/email-already-in-use') mensajeError = 'Este correo ya está registrado.';
+                else if (e.code === 'auth/invalid-email') mensajeError = 'El correo electrónico no es válido.';
+                else if (e.code === 'auth/weak-password') mensajeError = 'La contraseña es muy débil (mínimo 6 caracteres).';
+                return { success: false, error: mensajeError };
+            }
         }
 
-        function cerrarSesion() {
-            setAuthToken(null); guardarUsuarioLocal(null); actualizarUIUsuario();
-            renderizarProductos();
-            cerrarAccountDropdown();
+        async function cerrarSesion() {
+            try {
+                const { signOut } = window.firebaseFns;
+                await signOut(window.firebaseAuth);
+                guardarUsuarioLocal(null);
+                actualizarUIUsuario();
+                renderizarProductos();
+                cerrarAccountDropdown();
+            } catch (e) {
+                console.error('Error al cerrar sesión:', e);
+            }
         }
 
         function actualizarUIUsuario() {
-            const user = getCurrentUserFromToken();
+            const user = usuarioActual;
             const dropdownContent = document.getElementById('accountDropdownContent');
             const avatar = document.getElementById('accountAvatar');
             const label = document.getElementById('accountLabel');
@@ -741,7 +878,6 @@
                         <span class="icon">🚪</span> Cerrar sesión
                     </button>
                 `;
-                usuarioActual = user;
             } else {
                 avatar.textContent = '👤';
                 label.textContent = 'Iniciar sesión';
@@ -750,7 +886,6 @@
                         <span class="icon">🔑</span> Iniciar sesión
                     </button>
                 `;
-                usuarioActual = null;
             }
         }
 
@@ -854,24 +989,28 @@
             const confirmPass = document.getElementById('confirmPassword').value;
             const errorEl = document.getElementById('passError');
             errorEl.classList.remove('show');
+
             if (!oldPass || !newPass || !confirmPass) { errorEl.textContent = 'Completa todos los campos.'; errorEl.classList.add('show'); return; }
             if (newPass.length < 8) { errorEl.textContent = 'La nueva contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
             if (newPass !== confirmPass) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
+
             try {
-                const loginResp = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identity: usuarioActual.email, password: oldPass })
-                });
-                if (!loginResp.ok) { errorEl.textContent = 'La contraseña actual es incorrecta.'; errorEl.classList.add('show'); return; }
-                const updateResp = await fetch(`${POCKETBASE_URL}/api/collections/users/records/${usuarioActual.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': authToken ? `Bearer ${authToken}` : '' },
-                    body: JSON.stringify({ password: newPass, passwordConfirm: confirmPass })
-                });
-                if (!updateResp.ok) { const err = await updateResp.json(); throw new Error(err.message || 'Error al actualizar la contraseña'); }
+                const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } = window.firebaseFns;
+                const user = window.firebaseAuth.currentUser;
+
+                const credential = EmailAuthProvider.credential(user.email, oldPass);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPass);
+
                 alert('✅ Contraseña actualizada correctamente.');
                 cerrarChangePasswordModal();
-            } catch (e) { errorEl.textContent = e.message; errorEl.classList.add('show'); }
+            } catch (e) {
+                let mensajeError = 'Error al cambiar la contraseña';
+                if (e.code === 'auth/wrong-password') mensajeError = 'La contraseña actual es incorrecta.';
+                else if (e.code === 'auth/too-many-requests') mensajeError = 'Demasiados intentos. Espera unos minutos.';
+                errorEl.textContent = mensajeError;
+                errorEl.classList.add('show');
+            }
         }
 
         function abrirContacto() { document.getElementById('contactModal').classList.add('active'); }
@@ -884,15 +1023,22 @@
             content.innerHTML = '<p style="color:#94a3b8; text-align:center;">Cargando historial...</p>';
             modal.classList.add('active');
             try {
-                const filter = `usuario_id="${usuarioActual.id}"`;
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records?filter=${encodeURIComponent(filter)}&sort=-fecha`);
-                if (!resp.ok) throw new Error('Error al obtener el historial');
-                const data = await resp.json();
-                const pedidos = data.items;
-                if (pedidos.length === 0) { content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos realizados aún.</p>'; return; }
+                const { collection, query, where, getDocs } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', usuarioActual.id));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) { content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos realizados aún.</p>'; return; }
+
+                const docs = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => {
+                    const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
+                    const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
+                    return fb - fa;
+                });
+
                 let html = '';
-                pedidos.forEach(p => {
-                    const fecha = new Date(p.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                docs.forEach((p) => {
+                    const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date(p.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : 'Sin fecha';
                     let productosLista = [];
                     if (p.productos_json) productosLista = p.productos_json.split(',').map(item => item.trim());
                     let productosHtml = '<ul>';
@@ -901,69 +1047,100 @@
                     html += `<div class="history-item"><div class="order-date">📅 ${fecha}</div><div class="order-products">${productosHtml}</div><div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div><div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div></div>`;
                 });
                 content.innerHTML = html;
-            } catch (e) { content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`; }
+            } catch (e) {
+                content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`;
+            }
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
+        // ============================================================
+        // DATOS (Firestore)
+        // ============================================================
         async function obtenerProductos() {
-            try { const resp = await fetch(`${POCKETBASE_URL}/api/collections/productos/records?perPage=500`); if (resp.ok) { const data = await resp.json(); return data.items; } return []; }
-            catch (e) { return []; }
+            try {
+                const { collection, getDocs } = window.firebaseFns;
+                const querySnapshot = await getDocs(collection(window.firebaseDb, 'productos'));
+                return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (e) { console.error('Error al obtener productos:', e); return []; }
         }
+
         async function obtenerCategorias() {
-            try { const resp = await fetch(`${POCKETBASE_URL}/api/collections/Categoria/records`); if (resp.ok) { const data = await resp.json(); return data.items.map(c => c.nombre).filter(Boolean); } return []; }
-            catch (e) { return []; }
+            try {
+                const { collection, getDocs } = window.firebaseFns;
+                const querySnapshot = await getDocs(collection(window.firebaseDb, 'Categoria'));
+                return querySnapshot.docs.map(doc => doc.data().nombre).filter(Boolean);
+            } catch (e) { console.error('Error al obtener categorías:', e); return []; }
         }
+
         async function obtenerCalificaciones(productoId) {
-            try { const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records?filter=producto_id="${productoId}"`); if (resp.ok) { const data = await resp.json(); return data.items; } return []; }
-            catch (e) { return []; }
+            try {
+                const { collection, query, where, getDocs } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Calificaciones'), where('producto_id', '==', productoId));
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (e) { return []; }
         }
+
         async function obtenerNombresUsuarios(userIds) {
             if (!userIds || userIds.length === 0) return {};
-            const filter = userIds.map(id => `id="${id}"`).join('||');
+            const map = {};
             try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/users/records?filter=${encodeURIComponent(filter)}&perPage=100`);
-                if (!resp.ok) return {};
-                const data = await resp.json();
-                const map = {};
-                data.items.forEach(u => {
-                    let nombreCompleto = '';
-                    if (u.nombre && u.apellidos) nombreCompleto = `${u.nombre} ${u.apellidos}`.trim();
-                    else if (u.nombre) nombreCompleto = u.nombre;
-                    else if (u.name) nombreCompleto = u.name;
-                    else nombreCompleto = u.email || 'Usuario';
-                    map[u.id] = nombreCompleto;
-                });
-                return map;
-            } catch (e) { return {}; }
+                const { doc, getDoc } = window.firebaseFns;
+                for (const uid of userIds) {
+                    const userDoc = await getDoc(doc(window.firebaseDb, 'usuarios', uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        let nombreCompleto = '';
+                        if (data.nombre && data.apellidos) nombreCompleto = `${data.nombre} ${data.apellidos}`.trim();
+                        else if (data.nombre) nombreCompleto = data.nombre;
+                        else if (data.name) nombreCompleto = data.name;
+                        else nombreCompleto = data.email || 'Usuario';
+                        map[uid] = nombreCompleto;
+                    } else {
+                        map[uid] = 'Usuario';
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            return map;
         }
+
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Calificaciones/records`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ producto_id: productoId, usuario_id: usuarioId, puntuacion, comentario: comentario || '', fecha: new Date().toISOString() })
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
+                await addDoc(collection(window.firebaseDb, 'Calificaciones'), {
+                    producto_id: productoId,
+                    usuario_id: usuarioId,
+                    puntuacion,
+                    comentario: comentario || '',
+                    fecha: serverTimestamp()
                 });
-                if (!resp.ok) { const error = await resp.json(); throw new Error(error.message || 'Error al calificar'); }
                 return { success: true };
             } catch (e) { return { success: false, error: e.message }; }
         }
+
         async function verificarCompra(usuarioId, productoId) {
             try {
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Ventas/records?filter=usuario_id="${usuarioId}"`);
-                if (resp.ok) {
-                    const data = await resp.json();
-                    return data.items.some(v => {
-                        if (v.productos_ids) { const ids = v.productos_ids.split(',').map(id => id.trim()); return ids.includes(productoId); }
-                        return v.productos_json && v.productos_json.includes(productoId);
-                    });
-                }
-                return false;
+                const { collection, query, where, getDocs } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', usuarioId));
+                const querySnapshot = await getDocs(q);
+                let comprado = false;
+                querySnapshot.forEach(doc => {
+                    const v = doc.data();
+                    if (v.productos_ids) {
+                        const ids = v.productos_ids.split(',').map(id => id.trim());
+                        if (ids.includes(productoId)) comprado = true;
+                    }
+                });
+                return comprado;
             } catch (e) { return false; }
         }
+
         function precioFinal(prod) {
             const venta = parseFloat(prod.Precio_Venta || 0);
             const oferta = parseFloat(prod.Precio_Oferta || 0);
             return (oferta > 0 && oferta < venta) ? oferta : venta;
         }
+
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
@@ -973,6 +1150,9 @@
             return fotos;
         }
 
+        // ============================================================
+        // RENDERIZADO
+        // ============================================================
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
@@ -1124,7 +1304,7 @@
                     for (const prod of paginaItems) {
                         const fotos = obtenerFotosProducto(prod);
                         const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                        const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
+                        const fotoUrl = fotoPrincipal || '';
                         const precio = precioFinal(prod);
                         const venta = parseFloat(prod.Precio_Venta || 0);
                         const oferta = parseFloat(prod.Precio_Oferta || 0);
@@ -1188,7 +1368,7 @@
                 pagHtml += `<span class="page-info">${paginaActual} / ${totalPaginas}</span>`;
                 pagHtml += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual >= totalPaginas ? 'disabled' : ''}>▶</button>`;
                 pagContainer.innerHTML = pagHtml;
-            }, 300);
+            }, 200);
         }
 
         function cambiarPagina(pag) {
@@ -1216,7 +1396,7 @@
                 const nombresMap = await obtenerNombresUsuarios(userIds);
                 const fotos = obtenerFotosProducto(prod);
                 const fotoPrincipal = fotos.length > 0 ? fotos[0] : '';
-                const fotoUrl = fotoPrincipal ? `${POCKETBASE_URL}/api/files/productos/${prod.id}/${fotoPrincipal}` : '';
+                const fotoUrl = fotoPrincipal || '';
                 const venta = parseFloat(prod.Precio_Venta || 0);
                 const oferta = parseFloat(prod.Precio_Oferta || 0);
                 const tieneOferta = (oferta > 0 && oferta < venta);
@@ -1232,7 +1412,7 @@
 
                 let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" ${detalleImgAttrs} /><div class="miniaturas" id="detalleMiniaturas">`;
                 fotos.forEach((f, index) => {
-                    const url = `${POCKETBASE_URL}/api/files/productos/${prod.id}/${f}`;
+                    const url = f;
                     const active = index === 0 ? 'active' : '';
                     galeriaHtml += `<img src="${url}" alt="Foto ${index+1}" class="${active}" onclick="cambiarFotoDetalle('${url}', this)" />`;
                 });
@@ -1255,7 +1435,7 @@
                 if (calificaciones.length === 0) html += `<p style="color:#94a3b8;">No hay comentarios aún. Sé el primero en opinar.</p>`;
                 else {
                     calificaciones.forEach(c => {
-                        const fecha = new Date(c.fecha).toLocaleDateString('es-ES');
+                        const fecha = c.fecha ? (c.fecha.seconds ? new Date(c.fecha.seconds * 1000).toLocaleDateString('es-ES') : new Date(c.fecha).toLocaleDateString('es-ES')) : 'Sin fecha';
                         const estrellasCom = '★'.repeat(c.puntuacion) + '☆'.repeat(5 - c.puntuacion);
                         const nombreReal = nombresMap[c.usuario_id] || 'Anónimo';
                         html += `<div class="comentario-item"><div class="comentario-header"><span class="comentario-nombre">${nombreReal}</span><span class="comentario-estrellas">${estrellasCom}</span></div><div class="comentario-texto">${c.comentario || 'Sin comentario'}</div><div class="comentario-fecha">${fecha}</div></div>`;
@@ -1419,22 +1599,40 @@
             const envio = (tipoEntregaSeleccionado === 'Domicilio') ? ENVIO_COSTO : 0;
             const totalFinal = subtotal + envio;
             try {
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
                 let pedidoId = '';
+
                 if (tipoEntregaSeleccionado === 'Domicilio') {
-                    const domData = { Cliente_Nombre: nombreCompleto, Direccion_Entrega: direccion, Telefono: telefono, Detalles: referencias || '', Estado: 'Pendiente', usuario_id: usuarioActual.id, productos_pedido: JSON.stringify(productosPedido) };
-                    const respDom = await fetch(`${POCKETBASE_URL}/api/collections/Domicilios/records`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(domData) });
-                    if (!respDom.ok) { const error = await respDom.json(); throw new Error(error.message || 'Error al registrar el domicilio'); }
-                    const domRecord = await respDom.json();
-                    pedidoId = domRecord.id.slice(-6);
+                    const domData = {
+                        Cliente_Nombre: nombreCompleto,
+                        Direccion_Entrega: direccion,
+                        Telefono: telefono,
+                        Detalles: referencias || '',
+                        Estado: 'Pendiente',
+                        usuario_id: usuarioActual.id,
+                        productos_pedido: JSON.stringify(productosPedido),
+                        total: totalFinal,
+                        fecha: serverTimestamp()
+                    };
+                    const docRef = await addDoc(collection(window.firebaseDb, 'Domicilios'), domData);
+                    pedidoId = docRef.id.slice(-6);
                 } else {
                     const ahora = new Date();
                     const fechaLimite = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
-                    const tiendaData = { Cliente_Nombre: nombreCompleto, Telefono: telefono, productos_pedido: JSON.stringify(productosPedido), total: totalFinal, Estado: 'Pendiente', fecha_pedido: ahora.toISOString(), usuario_id: usuarioActual.id, fecha_limite: fechaLimite.toISOString() };
-                    const respTienda = await fetch(`${POCKETBASE_URL}/api/collections/PedidosTienda/records`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tiendaData) });
-                    if (!respTienda.ok) { const error = await respTienda.json(); throw new Error(error.message || 'Error al registrar el pedido en tienda'); }
-                    const tiendaRecord = await respTienda.json();
-                    pedidoId = tiendaRecord.id.slice(-6);
+                    const tiendaData = {
+                        Cliente_Nombre: nombreCompleto,
+                        Telefono: telefono,
+                        productos_pedido: JSON.stringify(productosPedido),
+                        total: totalFinal,
+                        Estado: 'Pendiente',
+                        fecha: serverTimestamp(),
+                        usuario_id: usuarioActual.id,
+                        fecha_limite: fechaLimite
+                    };
+                    const docRef = await addDoc(collection(window.firebaseDb, 'PedidosTienda'), tiendaData);
+                    pedidoId = docRef.id.slice(-6);
                 }
+
                 let mensaje = `*🆕 Nuevo pedido*\n\n`;
                 mensaje += `👤 Cliente: ${nombreCompleto}\n`;
                 mensaje += `📞 Teléfono: ${telefono}\n`;
@@ -1453,9 +1651,12 @@
                 mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
                 mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
-                if (!response.ok) console.error('Error al enviar WhatsApp al grupo:', await response.text());
+                try {
+                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
+                } catch (err) { console.warn('No se pudo enviar WhatsApp:', err); }
+
                 notificarAdminOneSignal("🛒 Nueva compra", `${nombreCompleto} - Total: $${totalFinal.toFixed(2)} (${tipoEntregaSeleccionado})`);
+
                 carrito = [];
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
@@ -1496,10 +1697,22 @@
             btn.disabled = true;
             btn.textContent = '⏳ Enviando...';
             try {
-                const encargoData = { producto_id: prod.id, producto_nombre: prod.Nombre || 'Sin nombre', usuario_id: usuarioActual.id, usuario_nombre: usuarioActual.nombre || usuarioActual.name || 'Usuario', usuario_telefono: usuarioActual.telefono || 'Sin teléfono', cantidad, comentario, estado: 'Pendiente', fecha_solicitud: new Date().toISOString(), fecha_actualizacion: new Date().toISOString() };
-                const resp = await fetch(`${POCKETBASE_URL}/api/collections/Encargos/records`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(encargoData) });
-                if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Error al guardar el encargo'); }
-                const result = await resp.json();
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
+                const encargoData = {
+                    producto_id: prod.id,
+                    producto_nombre: prod.Nombre || 'Sin nombre',
+                    usuario_id: usuarioActual.id,
+                    usuario_nombre: usuarioActual.nombre || usuarioActual.name || 'Usuario',
+                    usuario_telefono: usuarioActual.telefono || 'Sin teléfono',
+                    cantidad,
+                    comentario,
+                    estado: 'Pendiente',
+                    fecha_solicitud: serverTimestamp(),
+                    fecha_actualizacion: serverTimestamp()
+                };
+                const docRef = await addDoc(collection(window.firebaseDb, 'Encargos'), encargoData);
+                const resultId = docRef.id;
+
                 const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
                     `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
                     `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
@@ -1508,10 +1721,14 @@
                     `🔢 Cantidad: ${cantidad}\n` +
                     `💬 Comentario: ${comentario || 'Sin comentario'}\n` +
                     `📅 Fecha: ${new Date().toLocaleString('es-ES')}\n` +
-                    `🆔 ID Encargo: ${result.id.slice(-6)}`;
+                    `🆔 ID Encargo: ${resultId.slice(-6)}`;
                 const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
-                await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
+                try {
+                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
+                } catch (err) { console.warn('No se pudo enviar WhatsApp:', err); }
+
                 notificarAdminOneSignal("📦 Nuevo encargo", `${usuarioActual.nombre || usuarioActual.name || 'Cliente'} - ${prod.Nombre} (x${cantidad})`);
+
                 alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
                 cerrarEncargoModal();
             } catch (e) {
