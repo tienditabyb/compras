@@ -78,20 +78,9 @@
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
         .toolbar__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .toolbar__left h2 { font-size: 1.2rem; font-weight: 600; color: #1e272e; }
-
-        /* ===== FILTROS AVANZADOS (#5) ===== */
-        .filters-advanced { background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-        .filters-advanced label { font-size: 0.8rem; font-weight: 500; color: #64748b; display: block; margin-bottom: 3px; }
-        .filters-advanced input[type="number"], .filters-advanced select { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; width: 100%; font-family: inherit; color: #1e272e; background: white; }
-        .filters-advanced input:focus, .filters-advanced select:focus { border-color: #2980b9; }
-        .filters-advanced .filter-group { flex: 1; min-width: 110px; }
-        .filters-advanced .filter-btn { padding: 8px 16px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; align-self: flex-end; }
-        .filters-advanced .filter-btn:hover { background: #1f6da9; }
-        .filters-advanced .filter-clear { background: #94a3b8; }
-        .filters-advanced .filter-clear:hover { background: #64748b; }
 
         .toolbar__categories { display: none; position: relative; }
         .btn-categories { background: #eef2f6; border: none; padding: 6px 14px; border-radius: 30px; font-weight: 500; font-size: 0.85rem; color: #1e272e; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -186,9 +175,7 @@
             .cart-float { width: 50px; height: 50px; font-size: 1.4rem; bottom: 15px; right: 15px; }
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
-
             .main-content, .products-section, .toolbar, .toolbar__left { overflow: visible !important; }
-
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; position: relative; z-index: 500; }
             .toolbar__left { justify-content: space-between; width: 100%; position: relative; z-index: 500; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
             .toolbar__left h2 { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; }
@@ -206,10 +193,6 @@
             .detail-page .detail-container .galeria .miniaturas img { width: 45px; height: 45px; }
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
-
-            .filters-advanced { padding: 10px; gap: 8px; }
-            .filters-advanced .filter-group { min-width: 100%; }
-
             .products-grid { gap: 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; grid-auto-rows: 1fr; width: 100%; max-width: 100%; min-width: 0; }
             .product-card { padding: 4px; border-radius: 6px; height: 100%; display: flex; flex-direction: column; min-width: 0; max-width: 100%; overflow: hidden; }
             .product-card .foto-principal { border-radius: 4px; margin-bottom: 2px; aspect-ratio: 1 / 1; width: 100%; max-width: 100%; object-fit: contain; }
@@ -247,7 +230,7 @@
         .resumen-pedido .linea.total { font-weight: 700; font-size: 1.05rem; border-top: 2px solid #e2e8f0; margin-top: 4px; padding-top: 8px; color: #1a252f; }
         .resumen-pedido .envio { color: #64748b; }
         .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
-        .resumen-pedido .envio.gratis { color: #059669; font-weight: 700; text-decoration: line-through; }
+        .resumen-pedido .envio.gratis { color: #059669; font-weight: 700; }
         .history-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; }
         .history-item:last-child { border-bottom: none; }
         .history-item .order-date { font-size: 0.8rem; color: #94a3b8; }
@@ -283,7 +266,6 @@
         .contact-info { background: #f8fafc; border-radius: 10px; padding: 12px; margin: 8px 0; line-height: 1.7; font-size: 0.9rem; }
         .contact-info strong { color: #1e272e; }
 
-        /* ===== SOBRE NOSOTROS (#10) ===== */
         .about-content { font-size: 0.95rem; line-height: 1.7; color: #475569; }
         .about-content p { margin-bottom: 12px; }
         .about-content h3 { color: #1e272e; margin: 18px 0 8px; font-size: 1.1rem; }
@@ -390,21 +372,6 @@
                     </select>
                 </div>
             </div>
-
-            <!-- ===== FILTROS AVANZADOS (#5) ===== -->
-            <div class="filters-advanced">
-                <div class="filter-group">
-                    <label>Precio mín.</label>
-                    <input type="number" id="filtroPrecioMin" placeholder="0" min="0" step="0.01" />
-                </div>
-                <div class="filter-group">
-                    <label>Precio máx.</label>
-                    <input type="number" id="filtroPrecioMax" placeholder="1000" min="0" step="0.01" />
-                </div>
-                <button class="filter-btn" onclick="aplicarFiltrosAvanzados()">🔍 Filtrar</button>
-                <button class="filter-btn filter-clear" onclick="limpiarFiltrosAvanzados()">✕ Limpiar</button>
-            </div>
-
             <div class="products-grid" id="productsGrid">
                 <div class="loading-message">🔄 Cargando productos...</div>
             </div>
@@ -439,34 +406,21 @@
                 Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>.
             </div>
             <div id="encargoForm">
-                <div class="form-group">
-                    <label>Producto</label>
-                    <input type="text" id="encargoProductoNombre" disabled />
-                </div>
-                <div class="form-group">
-                    <label>Cantidad *</label>
-                    <input type="number" id="encargoCantidad" value="1" min="1" />
-                </div>
-                <div class="form-group">
-                    <label>Comentarios (opcional)</label>
-                    <textarea id="encargoComentario" rows="3" placeholder="Detalles adicionales..."></textarea>
-                </div>
+                <div class="form-group"><label>Producto</label><input type="text" id="encargoProductoNombre" disabled /></div>
+                <div class="form-group"><label>Cantidad *</label><input type="number" id="encargoCantidad" value="1" min="1" /></div>
+                <div class="form-group"><label>Comentarios (opcional)</label><textarea id="encargoComentario" rows="3" placeholder="Detalles adicionales..."></textarea></div>
                 <div id="encargoError" class="error-msg"></div>
                 <button class="btn-primary" id="encargoConfirmarBtn">✅ Enviar solicitud</button>
             </div>
         </div>
     </div>
 
-    <!-- ===== RECUPERAR CONTRASEÑA (#7) ===== -->
     <div class="modal-overlay" id="recuperarModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarRecuperarModal()">✕</button>
             <h2>🔐 Recuperar contraseña</h2>
             <p style="font-size:0.9rem; color:#64748b; text-align:center; margin-bottom:15px;">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
-            <div class="form-group">
-                <label>Correo electrónico *</label>
-                <input type="email" id="recuperarEmail" placeholder="tu@email.com" />
-            </div>
+            <div class="form-group"><label>Correo electrónico *</label><input type="email" id="recuperarEmail" placeholder="tu@email.com" /></div>
             <div id="recuperarError" class="error-msg"></div>
             <div id="recuperarExito" class="success-msg"></div>
             <button class="btn-primary" id="recuperarBtn" onclick="enviarRecuperacion()">📧 Enviar enlace</button>
@@ -500,17 +454,14 @@
         </div>
     </div>
 
-    <!-- ===== SOBRE NOSOTROS (#10) ===== -->
     <div class="modal-overlay" id="aboutModal">
         <div class="modal modal-lg">
             <button class="close-modal" onclick="cerrarAboutModal()">✕</button>
             <h2>🏪 Sobre Nosotros</h2>
             <div class="about-content">
                 <p><strong>Tiendita B&amp;B</strong> es un proyecto familiar que nació en Santa Clara, Cuba, con el sueño de acercar a nuestros clientes los productos que necesitan, tanto de la tienda física como de encargos internacionales.</p>
-                
                 <h3>🎯 Nuestra misión</h3>
                 <p>Brindar un servicio cercano, honesto y confiable, ofreciendo productos de calidad y un trato humano que haga sentir a cada cliente como en casa.</p>
-
                 <h3>📦 ¿Qué ofrecemos?</h3>
                 <ul>
                     <li><strong>Productos en tienda:</strong> disponibilidad inmediata para entrega o retiro.</li>
@@ -518,15 +469,12 @@
                     <li><strong>Domicilio:</strong> llevamos tu pedido hasta la puerta de tu casa.</li>
                     <li><strong>Retiro en tienda:</strong> puedes pasar a buscarlo cuando te convenga.</li>
                 </ul>
-
                 <h3>📅 Sobre los encargos</h3>
                 <div class="highlight">
                     Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>. Al confirmar el pedido, el cliente debe abonar la mitad del costo en un plazo de 24h.
                 </div>
-
                 <h3>📍 Visítanos</h3>
                 <p>Estamos ubicados en <strong>Paseo de la Paz #457 entre 2da y 3ra, Loma de Belén, Santa Clara, Villa Clara, Cuba</strong>. Puedes llamarnos al <strong>+53 58388494 (Yoandy)</strong> o <strong>+53 53803134 (Carmen)</strong>, o escribirnos a <strong>bribry457@gmail.com</strong>.</p>
-
                 <p style="text-align:center; margin-top:20px; font-style:italic; color:#94a3b8;">💙 Gracias por confiar en B&amp;B</p>
             </div>
         </div>
@@ -686,7 +634,7 @@
     <script>
         const PRODUCTOS_POR_PAGINA = 12;
         let ENVIO_COSTO = 1.00;
-        let ENVIO_GRATIS_DESDE = 20.00; // configurable desde admin (#2)
+        let ENVIO_GRATIS_DESDE = 5.00; // 🆕 Ahora se refiere a la GANANCIA total del pedido
 
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
@@ -700,8 +648,6 @@
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
         let estrellaSeleccionada = 0;
-        let filtroPrecioMin = null;
-        let filtroPrecioMax = null;
 
         (function restaurarUsuarioLocal() {
             try {
@@ -739,12 +685,10 @@
             if (e.key === 'Escape') cerrarZoom();
         });
 
-        // ===== SOBRE NOSOTROS (#10) =====
         function abrirAboutModal() { document.getElementById('aboutModal').classList.add('active'); }
         function cerrarAboutModal() { document.getElementById('aboutModal').classList.remove('active'); }
         document.getElementById('aboutModal').addEventListener('click', function(e) { if (e.target === this) cerrarAboutModal(); });
 
-        // ===== RECUPERAR CONTRASEÑA (#7) =====
         function abrirRecuperarModal() {
             document.getElementById('recuperarEmail').value = '';
             document.getElementById('recuperarError').classList.remove('show');
@@ -761,21 +705,14 @@
             const exitoEl = document.getElementById('recuperarExito');
             errorEl.classList.remove('show');
             exitoEl.classList.remove('show');
-
-            if (!email) {
-                errorEl.textContent = 'Escribe tu correo electrónico.';
-                errorEl.classList.add('show');
-                return;
-            }
-
+            if (!email) { errorEl.textContent = 'Escribe tu correo electrónico.'; errorEl.classList.add('show'); return; }
             const btn = document.getElementById('recuperarBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Enviando...';
-
             try {
                 const { sendPasswordResetEmail } = window.firebaseFns;
                 await sendPasswordResetEmail(window.firebaseAuth, email);
-                exitoEl.textContent = '✅ ¡Listo! Revisa tu correo (y la carpeta de spam). Te enviamos un enlace para restablecer tu contraseña.';
+                exitoEl.textContent = '✅ ¡Listo! Revisa tu correo (y la carpeta de spam).';
                 exitoEl.classList.add('show');
                 document.getElementById('recuperarEmail').value = '';
             } catch (e) {
@@ -798,17 +735,12 @@
                         const { doc, getDoc } = window.firebaseFns;
                         const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
                         const userDoc = await getDoc(userDocRef);
-                        
                         let userData = {
                             id: user.uid,
                             email: user.email,
                             name: user.displayName || user.email,
-                            nombre: '',
-                            apellidos: '',
-                            telefono: '',
-                            direccion: ''
+                            nombre: '', apellidos: '', telefono: '', direccion: ''
                         };
-                        
                         if (userDoc.exists()) {
                             const data = userDoc.data();
                             userData.nombre = data.nombre || '';
@@ -817,14 +749,9 @@
                             userData.direccion = data.direccion || '';
                             userData.name = data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email;
                         }
-                        
                         guardarUsuarioLocal(userData);
-                    } catch (e) {
-                        console.error('Error al cargar datos del usuario:', e);
-                    }
-                } else {
-                    guardarUsuarioLocal(null);
-                }
+                    } catch (e) { console.error('Error al cargar datos del usuario:', e); }
+                } else { guardarUsuarioLocal(null); }
                 actualizarUIUsuario();
                 renderizarProductos();
             });
@@ -840,33 +767,21 @@
                 const { signInWithEmailAndPassword, doc, getDoc } = window.firebaseFns;
                 const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
                 const user = userCredential.user;
-
                 const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
                 const userDoc = await getDoc(userDocRef);
-
                 let userData = {
-                    id: user.uid,
-                    email: user.email,
-                    name: user.displayName || user.email,
-                    nombre: '',
-                    apellidos: '',
-                    telefono: '',
-                    direccion: ''
+                    id: user.uid, email: user.email, name: user.displayName || user.email,
+                    nombre: '', apellidos: '', telefono: '', direccion: ''
                 };
-
                 if (userDoc.exists()) {
                     const data = userDoc.data();
                     userData = {
-                        id: user.uid,
-                        email: user.email,
+                        id: user.uid, email: user.email,
                         name: data.nombre && data.apellidos ? `${data.nombre} ${data.apellidos}`.trim() : user.email,
-                        nombre: data.nombre || '',
-                        apellidos: data.apellidos || '',
-                        telefono: data.telefono || '',
-                        direccion: data.direccion || ''
+                        nombre: data.nombre || '', apellidos: data.apellidos || '',
+                        telefono: data.telefono || '', direccion: data.direccion || ''
                     };
                 }
-
                 guardarUsuarioLocal(userData);
                 actualizarUIUsuario();
                 return { success: true };
@@ -885,21 +800,13 @@
             try {
                 const { createUserWithEmailAndPassword, doc, setDoc, serverTimestamp } = window.firebaseFns;
                 const nombreCompleto = `${nombre} ${apellidos}`.trim();
-
                 const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
                 const user = userCredential.user;
-
                 const userDocRef = doc(window.firebaseDb, 'usuarios', user.uid);
                 await setDoc(userDocRef, {
-                    nombre: nombre,
-                    apellidos: apellidos,
-                    name: nombreCompleto,
-                    email: email,
-                    telefono: telefono,
-                    direccion: direccion,
+                    nombre, apellidos, name: nombreCompleto, email, telefono, direccion,
                     fecha_registro: serverTimestamp()
                 });
-
                 return await login(email, password);
             } catch (e) {
                 let mensajeError = 'Error al registrar';
@@ -918,9 +825,7 @@
                 actualizarUIUsuario();
                 renderizarProductos();
                 cerrarAccountDropdown();
-            } catch (e) {
-                console.error('Error al cerrar sesión:', e);
-            }
+            } catch (e) { console.error('Error al cerrar sesión:', e); }
         }
 
         function actualizarUIUsuario() {
@@ -928,7 +833,6 @@
             const dropdownContent = document.getElementById('accountDropdownContent');
             const avatar = document.getElementById('accountAvatar');
             const label = document.getElementById('accountLabel');
-
             if (user) {
                 let nombreCompleto = '';
                 if (user.nombre && user.apellidos) nombreCompleto = `${user.nombre} ${user.apellidos}`.trim();
@@ -938,7 +842,6 @@
                 const inicial = (user.nombre ? user.nombre.charAt(0).toUpperCase() : (user.name ? user.name.charAt(0).toUpperCase() : 'U'));
                 avatar.textContent = inicial;
                 label.textContent = `Hola, ${nombreCompleto}`;
-
                 dropdownContent.innerHTML = `
                     <div class="dropdown-header">
                         <div class="avatar-lg">${inicial}</div>
@@ -947,9 +850,7 @@
                             <div class="user-email">${user.email}</div>
                         </div>
                     </div>
-                    <button class="dropdown-item" onclick="toggleProfileSubmenu()">
-                        <span class="icon">👤</span> Perfil
-                    </button>
+                    <button class="dropdown-item" onclick="toggleProfileSubmenu()"><span class="icon">👤</span> Perfil</button>
                     <div class="profile-submenu" id="profileSubmenu" style="display:none;">
                         <div class="profile-data">
                             <p><span class="label">Nombre</span><span class="value">${user.nombre || 'No especificado'}</span></p>
@@ -960,30 +861,18 @@
                         </div>
                         <button class="btn-change-password" onclick="abrirCambiarPassword()">🔑 Cambiar contraseña</button>
                     </div>
-                    <button class="dropdown-item" onclick="abrirHistoryModal()">
-                        <span class="icon">📋</span> Mis pedidos
-                    </button>
-                    <button class="dropdown-item" onclick="abrirAboutModal()">
-                        <span class="icon">🏪</span> Sobre nosotros
-                    </button>
-                    <button class="dropdown-item" onclick="abrirContacto()">
-                        <span class="icon">📞</span> Contáctenos
-                    </button>
+                    <button class="dropdown-item" onclick="abrirHistoryModal()"><span class="icon">📋</span> Mis pedidos</button>
+                    <button class="dropdown-item" onclick="abrirAboutModal()"><span class="icon">🏪</span> Sobre nosotros</button>
+                    <button class="dropdown-item" onclick="abrirContacto()"><span class="icon">📞</span> Contáctenos</button>
                     <div class="dropdown-divider"></div>
-                    <button class="dropdown-item" onclick="cerrarSesion()" style="color:#e74c3c;">
-                        <span class="icon">🚪</span> Cerrar sesión
-                    </button>
+                    <button class="dropdown-item" onclick="cerrarSesion()" style="color:#e74c3c;"><span class="icon">🚪</span> Cerrar sesión</button>
                 `;
             } else {
                 avatar.textContent = '👤';
                 label.textContent = 'Iniciar sesión';
                 dropdownContent.innerHTML = `
-                    <button class="dropdown-item" onclick="abrirModalLogin()">
-                        <span class="icon">🔑</span> Iniciar sesión
-                    </button>
-                    <button class="dropdown-item" onclick="abrirAboutModal()">
-                        <span class="icon">🏪</span> Sobre nosotros
-                    </button>
+                    <button class="dropdown-item" onclick="abrirModalLogin()"><span class="icon">🔑</span> Iniciar sesión</button>
+                    <button class="dropdown-item" onclick="abrirAboutModal()"><span class="icon">🏪</span> Sobre nosotros</button>
                 `;
             }
         }
@@ -992,7 +881,6 @@
             const sub = document.getElementById('profileSubmenu');
             if (sub) sub.style.display = sub.style.display === 'none' ? 'block' : 'none';
         }
-
         function toggleAccountDropdown() {
             document.getElementById('accountDropdownContent').classList.toggle('open');
             document.getElementById('accountBtn').classList.toggle('open');
@@ -1046,22 +934,14 @@
             const password = document.getElementById('authPassword').value;
             const errorEl = document.getElementById('authError');
             errorEl.classList.remove('show');
-
-            if (!email || !password) {
-                errorEl.textContent = 'Completa todos los campos obligatorios.';
-                errorEl.classList.add('show'); return;
-            }
-
+            if (!email || !password) { errorEl.textContent = 'Completa todos los campos obligatorios.'; errorEl.classList.add('show'); return; }
             if (modoRegistro) {
                 const nombre = document.getElementById('regNombre').value.trim();
                 const apellidos = document.getElementById('regApellidos').value.trim();
                 const telefono = document.getElementById('regTelefono').value.trim();
                 const direccion = document.getElementById('regDireccion').value.trim();
                 const passwordConfirm = document.getElementById('authPasswordConfirm').value;
-                if (!nombre || !apellidos || !telefono || !direccion) {
-                    errorEl.textContent = 'Nombre, apellidos, teléfono y dirección son obligatorios.';
-                    errorEl.classList.add('show'); return;
-                }
+                if (!nombre || !apellidos || !telefono || !direccion) { errorEl.textContent = 'Nombre, apellidos, teléfono y dirección son obligatorios.'; errorEl.classList.add('show'); return; }
                 if (password !== passwordConfirm) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
                 if (password.length < 8) { errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
                 const result = await registrar(nombre, apellidos, email, telefono, direccion, password, passwordConfirm);
@@ -1091,19 +971,15 @@
             const confirmPass = document.getElementById('confirmPassword').value;
             const errorEl = document.getElementById('passError');
             errorEl.classList.remove('show');
-
             if (!oldPass || !newPass || !confirmPass) { errorEl.textContent = 'Completa todos los campos.'; errorEl.classList.add('show'); return; }
             if (newPass.length < 8) { errorEl.textContent = 'La nueva contraseña debe tener al menos 8 caracteres.'; errorEl.classList.add('show'); return; }
             if (newPass !== confirmPass) { errorEl.textContent = 'Las contraseñas no coinciden.'; errorEl.classList.add('show'); return; }
-
             try {
                 const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } = window.firebaseFns;
                 const user = window.firebaseAuth.currentUser;
-
                 const credential = EmailAuthProvider.credential(user.email, oldPass);
                 await reauthenticateWithCredential(user, credential);
                 await updatePassword(user, newPass);
-
                 alert('✅ Contraseña actualizada correctamente.');
                 cerrarChangePasswordModal();
             } catch (e) {
@@ -1128,16 +1004,13 @@
                 const { collection, query, where, getDocs } = window.firebaseFns;
                 const q = query(collection(window.firebaseDb, 'Ventas'), where('usuario_id', '==', usuarioActual.id));
                 const querySnapshot = await getDocs(q);
-
                 if (querySnapshot.empty) { content.innerHTML = '<p style="color:#94a3b8; text-align:center;">No tienes pedidos realizados aún.</p>'; return; }
-
                 const docs = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 docs.sort((a, b) => {
                     const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
                     const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
                     return fb - fa;
                 });
-
                 let html = '';
                 docs.forEach((p) => {
                     const fecha = p.fecha ? (p.fecha.seconds ? new Date(p.fecha.seconds * 1000).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date(p.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })) : 'Sin fecha';
@@ -1149,13 +1022,10 @@
                     html += `<div class="history-item"><div class="order-date">📅 ${fecha}</div><div class="order-products">${productosHtml}</div><div class="order-total">💰 $${parseFloat(p.total || 0).toFixed(2)}</div><div style="font-size:0.8rem; color:#64748b;">Tipo: ${p.Tipo || 'Local'}</div></div>`;
                 });
                 content.innerHTML = html;
-            } catch (e) {
-                content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`;
-            }
+            } catch (e) { content.innerHTML = `<p style="color:#e74c3c; text-align:center;">❌ ${e.message}</p>`; }
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
 
-        // ===== CONFIGURACIÓN (envío gratis desde X monto) (#2) =====
         async function cargarConfiguracion() {
             try {
                 const { doc, getDoc } = window.firebaseFns;
@@ -1177,7 +1047,6 @@
                 return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             } catch (e) { console.error('Error al obtener productos:', e); return []; }
         }
-
         async function obtenerCategorias() {
             try {
                 const { collection, getDocs } = window.firebaseFns;
@@ -1185,7 +1054,6 @@
                 return querySnapshot.docs.map(doc => doc.data().nombre).filter(Boolean);
             } catch (e) { console.error('Error al obtener categorías:', e); return []; }
         }
-
         async function obtenerCalificaciones(productoId) {
             try {
                 const { collection, query, where, getDocs } = window.firebaseFns;
@@ -1194,7 +1062,6 @@
                 return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             } catch (e) { return []; }
         }
-
         async function obtenerNombresUsuarios(userIds) {
             if (!userIds || userIds.length === 0) return {};
             const map = {};
@@ -1210,28 +1077,21 @@
                         else if (data.name) nombreCompleto = data.name;
                         else nombreCompleto = data.email || 'Usuario';
                         map[uid] = nombreCompleto;
-                    } else {
-                        map[uid] = 'Usuario';
-                    }
+                    } else { map[uid] = 'Usuario'; }
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) { }
             return map;
         }
-
         async function guardarCalificacion(productoId, usuarioId, puntuacion, comentario) {
             try {
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
                 await addDoc(collection(window.firebaseDb, 'Calificaciones'), {
-                    producto_id: productoId,
-                    usuario_id: usuarioId,
-                    puntuacion,
-                    comentario: comentario || '',
-                    fecha: serverTimestamp()
+                    producto_id: productoId, usuario_id: usuarioId, puntuacion,
+                    comentario: comentario || '', fecha: serverTimestamp()
                 });
                 return { success: true };
             } catch (e) { return { success: false, error: e.message }; }
         }
-
         async function verificarCompra(usuarioId, productoId) {
             try {
                 const { collection, query, where, getDocs } = window.firebaseFns;
@@ -1248,13 +1108,11 @@
                 return comprado;
             } catch (e) { return false; }
         }
-
         function precioFinal(prod) {
             const venta = parseFloat(prod.Precio_Venta || 0);
             const oferta = parseFloat(prod.Precio_Oferta || 0);
             return (oferta > 0 && oferta < venta) ? oferta : venta;
         }
-
         function obtenerFotosProducto(prod) {
             let fotos = [];
             if (prod.Fotos) {
@@ -1262,6 +1120,20 @@
                 else if (typeof prod.Fotos === 'string') { try { const parsed = JSON.parse(prod.Fotos); if (Array.isArray(parsed)) fotos = parsed; } catch (e) {} }
             }
             return fotos;
+        }
+
+        // 🆕 Calcular la GANANCIA total del carrito
+        function calcularGananciaCarrito() {
+            let ganancia = 0;
+            for (const item of carrito) {
+                const prod = productos.find(p => p.id === item.id);
+                if (prod) {
+                    const costo = parseFloat(prod.Precio_Costo || 0);
+                    const venta = item.precio; // Ya incluye oferta si aplica
+                    ganancia += (venta - costo) * (item.cantidad || 1);
+                }
+            }
+            return ganancia;
         }
 
         async function renderizarCategorias() {
@@ -1383,24 +1255,6 @@
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
-        // ===== FILTROS AVANZADOS (#5) =====
-        function aplicarFiltrosAvanzados() {
-            const min = document.getElementById('filtroPrecioMin').value;
-            const max = document.getElementById('filtroPrecioMax').value;
-            filtroPrecioMin = min !== '' ? parseFloat(min) : null;
-            filtroPrecioMax = max !== '' ? parseFloat(max) : null;
-            paginaActual = 1;
-            renderizarProductos();
-        }
-        function limpiarFiltrosAvanzados() {
-            document.getElementById('filtroPrecioMin').value = '';
-            document.getElementById('filtroPrecioMax').value = '';
-            filtroPrecioMin = null;
-            filtroPrecioMax = null;
-            paginaActual = 1;
-            renderizarProductos();
-        }
-
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
@@ -1413,10 +1267,6 @@
                 }
                 const busqueda = getBusqueda();
                 if (busqueda) filtrados = filtrados.filter(p => (p.Nombre || '').toLowerCase().includes(busqueda) || (p.Descripcion || '').toLowerCase().includes(busqueda));
-
-                // Filtro por rango de precio
-                if (filtroPrecioMin !== null) filtrados = filtrados.filter(p => precioFinal(p) >= filtroPrecioMin);
-                if (filtroPrecioMax !== null) filtrados = filtrados.filter(p => precioFinal(p) <= filtroPrecioMax);
 
                 const sortValue = document.getElementById('sortSelect').value;
                 switch (sortValue) {
@@ -1448,10 +1298,7 @@
                         else precioHtml += `$${venta.toFixed(2)}`;
                         precioHtml += `</span>`;
                         const esEncargo = prod.Es_Encargo === true;
-
-                        const cardImgAttrs = fotoUrl
-                            ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');" data-zoom="1"`
-                            : '';
+                        const cardImgAttrs = fotoUrl ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');" data-zoom="1"` : '';
 
                         html += `
                             <div class="product-card" data-id="${prod.id}">
@@ -1539,11 +1386,7 @@
                 else precioHtml += `$${venta.toFixed(2)}`;
                 precioHtml += `</span>`;
                 const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
-
-                const detalleImgAttrs = fotoUrl
-                    ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)" data-zoom="1"`
-                    : '';
-
+                const detalleImgAttrs = fotoUrl ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)" data-zoom="1"` : '';
                 let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" ${detalleImgAttrs} /><div class="miniaturas" id="detalleMiniaturas">`;
                 fotos.forEach((f, index) => {
                     const url = f;
@@ -1589,14 +1432,12 @@
             document.querySelectorAll('#detalleMiniaturas img').forEach(img => img.classList.remove('active'));
             if (elemento) elemento.classList.add('active');
         }
-
         function volverALista() {
             document.getElementById('productsSection').style.display = 'block';
             document.getElementById('detailPage').classList.remove('active');
             window.history.pushState({}, document.title, window.location.pathname);
             renderizarProductos();
         }
-
         async function enviarCalificacionDesdeDetalle(productoId) {
             if (!usuarioActual) { alert('Debes iniciar sesión para calificar.'); return; }
             if (estrellaSeleccionada === 0) { alert('Selecciona una calificación (1-5 estrellas).'); return; }
@@ -1605,7 +1446,6 @@
             if (result.success) { alert('✅ Calificación enviada correctamente. ¡Gracias!'); mostrarDetalle(productoId); }
             else alert('Error al calificar: ' + result.error);
         }
-
         function seleccionarEstrella(valor) {
             estrellaSeleccionada = valor;
             const spans = document.querySelectorAll('#starsInput span');
@@ -1614,7 +1454,6 @@
                 span.classList.toggle('active', index < valor);
             });
         }
-
         function mostrarAddToCartModal() { document.getElementById('addToCartModal').classList.add('active'); }
         function cerrarAddToCartModal() { document.getElementById('addToCartModal').classList.remove('active'); }
 
@@ -1640,7 +1479,6 @@
         function decrementarCantidad(index) {
             if (carrito[index]) { if (carrito[index].cantidad > 1) carrito[index].cantidad--; else carrito.splice(index, 1); guardarCarritoLocal(); }
         }
-
         function actualizarCarritoUI() {
             const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
             document.getElementById('cartFloatBadge').textContent = totalItems;
@@ -1650,8 +1488,7 @@
                 document.getElementById('cartTotal').textContent = '💰 Subtotal: $0.00';
                 return;
             }
-            let html = '';
-            let subtotal = 0;
+            let html = '', subtotal = 0;
             carrito.forEach((item, idx) => {
                 const subtotalItem = item.precio * (item.cantidad || 1);
                 subtotal += subtotalItem;
@@ -1661,7 +1498,6 @@
             document.getElementById('cartTotal').textContent = `💰 Subtotal: $${subtotal.toFixed(2)}`;
             window.subtotalCarrito = subtotal;
         }
-
         function abrirCarrito() { document.getElementById('cartSidebar').classList.add('open'); }
         document.getElementById('closeCartBtn').addEventListener('click', () => { document.getElementById('cartSidebar').classList.remove('open'); });
 
@@ -1689,7 +1525,6 @@
             document.getElementById('resumenTotal').textContent = `$${subtotal.toFixed(2)}`;
             tipoEntregaSeleccionado = null;
         }
-
         function cerrarDeliveryModal() { document.getElementById('deliveryModal').classList.remove('active'); }
 
         function seleccionarEntrega(tipo) {
@@ -1700,11 +1535,12 @@
             form.classList.add('active');
             confirmBtn.style.display = 'block';
             const subtotal = window.subtotalCarrito || 0;
-            // ===== #2: Aplicar envío gratis si subtotal >= ENVIO_GRATIS_DESDE =====
+            // 🆕 Envío gratis según la GANANCIA del carrito
+            const gananciaCarrito = calcularGananciaCarrito();
             let envio = 0;
             let esGratis = false;
             if (tipo === 'Domicilio') {
-                if (subtotal >= ENVIO_GRATIS_DESDE && ENVIO_GRATIS_DESDE > 0) {
+                if (ENVIO_GRATIS_DESDE > 0 && gananciaCarrito >= ENVIO_GRATIS_DESDE) {
                     envio = 0;
                     esGratis = true;
                 } else {
@@ -1752,16 +1588,16 @@
                 subtotal += precio * cantidad;
                 return { id: item.id, nombre: item.nombre, cantidad, precio };
             });
-            // ===== #2: Envío gratis desde X =====
+            // 🆕 Envío gratis según la GANANCIA del carrito
+            const gananciaCarrito = calcularGananciaCarrito();
             let envio = 0;
             if (tipoEntregaSeleccionado === 'Domicilio') {
-                envio = (subtotal >= ENVIO_GRATIS_DESDE && ENVIO_GRATIS_DESDE > 0) ? 0 : ENVIO_COSTO;
+                envio = (ENVIO_GRATIS_DESDE > 0 && gananciaCarrito >= ENVIO_GRATIS_DESDE) ? 0 : ENVIO_COSTO;
             }
             const totalFinal = subtotal + envio;
             try {
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
                 let pedidoId = '';
-
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     const domData = {
                         Cliente_Nombre: nombreCompleto,
@@ -1773,6 +1609,7 @@
                         productos_pedido: JSON.stringify(productosPedido),
                         subtotal: subtotal,
                         envio: envio,
+                        ganancia: gananciaCarrito,
                         total: totalFinal,
                         fecha: serverTimestamp()
                     };
@@ -1787,6 +1624,7 @@
                         productos_pedido: JSON.stringify(productosPedido),
                         subtotal: subtotal,
                         envio: 0,
+                        ganancia: gananciaCarrito,
                         total: totalFinal,
                         Estado: 'Pendiente',
                         fecha: serverTimestamp(),
@@ -1811,6 +1649,7 @@
                 productosPedido.forEach(item => { mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`; });
                 mensaje += `\n💰 Subtotal: $${subtotal.toFixed(2)}\n`;
                 if (tipoEntregaSeleccionado === 'Domicilio') mensaje += `🚚 Envío: $${envio.toFixed(2)}\n`;
+                mensaje += `📊 Ganancia del pedido: $${gananciaCarrito.toFixed(2)}\n`;
                 mensaje += `💵 Total a pagar: $${totalFinal.toFixed(2)}`;
                 mensaje += `\n\n🆔 ID Pedido: #${pedidoId}`;
                 mensaje += `\n📅 Fecha: ${new Date().toLocaleString('es-ES')}`;
@@ -1868,15 +1707,13 @@
                     usuario_id: usuarioActual.id,
                     usuario_nombre: usuarioActual.nombre || usuarioActual.name || 'Usuario',
                     usuario_telefono: usuarioActual.telefono || 'Sin teléfono',
-                    cantidad,
-                    comentario,
+                    cantidad, comentario,
                     estado: 'Pendiente',
                     fecha_solicitud: serverTimestamp(),
                     fecha_actualizacion: serverTimestamp()
                 };
                 const docRef = await addDoc(collection(window.firebaseDb, 'Encargos'), encargoData);
                 const resultId = docRef.id;
-
                 const mensaje = `*📦 Nuevo encargo solicitado*\n\n` +
                     `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n` +
                     `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n` +
@@ -1890,9 +1727,7 @@
                 try {
                     await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) });
                 } catch (err) { console.warn('No se pudo enviar WhatsApp:', err); }
-
                 notificarAdminOneSignal("📦 Nuevo encargo", `${usuarioActual.nombre || usuarioActual.name || 'Cliente'} - ${prod.Nombre} (x${cantidad})`);
-
                 alert('✅ Encargo solicitado correctamente. Pronto nos pondremos en contacto contigo.');
                 cerrarEncargoModal();
             } catch (e) {
