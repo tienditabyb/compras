@@ -594,6 +594,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
             getAuth, 
+            setPersistence,
+            browserLocalPersistence,
             createUserWithEmailAndPassword, 
             signInWithEmailAndPassword, 
             signOut, 
@@ -631,6 +633,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // 🔐 Forzar persistencia LOCAL (la sesión se mantiene al cerrar el navegador)
+        try {
+            await setPersistence(auth, browserLocalPersistence);
+            console.log('✅ Persistencia de sesión configurada');
+        } catch (e) {
+            console.error('❌ No se pudo establecer persistencia:', e);
+        }
+
         window.firebaseAuth = auth;
         window.firebaseDb = db;
         window.firebaseFns = {
@@ -657,6 +667,22 @@
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
         let estrellaSeleccionada = 0;
+
+        // 🔐 Restaurar usuario desde localStorage (para que la UI muestre logueado al instante)
+        (function restaurarUsuarioLocal() {
+            try {
+                const stored = localStorage.getItem('bb_user_data');
+                if (stored) {
+                    const user = JSON.parse(stored);
+                    if (user && user.id) {
+                        usuarioActual = user;
+                        console.log('✅ Usuario restaurado de localStorage:', user.email);
+                    }
+                }
+            } catch (e) {
+                console.error('Error restaurando usuario:', e);
+            }
+        })();
 
         document.getElementById('year').textContent = new Date().getFullYear();
 
