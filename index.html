@@ -78,9 +78,20 @@
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
         .toolbar__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .toolbar__left h2 { font-size: 1.2rem; font-weight: 600; color: #1e272e; }
+
+        /* ===== FILTROS AVANZADOS (#5) ===== */
+        .filters-advanced { background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+        .filters-advanced label { font-size: 0.8rem; font-weight: 500; color: #64748b; display: block; margin-bottom: 3px; }
+        .filters-advanced input[type="number"], .filters-advanced select { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; width: 100%; font-family: inherit; color: #1e272e; background: white; }
+        .filters-advanced input:focus, .filters-advanced select:focus { border-color: #2980b9; }
+        .filters-advanced .filter-group { flex: 1; min-width: 110px; }
+        .filters-advanced .filter-btn { padding: 8px 16px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; align-self: flex-end; }
+        .filters-advanced .filter-btn:hover { background: #1f6da9; }
+        .filters-advanced .filter-clear { background: #94a3b8; }
+        .filters-advanced .filter-clear:hover { background: #64748b; }
 
         .toolbar__categories { display: none; position: relative; }
         .btn-categories { background: #eef2f6; border: none; padding: 6px 14px; border-radius: 30px; font-weight: 500; font-size: 0.85rem; color: #1e272e; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -176,12 +187,7 @@
             .account-btn { padding: 4px 12px; font-size: 0.8rem; }
             .account-btn .avatar { width: 24px; height: 24px; font-size: 0.75rem; }
 
-            .main-content,
-            .products-section,
-            .toolbar,
-            .toolbar__left {
-                overflow: visible !important;
-            }
+            .main-content, .products-section, .toolbar, .toolbar__left { overflow: visible !important; }
 
             .toolbar { flex-direction: column; align-items: stretch; gap: 8px; position: relative; z-index: 500; }
             .toolbar__left { justify-content: space-between; width: 100%; position: relative; z-index: 500; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
@@ -201,10 +207,12 @@
             .detail-page .detail-container h2 { font-size: 1.4rem; }
             .detail-page .detail-container .detail-price { font-size: 1.3rem; }
 
+            .filters-advanced { padding: 10px; gap: 8px; }
+            .filters-advanced .filter-group { min-width: 100%; }
+
             .products-grid { gap: 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; grid-auto-rows: 1fr; width: 100%; max-width: 100%; min-width: 0; }
             .product-card { padding: 4px; border-radius: 6px; height: 100%; display: flex; flex-direction: column; min-width: 0; max-width: 100%; overflow: hidden; }
             .product-card .foto-principal { border-radius: 4px; margin-bottom: 2px; aspect-ratio: 1 / 1; width: 100%; max-width: 100%; object-fit: contain; }
-            .product-card .product-tag { font-size: 0.45rem; margin-bottom: 1px; }
             .product-card h3 { font-size: 0.6rem; margin: 2px 0 1px; line-height: 1.2; overflow-wrap: anywhere; word-break: break-word; }
             .product-card .product-desc { display: none; }
             .product-card .price { font-size: 0.85rem; line-height: 1.2; overflow-wrap: anywhere; }
@@ -220,13 +228,6 @@
             .product-card .price { font-size: 0.8rem; }
             .product-card .price .old { font-size: 0.6rem; }
             .btn-add, .btn-encargo { font-size: 0.65rem; padding: 3px 6px; }
-            .product-card .product-footer { padding-top: 1px; }
-            .detail-page .detail-container { padding: 12px; }
-            .detail-page .detail-container .galeria .miniaturas img { width: 40px; height: 40px; }
-            .btn-categories { font-size: 0.8rem; padding: 5px 12px; }
-            .btn-categories .icon { font-size: 0.9rem; }
-            .categories-dropdown a { padding: 12px 16px; font-size: 0.9rem; }
-            .categories-dropdown { width: 240px; }
         }
 
         @media (min-width: 769px) { .toolbar__categories { display: none !important; } }
@@ -246,6 +247,7 @@
         .resumen-pedido .linea.total { font-weight: 700; font-size: 1.05rem; border-top: 2px solid #e2e8f0; margin-top: 4px; padding-top: 8px; color: #1a252f; }
         .resumen-pedido .envio { color: #64748b; }
         .resumen-pedido .envio.domicilio { color: #2980b9; font-weight: 600; }
+        .resumen-pedido .envio.gratis { color: #059669; font-weight: 700; text-decoration: line-through; }
         .history-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; }
         .history-item:last-child { border-bottom: none; }
         .history-item .order-date { font-size: 0.8rem; color: #94a3b8; }
@@ -257,6 +259,7 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 20px; padding: 25px; max-width: 460px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
+        .modal.modal-lg { max-width: 650px; }
         .modal .close-modal { position: absolute; top: 12px; right: 18px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #94a3b8; }
         .modal .close-modal:hover { color: #1e272e; }
         .modal h2 { font-size: 1.3rem; margin-bottom: 16px; color: #1e272e; text-align: center; }
@@ -271,12 +274,22 @@
         .modal .switch-auth a { color: #2980b9; font-weight: 600; cursor: pointer; }
         .modal .error-msg { color: #e74c3c; font-size: 0.85rem; margin-top: 6px; display: none; }
         .modal .error-msg.show { display: block; }
+        .modal .success-msg { color: #059669; font-size: 0.85rem; margin-top: 6px; display: none; }
+        .modal .success-msg.show { display: block; }
         .add-cart-actions { display: flex; gap: 10px; margin-top: 16px; }
         .add-cart-actions .btn-primary { flex: 1; }
         .add-cart-actions .btn-primary.green { background: #2ecc71; }
         .add-cart-actions .btn-primary.green:hover { background: #27ae60; }
         .contact-info { background: #f8fafc; border-radius: 10px; padding: 12px; margin: 8px 0; line-height: 1.7; font-size: 0.9rem; }
         .contact-info strong { color: #1e272e; }
+
+        /* ===== SOBRE NOSOTROS (#10) ===== */
+        .about-content { font-size: 0.95rem; line-height: 1.7; color: #475569; }
+        .about-content p { margin-bottom: 12px; }
+        .about-content h3 { color: #1e272e; margin: 18px 0 8px; font-size: 1.1rem; }
+        .about-content ul { padding-left: 20px; margin-bottom: 12px; }
+        .about-content li { margin-bottom: 4px; }
+        .about-content .highlight { background: #fef9e7; padding: 12px 16px; border-left: 4px solid #f1c40f; border-radius: 8px; margin: 12px 0; font-size: 0.9rem; }
 
         .cart-sidebar { position: fixed; top: 0; right: -400px; width: 360px; height: 100%; background: #ffffff; border-left: 2px solid #e2e8f0; padding: 16px; overflow-y: auto; transition: right 0.3s ease; z-index: 999; box-shadow: -4px 0 30px rgba(0,0,0,0.1); }
         .cart-sidebar.open { right: 0; }
@@ -302,68 +315,20 @@
         .footer p { margin: 4px 0; opacity: 0.9; }
         .footer .download-footer { color: #74b9ff; text-decoration: underline; font-weight: 500; }
         .footer .download-footer:hover { color: #a8d8ff; }
+        .footer .about-link { color: #74b9ff; text-decoration: underline; font-weight: 500; cursor: pointer; }
+        .footer .about-link:hover { color: #a8d8ff; }
 
         html, body { max-width: 100% !important; overflow-x: hidden !important; }
         .main-content, .products-section, .products-grid, .toolbar, .detail-page, .detail-container { max-width: 100% !important; box-sizing: border-box; overflow-x: hidden; }
         .products-section { width: 100%; }
         .product-card, .product-card .product-footer, .product-card h3 { min-width: 0; }
 
-        /* ===== ZOOM DE FOTO (LIGHTBOX) ===== */
-        .zoom-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92);
-            z-index: 5000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            cursor: zoom-out;
-            touch-action: pinch-zoom;
-        }
+        .zoom-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; touch-action: pinch-zoom; }
         .zoom-overlay.active { display: flex; }
-        .zoom-overlay img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            border-radius: 10px;
-            background: #fff;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            cursor: default;
-        }
-        .zoom-overlay .zoom-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            border: none;
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            font-size: 1.6rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-            backdrop-filter: blur(4px);
-        }
+        .zoom-overlay img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,0.5); cursor: default; }
+        .zoom-overlay .zoom-close { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; width: 46px; height: 46px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; backdrop-filter: blur(4px); }
         .zoom-overlay .zoom-close:hover { background: rgba(255,255,255,0.3); }
-        .zoom-overlay .zoom-hint {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.7);
-            font-size: 0.8rem;
-            text-align: center;
-            pointer-events: none;
-            padding: 6px 14px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-        }
+        .zoom-overlay .zoom-hint { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.8rem; text-align: center; pointer-events: none; padding: 6px 14px; background: rgba(0,0,0,0.4); border-radius: 20px; }
         .product-card .foto-principal[data-zoom="1"] { cursor: zoom-in; }
         .detail-page .imagen-principal[data-zoom="1"] { cursor: zoom-in; }
     </style>
@@ -425,6 +390,21 @@
                     </select>
                 </div>
             </div>
+
+            <!-- ===== FILTROS AVANZADOS (#5) ===== -->
+            <div class="filters-advanced">
+                <div class="filter-group">
+                    <label>Precio mín.</label>
+                    <input type="number" id="filtroPrecioMin" placeholder="0" min="0" step="0.01" />
+                </div>
+                <div class="filter-group">
+                    <label>Precio máx.</label>
+                    <input type="number" id="filtroPrecioMax" placeholder="1000" min="0" step="0.01" />
+                </div>
+                <button class="filter-btn" onclick="aplicarFiltrosAvanzados()">🔍 Filtrar</button>
+                <button class="filter-btn filter-clear" onclick="limpiarFiltrosAvanzados()">✕ Limpiar</button>
+            </div>
+
             <div class="products-grid" id="productsGrid">
                 <div class="loading-message">🔄 Cargando productos...</div>
             </div>
@@ -477,6 +457,22 @@
         </div>
     </div>
 
+    <!-- ===== RECUPERAR CONTRASEÑA (#7) ===== -->
+    <div class="modal-overlay" id="recuperarModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarRecuperarModal()">✕</button>
+            <h2>🔐 Recuperar contraseña</h2>
+            <p style="font-size:0.9rem; color:#64748b; text-align:center; margin-bottom:15px;">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+            <div class="form-group">
+                <label>Correo electrónico *</label>
+                <input type="email" id="recuperarEmail" placeholder="tu@email.com" />
+            </div>
+            <div id="recuperarError" class="error-msg"></div>
+            <div id="recuperarExito" class="success-msg"></div>
+            <button class="btn-primary" id="recuperarBtn" onclick="enviarRecuperacion()">📧 Enviar enlace</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="changePasswordModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarChangePasswordModal()">✕</button>
@@ -500,6 +496,38 @@
                 <p>📱 Teléfonos:<br> +53 58388494 (Yoandy)<br> +53 53803134 (Carmen)</p>
                 <p>📧 Correo: <a href="mailto:bribry457@gmail.com">bribry457@gmail.com</a></p>
                 <p>📍 Dirección:<br> Paseo de la Paz #457 entre 2da y 3ra<br> Loma de Belén, Municipio Santa Clara<br> Provincia Villa Clara, Cuba</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SOBRE NOSOTROS (#10) ===== -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal modal-lg">
+            <button class="close-modal" onclick="cerrarAboutModal()">✕</button>
+            <h2>🏪 Sobre Nosotros</h2>
+            <div class="about-content">
+                <p><strong>Tiendita B&amp;B</strong> es un proyecto familiar que nació en Santa Clara, Cuba, con el sueño de acercar a nuestros clientes los productos que necesitan, tanto de la tienda física como de encargos internacionales.</p>
+                
+                <h3>🎯 Nuestra misión</h3>
+                <p>Brindar un servicio cercano, honesto y confiable, ofreciendo productos de calidad y un trato humano que haga sentir a cada cliente como en casa.</p>
+
+                <h3>📦 ¿Qué ofrecemos?</h3>
+                <ul>
+                    <li><strong>Productos en tienda:</strong> disponibilidad inmediata para entrega o retiro.</li>
+                    <li><strong>Pedidos por encargo:</strong> traemos productos específicos desde el extranjero.</li>
+                    <li><strong>Domicilio:</strong> llevamos tu pedido hasta la puerta de tu casa.</li>
+                    <li><strong>Retiro en tienda:</strong> puedes pasar a buscarlo cuando te convenga.</li>
+                </ul>
+
+                <h3>📅 Sobre los encargos</h3>
+                <div class="highlight">
+                    Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>. Al confirmar el pedido, el cliente debe abonar la mitad del costo en un plazo de 24h.
+                </div>
+
+                <h3>📍 Visítanos</h3>
+                <p>Estamos ubicados en <strong>Paseo de la Paz #457 entre 2da y 3ra, Loma de Belén, Santa Clara, Villa Clara, Cuba</strong>. Puedes llamarnos al <strong>+53 58388494 (Yoandy)</strong> o <strong>+53 53803134 (Carmen)</strong>, o escribirnos a <strong>bribry457@gmail.com</strong>.</p>
+
+                <p style="text-align:center; margin-top:20px; font-style:italic; color:#94a3b8;">💙 Gracias por confiar en B&amp;B</p>
             </div>
         </div>
     </div>
@@ -570,13 +598,17 @@
                 </div>
                 <div id="authError" class="error-msg"></div>
                 <button class="btn-primary" id="authSubmitBtn" onclick="handleAuth()">Iniciar sesión</button>
-                <div class="switch-auth"><span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span></div>
+                <div class="switch-auth">
+                    <span id="authSwitchText">¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a></span>
+                    <div style="margin-top:8px;" id="recuperarLinkWrapper"><a onclick="abrirRecuperarModal()" style="color:#64748b; font-size:0.8rem;">¿Olvidaste tu contraseña?</a></div>
+                </div>
             </div>
         </div>
     </div>
 
     <footer class="footer">
         <p>© <span id="year"></span> B&amp;B. Todos los derechos reservados.</p>
+        <p><span class="about-link" onclick="abrirAboutModal()">🏪 Sobre Nosotros</span></p>
         <p id="footerDescargaParrafo">
             <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-footer" id="btnDescargaFooter" download>
                 📲 Descarga nuestra APK
@@ -602,7 +634,8 @@
             onAuthStateChanged,
             updatePassword,
             EmailAuthProvider,
-            reauthenticateWithCredential
+            reauthenticateWithCredential,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { 
             getFirestore, 
@@ -633,7 +666,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 🔐 Forzar persistencia LOCAL (la sesión se mantiene al cerrar el navegador)
         try {
             await setPersistence(auth, browserLocalPersistence);
             console.log('✅ Persistencia de sesión configurada');
@@ -645,7 +677,7 @@
         window.firebaseDb = db;
         window.firebaseFns = {
             createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-            updatePassword, EmailAuthProvider, reauthenticateWithCredential,
+            updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail,
             collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
             query, where, orderBy, serverTimestamp, setDoc
         };
@@ -653,7 +685,8 @@
 
     <script>
         const PRODUCTOS_POR_PAGINA = 12;
-        const ENVIO_COSTO = 1.00;
+        let ENVIO_COSTO = 1.00;
+        let ENVIO_GRATIS_DESDE = 20.00; // configurable desde admin (#2)
 
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
@@ -667,8 +700,9 @@
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
         let estrellaSeleccionada = 0;
+        let filtroPrecioMin = null;
+        let filtroPrecioMax = null;
 
-        // 🔐 Restaurar usuario desde localStorage (para que la UI muestre logueado al instante)
         (function restaurarUsuarioLocal() {
             try {
                 const stored = localStorage.getItem('bb_user_data');
@@ -704,6 +738,58 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') cerrarZoom();
         });
+
+        // ===== SOBRE NOSOTROS (#10) =====
+        function abrirAboutModal() { document.getElementById('aboutModal').classList.add('active'); }
+        function cerrarAboutModal() { document.getElementById('aboutModal').classList.remove('active'); }
+        document.getElementById('aboutModal').addEventListener('click', function(e) { if (e.target === this) cerrarAboutModal(); });
+
+        // ===== RECUPERAR CONTRASEÑA (#7) =====
+        function abrirRecuperarModal() {
+            document.getElementById('recuperarEmail').value = '';
+            document.getElementById('recuperarError').classList.remove('show');
+            document.getElementById('recuperarExito').classList.remove('show');
+            cerrarModal();
+            document.getElementById('recuperarModal').classList.add('active');
+        }
+        function cerrarRecuperarModal() { document.getElementById('recuperarModal').classList.remove('active'); }
+        document.getElementById('recuperarModal').addEventListener('click', function(e) { if (e.target === this) cerrarRecuperarModal(); });
+
+        async function enviarRecuperacion() {
+            const email = document.getElementById('recuperarEmail').value.trim();
+            const errorEl = document.getElementById('recuperarError');
+            const exitoEl = document.getElementById('recuperarExito');
+            errorEl.classList.remove('show');
+            exitoEl.classList.remove('show');
+
+            if (!email) {
+                errorEl.textContent = 'Escribe tu correo electrónico.';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            const btn = document.getElementById('recuperarBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Enviando...';
+
+            try {
+                const { sendPasswordResetEmail } = window.firebaseFns;
+                await sendPasswordResetEmail(window.firebaseAuth, email);
+                exitoEl.textContent = '✅ ¡Listo! Revisa tu correo (y la carpeta de spam). Te enviamos un enlace para restablecer tu contraseña.';
+                exitoEl.classList.add('show');
+                document.getElementById('recuperarEmail').value = '';
+            } catch (e) {
+                let msg = 'Error al enviar el correo.';
+                if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con ese correo.';
+                else if (e.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+                else if (e.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera unos minutos.';
+                errorEl.textContent = msg;
+                errorEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📧 Enviar enlace';
+            }
+        }
 
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
@@ -877,6 +963,9 @@
                     <button class="dropdown-item" onclick="abrirHistoryModal()">
                         <span class="icon">📋</span> Mis pedidos
                     </button>
+                    <button class="dropdown-item" onclick="abrirAboutModal()">
+                        <span class="icon">🏪</span> Sobre nosotros
+                    </button>
                     <button class="dropdown-item" onclick="abrirContacto()">
                         <span class="icon">📞</span> Contáctenos
                     </button>
@@ -891,6 +980,9 @@
                 dropdownContent.innerHTML = `
                     <button class="dropdown-item" onclick="abrirModalLogin()">
                         <span class="icon">🔑</span> Iniciar sesión
+                    </button>
+                    <button class="dropdown-item" onclick="abrirAboutModal()">
+                        <span class="icon">🏪</span> Sobre nosotros
                     </button>
                 `;
             }
@@ -921,6 +1013,7 @@
             document.getElementById('registerPasswordConfirm').style.display = 'none';
             document.getElementById('authSubmitBtn').textContent = 'Iniciar sesión';
             document.getElementById('authSwitchText').innerHTML = '¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a>';
+            document.getElementById('recuperarLinkWrapper').style.display = 'block';
             document.getElementById('authEmail').value = '';
             document.getElementById('authPassword').value = '';
             document.getElementById('authError').classList.remove('show');
@@ -935,12 +1028,14 @@
                 document.getElementById('registerPasswordConfirm').style.display = 'block';
                 document.getElementById('authSubmitBtn').textContent = 'Registrarse';
                 document.getElementById('authSwitchText').innerHTML = '¿Ya tienes cuenta? <a onclick="toggleAuthMode()">Inicia sesión</a>';
+                document.getElementById('recuperarLinkWrapper').style.display = 'none';
             } else {
                 document.getElementById('authTitle').textContent = 'Iniciar sesión';
                 document.getElementById('registerFields').style.display = 'none';
                 document.getElementById('registerPasswordConfirm').style.display = 'none';
                 document.getElementById('authSubmitBtn').textContent = 'Iniciar sesión';
                 document.getElementById('authSwitchText').innerHTML = '¿No tienes cuenta? <a onclick="toggleAuthMode()">Regístrate aquí</a>';
+                document.getElementById('recuperarLinkWrapper').style.display = 'block';
             }
             document.getElementById('authError').classList.remove('show');
         }
@@ -1059,6 +1154,21 @@
             }
         }
         function cerrarHistoryModal() { document.getElementById('historyModal').classList.remove('active'); }
+
+        // ===== CONFIGURACIÓN (envío gratis desde X monto) (#2) =====
+        async function cargarConfiguracion() {
+            try {
+                const { doc, getDoc } = window.firebaseFns;
+                const configRef = doc(window.firebaseDb, 'config', 'general');
+                const snap = await getDoc(configRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (typeof data.envio_costo === 'number') ENVIO_COSTO = data.envio_costo;
+                    if (typeof data.envio_gratis_desde === 'number') ENVIO_GRATIS_DESDE = data.envio_gratis_desde;
+                    console.log('✅ Config cargada:', { ENVIO_COSTO, ENVIO_GRATIS_DESDE });
+                }
+            } catch (e) { console.warn('No se pudo cargar la config:', e); }
+        }
 
         async function obtenerProductos() {
             try {
@@ -1273,6 +1383,24 @@
         function buscarProductos() { paginaActual = 1; renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
+        // ===== FILTROS AVANZADOS (#5) =====
+        function aplicarFiltrosAvanzados() {
+            const min = document.getElementById('filtroPrecioMin').value;
+            const max = document.getElementById('filtroPrecioMax').value;
+            filtroPrecioMin = min !== '' ? parseFloat(min) : null;
+            filtroPrecioMax = max !== '' ? parseFloat(max) : null;
+            paginaActual = 1;
+            renderizarProductos();
+        }
+        function limpiarFiltrosAvanzados() {
+            document.getElementById('filtroPrecioMin').value = '';
+            document.getElementById('filtroPrecioMax').value = '';
+            filtroPrecioMin = null;
+            filtroPrecioMax = null;
+            paginaActual = 1;
+            renderizarProductos();
+        }
+
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
@@ -1285,6 +1413,11 @@
                 }
                 const busqueda = getBusqueda();
                 if (busqueda) filtrados = filtrados.filter(p => (p.Nombre || '').toLowerCase().includes(busqueda) || (p.Descripcion || '').toLowerCase().includes(busqueda));
+
+                // Filtro por rango de precio
+                if (filtroPrecioMin !== null) filtrados = filtrados.filter(p => precioFinal(p) >= filtroPrecioMin);
+                if (filtroPrecioMax !== null) filtrados = filtrados.filter(p => precioFinal(p) <= filtroPrecioMax);
+
                 const sortValue = document.getElementById('sortSelect').value;
                 switch (sortValue) {
                     case 'price_asc': filtrados.sort((a, b) => precioFinal(a) - precioFinal(b)); break;
@@ -1567,14 +1700,36 @@
             form.classList.add('active');
             confirmBtn.style.display = 'block';
             const subtotal = window.subtotalCarrito || 0;
-            const envio = (tipo === 'Domicilio') ? ENVIO_COSTO : 0;
+            // ===== #2: Aplicar envío gratis si subtotal >= ENVIO_GRATIS_DESDE =====
+            let envio = 0;
+            let esGratis = false;
+            if (tipo === 'Domicilio') {
+                if (subtotal >= ENVIO_GRATIS_DESDE && ENVIO_GRATIS_DESDE > 0) {
+                    envio = 0;
+                    esGratis = true;
+                } else {
+                    envio = ENVIO_COSTO;
+                }
+            }
             const total = subtotal + envio;
             document.getElementById('resumenSubtotal').textContent = `$${subtotal.toFixed(2)}`;
             const envioEl = document.getElementById('resumenEnvioMonto');
-            envioEl.textContent = `$${envio.toFixed(2)}`;
             const envioLinea = document.getElementById('resumenEnvio');
-            if (tipo === 'Domicilio') { envioLinea.className = 'linea envio domicilio'; envioEl.style.color = '#2980b9'; }
-            else { envioLinea.className = 'linea envio'; envioEl.style.color = '#64748b'; }
+            if (tipo === 'Domicilio') {
+                if (esGratis) {
+                    envioEl.textContent = '¡GRATIS! 🎉';
+                    envioEl.style.color = '#059669';
+                    envioLinea.className = 'linea envio gratis';
+                } else {
+                    envioEl.textContent = `$${envio.toFixed(2)}`;
+                    envioEl.style.color = '#2980b9';
+                    envioLinea.className = 'linea envio domicilio';
+                }
+            } else {
+                envioEl.textContent = '$0.00';
+                envioEl.style.color = '#64748b';
+                envioLinea.className = 'linea envio';
+            }
             document.getElementById('resumenTotal').textContent = `$${total.toFixed(2)}`;
             if (tipo === 'Domicilio') { dirGroup.style.display = 'block'; confirmBtn.textContent = '✅ Confirmar pedido a domicilio'; }
             else { dirGroup.style.display = 'none'; confirmBtn.textContent = '✅ Confirmar pedido en tienda'; }
@@ -1597,7 +1752,11 @@
                 subtotal += precio * cantidad;
                 return { id: item.id, nombre: item.nombre, cantidad, precio };
             });
-            const envio = (tipoEntregaSeleccionado === 'Domicilio') ? ENVIO_COSTO : 0;
+            // ===== #2: Envío gratis desde X =====
+            let envio = 0;
+            if (tipoEntregaSeleccionado === 'Domicilio') {
+                envio = (subtotal >= ENVIO_GRATIS_DESDE && ENVIO_GRATIS_DESDE > 0) ? 0 : ENVIO_COSTO;
+            }
             const totalFinal = subtotal + envio;
             try {
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
@@ -1646,7 +1805,7 @@
                 if (tipoEntregaSeleccionado === 'Domicilio') {
                     mensaje += `📍 Dirección: ${direccion}\n`;
                     if (referencias) mensaje += `📝 Referencias: ${referencias}\n`;
-                    mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}\n`;
+                    mensaje += `🚚 Costo de envío: $${envio.toFixed(2)}${envio === 0 && ENVIO_GRATIS_DESDE > 0 ? ' (GRATIS 🎉)' : ''}\n`;
                 }
                 mensaje += `\n📋 Productos:\n`;
                 productosPedido.forEach(item => { mensaje += `- ${item.nombre}: $${item.precio.toFixed(2)} x ${item.cantidad} = $${(item.precio * item.cantidad).toFixed(2)}\n`; });
@@ -1755,6 +1914,7 @@
 
         async function init() {
             actualizarUIUsuario();
+            await cargarConfiguracion();
             productos = await obtenerProductos();
             await renderizarCategorias();
             const params = new URLSearchParams(window.location.search);
