@@ -506,7 +506,6 @@
             <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId" value="" />
                 <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
-                
                 <div class="form-group">
                     <label>Categoría *</label>
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -516,23 +515,17 @@
                         <button type="button" id="eliminarCategoriaBtn" class="btn-danger" style="padding:8px 16px; font-size:0.85rem;">🗑️ Eliminar</button>
                     </div>
                 </div>
-
                 <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
-
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                     <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
                         <input type="checkbox" id="prodEsProveedor" /> 🏭 Es producto de Proveedor (no cuenta en inventario)
                     </label>
                 </div>
-
                 <div class="form-group" id="proveedorGroup" style="display:none; background:#eff6ff; padding:12px; border-radius:10px; border:1px solid #bfdbfe;">
                     <label style="color:#1e40af;">🏭 Nombre del Proveedor</label>
                     <input type="text" id="prodProveedor" placeholder="Nombre del proveedor" />
-                    <div style="margin-top:6px; font-size:0.8rem; color:#1e40af;">
-                        Este producto no se contará en el inventario ni en el costo de inventario.
-                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#1e40af;">Este producto no se contará en el inventario ni en el costo de inventario.</div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group"><label>Precio Costo *</label><input type="number" id="prodCosto" step="0.01" required /></div>
                     <div class="form-group"><label>Precio Venta *</label><input type="number" id="prodVenta" step="0.01" required /></div>
@@ -545,15 +538,11 @@
                         <input type="checkbox" id="prodEsEncargo" /> Mostrar en sección Encargos
                     </label>
                 </div>
-
                 <div class="form-group" id="urlEncargoGroup" style="display:none; background:#f5f3ff; padding:12px; border-radius:10px; border:1px solid #ddd6fe;">
                     <label style="color:#6d28d9;">🔗 URL del producto (dónde buscarlo)</label>
                     <input type="url" id="prodUrlEncargo" placeholder="https://..." />
-                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9;">
-                        Pega aquí el enlace (AliExpress, Amazon, etc.) para saber dónde buscar este producto cuando un cliente lo pida.
-                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#6d28d9;">Pega aquí el enlace (AliExpress, Amazon, etc.) para saber dónde buscar este producto cuando un cliente lo pida.</div>
                 </div>
-
                 <div class="form-group">
                     <label>Fotos del producto</label>
                     <div class="file-input-wrapper">
@@ -561,9 +550,7 @@
                         <span class="file-count" id="prodFotosCount">Seleccionar archivos</span>
                     </div>
                     <div class="file-preview-grid" id="prodFotosPreview"></div>
-                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">
-                        Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.
-                    </div>
+                    <div style="margin-top:6px; font-size:0.8rem; color:#64748b;">Puedes seleccionar varias fotos a la vez. Las fotos existentes se muestran con un botón ✕ para eliminarlas.</div>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
                     <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
@@ -576,27 +563,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            doc, 
-            getDoc, 
-            getDocs, 
-            addDoc, 
-            updateDoc, 
-            deleteDoc, 
-            query, 
-            where, 
-            orderBy, 
-            serverTimestamp,
-            setDoc
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
@@ -619,7 +587,6 @@
             query, where, orderBy, serverTimestamp, setDoc
         };
 
-        // ☁️ Cloudinary para subir fotos (sin tarjeta de crédito)
         window.CLOUDINARY_CLOUD_NAME = "natkrios";
         window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
 
@@ -739,9 +706,6 @@
         }
         function actualizarNotificaciones() { generarNotificaciones(); }
 
-        // ============================================================
-        // AUTENTICACIÓN ADMIN (espera a que Firebase esté listo)
-        // ============================================================
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
@@ -799,9 +763,6 @@
             await window.firebaseFns.signOut(window.firebaseAuth);
         });
 
-        // ============================================================
-        // CARGA DE DATOS DESDE FIRESTORE
-        // ============================================================
         async function cargarCategorias() {
             try {
                 const { collection, getDocs } = window.firebaseFns;
@@ -863,9 +824,6 @@
             } catch (e) { console.error('Error cargando encargos:', e); return []; }
         }
 
-        // ============================================================
-        // UTILIDADES
-        // ============================================================
         function normalizarNombre(nombre) {
             if (!nombre) return "";
             let limpio = nombre.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim();
@@ -921,9 +879,6 @@
             return html;
         }
 
-        // ============================================================
-        // RENDERIZADO
-        // ============================================================
         function renderDashboard(ventas, domicilios) {
             const totalVentas = ventas.length;
             const ingresos = ventas.reduce((sum, v) => sum + parseFloat(v.total || 0), 0);
@@ -1070,6 +1025,11 @@
                             <div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fecha}</div>
                             <div class="sub">📞 ${telefono || 'Sin teléfono'}</div>
                             ${renderProductosPedidoConLinks(d.productos_pedido)}
+                            <div class="sub" style="margin-top:8px; padding:6px 10px; background:#f8fafc; border-radius:6px; display:inline-block;">
+                                <strong>💰 Subtotal:</strong> $${parseFloat(d.subtotal || 0).toFixed(2)}
+                                ${(parseFloat(d.envio) || 0) > 0 ? ` • <strong>🚚 Envío:</strong> $${parseFloat(d.envio).toFixed(2)}` : ''}
+                                • <strong>💵 Total:</strong> $${parseFloat(d.total || 0).toFixed(2)}
+                            </div>
                         </div>
                         <div class="center">
                             <span class="estado-badge ${badgeClass}">${estadoMostrado}</span>
@@ -1216,9 +1176,6 @@
             actualizarNotificaciones();
         }
 
-        // ============================================================
-        // ACCIONES
-        // ============================================================
         async function cancelarEncargoVencido(id) {
             const enc = encargosCache.find(e => e.id === id);
             if (!enc || enc.estado !== 'Pendiente') return;
@@ -1349,11 +1306,11 @@
                             await updateDoc(doc(window.firebaseDb, 'productos', item.id), { Stock: nuevoStock });
                         }
                     }
-                    const total = productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
+                    const totalConEnvio = parseFloat(domActual.total) || productosPedido.reduce((sum, p) => sum + (p.precio * p.cantidad), 0);
                     const productosStr = productosPedido.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
                     const productosIds = productosPedido.map(p => p.id).join(',');
                     await addDoc(collection(window.firebaseDb, 'Ventas'), {
-                        productos_json: productosStr, productos_ids: productosIds, total, fecha: serverTimestamp(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null
+                        productos_json: productosStr, productos_ids: productosIds, total: totalConEnvio, fecha: serverTimestamp(), Tipo: 'Domicilio', usuario_id: domActual.usuario_id || null
                     });
                     await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
                     alert('✅ Pedido entregado.\n✅ Stock descontado.\n✅ Venta registrada.');
@@ -1502,6 +1459,9 @@
                     });
                     productosHtml += '</ul>';
                 }
+                const subtotalGuardado = parseFloat(data.subtotal || 0);
+                const envioGuardado = parseFloat(data.envio || 0);
+                const totalGuardado = parseFloat(data.total || 0);
                 const body = `
                     <div class="detail-row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
                     <div class="detail-row"><span class="label">Cliente</span><span class="value">${data.Cliente_Nombre || 'Sin nombre'}</span></div>
@@ -1510,6 +1470,9 @@
                     <div class="detail-row"><span class="label">Estado</span><span class="value">${data.Estado || 'Pendiente'}</span></div>
                     <div class="detail-row"><span class="label">Detalles</span><span class="value">${data.Detalles || 'Sin detalles'}</span></div>
                     <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label" style="margin-bottom:4px;">🛍️ Productos</span><span class="value" style="text-align:left;">${productosHtml}</span></div>
+                    <div class="detail-row"><span class="label">💰 Subtotal</span><span class="value">$${subtotalGuardado.toFixed(2)}</span></div>
+                    <div class="detail-row"><span class="label">🚚 Envío</span><span class="value">$${envioGuardado.toFixed(2)}</span></div>
+                    <div class="detail-row" style="background:#f0f9ff; padding:10px; border-radius:8px; margin-top:6px;"><span class="label" style="font-weight:700; color:#1e40af;">💵 Total</span><span class="value" style="color:#1e40af; font-size:1.1rem;">$${totalGuardado.toFixed(2)}</span></div>
                 `;
                 document.getElementById('detailBody').innerHTML = body;
                 document.getElementById('detailModal').classList.add('active');
@@ -1761,7 +1724,6 @@
             btnSubmit.disabled = true;
             try {
                 const { collection, addDoc, doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                
                 const urlsNuevas = [];
                 if (fotosNuevas.length > 0) {
                     btnSubmit.textContent = '⏳ Subiendo fotos...';
@@ -1771,7 +1733,6 @@
                     }
                 }
                 const fotosFinales = [...fotosExistentes, ...urlsNuevas];
-
                 btnSubmit.textContent = '⏳ Guardando...';
                 const data = {
                     Nombre: nombre, Categoria: categoria, Codigo_de_Barras: codigo,
