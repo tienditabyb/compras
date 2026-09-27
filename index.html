@@ -59,7 +59,7 @@
         .cart-float:hover { transform: scale(1.05); background: #2c3e50; }
         .cart-float .badge { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 9px; font-size: 0.75rem; font-weight: 700; }
 
-        .main-content { display: flex; gap: 20px; margin-top: 20px; padding: 0 15px; width: 100%; min-height: 70vh; }
+        .main-content { display: flex; gap: 20px; margin-top: 20px; padding: 0 15px; width: 100%; max-width: 100%; min-height: 70vh; box-sizing: border-box; }
 
         .sidebar { width: 220px; flex-shrink: 0; background: white; border-radius: 16px; padding: 20px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 90px; }
         .sidebar__title { font-size: 0.9rem; font-weight: 700; color: #1e272e; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; }
@@ -69,7 +69,7 @@
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
         .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
-        .toolbar__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .toolbar__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
         .toolbar__left h2 { font-size: 1.2rem; font-weight: 600; color: #1e272e; }
         .toolbar__categories { display: none; position: relative; }
         .btn-categories { background: #eef2f6; border: none; padding: 6px 14px; border-radius: 30px; font-weight: 500; font-size: 0.85rem; color: #1e272e; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -84,24 +84,35 @@
         .toolbar__sort label { font-size: 0.85rem; color: #64748b; }
         .toolbar__sort select { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; font-size: 0.85rem; outline: none; cursor: pointer; }
 
-        .products-section { flex: 1; min-width: 0; }
-        .products-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-items: stretch; }
-        @media (min-width: 1400px) { .products-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 1399px) and (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 1023px) and (min-width: 769px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+        /* ── CUADRÍCULA DE PRODUCTOS CORREGIDA ── */
+        .products-section { flex: 1 1 0%; min-width: 0; max-width: 100%; }
 
-        .product-card { background: white; border-radius: 14px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; height: 100%; }
+        .products-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            align-items: stretch;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+        @media (min-width: 1500px) { .products-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+        @media (max-width: 1499px) and (min-width: 1250px) { .products-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+        @media (max-width: 1249px) and (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        @media (max-width: 1023px) and (min-width: 769px) { .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+        .product-card { background: white; border-radius: 14px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; height: 100%; min-width: 0; overflow: hidden; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
         .product-card .foto-principal { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f1f5f9; border-radius: 10px; margin-bottom: 8px; }
         .product-card h3 { font-size: 0.95rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .product-card .product-desc { font-size: 0.8rem; color: #64748b; line-height: 1.3; margin-bottom: 6px; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-card .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: auto; }
-        .product-card .price { font-size: 1.1rem; font-weight: 700; color: #2980b9; }
+        .product-card .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 6px; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: auto; min-width: 0; flex-wrap: wrap; }
+        .product-card .price { font-size: 1.1rem; font-weight: 700; color: #2980b9; min-width: 0; }
         .product-card .price .old { font-size: 0.8rem; text-decoration: line-through; color: #94a3b8; font-weight: 400; margin-right: 4px; }
-        .btn-add { background: #2980b9; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; }
+        .btn-add { background: #2980b9; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
         .btn-add:hover { background: #1f6da9; transform: scale(1.02); }
         .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
-        .btn-encargo { background: #e67e22; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; }
+        .btn-encargo { background: #e67e22; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
         .btn-encargo:hover { background: #d35400; transform: scale(1.02); }
         .product-card .encargo-badge { font-size: 0.65rem; background: #fef3c7; color: #d97706; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 4px; }
 
@@ -277,7 +288,7 @@
         .footer .about-link { color: #74b9ff; text-decoration: underline; font-weight: 500; cursor: pointer; }
 
         html, body { max-width: 100% !important; overflow-x: hidden !important; }
-        .main-content, .products-section, .products-grid, .toolbar, .detail-page, .detail-container { max-width: 100% !important; box-sizing: border-box; overflow-x: hidden; }
+        .main-content, .products-section, .detail-page, .detail-container { max-width: 100% !important; box-sizing: border-box; }
 
         .zoom-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
         .zoom-overlay.active { display: flex; }
@@ -568,8 +579,8 @@
         let productos = [];
         let carrito = [];
         let categoriaSeleccionada = "Todas";
-        let productosFiltrados = [];   // lista completa ya filtrada y ordenada
-        let productosMostrados = 0;    // cuántos se han pintado hasta ahora
+        let productosFiltrados = [];
+        let productosMostrados = 0;
         let usuarioActual = null;
         let modoRegistro = false;
         let tipoEntregaSeleccionado = null;
@@ -1029,7 +1040,6 @@
         function buscarProductos() { renderizarProductos(); }
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
-        // ── Filtra + ordena la lista completa de productos ──
         function obtenerProductosFiltrados() {
             let filtrados = productos;
             if (categoriaSeleccionada === "PedidosPorEncargo") {
@@ -1057,7 +1067,6 @@
             return filtrados;
         }
 
-        // ── HTML de una tarjeta de producto ──
         function construirTarjeta(prod) {
             const fotos = obtenerFotosProducto(prod);
             const fotoUrl = fotos.length > 0 ? fotos[0] : '';
@@ -1084,7 +1093,6 @@
             `;
         }
 
-        // ── Render inicial (resetea la lista al primer lote) ──
         function renderizarProductos() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading-message">🔄 Cargando productos...</div>';
@@ -1106,7 +1114,6 @@
             }, 200);
         }
 
-        // ── Pinta un lote de productos (append) ──
         function renderizarLote(desde, hasta) {
             const grid = document.getElementById('productsGrid');
             let html = '';
@@ -1117,7 +1124,6 @@
             actualizarSentinel();
         }
 
-        // ── Eventos solo para las tarjetas nuevas ──
         function adjuntarEventosTarjetas() {
             const grid = document.getElementById('productsGrid');
 
@@ -1155,7 +1161,6 @@
             });
         }
 
-        // ── Texto del centinela de carga ──
         function actualizarSentinel() {
             const s = document.getElementById('infiniteSentinel');
             if (productosMostrados >= productosFiltrados.length) {
@@ -1172,7 +1177,6 @@
             }
         }
 
-        // ── Carga el siguiente lote ──
         function cargarMasProductos() {
             if (productosMostrados >= productosFiltrados.length) return;
             const desde = productosMostrados;
@@ -1181,7 +1185,6 @@
             setTimeout(verificarScroll, 120);
         }
 
-        // ── Comprueba si el usuario llegó al final ──
         function verificarScroll() {
             if (productosFiltrados.length === 0) return;
             if (productosMostrados >= productosFiltrados.length) return;
@@ -1196,7 +1199,6 @@
             if (rect.top <= window.innerHeight + 400) cargarMasProductos();
         }
 
-        // ── Listeners globales (con throttle) ──
         let scrollThrottle = null;
         window.addEventListener('scroll', function() {
             if (scrollThrottle) return;
@@ -1204,7 +1206,6 @@
         }, { passive: true });
         window.addEventListener('resize', verificarScroll);
 
-        // ── Refresca sin perder la posición de scroll ──
         function refrescarProductosActuales() {
             const antes = productosMostrados;
             productosFiltrados = obtenerProductosFiltrados();
