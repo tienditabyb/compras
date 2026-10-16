@@ -450,7 +450,7 @@
                         <button class="btn-primary" id="userRefreshBtn" style="padding:8px 20px;">🔄 Refrescar</button>
                     </div>
                     <div class="list-container" id="usuariosContainer">
-                        <div class="loading"><div class="spinner"></div>Cargando usuarios...</div></div>
+                        <div class="loading"><div class="spinner"></div>Cargando usuarios...</div>
                     </div>
                 </div>
 
@@ -470,10 +470,20 @@
                                 <div class="help">Si la <strong>GANANCIA total del pedido</strong> es mayor o igual a este monto, el envío es <strong>gratis</strong>. Pon 0 para desactivar.</div>
                             </div>
                         </div>
-                        <button class="btn-success" id="guardarConfigBtn" style="margin-top:10px;">💾 Guardar Configuración</button>
-                        <div class="config-success" id="configSuccess">✅ Configuración guardada correctamente.</div>
                     </div>
-                    <div class="config-section" style="background:#f8fafc;">
+                    <div class="config-section">
+                        <h3>📦 Sección de Pedidos Por Encargo</h3>
+                        <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                            <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:500; font-size:0.95rem;">
+                                <input type="checkbox" id="configEncargosActivos" style="width:20px; height:20px; cursor:pointer; accent-color:#2980b9;" />
+                                Mostrar la sección "Pedidos Por Encargo" a los clientes
+                            </label>
+                        </div>
+                        <div class="help">Si está <strong>desactivado</strong>, los clientes NO verán la sección de Pedidos por Encargo en la tienda (ni en el menú lateral, ni en el desplegable móvil). Si lo <strong>activas</strong>, la verán con normalidad.</div>
+                    </div>
+                    <button class="btn-success" id="guardarConfigBtn" style="margin-top:10px;">💾 Guardar Configuración</button>
+                    <div class="config-success" id="configSuccess">✅ Configuración guardada correctamente.</div>
+                    <div class="config-section" style="background:#f8fafc; margin-top:20px;">
                         <h3>ℹ️ Información</h3>
                         <p style="font-size:0.9rem; color:#64748b; line-height:1.6;">
                             Los cambios se aplican <strong>inmediatamente</strong> en la tienda pública.<br>
@@ -622,7 +632,7 @@
         let usuariosCache = [];
         let carrito = [];
         let ventasFiltradasReporte = [];
-        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 5.00 };
+        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 5.00, encargos_activos: true };
 
         let notificaciones = [];
         const NOTIF_STORAGE_KEY = 'admin_notificaciones_leidas';
@@ -789,23 +799,31 @@
                     const data = snap.data();
                     if (typeof data.envio_costo === 'number') configGeneral.envio_costo = data.envio_costo;
                     if (typeof data.envio_gratis_desde === 'number') configGeneral.envio_gratis_desde = data.envio_gratis_desde;
+                    if (typeof data.encargos_activos === 'boolean') configGeneral.encargos_activos = data.encargos_activos;
                 }
                 document.getElementById('configEnvioCosto').value = configGeneral.envio_costo;
                 document.getElementById('configEnvioGratis').value = configGeneral.envio_gratis_desde;
+                document.getElementById('configEncargosActivos').checked = configGeneral.encargos_activos;
             } catch (e) { }
         }
 
         document.getElementById('guardarConfigBtn').addEventListener('click', async function() {
             const c = parseFloat(document.getElementById('configEnvioCosto').value);
             const g = parseFloat(document.getElementById('configEnvioGratis').value);
+            const encargosActivos = document.getElementById('configEncargosActivos').checked;
             if (isNaN(c) || c < 0) { alert('Costo inválido.'); return; }
             if (isNaN(g) || g < 0) { alert('Monto inválido.'); return; }
             const btn = this; btn.disabled = true; btn.textContent = '⏳ Guardando...';
             try {
                 await window.firebaseFns.setDoc(window.firebaseFns.doc(window.firebaseDb, 'config', 'general'), {
-                    envio_costo: c, envio_gratis_desde: g, fecha_actualizacion: window.firebaseFns.serverTimestamp()
+                    envio_costo: c,
+                    envio_gratis_desde: g,
+                    encargos_activos: encargosActivos,
+                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
                 }, { merge: true });
-                configGeneral.envio_costo = c; configGeneral.envio_gratis_desde = g;
+                configGeneral.envio_costo = c;
+                configGeneral.envio_gratis_desde = g;
+                configGeneral.encargos_activos = encargosActivos;
                 const el = document.getElementById('configSuccess');
                 el.classList.add('show');
                 setTimeout(() => el.classList.remove('show'), 3000);
