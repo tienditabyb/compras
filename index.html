@@ -84,7 +84,6 @@
         .toolbar__sort label { font-size: 0.85rem; color: #64748b; }
         .toolbar__sort select { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; font-size: 0.85rem; outline: none; cursor: pointer; }
 
-        /* ── CUADRÍCULA DE PRODUCTOS CORREGIDA ── */
         .products-section { flex: 1 1 0%; min-width: 0; max-width: 100%; }
 
         .products-grid {
@@ -116,7 +115,6 @@
         .btn-encargo:hover { background: #d35400; transform: scale(1.02); }
         .product-card .encargo-badge { font-size: 0.65rem; background: #fef3c7; color: #d97706; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 4px; }
 
-        /* ── Scroll infinito ── */
         .infinite-sentinel {
             text-align: center;
             padding: 22px 0 10px;
@@ -572,6 +570,7 @@
         const PRODUCTOS_POR_PAGINA = 12;
         let ENVIO_COSTO = 1.00;
         let ENVIO_GRATIS_DESDE = 5.00;
+        let ENCARGOS_ACTIVOS = true;
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
@@ -912,6 +911,7 @@
                     const data = snap.data();
                     if (typeof data.envio_costo === 'number') ENVIO_COSTO = data.envio_costo;
                     if (typeof data.envio_gratis_desde === 'number') ENVIO_GRATIS_DESDE = data.envio_gratis_desde;
+                    if (typeof data.encargos_activos === 'boolean') ENCARGOS_ACTIVOS = data.encargos_activos;
                 }
             } catch (e) { console.warn('No se pudo cargar la config:', e); }
         }
@@ -991,18 +991,27 @@
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
             ul.innerHTML = '';
-            const encLi = document.createElement('li');
-            const encLink = document.createElement('a');
-            encLink.textContent = '📦 Pedidos Por Encargo';
-            encLink.dataset.categoria = 'PedidosPorEncargo';
-            encLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encLink); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); });
-            encLi.appendChild(encLink); ul.appendChild(encLi);
-            const sepLi = document.createElement('li'); sepLi.style.borderTop = '1px solid #e2e8f0'; sepLi.style.margin = '6px 0'; ul.appendChild(sepLi);
+
+            if (ENCARGOS_ACTIVOS) {
+                const encLi = document.createElement('li');
+                const encLink = document.createElement('a');
+                encLink.textContent = '📦 Pedidos Por Encargo';
+                encLink.dataset.categoria = 'PedidosPorEncargo';
+                encLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encLink); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); });
+                encLi.appendChild(encLink);
+                ul.appendChild(encLi);
+                const sepLi = document.createElement('li');
+                sepLi.style.borderTop = '1px solid #e2e8f0';
+                sepLi.style.margin = '6px 0';
+                ul.appendChild(sepLi);
+            }
+
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo'; allLink.dataset.categoria = 'Todas'; allLink.classList.add('active');
             allLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Todas'; actualizarCategoriaActiva(allLink); document.getElementById('sectionTitle').textContent = 'Productos'; renderizarProductos(); });
             allLi.appendChild(allLink); ul.appendChild(allLi);
+
             cats.forEach(cat => {
                 const li = document.createElement('li');
                 const a = document.createElement('a');
@@ -1010,19 +1019,26 @@
                 a.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = cat; actualizarCategoriaActiva(a); document.getElementById('sectionTitle').textContent = cat; renderizarProductos(); });
                 li.appendChild(a); ul.appendChild(li);
             });
+
             const dd = document.getElementById('categoriesDropdown');
             dd.innerHTML = '';
-            const encD = document.createElement('a');
-            encD.textContent = '📦 Pedidos Por Encargo'; encD.dataset.categoria = 'PedidosPorEncargo';
-            if (categoriaSeleccionada === 'PedidosPorEncargo') encD.classList.add('active');
-            encD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encD); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); cerrarDropdownCategorias(); });
-            dd.appendChild(encD);
-            const sepD = document.createElement('div'); sepD.style.borderTop = '1px solid #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
+
+            if (ENCARGOS_ACTIVOS) {
+                const encD = document.createElement('a');
+                encD.textContent = '📦 Pedidos Por Encargo'; encD.dataset.categoria = 'PedidosPorEncargo';
+                if (categoriaSeleccionada === 'PedidosPorEncargo') encD.classList.add('active');
+                encD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encD); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); cerrarDropdownCategorias(); });
+                dd.appendChild(encD);
+                const sepD = document.createElement('div');
+                sepD.style.borderTop = '1px solid #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
+            }
+
             const allD = document.createElement('a');
             allD.textContent = '📂 Todas'; allD.dataset.categoria = 'Todas';
             if (categoriaSeleccionada === 'Todas') allD.classList.add('active');
             allD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Todas'; actualizarCategoriaActiva(allD); document.getElementById('sectionTitle').textContent = 'Productos'; renderizarProductos(); cerrarDropdownCategorias(); });
             dd.appendChild(allD);
+
             cats.forEach(cat => {
                 const a = document.createElement('a');
                 a.textContent = `📁 ${cat}`; a.dataset.categoria = cat;
@@ -1041,12 +1057,17 @@
         function getBusqueda() { return document.getElementById('searchInput').value.toLowerCase().trim(); }
 
         function obtenerProductosFiltrados() {
+            if (!ENCARGOS_ACTIVOS && categoriaSeleccionada === 'PedidosPorEncargo') {
+                categoriaSeleccionada = 'Todas';
+                document.getElementById('sectionTitle').textContent = 'Productos';
+            }
+
             let filtrados = productos;
-            if (categoriaSeleccionada === "PedidosPorEncargo") {
+            if (categoriaSeleccionada === "PedidosPorEncargo" && ENCARGOS_ACTIVOS) {
                 filtrados = filtrados.filter(p => p.Es_Encargo === true);
             } else {
                 filtrados = filtrados.filter(p => !p.Es_Encargo);
-                if (categoriaSeleccionada !== "Todas") {
+                if (categoriaSeleccionada !== "Todas" && categoriaSeleccionada !== "PedidosPorEncargo") {
                     filtrados = filtrados.filter(p => (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase());
                 }
             }
