@@ -100,7 +100,7 @@
         @media (max-width: 1249px) and (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
         @media (max-width: 1023px) and (min-width: 769px) { .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-        .product-card { background: white; border-radius: 14px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; height: 100%; min-width: 0; overflow: hidden; }
+        .product-card { background: white; border-radius: 14px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; height: 100%; min-width: 0; overflow: hidden; position: relative; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
         .product-card .foto-principal { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f1f5f9; border-radius: 10px; margin-bottom: 8px; }
         .product-card h3 { font-size: 0.95rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -114,6 +114,16 @@
         .btn-encargo { background: #e67e22; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
         .btn-encargo:hover { background: #d35400; transform: scale(1.02); }
         .product-card .encargo-badge { font-size: 0.65rem; background: #fef3c7; color: #d97706; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 4px; }
+
+        /* ── AGOTADO ── */
+        .product-card .agotado-badge { font-size: 0.65rem; background: #fee2e2; color: #dc2626; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .product-card.agotado .foto-principal { filter: grayscale(0.6) brightness(0.9); opacity: 0.85; }
+        .product-card.agotado .price { color: #94a3b8; }
+        .btn-add.btn-agotado { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+        .btn-add.btn-agotado:hover { background: #cbd5e1; transform: none; }
+        .detail-page .detail-container .btn-add.btn-agotado { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
+        .detail-page .detail-container .btn-add.btn-agotado:hover { background: #cbd5e1; }
+        .detail-page .detail-container .detail-agotado-label { display: inline-block; background: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; margin: 8px 0 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .infinite-sentinel {
             text-align: center;
@@ -200,6 +210,7 @@
             .product-card .price .old { font-size: 0.7rem; }
             .product-card .product-footer { padding-top: 2px; margin-top: auto; border-top: 1px solid #f1f5f9; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 100%; }
             .btn-add, .btn-encargo { font-size: 0.7rem; padding: 3px 8px; border-radius: 16px; max-width: 100%; }
+            .product-card .agotado-badge { font-size: 0.55rem; padding: 1px 6px; }
         }
 
         @media (max-width: 480px) {
@@ -987,6 +998,14 @@
             return g;
         }
 
+        // 🔹 NUEVO: comprueba si un producto está agotado
+        function estaAgotado(prod) {
+            if (!prod) return false;
+            if (prod.Es_Encargo === true) return false; // los encargos no se agotan
+            const stock = parseInt(prod.Stock || 0);
+            return isNaN(stock) || stock <= 0;
+        }
+
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
@@ -1099,16 +1118,35 @@
             else precioHtml += `$${venta.toFixed(2)}`;
             precioHtml += `</span>`;
             const esEncargo = prod.Es_Encargo === true;
+            const agotado = estaAgotado(prod); // 🔹 NUEVO
+
             const cardImgAttrs = fotoUrl ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');"` : '';
+            const cardClass = agotado ? 'product-card agotado' : 'product-card';
+
+            // 🔹 Badge de encargo o de agotado
+            let badgeHtml = '';
+            if (esEncargo) badgeHtml = '<div class="encargo-badge">📦 Pedido por encargo</div>';
+            else if (agotado) badgeHtml = '<div class="agotado-badge">🚫 Agotado</div>';
+
+            // 🔹 Botón
+            let botonHtml = '';
+            if (esEncargo) {
+                botonHtml = `<button class="btn-encargo" data-id="${prod.id}">Solicitar encargo</button>`;
+            } else if (agotado) {
+                botonHtml = `<button class="btn-add btn-agotado" data-id="${prod.id}" disabled>Agotado</button>`;
+            } else {
+                botonHtml = `<button class="btn-add" data-id="${prod.id}">Agregar</button>`;
+            }
+
             return `
-                <div class="product-card" data-id="${prod.id}">
+                <div class="${cardClass}" data-id="${prod.id}">
                     <img class="foto-principal" src="${fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" alt="${prod.Nombre || 'Producto'}" ${cardImgAttrs} />
-                    ${esEncargo ? '<div class="encargo-badge">📦 Pedido por encargo</div>' : ''}
+                    ${badgeHtml}
                     <h3>${prod.Nombre || 'Sin nombre'}</h3>
                     <div class="product-desc">${prod.Descripcion || ''}</div>
                     <div class="product-footer">
                         ${precioHtml}
-                        ${esEncargo ? `<button class="btn-encargo" data-id="${prod.id}">Solicitar encargo</button>` : `<button class="btn-add" data-id="${prod.id}">Agregar</button>`}
+                        ${botonHtml}
                     </div>
                 </div>
             `;
@@ -1148,7 +1186,7 @@
         function adjuntarEventosTarjetas() {
             const grid = document.getElementById('productsGrid');
 
-            grid.querySelectorAll('.btn-add').forEach(btn => {
+            grid.querySelectorAll('.btn-add:not(.btn-agotado)').forEach(btn => {
                 if (btn.dataset.evento) return;
                 btn.dataset.evento = '1';
                 btn.addEventListener('click', function(e) {
@@ -1266,11 +1304,26 @@
                 fotos.forEach((f, index) => { const active = index === 0 ? 'active' : ''; galeriaHtml += `<img src="${f}" alt="Foto ${index+1}" class="${active}" onclick="cambiarFotoDetalle('${f}', this)" />`; });
                 galeriaHtml += `</div></div>`;
                 const esEncargo = prod.Es_Encargo === true;
-                let html = `<button class="back-link" onclick="volverALista()">← Volver a productos</button>${galeriaHtml}<h2>${prod.Nombre || 'Sin nombre'}</h2>${esEncargo ? '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>' : ''}${precioHtml}<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
+                const agotado = estaAgotado(prod); // 🔹 NUEVO
+
+                let html = `<button class="back-link" onclick="volverALista()">← Volver a productos</button>${galeriaHtml}<h2>${prod.Nombre || 'Sin nombre'}</h2>`;
+
+                if (esEncargo) html += '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>';
+                else if (agotado) html += '<div class="detail-agotado-label">🚫 Producto agotado</div>';
+
+                html += `${precioHtml}<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
                 if (prod.Detalles) html += `<div class="detail-detalles"><h4>📋 Detalles del producto</h4><p>${prod.Detalles}</p></div>`;
                 html += `<div class="detail-stars">${estrellas}</div><div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>`;
-                if (esEncargo) html += `<button class="btn-encargo" onclick="abrirModalEncargo('${prod.id}')" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '📦 Solicitar encargo' : '🔒 Inicia sesión para solicitar'}</button>`;
-                else html += `<button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '➕ Agregar al carrito' : '🔒 Inicia sesión para comprar'}</button>`;
+
+                // 🔹 Botones según estado
+                if (esEncargo) {
+                    html += `<button class="btn-encargo" onclick="abrirModalEncargo('${prod.id}')" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '📦 Solicitar encargo' : '🔒 Inicia sesión para solicitar'}</button>`;
+                } else if (agotado) {
+                    html += `<button class="btn-add btn-agotado" disabled>🚫 Producto agotado</button>`;
+                } else {
+                    html += `<button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '➕ Agregar al carrito' : '🔒 Inicia sesión para comprar'}</button>`;
+                }
+
                 if (usuarioActual) {
                     const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
                     const haComprado = await verificarCompra(usuarioActual.id, prod.id);
@@ -1328,16 +1381,45 @@
             actualizarCarritoUI();
         }
         function guardarCarritoLocal() { localStorage.setItem('tiendita_carrito', JSON.stringify(carrito)); actualizarCarritoUI(); }
+
         function agregarAlCarrito(pid) {
             const prod = productos.find(p => p.id === pid);
             if (!prod) return;
+
+            // 🔹 NUEVO: bloquear si está agotado
+            if (estaAgotado(prod)) {
+                alert('🚫 Este producto está agotado.');
+                return;
+            }
+
+            const stockDisponible = parseInt(prod.Stock || 0);
             const ex = carrito.find(i => i.id === pid);
+            const cantidadActual = ex ? (ex.cantidad || 1) : 0;
+
+            if (cantidadActual + 1 > stockDisponible) {
+                alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`);
+                return;
+            }
+
             if (ex) ex.cantidad = (ex.cantidad || 1) + 1;
             else carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
             guardarCarritoLocal();
         }
         function eliminarDelCarrito(i) { carrito.splice(i, 1); guardarCarritoLocal(); }
-        function incrementarCantidad(i) { if (carrito[i]) { carrito[i].cantidad = (carrito[i].cantidad || 1) + 1; guardarCarritoLocal(); } }
+
+        function incrementarCantidad(i) {
+            if (carrito[i]) {
+                // 🔹 NUEVO: comprobar stock al incrementar
+                const prod = productos.find(p => p.id === carrito[i].id);
+                const stockDisponible = prod ? parseInt(prod.Stock || 0) : 0;
+                if ((carrito[i].cantidad || 1) + 1 > stockDisponible) {
+                    alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`);
+                    return;
+                }
+                carrito[i].cantidad = (carrito[i].cantidad || 1) + 1;
+                guardarCarritoLocal();
+            }
+        }
         function decrementarCantidad(i) { if (carrito[i]) { if (carrito[i].cantidad > 1) carrito[i].cantidad--; else carrito.splice(i, 1); guardarCarritoLocal(); } }
 
         function actualizarCarritoUI() {
@@ -1361,6 +1443,20 @@
         function iniciarProcesoPedido() {
             if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
             if (carrito.length === 0) { alert('El carrito está vacío.'); return; }
+
+            // 🔹 NUEVO: verificar stock antes de continuar
+            for (const item of carrito) {
+                const prod = productos.find(p => p.id === item.id);
+                if (!prod || estaAgotado(prod)) {
+                    alert(`⚠️ "${item.nombre}" ya no está disponible.`);
+                    return;
+                }
+                if ((item.cantidad || 1) > parseInt(prod.Stock || 0)) {
+                    alert(`⚠️ "${item.nombre}" solo tiene ${prod.Stock} unidad(es) disponible(s).`);
+                    return;
+                }
+            }
+
             let sub = 0;
             carrito.forEach(i => { sub += i.precio * (i.cantidad || 1); });
             window.subtotalCarrito = sub;
