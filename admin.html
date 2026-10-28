@@ -1176,7 +1176,7 @@
                         ${sl}${pl}${ub}
                         <div class="price">${precioMostrar}</div>
                         ${es ? '' : `<div class="stock">📦 ${st} uds</div>`}
-                        <div class="category">${p.Categoria || 'General'}</div>
+                        ${es ? '' : `<div class="category">${p.Categoria || 'General'}</div>`}
                         ${pn}
                         <div class="actions">
                             <button class="btn-edit" onclick="editarProducto('${p.id}')">✏️</button>
@@ -1767,7 +1767,6 @@
             const pr = ep ? document.getElementById('prodProveedor').value.trim() : '';
             const es = document.getElementById('prodEsServicio').checked;
 
-            // 🔹 VALIDACIONES: si es servicio, no pedir categoría
             if (!n) { alert('El nombre es obligatorio.'); return; }
             if (!es && !c) { alert('La categoría es obligatoria.'); return; }
             if (!es && co === '') { alert('El precio de costo es obligatorio.'); return; }
@@ -1783,7 +1782,6 @@
                 if (fotosNuevas.length > 0) { btn.textContent = '⏳ Subiendo fotos...'; for (const f of fotosNuevas) { const u = await window.subirFotoCloudinary(f); urls.push(u); } }
                 const ff = [...fotosExistentes, ...urls];
                 btn.textContent = '⏳ Guardando...';
-                // 🔹 Si es servicio, se guarda automáticamente como "Servicios"
                 const categoriaFinal = es ? 'Servicios' : c;
                 const data = {
                     Nombre: n, Categoria: categoriaFinal, Codigo_de_Barras: cod,
