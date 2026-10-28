@@ -84,6 +84,7 @@
         .estado-en-proceso { background: #dbeafe; color: #2563eb; }
         .estado-aduana { background: #e0e7ff; color: #4f46e5; }
         .estado-local { background: #d1fae5; color: #059669; }
+        .estado-completado { background: #d1fae5; color: #059669; }
         .estado-select { padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; background: white; cursor: pointer; }
         .btn-whatsapp { background: #25D366; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
         .product-grid { display: grid; grid-auto-rows: 1fr; gap: 12px; padding: 14px; width: 100%; }
@@ -102,6 +103,7 @@
         .product-card .proveedor { font-size: 0.65rem; color: #7c3aed; font-weight: 600; }
         .product-card .encargo-label { font-size: 0.6rem; background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
         .product-card .proveedor-label { font-size: 0.6rem; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
+        .product-card .servicio-label { font-size: 0.6rem; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
         .product-card .btn-url-encargo { display: inline-block; font-size: 0.65rem; font-weight: 600; background: #ede9fe; color: #6d28d9; padding: 3px 10px; border-radius: 12px; margin: 4px 0; text-decoration: none; }
         .product-card .actions { margin-top: auto; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
         .product-card .actions button { padding: 4px 12px; border: none; border-radius: 16px; font-size: 0.65rem; cursor: pointer; font-weight: 600; }
@@ -244,6 +246,7 @@
                         <li><a data-tab="domicilios">🛵 Domicilios</a></li>
                         <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
                         <li><a data-tab="encargos">📋 Encargos</a></li>
+                        <li><a data-tab="servicios">🔧 Servicios</a></li>
                         <li><a data-tab="reportes">📄 Reportes</a></li>
                         <li><a data-tab="usuarios">👥 Usuarios</a></li>
                         <li><a data-tab="configuracion">⚙️ Configuración</a></li>
@@ -405,6 +408,24 @@
                     <div class="list-container" id="encargosContainer"><div class="loading"><div class="spinner"></div>Cargando encargos...</div></div>
                 </div>
 
+                <div id="tab-servicios" class="tab-content">
+                    <h2 style="margin-bottom:15px; font-weight:600;">🔧 Solicitudes de Servicios</h2>
+                    <div class="filters">
+                        <div><label>Estado:</label>
+                            <select id="servFiltroEstado">
+                                <option value="Todos">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="En proceso">En proceso</option>
+                                <option value="Completado">Completado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <button id="servFiltrarBtn">Filtrar</button>
+                        <button class="btn-clear" id="servLimpiarBtn">Limpiar</button>
+                    </div>
+                    <div class="list-container" id="serviciosContainer"><div class="loading"><div class="spinner"></div>Cargando solicitudes...</div></div>
+                </div>
+
                 <div id="tab-reportes" class="tab-content">
                     <h2 style="margin-bottom:15px; font-weight:600;">📄 Reportes de Ventas</h2>
                     <div class="filters">
@@ -479,7 +500,17 @@
                                 Mostrar la sección "Pedidos Por Encargo" a los clientes
                             </label>
                         </div>
-                        <div class="help">Si está <strong>desactivado</strong>, los clientes NO verán la sección de Pedidos por Encargo en la tienda (ni en el menú lateral, ni en el desplegable móvil). Si lo <strong>activas</strong>, la verán con normalidad.</div>
+                        <div class="help">Si está <strong>desactivado</strong>, los clientes NO verán la sección de Pedidos por Encargo en la tienda.</div>
+                    </div>
+                    <div class="config-section">
+                        <h3>🔧 Sección de Servicios</h3>
+                        <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                            <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:500; font-size:0.95rem;">
+                                <input type="checkbox" id="configServiciosActivos" style="width:20px; height:20px; cursor:pointer; accent-color:#2980b9;" />
+                                Mostrar la sección "Servicios" a los clientes
+                            </label>
+                        </div>
+                        <div class="help">Si está <strong>desactivado</strong>, los clientes NO verán la sección de Servicios en la tienda.</div>
                     </div>
                     <button class="btn-success" id="guardarConfigBtn" style="margin-top:10px;">💾 Guardar Configuración</button>
                     <div class="config-success" id="configSuccess">✅ Configuración guardada correctamente.</div>
@@ -531,7 +562,7 @@
                     <div class="form-group"><label>Precio Venta *</label><input type="number" id="prodVenta" step="0.01" required /></div>
                 </div>
                 <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
-                <div class="form-group"><label>Stock *</label><input type="number" id="prodStock" required /></div>
+                <div class="form-group" id="stockGroup"><label>Stock *</label><input type="number" id="prodStock" required /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                     <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsEncargo" /> 📦 Mostrar en Encargos</label>
@@ -539,6 +570,13 @@
                 <div class="form-group" id="urlEncargoGroup" style="display:none; background:#f5f3ff; padding:12px; border-radius:10px; border:1px solid #ddd6fe;">
                     <label style="color:#6d28d9;">🔗 URL del producto</label>
                     <input type="url" id="prodUrlEncargo" placeholder="https://..." />
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsServicio" /> 🔧 Es un Servicio</label>
+                </div>
+                <div class="form-group" id="servicioNoteGroup" style="display:none; background:#f0fdf4; padding:12px; border-radius:10px; border:1px solid #bbf7d0;">
+                    <label style="color:#166534; font-weight:600;">ℹ️ Los servicios no tienen stock ni se venden directamente</label>
+                    <div style="font-size:0.85rem; color:#166534; margin-top:4px;">Los clientes los verán en la sección "🔧 Servicios" y podrán solicitarlos con un formulario. Si el precio es 0 se mostrará "Consultar precio".</div>
                 </div>
                 <div class="form-group">
                     <label>Fotos del producto</label>
@@ -628,11 +666,12 @@
         let domiciliosCache = [];
         let tiendaCache = [];
         let encargosCache = [];
+        let serviciosCache = [];
         let categoriasCache = [];
         let usuariosCache = [];
         let carrito = [];
         let ventasFiltradasReporte = [];
-        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 5.00, encargos_activos: true };
+        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 5.00, encargos_activos: true, servicios_activos: true };
 
         let notificaciones = [];
         const NOTIF_STORAGE_KEY = 'admin_notificaciones_leidas';
@@ -663,6 +702,12 @@
                     if (!l.includes(id)) n.push({ id, tipo: 'encargo', texto: `Nuevo encargo de <strong>${e.producto_nombre || 'Producto'}</strong>`, fecha: e.fecha_solicitud });
                 }
             }
+            for (const s of serviciosCache) {
+                if (s.estado === 'Pendiente' && !s.fecha_gestion) {
+                    const id = `serv-${s.id}`;
+                    if (!l.includes(id)) n.push({ id, tipo: 'servicio', texto: `Nueva solicitud de servicio de <strong>${s.usuario_nombre || 'Cliente'}</strong>`, fecha: s.fecha_solicitud });
+                }
+            }
             n.sort((a, b) => {
                 const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
                 const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
@@ -682,6 +727,7 @@
                 let icon = '📦'; let tab = 'domicilios';
                 if (n.tipo === 'tienda') { icon = '🏪'; tab = 'tienda'; }
                 if (n.tipo === 'encargo') { icon = '📋'; tab = 'encargos'; }
+                if (n.tipo === 'servicio') { icon = '🔧'; tab = 'servicios'; }
                 html += `<div class="notif-item" data-id="${n.id}" data-tab="${tab}"><span class="icon">${icon}</span><span class="text">${n.texto}</span></div>`;
             }
             list.innerHTML = html;
@@ -784,6 +830,13 @@
                 const s = await getDocs(q); encargosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return encargosCache;
             } catch (e) { return []; }
         }
+        async function cargarServicios() {
+            try {
+                const { collection, getDocs, orderBy, query } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'SolicitudesServicios'), orderBy('fecha_solicitud', 'desc'));
+                const s = await getDocs(q); serviciosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return serviciosCache;
+            } catch (e) { return []; }
+        }
         async function cargarUsuarios() {
             try {
                 const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'usuarios'));
@@ -800,10 +853,12 @@
                     if (typeof data.envio_costo === 'number') configGeneral.envio_costo = data.envio_costo;
                     if (typeof data.envio_gratis_desde === 'number') configGeneral.envio_gratis_desde = data.envio_gratis_desde;
                     if (typeof data.encargos_activos === 'boolean') configGeneral.encargos_activos = data.encargos_activos;
+                    if (typeof data.servicios_activos === 'boolean') configGeneral.servicios_activos = data.servicios_activos;
                 }
                 document.getElementById('configEnvioCosto').value = configGeneral.envio_costo;
                 document.getElementById('configEnvioGratis').value = configGeneral.envio_gratis_desde;
                 document.getElementById('configEncargosActivos').checked = configGeneral.encargos_activos;
+                document.getElementById('configServiciosActivos').checked = configGeneral.servicios_activos;
             } catch (e) { }
         }
 
@@ -811,6 +866,7 @@
             const c = parseFloat(document.getElementById('configEnvioCosto').value);
             const g = parseFloat(document.getElementById('configEnvioGratis').value);
             const encargosActivos = document.getElementById('configEncargosActivos').checked;
+            const serviciosActivos = document.getElementById('configServiciosActivos').checked;
             if (isNaN(c) || c < 0) { alert('Costo inválido.'); return; }
             if (isNaN(g) || g < 0) { alert('Monto inválido.'); return; }
             const btn = this; btn.disabled = true; btn.textContent = '⏳ Guardando...';
@@ -819,11 +875,13 @@
                     envio_costo: c,
                     envio_gratis_desde: g,
                     encargos_activos: encargosActivos,
+                    servicios_activos: serviciosActivos,
                     fecha_actualizacion: window.firebaseFns.serverTimestamp()
                 }, { merge: true });
                 configGeneral.envio_costo = c;
                 configGeneral.envio_gratis_desde = g;
                 configGeneral.encargos_activos = encargosActivos;
+                configGeneral.servicios_activos = serviciosActivos;
                 const el = document.getElementById('configSuccess');
                 el.classList.add('show');
                 setTimeout(() => el.classList.remove('show'), 3000);
@@ -877,7 +935,7 @@
             const p = domicilios.filter(d => d.Estado === 'Pendiente').length;
             let ci = 0, vi = 0;
             for (const x of productosCache) {
-                if (x.Es_Encargo || x.Es_Proveedor) continue;
+                if (x.Es_Encargo || x.Es_Proveedor || x.Es_Servicio) continue;
                 const st = parseInt(x.Stock || 0);
                 ci += st * parseFloat(x.Precio_Costo || 0);
                 vi += st * parseFloat(x.Precio_Venta || 0);
@@ -1046,7 +1104,7 @@
             const u = usuariosCache.find(x => x.id === id);
             if (!u) return;
             const nc = u.nombre && u.apellidos ? `${u.nombre} ${u.apellidos}` : (u.nombre || u.name || 'este usuario');
-            if (!confirm(`¿Eliminar a "${nc}"?\n\n⚠️ Se borrarán sus datos de Firestore.\n\nNota: La cuenta de acceso seguirá existiendo en Firebase Authentication y debes eliminarla manualmente desde la consola si lo deseas.`)) return;
+            if (!confirm(`¿Eliminar a "${nc}"?\n\n⚠️ Se borrarán sus datos de Firestore.\n\nNota: La cuenta de acceso seguirá existiendo en Firebase Authentication.`)) return;
             try {
                 await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'usuarios', id));
                 alert('✅ Usuario eliminado de Firestore.');
@@ -1074,6 +1132,7 @@
             const c = document.getElementById('inventarioContainer');
             let f = productos;
             if (catF === 'Encargos') f = f.filter(p => p.Es_Encargo === true);
+            else if (catF === 'Servicios') f = f.filter(p => p.Es_Servicio === true);
             else if (catF !== 'Todas') f = f.filter(p => (p.Categoria || 'General') === catF);
             if (busq) {
                 const q = busq.toLowerCase();
@@ -1090,6 +1149,7 @@
                 const st = parseInt(p.Stock || 0);
                 const ee = p.Es_Encargo === true;
                 const ep = p.Es_Proveedor === true;
+                const es = p.Es_Servicio === true;
                 const ue = (p.URL_Encargo || '').trim();
                 const prov = (p.Proveedor || '').trim();
                 let ex = '';
@@ -1100,16 +1160,18 @@
                 }
                 const ub = (ee && ue) ? `<a href="${ue}" target="_blank" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver</a>` : '';
                 const pl = ep ? '<div class="proveedor-label">🏭 Proveedor</div>' : '';
+                const sl = es ? '<div class="servicio-label">🔧 Servicio</div>' : '';
                 const pn = (ep && prov) ? `<div class="proveedor">${prov}</div>` : '';
+                const precioMostrar = (es && pf === 0) ? 'Consultar' : `$${pf.toFixed(2)}`;
                 h += `
                     <div class="product-card">
                         <img class="foto-principal" src="${fu || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" alt="${p.Nombre}" onclick="event.stopPropagation(); window.open('${fu}','_blank')" />
                         ${ex}
                         <h4>${p.Nombre || 'Sin nombre'}</h4>
                         ${ee ? '<div class="encargo-label">📦 Encargo</div>' : ''}
-                        ${pl}${ub}
-                        <div class="price">$${pf.toFixed(2)}</div>
-                        <div class="stock">📦 ${st} uds</div>
+                        ${sl}${pl}${ub}
+                        <div class="price">${precioMostrar}</div>
+                        ${es ? '' : `<div class="stock">📦 ${st} uds</div>`}
                         <div class="category">${p.Categoria || 'General'}</div>
                         ${pn}
                         <div class="actions">
@@ -1212,6 +1274,70 @@
             }
             c.innerHTML = h;
             actualizarNotificaciones();
+        }
+
+        function renderServicios(solicitudes) {
+            const c = document.getElementById('serviciosContainer');
+            if (solicitudes.length === 0) { c.innerHTML = '<div class="empty">No hay solicitudes de servicios.</div>'; return; }
+            let h = '';
+            for (const s of solicitudes) {
+                const st = s.estado || 'Pendiente';
+                let bc = 'estado-pendiente';
+                if (st === 'En proceso') bc = 'estado-en-proceso';
+                else if (st === 'Completado') bc = 'estado-completado';
+                else if (st === 'Cancelado') bc = 'estado-cancelado';
+                const tel = s.usuario_telefono == null ? '' : String(s.usuario_telefono);
+                const isDone = (st === 'Completado' || st === 'Cancelado');
+                const ops = `<option value="Pendiente" ${st === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="En proceso" ${st === 'En proceso' ? 'selected' : ''}>En proceso</option><option value="Completado" ${st === 'Completado' ? 'selected' : ''}>Completado</option><option value="Cancelado" ${st === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
+                let fechaPref = '';
+                if (s.fecha_preferida) {
+                    const fp = fechaToDate(s.fecha_preferida);
+                    if (fp) fechaPref = `<div class="sub">📅 Prefiere: ${fp.toLocaleDateString('es-ES')}</div>`;
+                }
+                h += `<div class="list-item"><div class="left"><div class="title">🔧 ${s.servicio_nombre || 'Servicio'}</div><div class="sub">👤 ${s.usuario_nombre || 'Cliente'} • 📞 ${tel || 'Sin teléfono'}</div><div class="sub">📧 ${s.usuario_email || 'Sin email'}</div><div class="sub">📍 ${s.direccion || 'Sin dirección'}</div>${fechaPref}<div class="sub">💬 ${s.descripcion || 'Sin descripción'}</div><div class="sub" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">Solicitado: ${fechaToStr(s.fecha_solicitud)}</div></div><div class="center"><span class="estado-badge ${bc}">${st}</span><select class="estado-select" onchange="cambiarEstadoServicio('${s.id}', this.value)" ${isDone ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="notificarServicio('${s.id}')">💬</button></div></div>`;
+            }
+            c.innerHTML = h;
+            actualizarNotificaciones();
+        }
+
+        async function cambiarEstadoServicio(id, nuevo) {
+            try {
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                await updateDoc(doc(window.firebaseDb, 'SolicitudesServicios', id), {
+                    estado: nuevo,
+                    fecha_gestion: serverTimestamp(),
+                    fecha_actualizacion: serverTimestamp()
+                });
+                await cargarServicios();
+                aplicarFiltrosServicios();
+                if (nuevo !== 'Cancelado') notificarServicio(id);
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function notificarServicio(id) {
+            const s = serviciosCache.find(x => x.id === id);
+            if (!s) return;
+            let tel = s.usuario_telefono;
+            if (!tel || tel === 'Sin teléfono') { alert('❌ Sin teléfono.'); return; }
+            tel = String(tel).trim();
+            const st = s.estado || 'Pendiente';
+            const serv = s.servicio_nombre || 'Servicio';
+            let m = '';
+            switch (st) {
+                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos. 🔧`; break;
+                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n✅ Tu solicitud de *${serv}* está en proceso. En breve coordinamos la visita. 🔧`; break;
+                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n🎉 Tu servicio *${serv}* ha sido completado. ¡Gracias por confiar en B&B!`; break;
+                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo. 🙌`; break;
+                default: m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* cambió a: *${st}*.`;
+            }
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
+        }
+
+        function aplicarFiltrosServicios() {
+            const e = document.getElementById('servFiltroEstado').value;
+            let f = [...serviciosCache];
+            if (e !== 'Todos') f = f.filter(x => (x.estado || 'Pendiente') === e);
+            renderServicios(f);
         }
 
         async function cancelarEncargoVencido(id) {
@@ -1482,8 +1608,34 @@
             this.value = '';
         });
         function resetFotosFormulario() { fotosExistentes = []; fotosNuevas = []; renderFotosFormulario(); }
-        document.getElementById('prodEsEncargo').addEventListener('change', function() { document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none'; });
-        document.getElementById('prodEsProveedor').addEventListener('change', function() { document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none'; });
+
+        document.getElementById('prodEsEncargo').addEventListener('change', function() {
+            document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                document.getElementById('prodEsServicio').checked = false;
+                document.getElementById('servicioNoteGroup').style.display = 'none';
+                document.getElementById('stockGroup').style.display = 'block';
+            }
+        });
+        document.getElementById('prodEsProveedor').addEventListener('change', function() {
+            document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none';
+            if (this.checked) {
+                document.getElementById('prodEsServicio').checked = false;
+                document.getElementById('servicioNoteGroup').style.display = 'none';
+                document.getElementById('stockGroup').style.display = 'block';
+            }
+        });
+        document.getElementById('prodEsServicio').addEventListener('change', function() {
+            const esServicio = this.checked;
+            document.getElementById('servicioNoteGroup').style.display = esServicio ? 'block' : 'none';
+            document.getElementById('stockGroup').style.display = esServicio ? 'none' : 'block';
+            if (esServicio) {
+                document.getElementById('prodEsEncargo').checked = false;
+                document.getElementById('urlEncargoGroup').style.display = 'none';
+                document.getElementById('prodEsProveedor').checked = false;
+                document.getElementById('proveedorGroup').style.display = 'none';
+            }
+        });
 
         async function agregarCategoria(n) {
             if (!n || !n.trim()) { alert('Escribe un nombre.'); return; }
@@ -1497,7 +1649,7 @@
                 for (const c of categoriasCache) { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); }
                 cs.value = nt;
                 const ic = document.getElementById('invCategory');
-                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option>';
+                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
                 for (const c of categoriasCache) ic.innerHTML += `<option value="${c}">${c}</option>`;
                 document.getElementById('nuevaCategoriaInput').value = '';
                 alert(`✅ Categoría "${nt}" agregada.`);
@@ -1521,7 +1673,7 @@
                 cs.innerHTML = '';
                 for (const c of categoriasCache) { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); }
                 const ic = document.getElementById('invCategory');
-                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option>';
+                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
                 for (const c of categoriasCache) ic.innerHTML += `<option value="${c}">${c}</option>`;
                 alert(`✅ Categoría "${nt}" eliminada.`);
             } catch (e) { alert('Error: ' + e.message); }
@@ -1537,6 +1689,8 @@
             document.getElementById('prodUrlEncargo').value = '';
             document.getElementById('proveedorGroup').style.display = 'none';
             document.getElementById('prodProveedor').value = '';
+            document.getElementById('servicioNoteGroup').style.display = 'none';
+            document.getElementById('stockGroup').style.display = 'block';
             const cs = document.getElementById('prodCategoria');
             cs.innerHTML = '';
             for (const cat of categoriasCache) { const o = document.createElement('option'); o.value = cat; o.textContent = cat; cs.appendChild(o); }
@@ -1557,12 +1711,23 @@
                 const ep = p.Es_Proveedor === true;
                 document.getElementById('prodEsProveedor').checked = ep;
                 if (ep) { document.getElementById('proveedorGroup').style.display = 'block'; document.getElementById('prodProveedor').value = p.Proveedor || ''; }
+                const es = p.Es_Servicio === true;
+                document.getElementById('prodEsServicio').checked = es;
+                if (es) {
+                    document.getElementById('servicioNoteGroup').style.display = 'block';
+                    document.getElementById('stockGroup').style.display = 'none';
+                    document.getElementById('prodEsEncargo').checked = false;
+                    document.getElementById('prodEsProveedor').checked = false;
+                    document.getElementById('urlEncargoGroup').style.display = 'none';
+                    document.getElementById('proveedorGroup').style.display = 'none';
+                }
                 fotosExistentes = obtenerFotosProducto(p);
                 renderFotosFormulario();
             } else {
                 document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
                 document.getElementById('prodEsEncargo').checked = false;
                 document.getElementById('prodEsProveedor').checked = false;
+                document.getElementById('prodEsServicio').checked = false;
             }
             document.getElementById('productModal').classList.add('active');
         }
@@ -1586,7 +1751,11 @@
             const ue = ee ? document.getElementById('prodUrlEncargo').value.trim() : '';
             const ep = document.getElementById('prodEsProveedor').checked;
             const pr = ep ? document.getElementById('prodProveedor').value.trim() : '';
-            if (!n || !c || !co || !v || s === '') { alert('Completa los campos obligatorios.'); return; }
+            const es = document.getElementById('prodEsServicio').checked;
+
+            if (!n || !c || co === '' || v === '') { alert('Completa los campos obligatorios.'); return; }
+            if (!es && s === '') { alert('El stock es obligatorio.'); return; }
+
             const btn = document.getElementById('productSubmitBtn');
             const txt = btn.textContent;
             btn.disabled = true;
@@ -1596,7 +1765,16 @@
                 if (fotosNuevas.length > 0) { btn.textContent = '⏳ Subiendo fotos...'; for (const f of fotosNuevas) { const u = await window.subirFotoCloudinary(f); urls.push(u); } }
                 const ff = [...fotosExistentes, ...urls];
                 btn.textContent = '⏳ Guardando...';
-                const data = { Nombre: n, Categoria: c, Codigo_de_Barras: cod, Precio_Costo: parseFloat(co), Precio_Venta: parseFloat(v), Precio_Oferta: parseFloat(of), Stock: parseInt(s), Detalles: d, Es_Encargo: ee, URL_Encargo: ue, Es_Proveedor: ep, Proveedor: pr, Fotos: ff, fecha_actualizacion: serverTimestamp() };
+                const data = {
+                    Nombre: n, Categoria: c, Codigo_de_Barras: cod,
+                    Precio_Costo: parseFloat(co), Precio_Venta: parseFloat(v), Precio_Oferta: parseFloat(of),
+                    Stock: es ? 0 : parseInt(s),
+                    Detalles: d,
+                    Es_Encargo: ee, URL_Encargo: ue,
+                    Es_Proveedor: ep, Proveedor: pr,
+                    Es_Servicio: es,
+                    Fotos: ff, fecha_actualizacion: serverTimestamp()
+                };
                 if (id) await updateDoc(doc(window.firebaseDb, 'productos', id), data);
                 else { data.fecha_creacion = serverTimestamp(); await addDoc(collection(window.firebaseDb, 'productos'), data); }
                 alert(id ? '✅ Actualizado.' : '✅ Creado.');
@@ -1637,7 +1815,7 @@
         function mostrarSugerencias(t) {
             const s = document.getElementById('cajaSugerencias');
             if (!t.trim()) { s.style.display = 'none'; return; }
-            const f = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(t.toLowerCase()) && parseInt(p.Stock || 0) > 0);
+            const f = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(t.toLowerCase()) && parseInt(p.Stock || 0) > 0 && !p.Es_Servicio && !p.Es_Encargo);
             if (f.length === 0) { s.style.display = 'none'; return; }
             let h = '';
             f.slice(0, 10).forEach(p => {
@@ -1760,10 +1938,10 @@
             let tc = 0, tv = 0, tg = 0;
             for (const p of productosCache) {
                 const st = parseInt(p.Stock || 0), co = parseFloat(p.Precio_Costo || 0), v = parseFloat(p.Precio_Venta || 0), of = parseFloat(p.Precio_Oferta || 0), g = v - co;
-                const ee = p.Es_Encargo === true, ep = p.Es_Proveedor === true;
-                if (!ee && !ep) { tc += st * co; tv += st * v; tg += st * g; }
-                const et = ee ? ' (Encargo)' : (ep ? ' (Prov)' : '');
-                td.push([(p.Nombre || '') + et, p.Categoria || '', p.Proveedor || '', p.Codigo_de_Barras || '', st, `$${co.toFixed(2)}`, `$${v.toFixed(2)}`, `$${of.toFixed(2)}`, `$${g.toFixed(2)}`]);
+                const ee = p.Es_Encargo === true, ep = p.Es_Proveedor === true, es = p.Es_Servicio === true;
+                if (!ee && !ep && !es) { tc += st * co; tv += st * v; tg += st * g; }
+                const et = ee ? ' (Encargo)' : (ep ? ' (Prov)' : (es ? ' (Servicio)' : ''));
+                td.push([(p.Nombre || '') + et, p.Categoria || '', p.Proveedor || '', p.Codigo_de_Barras || '', es ? '-' : st, `$${co.toFixed(2)}`, `$${v.toFixed(2)}`, `$${of.toFixed(2)}`, `$${g.toFixed(2)}`]);
             }
             td.push(['TOTALES', '', '', '', '', `$${tc.toFixed(2)}`, `$${tv.toFixed(2)}`, '', `$${tg.toFixed(2)}`]);
             doc.autoTable({ head: [['Producto', 'Categoría', 'Proveedor', 'Código', 'Stock', 'Costo', 'Venta', 'Oferta', 'Ganancia']], body: td, startY: 60, theme: 'striped', headStyles: { fillColor: '#1a252f', textColor: '#ffffff' }, styles: { fontSize: 8, font: 'times' } });
@@ -1778,10 +1956,8 @@
             const doc = new jsPDF('landscape', 'pt', 'a4');
             doc.setFont('times', 'bold'); doc.setFontSize(20); doc.text('Reporte B&B', 40, 40);
             const td = [];
-            let ti = 0, tg = 0;
             for (const x of v) {
                 const t = parseFloat(x.total || 0), g = calcularGananciaVenta(x);
-                ti += t; tg += g;
                 td.push([fechaToStr(x.fecha), x.Tipo || 'Local', x.productos_json || '', `$${t.toFixed(2)}`, `$${g.toFixed(2)}`]);
             }
             doc.autoTable({ head: [['Fecha', 'Tipo', 'Productos', 'Total', 'Ganancia']], body: td, startY: 60, theme: 'striped', headStyles: { fillColor: '#1a252f', textColor: '#ffffff' }, styles: { fontSize: 9, font: 'times' } });
@@ -1869,6 +2045,7 @@
                 await cargarDomicilios();
                 await cargarTienda();
                 await cargarEncargos();
+                await cargarServicios();
                 await cargarUsuarios();
 
                 renderDashboard(ventasCache, domiciliosCache);
@@ -1877,13 +2054,14 @@
                 renderUsuarios();
 
                 const ci = document.getElementById('invCategory');
-                ci.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option>';
+                ci.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
                 for (const c of categoriasCache) ci.innerHTML += `<option value="${c}">${c}</option>`;
 
                 renderVentas(ventasCache);
                 renderDomicilios(domiciliosCache);
                 renderTienda(tiendaCache);
                 renderEncargos(encargosCache);
+                renderServicios(serviciosCache);
                 renderReportes(ventasCache);
                 actualizarNotificaciones();
 
@@ -1897,6 +2075,7 @@
                         document.getElementById(`tab-${tab}`).classList.add('active');
                         if (tab === 'estadisticas') renderizarEstadisticas();
                         if (tab === 'usuarios') { cargarUsuarios().then(renderUsuarios); }
+                        if (tab === 'servicios') { cargarServicios().then(() => renderServicios(serviciosCache)); }
                     });
                 });
 
@@ -1912,6 +2091,8 @@
                 document.getElementById('tiendaLimpiarBtn').addEventListener('click', function() { document.getElementById('tiendaFiltroEstado').value = 'Todos'; renderTienda(tiendaCache); });
                 document.getElementById('encFiltrarBtn').addEventListener('click', aplicarFiltrosEncargos);
                 document.getElementById('encLimpiarBtn').addEventListener('click', function() { document.getElementById('encFiltroEstado').value = 'Todos'; renderEncargos(encargosCache); });
+                document.getElementById('servFiltrarBtn').addEventListener('click', aplicarFiltrosServicios);
+                document.getElementById('servLimpiarBtn').addEventListener('click', function() { document.getElementById('servFiltroEstado').value = 'Todos'; renderServicios(serviciosCache); });
                 document.getElementById('repFiltrarBtn').addEventListener('click', aplicarFiltrosReportes);
                 document.getElementById('repLimpiarBtn').addEventListener('click', function() {
                     document.getElementById('repFechaDesde').value = '';
@@ -1921,7 +2102,7 @@
                     renderReportes(ventasCache);
                 });
 
-                setInterval(() => { cargarDomicilios(); cargarTienda(); cargarEncargos(); }, 30000);
+                setInterval(() => { cargarDomicilios(); cargarTienda(); cargarEncargos(); cargarServicios(); }, 30000);
             } catch (e) { console.error('Error:', e); alert('Error al cargar: ' + e.message); }
         }
     </script>
