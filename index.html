@@ -113,9 +113,11 @@
         .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
         .btn-encargo { background: #e67e22; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
         .btn-encargo:hover { background: #d35400; transform: scale(1.02); }
+        .btn-servicio { background: #10b981; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-weight: 600; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
+        .btn-servicio:hover { background: #059669; transform: scale(1.02); }
         .product-card .encargo-badge { font-size: 0.65rem; background: #fef3c7; color: #d97706; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 4px; }
+        .product-card .servicio-badge { font-size: 0.65rem; background: #dcfce7; color: #166534; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 700; margin-top: 4px; }
 
-        /* ── AGOTADO ── */
         .product-card .agotado-badge { font-size: 0.65rem; background: #fee2e2; color: #dc2626; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
         .product-card.agotado .foto-principal { filter: grayscale(0.6) brightness(0.9); opacity: 0.85; }
         .product-card.agotado .price { color: #94a3b8; }
@@ -124,6 +126,7 @@
         .detail-page .detail-container .btn-add.btn-agotado { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
         .detail-page .detail-container .btn-add.btn-agotado:hover { background: #cbd5e1; }
         .detail-page .detail-container .detail-agotado-label { display: inline-block; background: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; margin: 8px 0 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-page .detail-container .detail-servicio-label { display: inline-block; background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; margin: 8px 0 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .infinite-sentinel {
             text-align: center;
@@ -163,6 +166,7 @@
         .detail-page .detail-container .detail-rating-text { color: #64748b; font-size: 0.9rem; margin-bottom: 15px; }
         .detail-page .detail-container .btn-add { width: auto; padding: 10px 30px; font-size: 1rem; margin: 10px 0 20px; }
         .detail-page .detail-container .btn-encargo { padding: 10px 30px; font-size: 1rem; margin: 10px 0 20px; }
+        .detail-page .detail-container .btn-servicio { padding: 10px 30px; font-size: 1rem; margin: 10px 0 20px; }
         .detail-page .detail-container .calificar-section { border-top: 2px solid #f1f5f9; padding-top: 20px; margin-top: 20px; }
         .detail-page .detail-container .calificar-section h4 { font-size: 1.1rem; margin-bottom: 10px; }
         .detail-page .detail-container .calificar-section .stars-input { display: flex; gap: 8px; font-size: 1.8rem; cursor: pointer; margin-bottom: 10px; }
@@ -209,8 +213,8 @@
             .product-card .price { font-size: 0.85rem; line-height: 1.2; overflow-wrap: anywhere; }
             .product-card .price .old { font-size: 0.7rem; }
             .product-card .product-footer { padding-top: 2px; margin-top: auto; border-top: 1px solid #f1f5f9; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 100%; }
-            .btn-add, .btn-encargo { font-size: 0.7rem; padding: 3px 8px; border-radius: 16px; max-width: 100%; }
-            .product-card .agotado-badge { font-size: 0.55rem; padding: 1px 6px; }
+            .btn-add, .btn-encargo, .btn-servicio { font-size: 0.7rem; padding: 3px 8px; border-radius: 16px; max-width: 100%; }
+            .product-card .agotado-badge, .product-card .servicio-badge { font-size: 0.55rem; padding: 1px 6px; }
         }
 
         @media (max-width: 480px) {
@@ -219,7 +223,7 @@
             .product-card h3 { font-size: 0.55rem; }
             .product-card .price { font-size: 0.8rem; }
             .product-card .price .old { font-size: 0.6rem; }
-            .btn-add, .btn-encargo { font-size: 0.65rem; padding: 3px 6px; }
+            .btn-add, .btn-encargo, .btn-servicio { font-size: 0.65rem; padding: 3px 6px; }
         }
 
         @media (min-width: 769px) { .toolbar__categories { display: none !important; } }
@@ -399,6 +403,25 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="servicioModal">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarServicioModal()">✕</button>
+            <h2>🔧 Solicitar Servicio</h2>
+            <div style="background:#f0fdf4; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; color:#166534; border-left:4px solid #10b981;">
+                <strong>ℹ️ ¿Cómo funciona?</strong><br>
+                Envía tu solicitud y nos pondremos en contacto contigo para coordinar la visita del técnico.
+            </div>
+            <div id="servicioForm">
+                <div class="form-group"><label>Servicio</label><input type="text" id="servicioNombre" disabled /></div>
+                <div class="form-group"><label>Descripción del problema *</label><textarea id="servicioDescripcion" rows="3" placeholder="Ej: El aire no enfría, hace ruido, etc." required></textarea></div>
+                <div class="form-group"><label>Dirección donde se prestará el servicio *</label><input type="text" id="servicioDireccion" placeholder="Calle, número, barrio, ciudad" required /></div>
+                <div class="form-group"><label>Fecha preferida (opcional)</label><input type="date" id="servicioFecha" /></div>
+                <div id="servicioError" class="error-msg"></div>
+                <button class="btn-primary" id="servicioConfirmarBtn">✅ Enviar solicitud</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="recuperarModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarRecuperarModal()">✕</button>
@@ -448,8 +471,8 @@
                 <ul>
                     <li><strong>Productos en tienda:</strong> disponibilidad inmediata para entrega o retiro.</li>
                     <li><strong>Pedidos por encargo:</strong> traemos productos específicos desde el extranjero.</li>
+                    <li><strong>Servicios técnicos:</strong> reparaciones, montaje de split, electricidad y más.</li>
                     <li><strong>Domicilio:</strong> llevamos tu pedido hasta la puerta de tu casa.</li>
-                    <li><strong>Retiro en tienda:</strong> puedes pasar a buscarlo cuando te convenga.</li>
                 </ul>
                 <h3>📅 Sobre los encargos</h3>
                 <div class="highlight">Los pedidos por encargo se realizan antes del <strong>día 20 de cada mes</strong> y llegan entre el <strong>día 1 y el 15 del mes siguiente</strong>. Al confirmar el pedido, el cliente debe abonar la mitad del costo en un plazo de 24h.</div>
@@ -582,6 +605,7 @@
         let ENVIO_COSTO = 1.00;
         let ENVIO_GRATIS_DESDE = 5.00;
         let ENCARGOS_ACTIVOS = true;
+        let SERVICIOS_ACTIVOS = true;
         const GREEN_API_ID = "710722715742";
         const GREEN_API_TOKEN = "27e0dade1e0042e3b1a7ff0451e163e5b2669ae94a6f4ec39f";
         const GRUPO_CHAT_ID = "120363410173464743@g.us";
@@ -923,6 +947,7 @@
                     if (typeof data.envio_costo === 'number') ENVIO_COSTO = data.envio_costo;
                     if (typeof data.envio_gratis_desde === 'number') ENVIO_GRATIS_DESDE = data.envio_gratis_desde;
                     if (typeof data.encargos_activos === 'boolean') ENCARGOS_ACTIVOS = data.encargos_activos;
+                    if (typeof data.servicios_activos === 'boolean') SERVICIOS_ACTIVOS = data.servicios_activos;
                 }
             } catch (e) { console.warn('No se pudo cargar la config:', e); }
         }
@@ -998,10 +1023,10 @@
             return g;
         }
 
-        // 🔹 NUEVO: comprueba si un producto está agotado
         function estaAgotado(prod) {
             if (!prod) return false;
-            if (prod.Es_Encargo === true) return false; // los encargos no se agotan
+            if (prod.Es_Encargo === true) return false;
+            if (prod.Es_Servicio === true) return false;
             const stock = parseInt(prod.Stock || 0);
             return isNaN(stock) || stock <= 0;
         }
@@ -1019,6 +1044,19 @@
                 encLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encLink); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); });
                 encLi.appendChild(encLink);
                 ul.appendChild(encLi);
+            }
+
+            if (SERVICIOS_ACTIVOS) {
+                const servLi = document.createElement('li');
+                const servLink = document.createElement('a');
+                servLink.textContent = '🔧 Servicios';
+                servLink.dataset.categoria = 'Servicios';
+                servLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Servicios'; actualizarCategoriaActiva(servLink); document.getElementById('sectionTitle').textContent = '🔧 Servicios'; renderizarProductos(); });
+                servLi.appendChild(servLink);
+                ul.appendChild(servLi);
+            }
+
+            if (ENCARGOS_ACTIVOS || SERVICIOS_ACTIVOS) {
                 const sepLi = document.createElement('li');
                 sepLi.style.borderTop = '1px solid #e2e8f0';
                 sepLi.style.margin = '6px 0';
@@ -1048,6 +1086,17 @@
                 if (categoriaSeleccionada === 'PedidosPorEncargo') encD.classList.add('active');
                 encD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encD); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); cerrarDropdownCategorias(); });
                 dd.appendChild(encD);
+            }
+
+            if (SERVICIOS_ACTIVOS) {
+                const servD = document.createElement('a');
+                servD.textContent = '🔧 Servicios'; servD.dataset.categoria = 'Servicios';
+                if (categoriaSeleccionada === 'Servicios') servD.classList.add('active');
+                servD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Servicios'; actualizarCategoriaActiva(servD); document.getElementById('sectionTitle').textContent = '🔧 Servicios'; renderizarProductos(); cerrarDropdownCategorias(); });
+                dd.appendChild(servD);
+            }
+
+            if (ENCARGOS_ACTIVOS || SERVICIOS_ACTIVOS) {
                 const sepD = document.createElement('div');
                 sepD.style.borderTop = '1px solid #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
             }
@@ -1080,16 +1129,24 @@
                 categoriaSeleccionada = 'Todas';
                 document.getElementById('sectionTitle').textContent = 'Productos';
             }
+            if (!SERVICIOS_ACTIVOS && categoriaSeleccionada === 'Servicios') {
+                categoriaSeleccionada = 'Todas';
+                document.getElementById('sectionTitle').textContent = 'Productos';
+            }
 
             let filtrados = productos;
+
             if (categoriaSeleccionada === "PedidosPorEncargo" && ENCARGOS_ACTIVOS) {
                 filtrados = filtrados.filter(p => p.Es_Encargo === true);
+            } else if (categoriaSeleccionada === "Servicios" && SERVICIOS_ACTIVOS) {
+                filtrados = filtrados.filter(p => p.Es_Servicio === true);
             } else {
-                filtrados = filtrados.filter(p => !p.Es_Encargo);
-                if (categoriaSeleccionada !== "Todas" && categoriaSeleccionada !== "PedidosPorEncargo") {
+                filtrados = filtrados.filter(p => !p.Es_Encargo && !p.Es_Servicio);
+                if (categoriaSeleccionada !== "Todas" && categoriaSeleccionada !== "PedidosPorEncargo" && categoriaSeleccionada !== "Servicios") {
                     filtrados = filtrados.filter(p => (p.Categoria || "General").toLowerCase() === categoriaSeleccionada.toLowerCase());
                 }
             }
+
             const busqueda = getBusqueda();
             if (busqueda) {
                 filtrados = filtrados.filter(p =>
@@ -1113,24 +1170,29 @@
             const venta = parseFloat(prod.Precio_Venta || 0);
             const oferta = parseFloat(prod.Precio_Oferta || 0);
             const tieneOferta = (oferta > 0 && oferta < venta);
+            const esServicio = prod.Es_Servicio === true;
+
             let precioHtml = `<span class="price">`;
-            if (tieneOferta) precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
+            if (esServicio && venta === 0) precioHtml += `Consultar`;
+            else if (tieneOferta) precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
             else precioHtml += `$${venta.toFixed(2)}`;
             precioHtml += `</span>`;
+
             const esEncargo = prod.Es_Encargo === true;
-            const agotado = estaAgotado(prod); // 🔹 NUEVO
+            const agotado = estaAgotado(prod);
 
             const cardImgAttrs = fotoUrl ? `onclick="event.stopPropagation(); abrirZoom('${fotoUrl}');"` : '';
-            const cardClass = agotado ? 'product-card agotado' : 'product-card';
+            const cardClass = (agotado && !esServicio) ? 'product-card agotado' : 'product-card';
 
-            // 🔹 Badge de encargo o de agotado
             let badgeHtml = '';
-            if (esEncargo) badgeHtml = '<div class="encargo-badge">📦 Pedido por encargo</div>';
+            if (esServicio) badgeHtml = '<div class="servicio-badge">🔧 Servicio</div>';
+            else if (esEncargo) badgeHtml = '<div class="encargo-badge">📦 Pedido por encargo</div>';
             else if (agotado) badgeHtml = '<div class="agotado-badge">🚫 Agotado</div>';
 
-            // 🔹 Botón
             let botonHtml = '';
-            if (esEncargo) {
+            if (esServicio) {
+                botonHtml = `<button class="btn-servicio" data-id="${prod.id}">Solicitar</button>`;
+            } else if (esEncargo) {
                 botonHtml = `<button class="btn-encargo" data-id="${prod.id}">Solicitar encargo</button>`;
             } else if (agotado) {
                 botonHtml = `<button class="btn-add btn-agotado" data-id="${prod.id}" disabled>Agotado</button>`;
@@ -1208,6 +1270,17 @@
                 });
             });
 
+            grid.querySelectorAll('.btn-servicio').forEach(btn => {
+                if (btn.dataset.evento) return;
+                btn.dataset.evento = '1';
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    if (!usuarioActual) { alert('Debes iniciar sesión para solicitar un servicio.'); abrirModalLogin(); return; }
+                    abrirModalServicio(id);
+                });
+            });
+
             grid.querySelectorAll('.product-card').forEach(card => {
                 if (card.dataset.evento) return;
                 card.dataset.evento = '1';
@@ -1247,13 +1320,10 @@
         function verificarScroll() {
             if (productosFiltrados.length === 0) return;
             if (productosMostrados >= productosFiltrados.length) return;
-
             const section = document.getElementById('productsSection');
             if (!section || section.style.display === 'none') return;
-
             const s = document.getElementById('infiniteSentinel');
             if (!s) return;
-
             const rect = s.getBoundingClientRect();
             if (rect.top <= window.innerHeight + 400) cargarMasProductos();
         }
@@ -1294,29 +1364,36 @@
                 const venta = parseFloat(prod.Precio_Venta || 0);
                 const oferta = parseFloat(prod.Precio_Oferta || 0);
                 const tieneOferta = (oferta > 0 && oferta < venta);
+                const esServicio = prod.Es_Servicio === true;
+
                 let precioHtml = `<span class="detail-price">`;
-                if (tieneOferta) precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
+                if (esServicio && venta === 0) precioHtml += `Consultar precio`;
+                else if (tieneOferta) precioHtml += `<span class="old">$${venta.toFixed(2)}</span> $${oferta.toFixed(2)}`;
                 else precioHtml += `$${venta.toFixed(2)}`;
                 precioHtml += `</span>`;
+
                 const estrellas = '★'.repeat(Math.round(promedio)) + '☆'.repeat(5 - Math.round(promedio));
                 const detalleImgAttrs = fotoUrl ? `onclick="abrirZoom(document.getElementById('detalleImgPrincipal').src)"` : '';
                 let galeriaHtml = `<div class="galeria"><img class="imagen-principal" id="detalleImgPrincipal" src="${fotoUrl || 'https://via.placeholder.com/400x300/f1f5f9/94a3b8?text=Sin+foto'}" alt="${prod.Nombre || 'Producto'}" ${detalleImgAttrs} /><div class="miniaturas" id="detalleMiniaturas">`;
                 fotos.forEach((f, index) => { const active = index === 0 ? 'active' : ''; galeriaHtml += `<img src="${f}" alt="Foto ${index+1}" class="${active}" onclick="cambiarFotoDetalle('${f}', this)" />`; });
                 galeriaHtml += `</div></div>`;
+
                 const esEncargo = prod.Es_Encargo === true;
-                const agotado = estaAgotado(prod); // 🔹 NUEVO
+                const agotado = estaAgotado(prod);
 
                 let html = `<button class="back-link" onclick="volverALista()">← Volver a productos</button>${galeriaHtml}<h2>${prod.Nombre || 'Sin nombre'}</h2>`;
 
-                if (esEncargo) html += '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>';
+                if (esServicio) html += '<div class="detail-servicio-label">🔧 Servicio</div>';
+                else if (esEncargo) html += '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>';
                 else if (agotado) html += '<div class="detail-agotado-label">🚫 Producto agotado</div>';
 
                 html += `${precioHtml}<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
                 if (prod.Detalles) html += `<div class="detail-detalles"><h4>📋 Detalles del producto</h4><p>${prod.Detalles}</p></div>`;
                 html += `<div class="detail-stars">${estrellas}</div><div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>`;
 
-                // 🔹 Botones según estado
-                if (esEncargo) {
+                if (esServicio) {
+                    html += `<button class="btn-servicio" onclick="abrirModalServicio('${prod.id}')" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '🔧 Solicitar servicio' : '🔒 Inicia sesión para solicitar'}</button>`;
+                } else if (esEncargo) {
                     html += `<button class="btn-encargo" onclick="abrirModalEncargo('${prod.id}')" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '📦 Solicitar encargo' : '🔒 Inicia sesión para solicitar'}</button>`;
                 } else if (agotado) {
                     html += `<button class="btn-add btn-agotado" disabled>🚫 Producto agotado</button>`;
@@ -1324,7 +1401,7 @@
                     html += `<button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '➕ Agregar al carrito' : '🔒 Inicia sesión para comprar'}</button>`;
                 }
 
-                if (usuarioActual) {
+                if (usuarioActual && !esServicio) {
                     const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
                     const haComprado = await verificarCompra(usuarioActual.id, prod.id);
                     if (haComprado && !yaCalificado) {
@@ -1385,22 +1462,12 @@
         function agregarAlCarrito(pid) {
             const prod = productos.find(p => p.id === pid);
             if (!prod) return;
-
-            // 🔹 NUEVO: bloquear si está agotado
-            if (estaAgotado(prod)) {
-                alert('🚫 Este producto está agotado.');
-                return;
-            }
-
+            if (prod.Es_Servicio) { alert('Los servicios se solicitan, no se agregan al carrito.'); return; }
+            if (estaAgotado(prod)) { alert('🚫 Este producto está agotado.'); return; }
             const stockDisponible = parseInt(prod.Stock || 0);
             const ex = carrito.find(i => i.id === pid);
             const cantidadActual = ex ? (ex.cantidad || 1) : 0;
-
-            if (cantidadActual + 1 > stockDisponible) {
-                alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`);
-                return;
-            }
-
+            if (cantidadActual + 1 > stockDisponible) { alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`); return; }
             if (ex) ex.cantidad = (ex.cantidad || 1) + 1;
             else carrito.push({ id: prod.id, nombre: prod.Nombre || 'Producto', precio: precioFinal(prod), cantidad: 1 });
             guardarCarritoLocal();
@@ -1409,13 +1476,9 @@
 
         function incrementarCantidad(i) {
             if (carrito[i]) {
-                // 🔹 NUEVO: comprobar stock al incrementar
                 const prod = productos.find(p => p.id === carrito[i].id);
                 const stockDisponible = prod ? parseInt(prod.Stock || 0) : 0;
-                if ((carrito[i].cantidad || 1) + 1 > stockDisponible) {
-                    alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`);
-                    return;
-                }
+                if ((carrito[i].cantidad || 1) + 1 > stockDisponible) { alert(`⚠️ Solo hay ${stockDisponible} unidad(es) disponible(s).`); return; }
                 carrito[i].cantidad = (carrito[i].cantidad || 1) + 1;
                 guardarCarritoLocal();
             }
@@ -1443,20 +1506,11 @@
         function iniciarProcesoPedido() {
             if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
             if (carrito.length === 0) { alert('El carrito está vacío.'); return; }
-
-            // 🔹 NUEVO: verificar stock antes de continuar
             for (const item of carrito) {
                 const prod = productos.find(p => p.id === item.id);
-                if (!prod || estaAgotado(prod)) {
-                    alert(`⚠️ "${item.nombre}" ya no está disponible.`);
-                    return;
-                }
-                if ((item.cantidad || 1) > parseInt(prod.Stock || 0)) {
-                    alert(`⚠️ "${item.nombre}" solo tiene ${prod.Stock} unidad(es) disponible(s).`);
-                    return;
-                }
+                if (!prod || estaAgotado(prod)) { alert(`⚠️ "${item.nombre}" ya no está disponible.`); return; }
+                if ((item.cantidad || 1) > parseInt(prod.Stock || 0)) { alert(`⚠️ "${item.nombre}" solo tiene ${prod.Stock} unidad(es) disponible(s).`); return; }
             }
-
             let sub = 0;
             carrito.forEach(i => { sub += i.precio * (i.cantidad || 1); });
             window.subtotalCarrito = sub;
@@ -1626,6 +1680,69 @@
             } finally { btn.disabled = false; btn.textContent = '✅ Enviar solicitud'; }
         });
         document.getElementById('encargoModal').addEventListener('click', function(e) { if (e.target === this) cerrarEncargoModal(); });
+
+        // 🔧 SERVICIOS
+        let servicioProductoId = null;
+        function abrirModalServicio(pid) {
+            if (!usuarioActual) { alert('Debes iniciar sesión.'); abrirModalLogin(); return; }
+            const prod = productos.find(p => p.id === pid);
+            if (!prod) { alert('Servicio no encontrado.'); return; }
+            servicioProductoId = pid;
+            document.getElementById('servicioNombre').value = prod.Nombre || 'Servicio';
+            document.getElementById('servicioDescripcion').value = '';
+            document.getElementById('servicioDireccion').value = usuarioActual.direccion || '';
+            document.getElementById('servicioFecha').value = '';
+            document.getElementById('servicioError').classList.remove('show');
+            document.getElementById('servicioModal').classList.add('active');
+        }
+        function cerrarServicioModal() { document.getElementById('servicioModal').classList.remove('active'); servicioProductoId = null; }
+        document.getElementById('servicioModal').addEventListener('click', function(e) { if (e.target === this) cerrarServicioModal(); });
+
+        document.getElementById('servicioConfirmarBtn').addEventListener('click', async function() {
+            if (!servicioProductoId) { alert('Error: no hay servicio.'); return; }
+            const descripcion = document.getElementById('servicioDescripcion').value.trim();
+            const direccion = document.getElementById('servicioDireccion').value.trim();
+            const fecha = document.getElementById('servicioFecha').value;
+            const errorEl = document.getElementById('servicioError');
+            errorEl.classList.remove('show');
+            if (!descripcion || descripcion.length < 5) { errorEl.textContent = '⚠️ Describe el problema (mínimo 5 caracteres).'; errorEl.classList.add('show'); return; }
+            if (!direccion || direccion.length < 5) { errorEl.textContent = '⚠️ La dirección es obligatoria (mínimo 5 caracteres).'; errorEl.classList.add('show'); return; }
+            const prod = productos.find(p => p.id === servicioProductoId);
+            if (!prod) { alert('Servicio no encontrado.'); return; }
+            const btn = this;
+            btn.disabled = true; btn.textContent = '⏳ Enviando...';
+            try {
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
+                const docRef = await addDoc(collection(window.firebaseDb, 'SolicitudesServicios'), {
+                    servicio_id: prod.id, servicio_nombre: prod.Nombre || 'Servicio',
+                    usuario_id: usuarioActual.id,
+                    usuario_nombre: usuarioActual.nombre && usuarioActual.apellidos ? `${usuarioActual.nombre} ${usuarioActual.apellidos}`.trim() : (usuarioActual.nombre || usuarioActual.name || 'Usuario'),
+                    usuario_email: usuarioActual.email || '',
+                    usuario_telefono: usuarioActual.telefono || 'Sin teléfono',
+                    descripcion, direccion,
+                    fecha_preferida: fecha || null,
+                    estado: 'Pendiente',
+                    fecha_solicitud: serverTimestamp(),
+                    fecha_actualizacion: serverTimestamp()
+                });
+                let mensaje = `*🔧 Nueva Solicitud de Servicio*\n\n`;
+                mensaje += `👤 Cliente: ${usuarioActual.nombre || usuarioActual.name || 'Usuario'}\n`;
+                mensaje += `📞 Teléfono: ${usuarioActual.telefono || 'Sin teléfono'}\n`;
+                mensaje += `📧 Email: ${usuarioActual.email || 'Sin email'}\n`;
+                mensaje += `🔧 Servicio: ${prod.Nombre}\n`;
+                mensaje += `📍 Dirección: ${direccion}\n`;
+                mensaje += `📝 Descripción: ${descripcion}\n`;
+                if (fecha) mensaje += `📅 Fecha preferida: ${fecha}\n`;
+                mensaje += `🆔 #${docRef.id.slice(-6)}`;
+                const url = `https://api.green-api.com/waInstance${GREEN_API_ID}/sendMessage/${GREEN_API_TOKEN}`;
+                try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) {}
+                alert('✅ Solicitud de servicio enviada. Pronto te contactamos.');
+                cerrarServicioModal();
+            } catch (e) {
+                errorEl.textContent = 'Error: ' + e.message;
+                errorEl.classList.add('show');
+            } finally { btn.disabled = false; btn.textContent = '✅ Enviar solicitud'; }
+        });
 
         window.addEventListener('popstate', function(event) {
             if (!event.state || (!event.state.productoId && !event.state.page)) return;
