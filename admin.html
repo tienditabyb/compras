@@ -558,11 +558,11 @@
                     <input type="text" id="prodProveedor" />
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Precio Costo *</label><input type="number" id="prodCosto" step="0.01" required /></div>
-                    <div class="form-group"><label>Precio Venta *</label><input type="number" id="prodVenta" step="0.01" required /></div>
+                    <div class="form-group"><label>Precio Costo</label><input type="number" id="prodCosto" step="0.01" /></div>
+                    <div class="form-group"><label>Precio Venta</label><input type="number" id="prodVenta" step="0.01" /></div>
                 </div>
                 <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
-                <div class="form-group" id="stockGroup"><label>Stock *</label><input type="number" id="prodStock" required /></div>
+                <div class="form-group" id="stockGroup"><label>Stock *</label><input type="number" id="prodStock" /></div>
                 <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
                     <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsEncargo" /> 📦 Mostrar en Encargos</label>
@@ -1753,7 +1753,9 @@
             const pr = ep ? document.getElementById('prodProveedor').value.trim() : '';
             const es = document.getElementById('prodEsServicio').checked;
 
-            if (!n || !c || co === '' || v === '') { alert('Completa los campos obligatorios.'); return; }
+            if (!n || !c) { alert('Completa el nombre y la categoría.'); return; }
+            if (!es && co === '') { alert('El precio de costo es obligatorio.'); return; }
+            if (!es && v === '') { alert('El precio de venta es obligatorio.'); return; }
             if (!es && s === '') { alert('El stock es obligatorio.'); return; }
 
             const btn = document.getElementById('productSubmitBtn');
@@ -1767,8 +1769,10 @@
                 btn.textContent = '⏳ Guardando...';
                 const data = {
                     Nombre: n, Categoria: c, Codigo_de_Barras: cod,
-                    Precio_Costo: parseFloat(co), Precio_Venta: parseFloat(v), Precio_Oferta: parseFloat(of),
-                    Stock: es ? 0 : parseInt(s),
+                    Precio_Costo: parseFloat(co) || 0,
+                    Precio_Venta: parseFloat(v) || 0,
+                    Precio_Oferta: parseFloat(of) || 0,
+                    Stock: es ? 0 : (parseInt(s) || 0),
                     Detalles: d,
                     Es_Encargo: ee, URL_Encargo: ue,
                     Es_Proveedor: ep, Proveedor: pr,
