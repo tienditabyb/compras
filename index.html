@@ -1387,7 +1387,14 @@
                 else if (esEncargo) html += '<div class="encargo-badge" style="font-size:0.9rem;">📦 Este producto es un pedido por encargo</div>';
                 else if (agotado) html += '<div class="detail-agotado-label">🚫 Producto agotado</div>';
 
-                html += `${precioHtml}<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
+                // 🔹 Precio
+                html += precioHtml;
+
+                // 🔹 Categoría solo si NO es servicio
+                if (!esServicio) {
+                    html += `<div class="detail-category">📂 Categoría: ${prod.Categoria || 'General'}</div>`;
+                }
+
                 if (prod.Detalles) html += `<div class="detail-detalles"><h4>📋 Detalles del producto</h4><p>${prod.Detalles}</p></div>`;
                 html += `<div class="detail-stars">${estrellas}</div><div class="detail-rating-text">${calificaciones.length} calificaciones (${promedio.toFixed(1)}/5)</div>`;
 
