@@ -540,14 +540,18 @@
             <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId" value="" />
                 <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
-                <div class="form-group">
+                <div class="form-group" id="categoriaGroup">
                     <label>Categoría *</label>
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <select id="prodCategoria" required style="flex:1; min-width:150px;"></select>
+                        <select id="prodCategoria" style="flex:1; min-width:150px;"></select>
                         <input type="text" id="nuevaCategoriaInput" placeholder="Nueva categoría" style="flex:1; min-width:120px; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
                         <button type="button" id="agregarCategoriaBtn" class="btn-primary" style="padding:8px 16px; font-size:0.85rem;">Agregar</button>
                         <button type="button" id="eliminarCategoriaBtn" class="btn-danger" style="padding:8px 16px; font-size:0.85rem;">🗑️</button>
                     </div>
+                </div>
+                <div class="form-group" id="servicioInfoGroup" style="display:none; background:#dcfce7; padding:12px; border-radius:10px; border:1px solid #86efac;">
+                    <label style="color:#166534; font-weight:600;">📂 Categoría automática: <strong>Servicios</strong></label>
+                    <div style="font-size:0.85rem; color:#166534; margin-top:4px;">Los servicios no necesitan categoría propia. Aparecerán automáticamente en la sección <strong>🔧 Servicios</strong> de la tienda.</div>
                 </div>
                 <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px;">
@@ -1614,6 +1618,8 @@
             if (this.checked) {
                 document.getElementById('prodEsServicio').checked = false;
                 document.getElementById('servicioNoteGroup').style.display = 'none';
+                document.getElementById('servicioInfoGroup').style.display = 'none';
+                document.getElementById('categoriaGroup').style.display = 'block';
                 document.getElementById('stockGroup').style.display = 'block';
             }
         });
@@ -1622,12 +1628,16 @@
             if (this.checked) {
                 document.getElementById('prodEsServicio').checked = false;
                 document.getElementById('servicioNoteGroup').style.display = 'none';
+                document.getElementById('servicioInfoGroup').style.display = 'none';
+                document.getElementById('categoriaGroup').style.display = 'block';
                 document.getElementById('stockGroup').style.display = 'block';
             }
         });
         document.getElementById('prodEsServicio').addEventListener('change', function() {
             const esServicio = this.checked;
             document.getElementById('servicioNoteGroup').style.display = esServicio ? 'block' : 'none';
+            document.getElementById('servicioInfoGroup').style.display = esServicio ? 'block' : 'none';
+            document.getElementById('categoriaGroup').style.display = esServicio ? 'none' : 'block';
             document.getElementById('stockGroup').style.display = esServicio ? 'none' : 'block';
             if (esServicio) {
                 document.getElementById('prodEsEncargo').checked = false;
@@ -1690,6 +1700,8 @@
             document.getElementById('proveedorGroup').style.display = 'none';
             document.getElementById('prodProveedor').value = '';
             document.getElementById('servicioNoteGroup').style.display = 'none';
+            document.getElementById('servicioInfoGroup').style.display = 'none';
+            document.getElementById('categoriaGroup').style.display = 'block';
             document.getElementById('stockGroup').style.display = 'block';
             const cs = document.getElementById('prodCategoria');
             cs.innerHTML = '';
@@ -1715,6 +1727,8 @@
                 document.getElementById('prodEsServicio').checked = es;
                 if (es) {
                     document.getElementById('servicioNoteGroup').style.display = 'block';
+                    document.getElementById('servicioInfoGroup').style.display = 'block';
+                    document.getElementById('categoriaGroup').style.display = 'none';
                     document.getElementById('stockGroup').style.display = 'none';
                     document.getElementById('prodEsEncargo').checked = false;
                     document.getElementById('prodEsProveedor').checked = false;
@@ -1753,7 +1767,9 @@
             const pr = ep ? document.getElementById('prodProveedor').value.trim() : '';
             const es = document.getElementById('prodEsServicio').checked;
 
-            if (!n || !c) { alert('Completa el nombre y la categoría.'); return; }
+            // 🔹 VALIDACIONES: si es servicio, no pedir categoría
+            if (!n) { alert('El nombre es obligatorio.'); return; }
+            if (!es && !c) { alert('La categoría es obligatoria.'); return; }
             if (!es && co === '') { alert('El precio de costo es obligatorio.'); return; }
             if (!es && v === '') { alert('El precio de venta es obligatorio.'); return; }
             if (!es && s === '') { alert('El stock es obligatorio.'); return; }
@@ -1767,8 +1783,10 @@
                 if (fotosNuevas.length > 0) { btn.textContent = '⏳ Subiendo fotos...'; for (const f of fotosNuevas) { const u = await window.subirFotoCloudinary(f); urls.push(u); } }
                 const ff = [...fotosExistentes, ...urls];
                 btn.textContent = '⏳ Guardando...';
+                // 🔹 Si es servicio, se guarda automáticamente como "Servicios"
+                const categoriaFinal = es ? 'Servicios' : c;
                 const data = {
-                    Nombre: n, Categoria: c, Codigo_de_Barras: cod,
+                    Nombre: n, Categoria: categoriaFinal, Codigo_de_Barras: cod,
                     Precio_Costo: parseFloat(co) || 0,
                     Precio_Venta: parseFloat(v) || 0,
                     Precio_Oferta: parseFloat(of) || 0,
