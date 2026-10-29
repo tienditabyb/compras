@@ -351,7 +351,6 @@
 
     <div class="main-content" id="mainContent">
         <aside class="sidebar" id="sidebar">
-            <!-- Sidebar dinámico -->
             <div id="sidebarContent"></div>
         </aside>
 
@@ -388,7 +387,6 @@
         </div>
     </div>
 
-    <!-- MODALES (Carrito, Auth, Delivery, etc.) -->
     <div class="modal-overlay" id="addToCartModal">
         <div class="modal">
             <button class="close-modal" onclick="cerrarAddToCartModal()">✕</button>
@@ -1822,7 +1820,8 @@
         }
 
         (function esperarFirebaseInit() {
-            if (window.fbFns && window.fbAuth) {
+            // 🔥 AQUÍ ESTABA EL ERROR, ya corregido:
+            if (window.firebaseFns && window.firebaseAuth) {
                 iniciarListenerAuth();
                 init();
                 console.log('🏪 B&B cargada correctamente.');
