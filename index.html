@@ -427,7 +427,7 @@
             </div>
             <div id="servicioForm">
                 <div class="form-group"><label>Servicio</label><input type="text" id="servicioNombre" disabled /></div>
-                <div class="form-group"><label>Descripción del problema *</label><textarea id="servicioDescripcion" rows="3" placeholder="Ej: El aire no enfría, hace ruido, etc." required></textarea></div>
+                <div class="form-group"><label>Descripción del problema *</label><textarea id="servicioDescripcion" rows="3" placeholder="Ej: Describe el problema..." required></textarea></div>
                 <div class="form-group"><label>Dirección donde se prestará el servicio *</label><input type="text" id="servicioDireccion" placeholder="Calle, número, barrio, ciudad" required /></div>
                 <div class="form-group"><label>Fecha preferida (opcional)</label><input type="date" id="servicioFecha" /></div>
                 <div id="servicioError" class="error-msg"></div>
@@ -1725,6 +1725,23 @@
             servicioProductoId = pid;
             document.getElementById('servicioNombre').value = prod.Nombre || 'Servicio';
             document.getElementById('servicioDescripcion').value = '';
+            
+            // ── LÓGICA DE EJEMPLOS DINÁMICOS ──
+            const txtDesc = document.getElementById('servicioDescripcion');
+            const nombreServicio = (prod.Nombre || '').toLowerCase();
+            
+            if (nombreServicio.includes('aire') || nombreServicio.includes('split') || nombreServicio.includes('clima')) {
+                txtDesc.placeholder = "Ej: El aire no enfría, hace ruido, necesita mantenimiento...";
+            } else if (nombreServicio.includes('electri') || nombreServicio.includes('luz') || nombreServicio.includes('corriente')) {
+                txtDesc.placeholder = "Ej: Instalación de tomacorrientes, hay un cortocircuito...";
+            } else if (nombreServicio.includes('refri') || nombreServicio.includes('nevera') || nombreServicio.includes('congela')) {
+                txtDesc.placeholder = "Ej: La nevera no congela, gotea agua, hace ruido...";
+            } else if (nombreServicio.includes('lavado') || nombreServicio.includes('lavadora')) {
+                txtDesc.placeholder = "Ej: La lavadora no centrifuga, pierde agua...";
+            } else {
+                txtDesc.placeholder = "Ej: Describe detalladamente lo que necesitas o el problema...";
+            }
+
             document.getElementById('servicioDireccion').value = usuarioActual.direccion || '';
             document.getElementById('servicioFecha').value = '';
             document.getElementById('servicioError').classList.remove('show');
@@ -1820,7 +1837,6 @@
         }
 
         (function esperarFirebaseInit() {
-            // 🔥 AQUÍ ESTABA EL ERROR, ya corregido:
             if (window.firebaseFns && window.firebaseAuth) {
                 iniciarListenerAuth();
                 init();
