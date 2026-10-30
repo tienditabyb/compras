@@ -41,7 +41,7 @@
         
         /* PESTAÑAS */
         .tabs-container { display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
-        .tab-btn { flex: 1; padding: 12px 5px; border: none; background: none; font-size: 0.8rem; font-weight: 600; color: #64748b; transition: 0.2s; border-bottom: 3px solid transparent; }
+        .tab-btn { flex: 1; padding: 10px 2px; border: none; background: none; font-size: 0.75rem; font-weight: 600; color: #64748b; transition: 0.2s; border-bottom: 3px solid transparent; }
         .tab-btn:hover { background: #f1f5f9; color: #1e272e; }
         .tab-btn.active { color: #2980b9; border-bottom-color: #2980b9; background: white; }
 
@@ -142,8 +142,9 @@
                 <!-- PESTAÑAS -->
                 <div class="tabs-container">
                     <button class="tab-btn active" onclick="cambiarPestana('nuevos')">Nuevos</button>
-                    <button class="tab-btn" onclick="cambiarPestana('proceso')">En Proceso</button>
-                    <button class="tab-btn" onclick="cambiarPestana('finalizados')">Finalizados</button>
+                    <button class="tab-btn" onclick="cambiarPestana('proceso')">Proceso</button>
+                    <button class="tab-btn" onclick="cambiarPestana('completados')">Complet.</button>
+                    <button class="tab-btn" onclick="cambiarPestana('cancelados')">Cancel.</button>
                 </div>
                 
                 <div class="sidebar-list" id="listaSolicitudes">
@@ -283,7 +284,8 @@
                 const est = sol.estado || 'Pendiente';
                 if (pestañaActual === 'nuevos') return est === 'Pendiente';
                 if (pestañaActual === 'proceso') return est === 'En proceso';
-                if (pestañaActual === 'finalizados') return est === 'Completado' || est === 'Cancelado';
+                if (pestañaActual === 'completados') return est === 'Completado';
+                if (pestañaActual === 'cancelados') return est === 'Cancelado';
                 return true;
             });
 
@@ -302,7 +304,6 @@
                 const fechaObj = sol.fecha_solicitud;
                 const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
 
-                // Verificamos si esta es la tarjeta seleccionada para mantenerla activa
                 const isActive = solicitudActual && solicitudActual.id === sol.id ? 'active' : '';
 
                 html += `
@@ -536,10 +537,17 @@
                 
                 await cargarSolicitudes();
                 
-                // Mover a la pestaña de finalizados automáticamente
-                pestañaActual = 'finalizados';
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                // Mover a la pestaña correspondiente
+                if (nuevoEstado === 'Completado') {
+                    pestañaActual = 'completados';
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                } else if (nuevoEstado === 'Cancelado') {
+                    pestañaActual = 'cancelados';
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                }
+                
                 renderizarListaSolicitudes();
                 seleccionarSolicitud(solicitudActual.id);
 
