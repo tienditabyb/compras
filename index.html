@@ -999,8 +999,7 @@
             return isNaN(stock) || stock <= 0;
         }
         function fechaToDate(f) { if (!f) return null; if (f.seconds) return new Date(f.seconds * 1000); return new Date(f); }
-    </script>
-            // --- CATEGORÍAS Y TIENDA ---
+                // --- CATEGORÍAS Y TIENDA ---
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ul = document.getElementById('categoryList');
@@ -1982,23 +1981,33 @@
         } catch (err) { console.warn('pushState no disponible:', err); }
 
         async function init() {
-            actualizarUIUsuario();
-            await cargarConfiguracion();
-            productos = await obtenerProductos();
-            await renderizarCategorias();
-            const params = new URLSearchParams(window.location.search);
-            const productoId = params.get('id');
-            if (productoId) await mostrarDetalle(productoId);
-            else renderizarProductos();
-            cargarCarritoLocal();
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    setTimeout(async () => {
-                        const nuevos = await obtenerProductos();
-                        if (nuevos.length) { productos = nuevos; refrescarProductosActuales(); }
-                    }, 500);
-                }
-            });
+            try {
+                actualizarUIUsuario();
+                await cargarConfiguracion();
+                productos = await obtenerProductos();
+                await renderizarCategorias();
+                const params = new URLSearchParams(window.location.search);
+                const productoId = params.get('id');
+                if (productoId) await mostrarDetalle(productoId);
+                else renderizarProductos();
+                cargarCarritoLocal();
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        setTimeout(async () => {
+                            const nuevos = await obtenerProductos();
+                            if (nuevos.length) { productos = nuevos; refrescarProductosActuales(); }
+                        }, 500);
+                    }
+                });
+            } catch (error) {
+                console.error("Error crítico al iniciar:", error);
+                document.getElementById('productsGrid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: #fee2e2; border-radius: 12px; border: 1px solid #f87171;">
+                        <h3 style="color: #dc2626; margin-bottom: 10px;">⚠️ Error al cargar la tienda</h3>
+                        <p style="color: #7f1d1d; font-size: 0.9rem;">${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
         (function esperarFirebaseInit() {
