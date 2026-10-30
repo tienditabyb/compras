@@ -83,9 +83,11 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             cursor: pointer;
         }
-        .special-btn.encargo { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .special-btn.servicio { background: linear-gradient(135deg, #10b981, #059669); }
-        .special-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+        /* Forzamos los colores para que el hover no los dañe */
+        .special-btn.encargo, .special-btn.encargo:hover, .special-btn.encargo.active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; }
+        .special-btn.servicio, .special-btn.servicio:hover, .special-btn.servicio.active { background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important; }
+        
+        .special-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .special-btn.active { outline: 3px solid #1e272e; outline-offset: 2px; }
         
         .categories-dropdown a.special-dropdown { font-weight: 700; padding: 14px 20px; }
@@ -354,7 +356,7 @@
             <div class="sidebar__title" id="titleSpecial" style="display:none;">Categorías Especiales</div>
             <nav class="sidebar__nav" style="margin-bottom: 20px;"><ul id="specialCategoryList"></ul></nav>
             
-            <div class="sidebar__title">Categorías Normales</div>
+            <div class="sidebar__title">Categorías</div>
             <nav class="sidebar__nav"><ul id="categoryList"></ul></nav>
         </aside>
 
@@ -1125,7 +1127,11 @@
             });
         }
 
-        function actualizarCategoriaActiva(a) { document.querySelectorAll('#categoryList a, #specialCategoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active')); if (a) a.classList.add('active'); }
+        function actualizarCategoriaActiva(a) { 
+            document.querySelectorAll('#categoryList a, #specialCategoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active')); 
+            if (a) a.classList.add('active'); 
+        }
+        
         function toggleCategoriesDropdown() { document.getElementById('categoriesDropdown').classList.toggle('open'); }
         function cerrarDropdownCategorias() { document.getElementById('categoriesDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) { const c = document.querySelector('.toolbar__categories'); if (c && !c.contains(e.target)) cerrarDropdownCategorias(); });
@@ -1367,7 +1373,6 @@
                 }
             }
 
-            // Fallback para PC (sin Web Share API)
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(texto);
                 alert('✅ ¡Enlace copiado al portapapeles!\n\nPuedes pegarlo en WhatsApp, Facebook o donde quieras compartirlo.');
@@ -1384,7 +1389,7 @@
             ps.style.display = 'none';
             dp.classList.add('active');
             container.innerHTML = '<div class="detail-loading">🔄 Cargando detalles...</div>';
-            window.scrollTo(0, 0); // Scroll al inicio
+            window.scrollTo(0, 0);
 
             try {
                 const prod = productos.find(p => p.id === productoId);
