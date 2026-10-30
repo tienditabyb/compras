@@ -625,8 +625,7 @@
             </div>
         </div>
     </div>
-
-    <script type="module">
+        <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -670,7 +669,8 @@
 
         window.dispatchEvent(new Event('firebase-listo'));
     </script>
-        <script>
+
+    <script>
         const ADMIN_EMAIL = "byb@gmail.com";
         const TIENDA_URL = "https://tienditabyb.github.io/compras/";
 
@@ -733,6 +733,7 @@
             else badge.classList.remove('show');
             renderNotificaciones();
         }
+
         function renderNotificaciones() {
             const list = document.getElementById('notifList');
             if (notificaciones.length === 0) { list.innerHTML = '<div class="notif-empty">✨ No hay notificaciones nuevas</div>'; return; }
@@ -783,6 +784,7 @@
                 }
             });
         }
+
         (function esperarFirebase() {
             if (window.firebaseFns && window.firebaseAuth) iniciarListenerAuth();
             else setTimeout(esperarFirebase, 100);
@@ -804,6 +806,7 @@
                 errorEl.textContent = msg; errorEl.classList.add('show');
             }
         });
+        
         document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('logoutBtn').addEventListener('click', async () => { await window.firebaseFns.signOut(window.firebaseAuth); });
@@ -876,33 +879,6 @@
             } catch (e) { }
         }
 
-        document.getElementById('guardarConfigBtn').addEventListener('click', async function() {
-            const c = parseFloat(document.getElementById('configEnvioCosto').value);
-            const g = parseFloat(document.getElementById('configEnvioGratis').value);
-            const encargosActivos = document.getElementById('configEncargosActivos').checked;
-            const serviciosActivos = document.getElementById('configServiciosActivos').checked;
-            if (isNaN(c) || c < 0) { alert('Costo inválido.'); return; }
-            if (isNaN(g) || g < 0) { alert('Monto inválido.'); return; }
-            const btn = this; btn.disabled = true; btn.textContent = '⏳ Guardando...';
-            try {
-                await window.firebaseFns.setDoc(window.firebaseFns.doc(window.firebaseDb, 'config', 'general'), {
-                    envio_costo: c,
-                    envio_gratis_desde: g,
-                    encargos_activos: encargosActivos,
-                    servicios_activos: serviciosActivos,
-                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
-                }, { merge: true });
-                configGeneral.envio_costo = c;
-                configGeneral.envio_gratis_desde = g;
-                configGeneral.encargos_activos = encargosActivos;
-                configGeneral.servicios_activos = serviciosActivos;
-                const el = document.getElementById('configSuccess');
-                el.classList.add('show');
-                setTimeout(() => el.classList.remove('show'), 3000);
-            } catch (e) { alert('Error: ' + e.message); }
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Configuración'; }
-        });
-
         function normalizarNombre(n) { if (!n) return ""; return n.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
         function extraerNombresProductos(t) { return !t ? [] : t.split(',').map(p => p.trim()).filter(Boolean); }
         function calcularCostoVenta(v) {
@@ -941,8 +917,7 @@
             });
             return h;
         }
-
-        function renderDashboard(ventas, domicilios) {
+                function renderDashboard(ventas, domicilios) {
             const tv = ventas.length;
             const ing = ventas.reduce((s, v) => s + parseFloat(v.total || 0), 0);
             let g = 0; for (const v of ventas) g += calcularGananciaVenta(v);
