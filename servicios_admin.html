@@ -38,8 +38,13 @@
 
         /* SIDEBAR (LISTA DE SOLICITUDES) */
         .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
-        .sidebar-header h2 { font-size: 1.1rem; font-weight: 600; color: #1e272e; }
+        
+        /* PESTAÑAS */
+        .tabs-container { display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+        .tab-btn { flex: 1; padding: 12px 5px; border: none; background: none; font-size: 0.8rem; font-weight: 600; color: #64748b; transition: 0.2s; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { background: #f1f5f9; color: #1e272e; }
+        .tab-btn.active { color: #2980b9; border-bottom-color: #2980b9; background: white; }
+
         .sidebar-list { flex: 1; overflow-y: auto; padding: 10px; }
         .solicitud-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
         .solicitud-card:hover { border-color: #2980b9; background: #e6f0fa; }
@@ -86,10 +91,19 @@
         .btn-success:hover { background: #059669; }
         .btn-whatsapp { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .btn-whatsapp:hover { background: #1da851; }
+        
+        /* BOTONES DE ESTADO Y ELIMINAR */
+        .btn-status { padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; border: none; display: flex; align-items: center; gap: 6px; }
+        .btn-completar { background: #d1fae5; color: #059669; border: 1px solid #34d399; }
+        .btn-completar:hover { background: #a7f3d0; }
+        .btn-cancelar { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+        .btn-cancelar:hover { background: #fde68a; }
+        .btn-eliminar { background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-right: auto; }
+        .btn-eliminar:hover { background: #fca5a5; }
 
         @media (max-width: 900px) {
             .main-content { flex-direction: column; height: auto; overflow: visible; }
-            .sidebar { width: 100%; height: 300px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+            .sidebar { width: 100%; height: 350px; border-right: none; border-bottom: 1px solid #e2e8f0; }
             .workspace { padding: 10px; }
             .cliente-info { grid-template-columns: 1fr; }
             .componentes-header { display: none; }
@@ -125,9 +139,13 @@
         <div class="main-content">
             <!-- LISTA DE SOLICITUDES -->
             <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h2>📋 Solicitudes</h2>
+                <!-- PESTAÑAS -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" onclick="cambiarPestana('nuevos')">Nuevos</button>
+                    <button class="tab-btn" onclick="cambiarPestana('proceso')">En Proceso</button>
+                    <button class="tab-btn" onclick="cambiarPestana('finalizados')">Finalizados</button>
                 </div>
+                
                 <div class="sidebar-list" id="listaSolicitudes">
                     <div style="text-align:center; padding:20px; color:#94a3b8;">Cargando...</div>
                 </div>
@@ -146,7 +164,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
@@ -167,7 +185,7 @@
         window.firebaseDb = db;
         window.firebaseFns = {
             signInWithEmailAndPassword, signOut, onAuthStateChanged,
-            collection, doc, getDoc, getDocs, updateDoc,
+            collection, doc, getDoc, getDocs, updateDoc, deleteDoc,
             query, orderBy, serverTimestamp
         };
     </script>
@@ -181,6 +199,7 @@
         let solicitudesCache = [];
         let solicitudActual = null;
         let componentesTemporales = [];
+        let pestañaActual = 'nuevos';
 
         // --- AUTENTICACIÓN ---
         document.getElementById('loginBtn').addEventListener('click', async function() {
@@ -208,13 +227,12 @@
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
-                    // Verifica si el correo está en la lista de permitidos (sin importar mayúsculas/minúsculas)
                     const emailLower = user.email.toLowerCase();
                     const permitido = ADMIN_EMAILS.some(e => e.toLowerCase() === emailLower);
 
                     if (!permitido) {
                         await window.firebaseFns.signOut(window.firebaseAuth);
-                        document.getElementById('loginError').textContent = 'Acceso denegado. Solo el administrador o técnico.';
+                        document.getElementById('loginError').textContent = 'Acceso denegado.';
                         document.getElementById('loginError').classList.add('show');
                         return;
                     }
@@ -232,6 +250,14 @@
             else setTimeout(esperarFirebase, 100);
         })();
 
+        // --- LÓGICA DE PESTAÑAS ---
+        function cambiarPestana(tab) {
+            pestañaActual = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizarListaSolicitudes();
+        }
+
         // --- CARGAR SOLICITUDES ---
         async function cargarSolicitudes() {
             const lista = document.getElementById('listaSolicitudes');
@@ -243,36 +269,52 @@
                 const snap = await getDocs(q);
                 
                 solicitudesCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                if (solicitudesCache.length === 0) {
-                    lista.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No hay solicitudes aún.</div>';
-                    return;
-                }
-
-                let html = '';
-                solicitudesCache.forEach(sol => {
-                    let badgeClass = 'badge-pendiente';
-                    if (sol.estado === 'En proceso') badgeClass = 'badge-proceso';
-                    else if (sol.estado === 'Completado') badgeClass = 'badge-completado';
-                    else if (sol.estado === 'Cancelado') badgeClass = 'badge-cancelado';
-
-                    const fechaObj = sol.fecha_solicitud;
-                    const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
-
-                    html += `
-                        <div class="solicitud-card" id="card-${sol.id}" onclick="seleccionarSolicitud('${sol.id}')">
-                            <div class="title">🔧 ${sol.servicio_nombre || 'Servicio'}</div>
-                            <div class="sub">👤 ${sol.usuario_nombre || 'Cliente'}</div>
-                            <div class="sub">📅 ${fechaStr}</div>
-                            <span class="badge ${badgeClass}">${sol.estado || 'Pendiente'}</span>
-                        </div>
-                    `;
-                });
-                lista.innerHTML = html;
-
+                renderizarListaSolicitudes();
             } catch (e) {
                 lista.innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">Error al cargar: ${e.message}</div>`;
             }
+        }
+
+        // --- FILTRAR Y RENDERIZAR LISTA ---
+        function renderizarListaSolicitudes() {
+            const lista = document.getElementById('listaSolicitudes');
+            
+            let filtradas = solicitudesCache.filter(sol => {
+                const est = sol.estado || 'Pendiente';
+                if (pestañaActual === 'nuevos') return est === 'Pendiente';
+                if (pestañaActual === 'proceso') return est === 'En proceso';
+                if (pestañaActual === 'finalizados') return est === 'Completado' || est === 'Cancelado';
+                return true;
+            });
+
+            if (filtradas.length === 0) {
+                lista.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No hay solicitudes en esta pestaña.</div>';
+                return;
+            }
+
+            let html = '';
+            filtradas.forEach(sol => {
+                let badgeClass = 'badge-pendiente';
+                if (sol.estado === 'En proceso') badgeClass = 'badge-proceso';
+                else if (sol.estado === 'Completado') badgeClass = 'badge-completado';
+                else if (sol.estado === 'Cancelado') badgeClass = 'badge-cancelado';
+
+                const fechaObj = sol.fecha_solicitud;
+                const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
+
+                // Verificamos si esta es la tarjeta seleccionada para mantenerla activa
+                const isActive = solicitudActual && solicitudActual.id === sol.id ? 'active' : '';
+
+                html += `
+                    <div class="solicitud-card ${isActive}" id="card-${sol.id}" onclick="seleccionarSolicitud('${sol.id}')">
+                        <div class="title">🔧 ${sol.servicio_nombre || 'Servicio'}</div>
+                        <div class="sub">👤 ${sol.usuario_nombre || 'Cliente'}</div>
+                        <div class="sub">📅 ${fechaStr}</div>
+                        <span class="badge ${badgeClass}">${sol.estado || 'Pendiente'}</span>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html;
         }
 
         // --- SELECCIONAR SOLICITUD ---
@@ -293,7 +335,12 @@
         // --- RENDERIZAR EL PANEL DE TRABAJO ---
         function renderizarWorkspace(manoObraInicial) {
             const ws = document.getElementById('workspace');
+            const est = solicitudActual.estado || 'Pendiente';
             
+            // Si está finalizado o cancelado, bloqueamos los inputs
+            const isReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'disabled' : '';
+            const styleReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'background:#f1f5f9; color:#94a3b8;' : '';
+
             let html = `
                 <div class="card">
                     <h3>👤 Datos del Cliente</h3>
@@ -320,17 +367,17 @@
                     </div>
                     
                     <div id="contenedorComponentes">
-                        <!-- Aquí se inyectan las filas por JS -->
+                        <!-- Filas -->
                     </div>
 
-                    <button class="btn-add-componente" onclick="agregarComponente()">
+                    <button class="btn-add-componente" onclick="agregarComponente()" ${isReadOnly} style="${styleReadOnly}">
                         ➕ Añadir Componente
                     </button>
 
                     <div class="totales-box">
                         <div class="total-row">
                             <span>Mano de Obra:</span>
-                            <input type="number" id="inputManoObra" value="${manoObraInicial}" step="0.01" min="0" style="width: 100px; padding: 5px; text-align: right; border: 1px solid #e2e8f0; border-radius: 5px;" oninput="calcularTotales()" />
+                            <input type="number" id="inputManoObra" value="${manoObraInicial}" step="0.01" min="0" style="width: 100px; padding: 5px; text-align: right; border: 1px solid #e2e8f0; border-radius: 5px; ${styleReadOnly}" oninput="calcularTotales()" ${isReadOnly} />
                         </div>
                         <div class="total-row">
                             <span>Total Materiales:</span>
@@ -342,9 +389,19 @@
                         </div>
                     </div>
 
-                    <div class="acciones">
-                        <button class="btn-success" onclick="guardarPresupuesto()">💾 Guardar Presupuesto</button>
-                        <button class="btn-whatsapp" onclick="compartirWhatsApp()">💬 Compartir por WhatsApp</button>
+                    <div class="acciones" style="justify-content: space-between;">
+                        <div>
+                            <button class="btn-eliminar" onclick="eliminarSolicitud()" title="Eliminar registro permanentemente">🗑️ Eliminar</button>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                            ${est === 'Pendiente' || est === 'En proceso' ? `
+                                <button class="btn-status btn-completar" onclick="cambiarEstadoSolicitud('Completado')">✅ Marcar Completado</button>
+                                <button class="btn-status btn-cancelar" onclick="cambiarEstadoSolicitud('Cancelado')">❌ Cancelar</button>
+                            ` : ''}
+                            
+                            <button class="btn-success" onclick="guardarPresupuesto()" ${isReadOnly} style="${styleReadOnly}">💾 Guardar Presupuesto</button>
+                            <button class="btn-whatsapp" onclick="compartirWhatsApp()">💬 Compartir WhatsApp</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -352,7 +409,7 @@
             ws.innerHTML = html;
             
             componentesTemporales.forEach((comp, index) => {
-                agregarFilaDOM(comp, index);
+                agregarFilaDOM(comp, index, isReadOnly, styleReadOnly);
             });
             
             calcularTotales();
@@ -365,25 +422,29 @@
             calcularTotales();
         }
 
-        function agregarFilaDOM(comp, index) {
+        function agregarFilaDOM(comp, index, disabled = '', style = '') {
             const contenedor = document.getElementById('contenedorComponentes');
             const div = document.createElement('div');
             div.className = 'componente-row';
             div.id = `fila-comp-${index}`;
             div.innerHTML = `
-                <input type="text" placeholder="Ej: Breaker 15A" value="${comp.nombre || ''}" oninput="actualizarComponente(${index}, 'nombre', this.value)" />
-                <input type="number" placeholder="1" value="${comp.cantidad || 1}" min="1" oninput="actualizarComponente(${index}, 'cantidad', this.value)" />
-                <input type="number" placeholder="0.00" value="${comp.precio || 0}" min="0" step="0.01" oninput="actualizarComponente(${index}, 'precio', this.value)" />
-                <button class="btn-remove" onclick="eliminarComponente(${index})" title="Eliminar">✕</button>
+                <input type="text" placeholder="Ej: Breaker 15A" value="${comp.nombre || ''}" oninput="actualizarComponente(${index}, 'nombre', this.value)" ${disabled} style="${style}" />
+                <input type="number" placeholder="1" value="${comp.cantidad || 1}" min="1" oninput="actualizarComponente(${index}, 'cantidad', this.value)" ${disabled} style="${style}" />
+                <input type="number" placeholder="0.00" value="${comp.precio || 0}" min="0" step="0.01" oninput="actualizarComponente(${index}, 'precio', this.value)" ${disabled} style="${style}" />
+                <button class="btn-remove" onclick="eliminarComponente(${index})" title="Eliminar" ${disabled} style="${disabled ? 'display:none;' : ''}">✕</button>
             `;
             contenedor.appendChild(div);
         }
 
         function renderizarComponentesLista() {
             const contenedor = document.getElementById('contenedorComponentes');
+            const est = solicitudActual.estado || 'Pendiente';
+            const isReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'disabled' : '';
+            const styleReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'background:#f1f5f9; color:#94a3b8;' : '';
+
             contenedor.innerHTML = '';
             componentesTemporales.forEach((comp, index) => {
-                agregarFilaDOM(comp, index);
+                agregarFilaDOM(comp, index, isReadOnly, styleReadOnly);
             });
         }
 
@@ -438,26 +499,91 @@
                     fecha_actualizacion: serverTimestamp()
                 });
                 
-                alert('✅ Presupuesto guardado correctamente. El estado de la solicitud ha cambiado a "En proceso".');
+                alert('✅ Presupuesto guardado correctamente. El estado pasó a "En proceso".');
                 
                 await cargarSolicitudes();
+                
+                // Mover a la pestaña de proceso automáticamente
+                pestañaActual = 'proceso';
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                renderizarListaSolicitudes();
                 seleccionarSolicitud(solicitudActual.id);
                 
             } catch (e) {
-                alert('Error al guardar el presupuesto: ' + e.message);
+                alert('Error al guardar: ' + e.message);
             } finally {
                 btn.disabled = false; 
                 btn.textContent = '💾 Guardar Presupuesto';
             }
         }
 
-        // --- COMPARTIR POR WHATSAPP (SOLO TOTAL Y MATERIALES) ---
+        // --- CAMBIAR ESTADO (COMPLETAR / CANCELAR) ---
+        async function cambiarEstadoSolicitud(nuevoEstado) {
+            if (!solicitudActual) return;
+            if (!confirm(`¿Estás seguro de marcar este servicio como ${nuevoEstado}?`)) return;
+
+            try {
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                const ref = doc(window.firebaseDb, 'SolicitudesServicios', solicitudActual.id);
+                
+                await updateDoc(ref, {
+                    estado: nuevoEstado,
+                    fecha_actualizacion: serverTimestamp()
+                });
+                
+                alert(`✅ Servicio marcado como ${nuevoEstado}.`);
+                
+                await cargarSolicitudes();
+                
+                // Mover a la pestaña de finalizados automáticamente
+                pestañaActual = 'finalizados';
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                renderizarListaSolicitudes();
+                seleccionarSolicitud(solicitudActual.id);
+
+            } catch (e) {
+                alert('Error al cambiar estado: ' + e.message);
+            }
+        }
+
+        // --- ELIMINAR SOLICITUD ---
+        async function eliminarSolicitud() {
+            if (!solicitudActual) return;
+            if (!confirm('⚠️ ¿Estás seguro de que quieres ELIMINAR este registro permanentemente? Esta acción no se puede deshacer.')) return;
+
+            try {
+                const { doc, deleteDoc } = window.firebaseFns;
+                const ref = doc(window.firebaseDb, 'SolicitudesServicios', solicitudActual.id);
+                
+                await deleteDoc(ref);
+                
+                alert('🗑️ Registro eliminado correctamente.');
+                solicitudActual = null;
+                
+                // Limpiar el panel derecho
+                document.getElementById('workspace').innerHTML = `
+                    <div class="empty-state">
+                        <h2>👈 Selecciona una solicitud</h2>
+                        <p>Elige una solicitud de la lista de la izquierda para ver los detalles y crear el presupuesto.</p>
+                    </div>
+                `;
+                
+                await cargarSolicitudes();
+
+            } catch (e) {
+                alert('Error al eliminar: ' + e.message);
+            }
+        }
+
+        // --- COMPARTIR POR WHATSAPP ---
         function compartirWhatsApp() {
             if (!solicitudActual) return;
             
             let tel = solicitudActual.usuario_telefono;
             if (!tel || tel === 'Sin teléfono') { 
-                alert('El cliente no tiene un teléfono registrado para enviarle el WhatsApp.'); 
+                alert('El cliente no tiene un teléfono registrado.'); 
                 return; 
             }
             tel = String(tel).trim();
@@ -467,11 +593,10 @@
             const totalFinal = totalMateriales + manoObra;
 
             if (totalFinal <= 0) { 
-                alert('El presupuesto está vacío, agrega materiales o mano de obra.'); 
+                alert('El presupuesto está vacío.'); 
                 return; 
             }
 
-            // Construir mensaje
             let msg = `Hola ${solicitudActual.usuario_nombre || 'Cliente'} 👋\n`;
             msg += `Aquí tienes el presupuesto para tu servicio de *${solicitudActual.servicio_nombre}*:\n\n`;
             
@@ -485,11 +610,9 @@
                 msg += `\n`;
             }
             
-            // Solo el Total Final
             msg += `💰 *TOTAL A PAGAR: $${totalFinal.toFixed(2)}*\n\n`;
             msg += `Quedamos atentos para coordinar la visita. ¡Gracias por confiar en B&B! 🙌`;
 
-            // Abrir WhatsApp
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
