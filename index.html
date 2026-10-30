@@ -1167,7 +1167,9 @@
                     <div class="product-footer">
                         ${precioHtml}
                         <div style="display:flex; gap:4px; align-items:center;">
-                            <button class="btn-share" onclick="compartirProducto('${prod.id}', event)" title="Compartir">📤</button>
+                            <button class="btn-share" onclick="compartirProducto('${prod.id}', event)" title="Compartir">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                            </button>
                             ${botonHtml}
                         </div>
                     </div>
@@ -1246,7 +1248,7 @@
                 if (card.dataset.evento) return;
                 card.dataset.evento = '1';
                 card.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'BUTTON') return;
+                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'svg' || e.target.tagName === 'path' || e.target.tagName === 'polyline' || e.target.tagName === 'line') return;
                     const id = this.dataset.id;
                     window.history.pushState({ productoId: id }, '', `?id=${id}`);
                     mostrarDetalle(id);
@@ -1402,7 +1404,11 @@
                     botonDetalle = `<button class="btn-add" onclick="agregarAlCarrito('${prod.id}'); mostrarAddToCartModal();" ${!usuarioActual ? 'disabled' : ''}>${usuarioActual ? '➕ Agregar al carrito' : '🔒 Inicia sesión para comprar'}</button>`;
                 }
 
-                html += `<div style="display:flex; gap:10px; align-items:center; margin: 10px 0 20px;">${botonDetalle}<button class="btn-share" style="width:44px; height:44px; font-size:1.4rem;" onclick="compartirProducto('${prod.id}', event)" title="Compartir">📤</button></div>`;
+                html += `<div style="display:flex; gap:10px; align-items:center; margin: 10px 0 20px;">${botonDetalle}
+                    <button class="btn-share" style="width:44px; height:44px;" onclick="compartirProducto('${prod.id}', event)" title="Compartir">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                    </button>
+                </div>`;
 
                 if (usuarioActual && !esServicio) {
                     const yaCalificado = calificaciones.some(c => c.usuario_id === usuarioActual.id);
