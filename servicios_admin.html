@@ -171,12 +171,13 @@
             query, orderBy, serverTimestamp
         };
     </script>
-        <script>
+
+    <script>
         const ADMIN_EMAIL = "byb@gmail.com";
 
         let solicitudesCache = [];
         let solicitudActual = null;
-        let componentesTemporales = []; // Aquí guardaremos los componentes mientras editamos
+        let componentesTemporales = [];
 
         // --- AUTENTICACIÓN ---
         document.getElementById('loginBtn').addEventListener('click', async function() {
@@ -248,7 +249,6 @@
                     else if (sol.estado === 'Completado') badgeClass = 'badge-completado';
                     else if (sol.estado === 'Cancelado') badgeClass = 'badge-cancelado';
 
-                    // Formatear fecha
                     const fechaObj = sol.fecha_solicitud;
                     const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
 
@@ -270,23 +270,16 @@
 
         // --- SELECCIONAR SOLICITUD ---
         function seleccionarSolicitud(id) {
-            // Quitar clase active de todas las tarjetas
             document.querySelectorAll('.solicitud-card').forEach(c => c.classList.remove('active'));
-            // Poner active a la seleccionada
             const card = document.getElementById(`card-${id}`);
             if (card) card.classList.add('active');
 
-            // Buscar la data
             solicitudActual = solicitudesCache.find(s => s.id === id);
             if (!solicitudActual) return;
 
-            // Si ya tiene componentes guardados en la BD, los cargamos, si no, inicializamos vacío
             componentesTemporales = solicitudActual.componentes ? JSON.parse(JSON.stringify(solicitudActual.componentes)) : [];
-            
-            // Si no hay componentes pero hay un diagnóstico guardado, lo usamos como mano de obra inicial
             let manoObraInicial = solicitudActual.mano_obra || 0;
 
-            // Renderizar el panel derecho
             renderizarWorkspace(manoObraInicial);
         }
 
@@ -351,14 +344,14 @@
             
             ws.innerHTML = html;
             
-            // Renderizar las filas que ya existían
             componentesTemporales.forEach((comp, index) => {
                 agregarFilaDOM(comp, index);
             });
             
             calcularTotales();
         }
-                // --- LÓGICA DE COMPONENTES (ESTILO MIKROTIK) ---
+
+        // --- LÓGICA DE COMPONENTES ---
         function agregarComponente() {
             componentesTemporales.push({ nombre: '', cantidad: 1, precio: 0 });
             renderizarComponentesLista();
@@ -430,7 +423,6 @@
                 const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
                 const ref = doc(window.firebaseDb, 'SolicitudesServicios', solicitudActual.id);
                 
-                // Guardamos los componentes, la mano de obra, el total y actualizamos el estado a "En proceso"
                 await updateDoc(ref, {
                     componentes: componentesTemporales,
                     mano_obra: manoObra,
@@ -441,9 +433,7 @@
                 
                 alert('✅ Presupuesto guardado correctamente. El estado de la solicitud ha cambiado a "En proceso".');
                 
-                // Recargar la lista de la izquierda para reflejar el nuevo estado
                 await cargarSolicitudes();
-                // Volver a seleccionar la misma solicitud para que no se pierda la vista
                 seleccionarSolicitud(solicitudActual.id);
                 
             } catch (e) {
@@ -474,7 +464,7 @@
                 return; 
             }
 
-            // Construir mensaje
+            // Construir mensaje (SIN mostrar el precio de la mano de obra por separado)
             let msg = `Hola ${solicitudActual.usuario_nombre || 'Cliente'} 👋\n`;
             msg += `Aquí tienes el presupuesto para tu servicio de *${solicitudActual.servicio_nombre}*:\n\n`;
             
@@ -487,11 +477,8 @@
                 });
                 msg += `\n`;
             }
-
-            if (manoObra > 0) {
-                msg += `💵 *Mano de obra:* $${manoObra.toFixed(2)}\n`;
-            }
             
+            // Solo el Total Final
             msg += `💰 *TOTAL A PAGAR: $${totalFinal.toFixed(2)}*\n\n`;
             msg += `Quedamos atentos para coordinar la visita. ¡Gracias por confiar en B&B! 🙌`;
 
