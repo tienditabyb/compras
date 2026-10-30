@@ -173,7 +173,10 @@
     </script>
 
     <script>
-        const ADMIN_EMAIL = "byb@gmail.com";
+        // ==========================================
+        // AQUÍ PUEDES AÑADIR LOS CORREOS PERMITIDOS
+        // ==========================================
+        const ADMIN_EMAILS = ["byb@gmail.com", "logistica@byb.com"]; 
 
         let solicitudesCache = [];
         let solicitudActual = null;
@@ -205,9 +208,13 @@
         function iniciarListenerAuth() {
             window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
-                    if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                    // Verifica si el correo está en la lista de permitidos (sin importar mayúsculas/minúsculas)
+                    const emailLower = user.email.toLowerCase();
+                    const permitido = ADMIN_EMAILS.some(e => e.toLowerCase() === emailLower);
+
+                    if (!permitido) {
                         await window.firebaseFns.signOut(window.firebaseAuth);
-                        document.getElementById('loginError').textContent = 'Acceso denegado. Solo el administrador.';
+                        document.getElementById('loginError').textContent = 'Acceso denegado. Solo el administrador o técnico.';
                         document.getElementById('loginError').classList.add('show');
                         return;
                     }
@@ -464,7 +471,7 @@
                 return; 
             }
 
-            // Construir mensaje (SIN mostrar el precio de la mano de obra por separado)
+            // Construir mensaje
             let msg = `Hola ${solicitudActual.usuario_nombre || 'Cliente'} 👋\n`;
             msg += `Aquí tienes el presupuesto para tu servicio de *${solicitudActual.servicio_nombre}*:\n\n`;
             
