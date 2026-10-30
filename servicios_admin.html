@@ -37,8 +37,12 @@
         .main-content { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 60px); }
 
         /* SIDEBAR (LISTA DE SOLICITUDES) */
-        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .sidebar { width: 340px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
         
+        .sidebar-top { padding: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+        .btn-add-manual { width: 100%; padding: 10px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-add-manual:hover { background: #2c3e50; transform: translateY(-2px); }
+
         /* PESTAÑAS */
         .tabs-container { display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
         .tab-btn { flex: 1; padding: 10px 2px; border: none; background: none; font-size: 0.75rem; font-weight: 600; color: #64748b; transition: 0.2s; border-bottom: 3px solid transparent; }
@@ -101,6 +105,18 @@
         .btn-eliminar { background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-right: auto; }
         .btn-eliminar:hover { background: #fca5a5; }
 
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 20px; padding: 25px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
+        .modal .close-modal { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+        .modal h2 { font-size: 1.3rem; margin-bottom: 16px; color: #1e272e; text-align: center; }
+        .modal .form-group { margin-bottom: 12px; }
+        .modal .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #1e272e; margin-bottom: 4px; }
+        .modal .form-group input, .modal .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; }
+        .modal .form-group input:focus, .modal .form-group textarea:focus { border-color: #2980b9; }
+        .modal .btn-primary { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 10px; }
+
         @media (max-width: 900px) {
             .main-content { flex-direction: column; height: auto; overflow: visible; }
             .sidebar { width: 100%; height: 350px; border-right: none; border-bottom: 1px solid #e2e8f0; }
@@ -139,6 +155,13 @@
         <div class="main-content">
             <!-- LISTA DE SOLICITUDES -->
             <aside class="sidebar">
+                <!-- BOTÓN NUEVO SERVICIO -->
+                <div class="sidebar-top">
+                    <button class="btn-add-manual" onclick="abrirModalNuevoServicio()">
+                        ➕ Añadir Servicio Manual
+                    </button>
+                </div>
+
                 <!-- PESTAÑAS -->
                 <div class="tabs-container">
                     <button class="tab-btn active" onclick="cambiarPestana('nuevos')">Nuevos</button>
@@ -162,10 +185,24 @@
         </div>
     </div>
 
+    <!-- MODAL PARA AÑADIR SERVICIO MANUAL -->
+    <div class="modal-overlay" id="modalNuevoServicio">
+        <div class="modal">
+            <button class="close-modal" onclick="cerrarModalNuevoServicio()">✕</button>
+            <h2>➕ Añadir Servicio</h2>
+            <div class="form-group"><label>Nombre del Cliente *</label><input type="text" id="nuevoNombre" placeholder="Ej: Juan Pérez" /></div>
+            <div class="form-group"><label>Teléfono *</label><input type="tel" id="nuevoTelefono" placeholder="Ej: +53 55555555" /></div>
+            <div class="form-group"><label>Dirección *</label><input type="text" id="nuevoDireccion" placeholder="Calle, número, barrio..." /></div>
+            <div class="form-group"><label>Tipo de Servicio *</label><input type="text" id="nuevoServicio" placeholder="Ej: Instalación de Split" /></div>
+            <div class="form-group"><label>Descripción del problema *</label><textarea id="nuevoDescripcion" rows="3" placeholder="Describa el problema detalladamente..."></textarea></div>
+            <button class="btn-primary" id="btnGuardarNuevoServicio" onclick="guardarNuevoServicioManual()">Guardar y Presupuestar</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, query, orderBy, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
@@ -186,15 +223,12 @@
         window.firebaseDb = db;
         window.firebaseFns = {
             signInWithEmailAndPassword, signOut, onAuthStateChanged,
-            collection, doc, getDoc, getDocs, updateDoc, deleteDoc,
+            collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc,
             query, orderBy, serverTimestamp
         };
     </script>
 
     <script>
-        // ==========================================
-        // AQUÍ PUEDES AÑADIR LOS CORREOS PERMITIDOS
-        // ==========================================
         const ADMIN_EMAILS = ["byb@gmail.com", "logistica@byb.com"]; 
 
         let solicitudesCache = [];
@@ -338,7 +372,6 @@
             const ws = document.getElementById('workspace');
             const est = solicitudActual.estado || 'Pendiente';
             
-            // Si está finalizado o cancelado, bloqueamos los inputs
             const isReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'disabled' : '';
             const styleReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'background:#f1f5f9; color:#94a3b8;' : '';
 
@@ -367,9 +400,7 @@
                         <div></div>
                     </div>
                     
-                    <div id="contenedorComponentes">
-                        <!-- Filas -->
-                    </div>
+                    <div id="contenedorComponentes"></div>
 
                     <button class="btn-add-componente" onclick="agregarComponente()" ${isReadOnly} style="${styleReadOnly}">
                         ➕ Añadir Componente
@@ -504,7 +535,6 @@
                 
                 await cargarSolicitudes();
                 
-                // Mover a la pestaña de proceso automáticamente
                 pestañaActual = 'proceso';
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
@@ -537,7 +567,6 @@
                 
                 await cargarSolicitudes();
                 
-                // Mover a la pestaña correspondiente
                 if (nuevoEstado === 'Completado') {
                     pestañaActual = 'completados';
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -570,7 +599,6 @@
                 alert('🗑️ Registro eliminado correctamente.');
                 solicitudActual = null;
                 
-                // Limpiar el panel derecho
                 document.getElementById('workspace').innerHTML = `
                     <div class="empty-state">
                         <h2>👈 Selecciona una solicitud</h2>
@@ -622,6 +650,74 @@
             msg += `Quedamos atentos para coordinar la visita. ¡Gracias por confiar en B&B! 🙌`;
 
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // --- NUEVO SERVICIO MANUAL ---
+        function abrirModalNuevoServicio() {
+            document.getElementById('nuevoNombre').value = '';
+            document.getElementById('nuevoTelefono').value = '';
+            document.getElementById('nuevoDireccion').value = '';
+            document.getElementById('nuevoServicio').value = '';
+            document.getElementById('nuevoDescripcion').value = '';
+            document.getElementById('modalNuevoServicio').classList.add('active');
+        }
+
+        function cerrarModalNuevoServicio() {
+            document.getElementById('modalNuevoServicio').classList.remove('active');
+        }
+
+        async function guardarNuevoServicioManual() {
+            const nombre = document.getElementById('nuevoNombre').value.trim();
+            const telefono = document.getElementById('nuevoTelefono').value.trim();
+            const direccion = document.getElementById('nuevoDireccion').value.trim();
+            const servicio = document.getElementById('nuevoServicio').value.trim();
+            const descripcion = document.getElementById('nuevoDescripcion').value.trim();
+
+            if (!nombre || !telefono || !direccion || !servicio || !descripcion) {
+                alert('Por favor, completa todos los campos.');
+                return;
+            }
+
+            const btn = document.getElementById('btnGuardarNuevoServicio');
+            btn.disabled = true;
+            btn.textContent = '⏳ Guardando...';
+
+            try {
+                const { collection, addDoc, serverTimestamp } = window.firebaseFns;
+                
+                const docRef = await addDoc(collection(window.firebaseDb, 'SolicitudesServicios'), {
+                    usuario_id: 'manual', // ID especial para identificar que fue creado desde el admin
+                    usuario_nombre: nombre,
+                    usuario_telefono: telefono,
+                    direccion: direccion,
+                    servicio_nombre: servicio,
+                    descripcion: descripcion,
+                    estado: 'Pendiente',
+                    fecha_solicitud: serverTimestamp(),
+                    fecha_actualizacion: serverTimestamp()
+                });
+
+                alert('✅ Servicio añadido correctamente.');
+                cerrarModalNuevoServicio();
+
+                // Recargar y seleccionar
+                await cargarSolicitudes();
+                
+                // Mover a la pestaña de nuevos
+                pestañaActual = 'nuevos';
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                renderizarListaSolicitudes();
+                
+                // Seleccionar el recién creado
+                seleccionarSolicitud(docRef.id);
+
+            } catch (e) {
+                alert('Error al guardar el servicio: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar y Presupuestar';
+            }
         }
     </script>
 </body>
