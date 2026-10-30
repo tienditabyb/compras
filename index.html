@@ -68,6 +68,30 @@
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
+        /* --- NUEVOS ESTILOS PARA CATEGORÍAS ESPECIALES --- */
+        .special-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            color: white !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .special-btn.encargo { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .special-btn.servicio { background: linear-gradient(135deg, #10b981, #059669); }
+        .special-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+        .special-btn.active { outline: 3px solid #1e272e; outline-offset: 2px; }
+        
+        .categories-dropdown a.special-dropdown { font-weight: 700; padding: 14px 20px; }
+        .categories-dropdown a.special-dropdown.encargo { background: #fef3c7; color: #d97706; }
+        .categories-dropdown a.special-dropdown.servicio { background: #dcfce7; color: #059669; }
+
         .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
         .toolbar__left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
         .toolbar__left h2 { font-size: 1.2rem; font-weight: 600; color: #1e272e; }
@@ -327,7 +351,10 @@
 
     <div class="main-content" id="mainContent">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar__title">CATEGORÍAS</div>
+            <div class="sidebar__title" id="titleSpecial" style="display:none;">Categorías Especiales</div>
+            <nav class="sidebar__nav" style="margin-bottom: 20px;"><ul id="specialCategoryList"></ul></nav>
+            
+            <div class="sidebar__title">Categorías Normales</div>
             <nav class="sidebar__nav"><ul id="categoryList"></ul></nav>
         </aside>
 
@@ -401,7 +428,7 @@
             <div id="servicioDiagnosticoInfo" style="background:#fef3c7; padding:12px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; color:#92400e; border-left:4px solid #f59e0b;"></div>
             <div id="servicioForm">
                 <div class="form-group"><label>Servicio</label><input type="text" id="servicioNombre" disabled /></div>
-                <div class="form-group"><label>Descripción del problema *</label><textarea id="servicioDescripcion" rows="3" placeholder="Ej: Describa el Problema Detalladamente" required></textarea></div>
+                <div class="form-group"><label>Descripción del problema *</label><textarea id="servicioDescripcion" rows="3" placeholder="Describa el Problema detalladamente" required></textarea></div>
                 <div class="form-group"><label>Dirección donde se prestará el servicio *</label><input type="text" id="servicioDireccion" placeholder="Calle, número, barrio, ciudad" required /></div>
                 <div class="form-group"><label>Fecha preferida (opcional)</label><input type="date" id="servicioFecha" /></div>
                 <div id="servicioError" class="error-msg"></div>
@@ -1002,56 +1029,67 @@
                 // --- CATEGORÍAS Y TIENDA ---
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
-            const ul = document.getElementById('categoryList');
-            ul.innerHTML = '';
+            const ulSpecial = document.getElementById('specialCategoryList');
+            const ulNormal = document.getElementById('categoryList');
+            const titleSpecial = document.getElementById('titleSpecial');
+            
+            ulSpecial.innerHTML = '';
+            ulNormal.innerHTML = '';
 
+            let hasSpecial = false;
+
+            // 1. DIBUJAR CATEGORÍAS ESPECIALES
             if (ENCARGOS_ACTIVOS) {
+                hasSpecial = true;
                 const encLi = document.createElement('li');
                 const encLink = document.createElement('a');
-                encLink.textContent = '📦 Pedidos Por Encargo';
+                encLink.innerHTML = '📦 Pedidos Por Encargo';
+                encLink.className = 'special-btn encargo';
                 encLink.dataset.categoria = 'PedidosPorEncargo';
                 encLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encLink); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); });
                 encLi.appendChild(encLink);
-                ul.appendChild(encLi);
+                ulSpecial.appendChild(encLi);
             }
 
             if (SERVICIOS_ACTIVOS) {
+                hasSpecial = true;
                 const servLi = document.createElement('li');
                 const servLink = document.createElement('a');
-                servLink.textContent = '🔧 Servicios';
+                servLink.innerHTML = '🔧 Servicios Técnicos';
+                servLink.className = 'special-btn servicio';
                 servLink.dataset.categoria = 'Servicios';
                 servLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Servicios'; actualizarCategoriaActiva(servLink); document.getElementById('sectionTitle').textContent = '🔧 Servicios'; renderizarProductos(); });
                 servLi.appendChild(servLink);
-                ul.appendChild(servLi);
+                ulSpecial.appendChild(servLi);
             }
 
-            if (ENCARGOS_ACTIVOS || SERVICIOS_ACTIVOS) {
-                const sepLi = document.createElement('li');
-                sepLi.style.borderTop = '1px solid #e2e8f0';
-                sepLi.style.margin = '6px 0';
-                ul.appendChild(sepLi);
-            }
+            if (hasSpecial) titleSpecial.style.display = 'block';
+            else titleSpecial.style.display = 'none';
 
+            // 2. DIBUJAR CATEGORÍAS NORMALES
             const allLi = document.createElement('li');
             const allLink = document.createElement('a');
             allLink.textContent = 'Todo'; allLink.dataset.categoria = 'Todas'; allLink.classList.add('active');
             allLink.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Todas'; actualizarCategoriaActiva(allLink); document.getElementById('sectionTitle').textContent = 'Productos'; renderizarProductos(); });
-            allLi.appendChild(allLink); ul.appendChild(allLi);
+            allLi.appendChild(allLink); ulNormal.appendChild(allLi);
 
             cats.forEach(cat => {
                 const li = document.createElement('li');
                 const a = document.createElement('a');
                 a.textContent = cat; a.dataset.categoria = cat;
                 a.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = cat; actualizarCategoriaActiva(a); document.getElementById('sectionTitle').textContent = cat; renderizarProductos(); });
-                li.appendChild(a); ul.appendChild(li);
+                li.appendChild(a); ulNormal.appendChild(li);
             });
 
+            // 3. DIBUJAR EL MENÚ DESPLEGABLE (Móvil)
             const dd = document.getElementById('categoriesDropdown');
             dd.innerHTML = '';
 
             if (ENCARGOS_ACTIVOS) {
                 const encD = document.createElement('a');
-                encD.textContent = '📦 Pedidos Por Encargo'; encD.dataset.categoria = 'PedidosPorEncargo';
+                encD.innerHTML = '📦 Pedidos Por Encargo'; 
+                encD.className = 'special-dropdown encargo';
+                encD.dataset.categoria = 'PedidosPorEncargo';
                 if (categoriaSeleccionada === 'PedidosPorEncargo') encD.classList.add('active');
                 encD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'PedidosPorEncargo'; actualizarCategoriaActiva(encD); document.getElementById('sectionTitle').textContent = '📦 Pedidos Por Encargo'; renderizarProductos(); cerrarDropdownCategorias(); });
                 dd.appendChild(encD);
@@ -1059,7 +1097,9 @@
 
             if (SERVICIOS_ACTIVOS) {
                 const servD = document.createElement('a');
-                servD.textContent = '🔧 Servicios'; servD.dataset.categoria = 'Servicios';
+                servD.innerHTML = '🔧 Servicios Técnicos'; 
+                servD.className = 'special-dropdown servicio';
+                servD.dataset.categoria = 'Servicios';
                 if (categoriaSeleccionada === 'Servicios') servD.classList.add('active');
                 servD.addEventListener('click', (e) => { e.preventDefault(); categoriaSeleccionada = 'Servicios'; actualizarCategoriaActiva(servD); document.getElementById('sectionTitle').textContent = '🔧 Servicios'; renderizarProductos(); cerrarDropdownCategorias(); });
                 dd.appendChild(servD);
@@ -1067,7 +1107,7 @@
 
             if (ENCARGOS_ACTIVOS || SERVICIOS_ACTIVOS) {
                 const sepD = document.createElement('div');
-                sepD.style.borderTop = '1px solid #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
+                sepD.style.borderTop = '2px dashed #e2e8f0'; sepD.style.margin = '4px 12px'; dd.appendChild(sepD);
             }
 
             const allD = document.createElement('a');
@@ -1085,7 +1125,7 @@
             });
         }
 
-        function actualizarCategoriaActiva(a) { document.querySelectorAll('#categoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active')); if (a) a.classList.add('active'); }
+        function actualizarCategoriaActiva(a) { document.querySelectorAll('#categoryList a, #specialCategoryList a, #categoriesDropdown a').forEach(el => el.classList.remove('active')); if (a) a.classList.add('active'); }
         function toggleCategoriesDropdown() { document.getElementById('categoriesDropdown').classList.toggle('open'); }
         function cerrarDropdownCategorias() { document.getElementById('categoriesDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) { const c = document.querySelector('.toolbar__categories'); if (c && !c.contains(e.target)) cerrarDropdownCategorias(); });
@@ -1699,7 +1739,6 @@
             if (!prod) { alert('Servicio no encontrado.'); return; }
             servicioProductoId = pid;
             
-            // Diagnóstico personalizado o por defecto
             servicioDiagnosticoPrecio = parseFloat(prod.Diagnostico_Precio) || 3000;
             servicioDiagnosticoDesc = prod.Diagnostico_Descripcion || "Se cobra una tarifa de diagnóstico que se descuenta del total al concluir el trabajo.";
 
@@ -1803,7 +1842,6 @@
                     return;
                 }
 
-                // Ordenar por fecha descendente
                 historial.sort((a, b) => {
                     const fa = a.fecha || a.fecha_solicitud;
                     const fb = b.fecha || b.fecha_solicitud;
@@ -1852,7 +1890,6 @@
                             prodsHtml = '<div style="margin-top:4px;">📦 Producto/Servicio</div>';
                         }
 
-                        // LÓGICA DE CONTADORES Y CANCELACIÓN
                         let contadorHtml = '';
                         let botonCancelarHtml = '';
                         let puedeCancelar = false;
@@ -1864,7 +1901,6 @@
                             } else if (item.tipo_db === 'Encargos' && item.fecha_limite_pago) {
                                 fechaLimite = fechaToDate(item.fecha_limite_pago);
                             } else if (item.tipo_db === 'Domicilios') {
-                                // Domicilios no tienen fecha_limite por defecto, pero sí pueden cancelarse
                                 puedeCancelar = true;
                             }
 
@@ -1876,7 +1912,7 @@
                                     puedeCancelar = true;
                                 } else {
                                     contadorHtml = `<div style="color:#dc2626; font-weight:600; font-size:0.85rem; margin-top:6px;">⏰ Vencido</div>`;
-                                    puedeCancelar = false; // Si venció, ya no puede cancelar (para evitar problemas de stock)
+                                    puedeCancelar = false;
                                 }
                             }
 
@@ -1905,7 +1941,6 @@
 
                 renderHistorialItems();
 
-                // Iniciar contador en vivo
                 intervaloTiempo = setInterval(() => {
                     const countdowns = document.querySelectorAll('.live-countdown');
                     let hayVencidos = false;
@@ -1923,7 +1958,7 @@
                         }
                     });
                     if (hayVencidos) {
-                        renderHistorialItems(); // Re-renderizar para ocultar los botones de cancelar vencidos
+                        renderHistorialItems();
                     }
                 }, 1000);
 
@@ -1940,7 +1975,6 @@
                 const ref = doc(window.firebaseDb, coleccion, id);
                 const snap = await getDoc(ref);
                 if (!snap.exists()) { alert('Pedido no encontrado.'); return; }
-                const data = snap.data();
 
                 if (coleccion === 'PedidosTienda') {
                     await updateDoc(ref, { Estado: 'Cancelado', fecha_gestion: serverTimestamp() });
@@ -1950,7 +1984,6 @@
                     await updateDoc(ref, { estado: 'Cancelado', fecha_actualizacion: serverTimestamp() });
                 }
 
-                // Enviar notificación al admin
                 const nombre = usuarioActual.nombre || usuarioActual.name || 'Cliente';
                 const tel = usuarioActual.telefono || 'Sin teléfono';
                 const mensaje = `❌ *Pedido cancelado por el cliente*\n\n👤 Cliente: ${nombre}\n📞 Teléfono: ${tel}\n🆔 Pedido: #${id.slice(-6)}\n📦 Tipo: ${coleccion}\n\nEl pedido ha pasado a estado *Cancelado*.`;
@@ -1958,7 +1991,7 @@
                 try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chatId: GRUPO_CHAT_ID, message: mensaje }) }); } catch (err) {}
 
                 alert('✅ Pedido cancelado correctamente.');
-                abrirHistoryModal(); // Recargar el historial
+                abrirHistoryModal();
 
             } catch (e) {
                 alert('Error al cancelar el pedido: ' + e.message);
