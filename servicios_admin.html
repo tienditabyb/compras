@@ -113,8 +113,8 @@
         .modal h2 { font-size: 1.3rem; margin-bottom: 16px; color: #1e272e; text-align: center; }
         .modal .form-group { margin-bottom: 12px; }
         .modal .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #1e272e; margin-bottom: 4px; }
-        .modal .form-group input, .modal .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; }
-        .modal .form-group input:focus, .modal .form-group textarea:focus { border-color: #2980b9; }
+        .modal .form-group input, .modal .form-group select, .modal .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; background: white; }
+        .modal .form-group input:focus, .modal .form-group select:focus, .modal .form-group textarea:focus { border-color: #2980b9; }
         .modal .btn-primary { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 10px; }
 
         @media (max-width: 900px) {
@@ -193,7 +193,14 @@
             <div class="form-group"><label>Nombre del Cliente *</label><input type="text" id="nuevoNombre" placeholder="Ej: Juan Pérez" /></div>
             <div class="form-group"><label>Teléfono *</label><input type="tel" id="nuevoTelefono" placeholder="Ej: +53 55555555" /></div>
             <div class="form-group"><label>Dirección *</label><input type="text" id="nuevoDireccion" placeholder="Calle, número, barrio..." /></div>
-            <div class="form-group"><label>Tipo de Servicio *</label><input type="text" id="nuevoServicio" placeholder="Ej: Instalación de Split" /></div>
+            
+            <div class="form-group">
+                <label>Tipo de Servicio *</label>
+                <select id="nuevoServicio">
+                    <option value="">Cargando servicios...</option>
+                </select>
+            </div>
+
             <div class="form-group"><label>Descripción del problema *</label><textarea id="nuevoDescripcion" rows="3" placeholder="Describa el problema detalladamente..."></textarea></div>
             <button class="btn-primary" id="btnGuardarNuevoServicio" onclick="guardarNuevoServicioManual()">Guardar y Presupuestar</button>
         </div>
@@ -653,12 +660,36 @@
         }
 
         // --- NUEVO SERVICIO MANUAL ---
-        function abrirModalNuevoServicio() {
+        async function abrirModalNuevoServicio() {
             document.getElementById('nuevoNombre').value = '';
             document.getElementById('nuevoTelefono').value = '';
             document.getElementById('nuevoDireccion').value = '';
-            document.getElementById('nuevoServicio').value = '';
             document.getElementById('nuevoDescripcion').value = '';
+            
+            // Llenar el select con los servicios existentes
+            const select = document.getElementById('nuevoServicio');
+            select.innerHTML = '<option value="">Cargando servicios...</option>';
+            
+            try {
+                const { collection, getDocs } = window.firebaseFns;
+                const snap = await getDocs(collection(window.firebaseDb, 'productos'));
+                const servicios = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(p => p.Es_Servicio === true);
+
+                if (servicios.length === 0) {
+                    select.innerHTML = '<option value="">No hay servicios creados en inventario</option>';
+                } else {
+                    select.innerHTML = '<option value="">Seleccione un servicio...</option>';
+                    servicios.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.Nombre;
+                        opt.textContent = s.Nombre;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                select.innerHTML = '<option value="">Error al cargar servicios</option>';
+            }
+
             document.getElementById('modalNuevoServicio').classList.add('active');
         }
 
@@ -670,7 +701,7 @@
             const nombre = document.getElementById('nuevoNombre').value.trim();
             const telefono = document.getElementById('nuevoTelefono').value.trim();
             const direccion = document.getElementById('nuevoDireccion').value.trim();
-            const servicio = document.getElementById('nuevoServicio').value.trim();
+            const servicio = document.getElementById('nuevoServicio').value;
             const descripcion = document.getElementById('nuevoDescripcion').value.trim();
 
             if (!nombre || !telefono || !direccion || !servicio || !descripcion) {
@@ -686,7 +717,7 @@
                 const { collection, addDoc, serverTimestamp } = window.firebaseFns;
                 
                 const docRef = await addDoc(collection(window.firebaseDb, 'SolicitudesServicios'), {
-                    usuario_id: 'manual', // ID especial para identificar que fue creado desde el admin
+                    usuario_id: 'manual',
                     usuario_nombre: nombre,
                     usuario_telefono: telefono,
                     direccion: direccion,
@@ -700,16 +731,13 @@
                 alert('✅ Servicio añadido correctamente.');
                 cerrarModalNuevoServicio();
 
-                // Recargar y seleccionar
                 await cargarSolicitudes();
                 
-                // Mover a la pestaña de nuevos
                 pestañaActual = 'nuevos';
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
                 renderizarListaSolicitudes();
                 
-                // Seleccionar el recién creado
                 seleccionarSolicitud(docRef.id);
 
             } catch (e) {
