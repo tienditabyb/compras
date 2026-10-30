@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>B&B Admin - Gestión de Servicios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f5f6fa; color: #1e272e; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; font-family: inherit; }
+
+        /* HEADER */
+        .header { background-color: #1a252f; padding: 10px 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .header__logo { font-size: 1.5rem; font-weight: 800; color: #ffffff; }
+        .header__logo span { color: #74b9ff; }
+        .header__user button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 16px; color: #ffffff; font-weight: 600; font-size: 0.85rem; transition: 0.3s; }
+        .header__user button:hover { background: rgba(255,255,255,0.2); }
+
+        /* LOGIN */
+        .login-container { display: flex; align-items: center; justify-content: center; flex: 1; background: #1a252f; }
+        .login-box { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 380px; }
+        .login-box h1 { font-size: 2rem; margin-bottom: 25px; text-align: center; color: #1e272e; }
+        .login-box h1 span { color: #2980b9; }
+        .login-box .form-group { margin-bottom: 15px; }
+        .login-box label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 5px; }
+        .login-box input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-family: inherit; }
+        .login-box .btn-primary { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; margin-top: 10px; }
+        .login-box .error { color: #e74c3c; font-size: 0.85rem; margin-top: 10px; display: none; text-align: center; }
+        .login-box .error.show { display: block; }
+
+        /* APP LAYOUT */
+        #appContainer { display: none; flex-direction: column; flex: 1; }
+        .main-content { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 60px); }
+
+        /* SIDEBAR (LISTA DE SOLICITUDES) */
+        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+        .sidebar-header h2 { font-size: 1.1rem; font-weight: 600; color: #1e272e; }
+        .sidebar-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .solicitud-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .solicitud-card:hover { border-color: #2980b9; background: #e6f0fa; }
+        .solicitud-card.active { border-color: #2980b9; background: #e6f0fa; box-shadow: 0 0 0 2px rgba(41,128,185,0.2); }
+        .solicitud-card .title { font-weight: 600; font-size: 0.95rem; color: #1e272e; margin-bottom: 4px; }
+        .solicitud-card .sub { font-size: 0.8rem; color: #64748b; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-top: 6px; }
+        .badge-pendiente { background: #fef3c7; color: #d97706; }
+        .badge-proceso { background: #dbeafe; color: #2563eb; }
+        .badge-completado { background: #d1fae5; color: #059669; }
+        .badge-cancelado { background: #fee2e2; color: #dc2626; }
+
+        /* PANEL DE TRABAJO (DERECHA) */
+        .workspace { flex: 1; overflow-y: auto; padding: 20px; background: #f5f6fa; position: relative; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center; }
+        .empty-state h2 { font-size: 1.5rem; margin-bottom: 10px; }
+        
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h3 { font-size: 1.1rem; font-weight: 600; color: #1e272e; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .cliente-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; margin-bottom: 10px; }
+        .cliente-info p { margin: 0; }
+        .cliente-info strong { color: #1e272e; }
+        .cliente-info span { color: #475569; }
+        .problema-box { background: #f8fafc; border-left: 4px solid #2980b9; padding: 10px; font-size: 0.9rem; border-radius: 4px; margin-top: 10px; }
+
+        /* TABLA DE COMPONENTES */
+        .componentes-header { display: grid; grid-template-columns: 2fr 80px 100px 40px; gap: 10px; font-weight: 600; font-size: 0.85rem; color: #64748b; margin-bottom: 8px; padding: 0 5px; }
+        .componente-row { display: grid; grid-template-columns: 2fr 80px 100px 40px; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .componente-row input { width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-family: inherit; outline: none; }
+        .componente-row input:focus { border-color: #2980b9; }
+        .btn-remove { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-remove:hover { background: #fca5a5; }
+        .btn-add-componente { background: #e0e7ff; color: #4f46e5; border: 1px dashed #818cf8; border-radius: 8px; padding: 10px; width: 100%; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; transition: 0.2s; }
+        .btn-add-componente:hover { background: #c7d2fe; }
+
+        /* TOTALES Y ACCIONES */
+        .totales-box { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+        .total-row { display: flex; justify-content: space-between; width: 250px; font-size: 0.95rem; }
+        .total-row.gran-total { font-size: 1.3rem; font-weight: 700; color: #1e272e; margin-top: 5px; border-top: 2px solid #e2e8f0; padding-top: 10px; }
+        
+        .acciones { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+        .btn-success { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-success:hover { background: #059669; }
+        .btn-whatsapp { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-whatsapp:hover { background: #1da851; }
+
+        @media (max-width: 900px) {
+            .main-content { flex-direction: column; height: auto; overflow: visible; }
+            .sidebar { width: 100%; height: 300px; border-right: none; border-bottom: 1px solid #e2e8f0; }
+            .workspace { padding: 10px; }
+            .cliente-info { grid-template-columns: 1fr; }
+            .componentes-header { display: none; }
+            .componente-row { grid-template-columns: 1fr; gap: 5px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; position: relative; }
+            .componente-row input { background: white; }
+            .btn-remove { position: absolute; top: -10px; right: -10px; border-radius: 50%; }
+            .total-row { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-box">
+            <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Servicios</span></h1>
+            <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="off" /></div>
+            <div class="form-group"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••" /></div>
+            <div id="loginError" class="error"></div>
+            <button class="btn-primary" id="loginBtn">Acceder</button>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="appContainer">
+        <header class="header">
+            <div class="header__logo">B<span>&amp;</span>B <span style="font-size:0.8rem; font-weight:400; color:#b0c4d9;">Servicios</span></div>
+            <div class="header__user">
+                <button id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- LISTA DE SOLICITUDES -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>📋 Solicitudes</h2>
+                </div>
+                <div class="sidebar-list" id="listaSolicitudes">
+                    <div style="text-align:center; padding:20px; color:#94a3b8;">Cargando...</div>
+                </div>
+            </aside>
+
+            <!-- ÁREA DE TRABAJO -->
+            <section class="workspace" id="workspace">
+                <div class="empty-state">
+                    <h2>👈 Selecciona una solicitud</h2>
+                    <p>Elige una solicitud de la lista de la izquierda para ver los detalles y crear el presupuesto.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
+            authDomain: "tiendita-byb.firebaseapp.com",
+            projectId: "tiendita-byb",
+            storageBucket: "tiendita-byb.firebasestorage.app",
+            messagingSenderId: "257958619653",
+            appId: "1:257958619653:web:0367858d644596c4b50a6c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        try { await setPersistence(auth, browserSessionPersistence); } catch (e) { console.error('Persistencia:', e); }
+
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseFns = {
+            signInWithEmailAndPassword, signOut, onAuthStateChanged,
+            collection, doc, getDoc, getDocs, updateDoc,
+            query, orderBy, serverTimestamp
+        };
+    </script>
+        <script>
+        const ADMIN_EMAIL = "byb@gmail.com";
+
+        let solicitudesCache = [];
+        let solicitudActual = null;
+        let componentesTemporales = []; // Aquí guardaremos los componentes mientras editamos
+
+        // --- AUTENTICACIÓN ---
+        document.getElementById('loginBtn').addEventListener('click', async function() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            errorEl.classList.remove('show'); errorEl.textContent = '';
+            
+            if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
+            
+            try {
+                const { signInWithEmailAndPassword } = window.firebaseFns;
+                await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            } catch (e) {
+                let msg = 'Error de autenticación';
+                if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
+                else if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
+                errorEl.textContent = msg; errorEl.classList.add('show');
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
+        document.getElementById('logoutBtn').addEventListener('click', async () => { await window.firebaseFns.signOut(window.firebaseAuth); });
+
+        function iniciarListenerAuth() {
+            window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                if (user) {
+                    if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+                        await window.firebaseFns.signOut(window.firebaseAuth);
+                        document.getElementById('loginError').textContent = 'Acceso denegado. Solo el administrador.';
+                        document.getElementById('loginError').classList.add('show');
+                        return;
+                    }
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'flex';
+                    cargarSolicitudes();
+                } else {
+                    document.getElementById('loginContainer').style.display = 'flex';
+                    document.getElementById('appContainer').style.display = 'none';
+                }
+            });
+        }
+        (function esperarFirebase() {
+            if (window.firebaseFns && window.firebaseAuth) iniciarListenerAuth();
+            else setTimeout(esperarFirebase, 100);
+        })();
+
+        // --- CARGAR SOLICITUDES ---
+        async function cargarSolicitudes() {
+            const lista = document.getElementById('listaSolicitudes');
+            lista.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Cargando...</div>';
+            
+            try {
+                const { collection, getDocs, query, orderBy } = window.firebaseFns;
+                const q = query(collection(window.firebaseDb, 'SolicitudesServicios'), orderBy('fecha_solicitud', 'desc'));
+                const snap = await getDocs(q);
+                
+                solicitudesCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                if (solicitudesCache.length === 0) {
+                    lista.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No hay solicitudes aún.</div>';
+                    return;
+                }
+
+                let html = '';
+                solicitudesCache.forEach(sol => {
+                    let badgeClass = 'badge-pendiente';
+                    if (sol.estado === 'En proceso') badgeClass = 'badge-proceso';
+                    else if (sol.estado === 'Completado') badgeClass = 'badge-completado';
+                    else if (sol.estado === 'Cancelado') badgeClass = 'badge-cancelado';
+
+                    // Formatear fecha
+                    const fechaObj = sol.fecha_solicitud;
+                    const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
+
+                    html += `
+                        <div class="solicitud-card" id="card-${sol.id}" onclick="seleccionarSolicitud('${sol.id}')">
+                            <div class="title">🔧 ${sol.servicio_nombre || 'Servicio'}</div>
+                            <div class="sub">👤 ${sol.usuario_nombre || 'Cliente'}</div>
+                            <div class="sub">📅 ${fechaStr}</div>
+                            <span class="badge ${badgeClass}">${sol.estado || 'Pendiente'}</span>
+                        </div>
+                    `;
+                });
+                lista.innerHTML = html;
+
+            } catch (e) {
+                lista.innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">Error al cargar: ${e.message}</div>`;
+            }
+        }
+
+        // --- SELECCIONAR SOLICITUD ---
+        function seleccionarSolicitud(id) {
+            // Quitar clase active de todas las tarjetas
+            document.querySelectorAll('.solicitud-card').forEach(c => c.classList.remove('active'));
+            // Poner active a la seleccionada
+            const card = document.getElementById(`card-${id}`);
+            if (card) card.classList.add('active');
+
+            // Buscar la data
+            solicitudActual = solicitudesCache.find(s => s.id === id);
+            if (!solicitudActual) return;
+
+            // Si ya tiene componentes guardados en la BD, los cargamos, si no, inicializamos vacío
+            componentesTemporales = solicitudActual.componentes ? JSON.parse(JSON.stringify(solicitudActual.componentes)) : [];
+            
+            // Si no hay componentes pero hay un diagnóstico guardado, lo usamos como mano de obra inicial
+            let manoObraInicial = solicitudActual.mano_obra || 0;
+
+            // Renderizar el panel derecho
+            renderizarWorkspace(manoObraInicial);
+        }
+
+        // --- RENDERIZAR EL PANEL DE TRABAJO ---
+        function renderizarWorkspace(manoObraInicial) {
+            const ws = document.getElementById('workspace');
+            
+            let html = `
+                <div class="card">
+                    <h3>👤 Datos del Cliente</h3>
+                    <div class="cliente-info">
+                        <p><strong>Nombre:</strong> <span>${solicitudActual.usuario_nombre || 'Cliente'}</span></p>
+                        <p><strong>Teléfono:</strong> <span>${solicitudActual.usuario_telefono || 'Sin teléfono'}</span></p>
+                        <p><strong>Dirección:</strong> <span>${solicitudActual.direccion || 'Sin dirección'}</span></p>
+                        <p><strong>Servicio:</strong> <span>${solicitudActual.servicio_nombre || 'Servicio'}</span></p>
+                    </div>
+                    <div class="problema-box">
+                        <strong>📝 Problema reportado:</strong><br>
+                        ${solicitudActual.descripcion || 'Sin descripción'}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🛠️ Desglose de Materiales y Trabajo</h3>
+                    
+                    <div class="componentes-header">
+                        <div>Componente / Descripción</div>
+                        <div>Cantidad</div>
+                        <div>Precio Unit.</div>
+                        <div></div>
+                    </div>
+                    
+                    <div id="contenedorComponentes">
+                        <!-- Aquí se inyectan las filas por JS -->
+                    </div>
+
+                    <button class="btn-add-componente" onclick="agregarComponente()">
+                        ➕ Añadir Componente
+                    </button>
+
+                    <div class="totales-box">
+                        <div class="total-row">
+                            <span>Mano de Obra:</span>
+                            <input type="number" id="inputManoObra" value="${manoObraInicial}" step="0.01" min="0" style="width: 100px; padding: 5px; text-align: right; border: 1px solid #e2e8f0; border-radius: 5px;" oninput="calcularTotales()" />
+                        </div>
+                        <div class="total-row">
+                            <span>Total Materiales:</span>
+                            <span id="spanTotalMateriales">$0.00</span>
+                        </div>
+                        <div class="total-row gran-total">
+                            <span>TOTAL DEL TRABAJO:</span>
+                            <span id="spanTotalFinal" style="color: #10b981;">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="acciones">
+                        <button class="btn-success" onclick="guardarPresupuesto()">💾 Guardar Presupuesto</button>
+                        <button class="btn-whatsapp" onclick="compartirWhatsApp()">💬 Compartir por WhatsApp</button>
+                    </div>
+                </div>
+            `;
+            
+            ws.innerHTML = html;
+            
+            // Renderizar las filas que ya existían
+            componentesTemporales.forEach((comp, index) => {
+                agregarFilaDOM(comp, index);
+            });
+            
+            calcularTotales();
+        }
+                // --- LÓGICA DE COMPONENTES (ESTILO MIKROTIK) ---
+        function agregarComponente() {
+            componentesTemporales.push({ nombre: '', cantidad: 1, precio: 0 });
+            renderizarComponentesLista();
+            calcularTotales();
+        }
+
+        function agregarFilaDOM(comp, index) {
+            const contenedor = document.getElementById('contenedorComponentes');
+            const div = document.createElement('div');
+            div.className = 'componente-row';
+            div.id = `fila-comp-${index}`;
+            div.innerHTML = `
+                <input type="text" placeholder="Ej: Breaker 15A" value="${comp.nombre || ''}" oninput="actualizarComponente(${index}, 'nombre', this.value)" />
+                <input type="number" placeholder="1" value="${comp.cantidad || 1}" min="1" oninput="actualizarComponente(${index}, 'cantidad', this.value)" />
+                <input type="number" placeholder="0.00" value="${comp.precio || 0}" min="0" step="0.01" oninput="actualizarComponente(${index}, 'precio', this.value)" />
+                <button class="btn-remove" onclick="eliminarComponente(${index})" title="Eliminar">✕</button>
+            `;
+            contenedor.appendChild(div);
+        }
+
+        function renderizarComponentesLista() {
+            const contenedor = document.getElementById('contenedorComponentes');
+            contenedor.innerHTML = '';
+            componentesTemporales.forEach((comp, index) => {
+                agregarFilaDOM(comp, index);
+            });
+        }
+
+        function actualizarComponente(index, campo, valor) {
+            if (!componentesTemporales[index]) return;
+            if (campo === 'cantidad' || campo === 'precio') {
+                componentesTemporales[index][campo] = parseFloat(valor) || 0;
+            } else {
+                componentesTemporales[index][campo] = valor;
+            }
+            calcularTotales();
+        }
+
+        function eliminarComponente(index) {
+            componentesTemporales.splice(index, 1);
+            renderizarComponentesLista();
+            calcularTotales();
+        }
+
+        function calcularTotales() {
+            let totalMateriales = 0;
+            componentesTemporales.forEach(c => {
+                totalMateriales += (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0));
+            });
+            
+            const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
+            const totalFinal = totalMateriales + manoObra;
+            
+            document.getElementById('spanTotalMateriales').textContent = `$${totalMateriales.toFixed(2)}`;
+            document.getElementById('spanTotalFinal').textContent = `$${totalFinal.toFixed(2)}`;
+        }
+
+        // --- GUARDAR PRESUPUESTO EN FIREBASE ---
+        async function guardarPresupuesto() {
+            if (!solicitudActual) return;
+            const btn = document.querySelector('.btn-success');
+            btn.disabled = true; btn.textContent = '⏳ Guardando...';
+            
+            const totalMateriales = componentesTemporales.reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+            const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
+            const totalFinal = totalMateriales + manoObra;
+
+            try {
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                const ref = doc(window.firebaseDb, 'SolicitudesServicios', solicitudActual.id);
+                
+                // Guardamos los componentes, la mano de obra, el total y actualizamos el estado a "En proceso"
+                await updateDoc(ref, {
+                    componentes: componentesTemporales,
+                    mano_obra: manoObra,
+                    total_presupuesto: totalFinal,
+                    estado: 'En proceso', 
+                    fecha_actualizacion: serverTimestamp()
+                });
+                
+                alert('✅ Presupuesto guardado correctamente. El estado de la solicitud ha cambiado a "En proceso".');
+                
+                // Recargar la lista de la izquierda para reflejar el nuevo estado
+                await cargarSolicitudes();
+                // Volver a seleccionar la misma solicitud para que no se pierda la vista
+                seleccionarSolicitud(solicitudActual.id);
+                
+            } catch (e) {
+                alert('Error al guardar el presupuesto: ' + e.message);
+            } finally {
+                btn.disabled = false; 
+                btn.textContent = '💾 Guardar Presupuesto';
+            }
+        }
+
+        // --- COMPARTIR POR WHATSAPP (SOLO TOTAL Y MATERIALES) ---
+        function compartirWhatsApp() {
+            if (!solicitudActual) return;
+            
+            let tel = solicitudActual.usuario_telefono;
+            if (!tel || tel === 'Sin teléfono') { 
+                alert('El cliente no tiene un teléfono registrado para enviarle el WhatsApp.'); 
+                return; 
+            }
+            tel = String(tel).trim();
+            
+            const totalMateriales = componentesTemporales.reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+            const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
+            const totalFinal = totalMateriales + manoObra;
+
+            if (totalFinal <= 0) { 
+                alert('El presupuesto está vacío, agrega materiales o mano de obra.'); 
+                return; 
+            }
+
+            // Construir mensaje
+            let msg = `Hola ${solicitudActual.usuario_nombre || 'Cliente'} 👋\n`;
+            msg += `Aquí tienes el presupuesto para tu servicio de *${solicitudActual.servicio_nombre}*:\n\n`;
+            
+            if (componentesTemporales.length > 0) {
+                msg += `🛠️ *Materiales a utilizar:*\n`;
+                componentesTemporales.forEach(c => {
+                    if (c.nombre && c.cantidad > 0) {
+                        msg += `- ${c.nombre} (x${c.cantidad})\n`;
+                    }
+                });
+                msg += `\n`;
+            }
+
+            if (manoObra > 0) {
+                msg += `💵 *Mano de obra:* $${manoObra.toFixed(2)}\n`;
+            }
+            
+            msg += `💰 *TOTAL A PAGAR: $${totalFinal.toFixed(2)}*\n\n`;
+            msg += `Quedamos atentos para coordinar la visita. ¡Gracias por confiar en B&B! 🙌`;
+
+            // Abrir WhatsApp
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
