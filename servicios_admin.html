@@ -45,9 +45,39 @@
         .btn-reportes { width: 100%; padding: 10px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-reportes:hover { background: #1f6da9; transform: translateY(-2px); }
 
-        .search-container { padding: 10px 15px; background: #f8fafc; }
+        /* BUSCADOR CON SUGERENCIAS */
+        .search-container { padding: 10px 15px; background: #f8fafc; position: relative; }
         .search-container input { width: 100%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-size: 0.9rem; font-family: inherit; background: white; }
         .search-container input:focus { border-color: #2980b9; }
+        
+        .sugerencias-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 15px;
+            right: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .sugerencias-dropdown.active { display: block; }
+        .sugerencia-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1e272e;
+        }
+        .sugerencia-item:last-child { border-bottom: none; }
+        .sugerencia-item:hover { background: #e6f0fa; color: #2980b9; }
+        .sugerencia-item .icon { font-size: 1rem; }
 
         /* PESTAÑAS */
         .tabs-container { display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
@@ -193,9 +223,10 @@
                     <button class="btn-reportes" onclick="abrirModalReportes()">📊 Generar Reporte</button>
                 </div>
 
-                <!-- BUSCADOR -->
+                <!-- BUSCADOR CON SUGERENCIAS -->
                 <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="🔍 Buscar cliente, servicio..." oninput="buscarSolicitudes()" />
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar cliente, servicio..." oninput="manejarBusqueda(this.value)" onfocus="mostrarSugerencias(this.value)" autocomplete="off" />
+                    <div class="sugerencias-dropdown" id="sugerenciasDropdown"></div>
                 </div>
 
                 <!-- PESTAÑAS -->
@@ -362,11 +393,74 @@
             }
         }
 
-        // --- BUSCADOR Y LÓGICA DE PESTAÑAS ---
-        function buscarSolicitudes() {
+        // --- BUSCADOR CON SUGERENCIAS ---
+        function manejarBusqueda(val) {
+            renderizarListaSolicitudes();
+            mostrarSugerencias(val);
+        }
+
+        function mostrarSugerencias(val) {
+            const dropdown = document.getElementById('sugerenciasDropdown');
+            const busq = val.toLowerCase().trim();
+
+            if (!busq) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            // Extraer sugerencias únicas (nombres, servicios y teléfonos)
+            const nombres = new Set();
+            const servicios = new Set();
+            const telefonos = new Set();
+
+            solicitudesCache.forEach(sol => {
+                if (sol.usuario_nombre && sol.usuario_nombre.toLowerCase().includes(busq)) nombres.add(sol.usuario_nombre);
+                if (sol.servicio_nombre && sol.servicio_nombre.toLowerCase().includes(busq)) servicios.add(sol.servicio_nombre);
+                if (sol.usuario_telefono && sol.usuario_telefono.toLowerCase().includes(busq)) telefonos.add(sol.usuario_telefono);
+            });
+
+            // Crear la lista combinada (limitada a 8 resultados para no saturar)
+            let items = [];
+            nombres.forEach(n => items.push({ tipo: 'nombre', valor: n, icon: '👤' }));
+            servicios.forEach(s => items.push({ tipo: 'servicio', valor: s, icon: '🔧' }));
+            telefonos.forEach(t => items.push({ tipo: 'telefono', valor: t, icon: '📞' }));
+
+            items = items.slice(0, 8);
+
+            if (items.length === 0) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <div class="sugerencia-item" onclick="seleccionarSugerencia('${item.valor.replace(/'/g, "\\'")}')">
+                        <span class="icon">${item.icon}</span>
+                        <span>${item.valor}</span>
+                    </div>
+                `;
+            });
+
+            dropdown.innerHTML = html;
+            dropdown.classList.add('active');
+        }
+
+        function seleccionarSugerencia(valor) {
+            document.getElementById('searchInput').value = valor;
+            document.getElementById('sugerenciasDropdown').classList.remove('active');
             renderizarListaSolicitudes();
         }
 
+        // Cerrar sugerencias al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                document.getElementById('sugerenciasDropdown').classList.remove('active');
+            }
+        });
+
+        // --- LÓGICA DE PESTAÑAS ---
         function cambiarPestana(tab) {
             pestañaActual = tab;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -388,7 +482,7 @@
                 return true;
             });
 
-            // 2. Filtrar por buscador (Cliente o Servicio)
+            // 2. Filtrar por buscador
             if (busqueda) {
                 filtradas = filtradas.filter(sol => {
                     const nombre = (sol.usuario_nombre || '').toLowerCase();
