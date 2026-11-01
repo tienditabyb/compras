@@ -49,10 +49,14 @@
         .config-panel h4 { font-size: 0.9rem; color: #92400e; margin-bottom: 10px; }
         .config-option { display: flex; align-items: center; gap: 10px; padding: 10px; background: white; border-radius: 8px; margin-bottom: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
         .config-option:hover { border-color: #fbbf24; background: #fffbeb; }
+        .config-option.recomendada { border-color: #22c55e; background: #f0fdf4; }
         .config-option input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: #f59e0b; }
+        .config-option.recomendada input[type="radio"] { accent-color: #22c55e; }
         .config-option > div { flex: 1; font-size: 0.85rem; }
         .config-option strong { display: block; color: #92400e; font-size: 0.9rem; margin-bottom: 2px; }
+        .config-option.recomendada strong { color: #166534; }
         .config-option span { color: #64748b; font-size: 0.78rem; }
+        .badge-recomendada { background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 5px; vertical-align: middle; }
         .config-nota { font-size: 0.72rem; color: #92400e; margin-top: 8px; font-style: italic; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -224,9 +228,9 @@
                     <div class="form-group"><label>Isc (A)</label><input type="number" id="sis-tiene-panel-isc" value="14" min="0.1" step="0.1" /></div>
                     <div class="form-group"><label>Voc (V)</label><input type="number" id="sis-tiene-panel-voc" value="50" min="1" step="0.1" /></div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Paneles que YA Tiene</label><input type="number" id="sis-tiene-paneles" value="0" min="0" /></div>
-                    <div class="form-group"><label>Paneles Adicionales</label><input type="number" id="sis-tiene-adicionales" placeholder="Auto (según banco)" min="0" /></div>
+                <div class="form-group">
+                    <label>Cantidad de Paneles que YA Tiene</label>
+                    <input type="number" id="sis-tiene-paneles" value="8" min="1" />
                 </div>
                 <div class="section-title">📏 Distancias</div>
                 <div class="form-row">
@@ -236,7 +240,7 @@
                 <button class="btn-calcular" onclick="calcularSistemasTiene()">Calcular Ampliación Completa</button>
 
                 <div class="config-panel" id="sis-tiene-configs-panel">
-                    <h4>⚙️ Configuraciones posibles del array completo (elige una):</h4>
+                    <h4>⚙️ Configuraciones posibles para sus paneles (elige una):</h4>
                     <div id="sis-tiene-configs-list"></div>
                     <div class="config-nota">⚠️ Verifica que el MPPT soporte el voltaje de la configuración elegida.</div>
                 </div>
@@ -244,7 +248,7 @@
                 <div class="resultado-box" id="res-sis-tiene">
                     <h3>✅ Lista Completa para Ampliación</h3>
                     <div class="section-title" style="font-size:0.85rem;">🔆 Equipos Principales</div>
-                    <div class="res-item"><span class="label">Paneles Adicionales:</span><span class="value" id="sis-t-paneles">-</span></div>
+                    <div class="res-item"><span class="label">Paneles del Cliente:</span><span class="value" id="sis-t-paneles">-</span></div>
                     <div class="res-item"><span class="label">Controlador de Carga:</span><span class="value" id="sis-t-controlador">-</span></div>
                     <div class="res-item"><span class="label">Transfer Switch:</span><span class="value" id="sis-t-transfer">-</span></div>
                     <div class="section-title" style="font-size:0.85rem; margin-top:10px;">🛡️ Protecciones</div>
@@ -285,16 +289,30 @@
 
         function generarConfiguraciones(numPaneles, isc, voc) {
             const configs = [];
+            let maxVocSeguro = -1;
+            let idxRecomendada = -1;
+
             for (let s = 1; s <= numPaneles; s++) {
                 if (numPaneles % s !== 0) continue;
                 const p = numPaneles / s;
                 const vocTotal = s * voc;
                 if (vocTotal > VOC_MAX) continue;
                 const iscTotal = p * isc;
+                
                 configs.push({
                     serie: s, paralelo: p, vocTotal: vocTotal, iscTotal: iscTotal,
-                    descripcion: p === 1 ? `${s} en serie` : (s === 1 ? `${p} en paralelo (todos)` : `${s} en serie × ${p} strings`)
+                    descripcion: p === 1 ? `${s} en serie` : (s === 1 ? `${p} en paralelo (todos)` : `${s} en serie × ${p} strings`),
+                    esRecomendada: false
                 });
+
+                if (vocTotal > maxVocSeguro) {
+                    maxVocSeguro = vocTotal;
+                    idxRecomendada = configs.length - 1;
+                }
+            }
+            
+            if (idxRecomendada >= 0 && configs.length > 0) {
+                configs[idxRecomendada].esRecomendada = true;
             }
             return configs;
         }
@@ -411,7 +429,8 @@
             configsNada = configs;
 
             renderConfigs('nada');
-            aplicarConfigNada(0);
+            const idxRec = configs.findIndex(c => c.esRecomendada);
+            aplicarConfigNada(idxRec >= 0 ? idxRec : 0);
         }
 
         function renderConfigs(tipo) {
@@ -423,10 +442,14 @@
 
             const html = configs.map((c, i) => {
                 const brk = calcularBreakerArray(c.iscTotal);
-                return `<label class="config-option">
-                    <input type="radio" name="config-${tipo}" value="${i}" ${i === 0 ? 'checked' : ''} onchange="${fnName}(${i})">
+                const isRec = c.esRecomendada;
+                const badge = isRec ? '<span class="badge-recomendada">⭐ RECOMENDADA</span>' : '';
+                const claseRec = isRec ? 'recomendada' : '';
+                
+                return `<label class="config-option ${claseRec}">
+                    <input type="radio" name="config-${tipo}" value="${i}" ${isRec ? 'checked' : ''} onchange="${fnName}(${i})">
                     <div>
-                        <strong>${c.descripcion}</strong>
+                        <strong>${c.descripcion} ${badge}</strong>
                         <span>${c.vocTotal}V / ${c.iscTotal.toFixed(1)}A → Breaker ${brk}A DC</span>
                     </div>
                 </label>`;
@@ -476,17 +499,11 @@
             const panelW = parseFloat(document.getElementById('sis-tiene-panel-w').value) || 550;
             const panelIsc = parseFloat(document.getElementById('sis-tiene-panel-isc').value) || 14;
             const panelVoc = parseFloat(document.getElementById('sis-tiene-panel-voc').value) || 50;
-            const adicionalesManual = parseInt(document.getElementById('sis-tiene-adicionales').value);
 
             if (inv <= 0 || ah <= 0 || cantBat <= 0) { alert('Ingresa inversor y baterías válidos.'); return; }
+            if (panelesExistentes <= 0) { alert('El cliente debe tener al menos 1 panel para calcular configuraciones.'); return; }
 
-            const whBanco = ah * voltaje * cantBat;
-            const panelesTotalesAuto = Math.ceil((whBanco / 1000) / ((panelW / 1000) * 4 * 0.8));
-            const adicionalesAuto = Math.max(0, panelesTotalesAuto - panelesExistentes);
-            const adicionales = isNaN(adicionalesManual) ? adicionalesAuto : adicionalesManual;
-            const panelesTotal = panelesExistentes + adicionales;
-
-            if (panelesTotal <= 0) { alert('No hay paneles. Configura al menos 1.'); return; }
+            const panelesTotal = panelesExistentes;
 
             const corrienteCtrl = (panelesTotal * panelW) / voltaje;
             const controlador = corrienteCtrl > 100 ? "MPPT de 100A o más" : (corrienteCtrl > 80 ? "MPPT de 80A" : (corrienteCtrl > 60 ? "MPPT de 60A" : "MPPT de 40A"));
@@ -503,11 +520,12 @@
             const configs = generarConfiguraciones(panelesTotal, panelIsc, panelVoc);
             if (configs.length === 0) { alert('Ninguna configuración válida (Voc máximo ' + VOC_MAX + 'V).'); return; }
 
-            datosTiene = { panelesExistentes, adicionales, panelesTotal, panelW, panelIsc, panelVoc, controlador, transfer, breakerBat, breakerAC, cableBat, cableAC, distSolar };
+            datosTiene = { panelesTotal, panelW, panelIsc, panelVoc, controlador, transfer, breakerBat, breakerAC, cableBat, cableAC, distSolar };
             configsTiene = configs;
 
             renderConfigs('tiene');
-            aplicarConfigTiene(0);
+            const idxRec = configs.findIndex(c => c.esRecomendada);
+            aplicarConfigTiene(idxRec >= 0 ? idxRec : 0);
         }
 
         function aplicarConfigTiene(idx) {
@@ -519,9 +537,8 @@
             const fusibleSize = calcularBreakerArray(d.panelIsc);
             const fusibles = c.paralelo > 1 ? `${c.paralelo} fusibles de ${fusibleSize}A (1 por string)` : `1 fusible de ${fusibleSize}A`;
             const cableSolar = `${Math.ceil(d.distSolar * 1.15)} m de Cable Solar ${calcularCalibreSolar(c.iscTotal, d.distSolar)}`;
-            const panelTexto = d.adicionales > 0 ? `${d.adicionales} uds de ${d.panelW}W (Total: ${d.panelesTotal} paneles — ${c.descripcion})` : `0 adicionales (solo reconfigurar — ${c.descripcion})`;
-
-            document.getElementById('sis-t-paneles').textContent = panelTexto;
+            
+            document.getElementById('sis-t-paneles').textContent = `${d.panelesTotal} paneles de ${d.panelW}W — ${c.descripcion}`;
             document.getElementById('sis-t-controlador').textContent = d.controlador + ` (entrada ≥${voltMax}V)`;
             document.getElementById('sis-t-transfer').textContent = d.transfer;
             document.getElementById('sis-t-bdc-paneles').textContent = breakerPaneles;
