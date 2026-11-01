@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B&B - Calculadora Eléctrica Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f5f6fa; color: #1e272e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
+        .calc-container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 680px; }
+        .calc-header { text-align: center; margin-bottom: 20px; }
+        .calc-header h1 { font-size: 1.5rem; color: #1a252f; font-weight: 800; }
+        .calc-header span { color: #2980b9; }
+        .calc-header p { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #eef2f6; padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; background: transparent; color: #64748b; transition: 0.3s; font-family: inherit; }
+        .tab-btn.active { background: white; color: #2980b9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .modulo { display: none; }
+        .modulo.active { display: block; animation: fadeIn 0.3s; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 4px; color: #1e272e; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-size: 0.9rem; background: #f8fafc; font-family: inherit; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: #2980b9; background: white; box-shadow: 0 0 0 3px rgba(41,128,185,0.1); }
+        .form-group small { display: block; font-size: 0.72rem; color: #64748b; margin-top: 3px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .section-title { font-size: 0.9rem; font-weight: 700; color: #2980b9; margin: 15px 0 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .sub-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #eef2f6; padding: 4px; border-radius: 10px; }
+        .sub-tab-btn { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: #64748b; font-family: inherit; transition: 0.2s; }
+        .sub-tab-btn.active { background: white; color: #2980b9; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .sub-modulo { display: none; }
+        .sub-modulo.active { display: block; animation: fadeIn 0.3s; }
+        .btn-calcular { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; margin-top: 15px; cursor: pointer; transition: 0.3s; font-family: inherit; }
+        .btn-calcular:hover { background: #2980b9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(41,128,185,0.3); }
+        .resultado-box { display: none; margin-top: 20px; padding: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; }
+        .resultado-box.show { display: block; animation: fadeIn 0.4s; }
+        .resultado-box h3 { font-size: 1rem; color: #166534; margin-bottom: 12px; text-align: center; border-bottom: 1px dashed #bbf7d0; padding-bottom: 8px; }
+        .res-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #dcfce7; font-size: 0.85rem; gap: 8px; }
+        .res-item:last-child { border-bottom: none; }
+        .res-item .label { font-weight: 500; color: #475569; }
+        .res-item .value { font-weight: 700; color: #166534; background: white; padding: 2px 8px; border-radius: 6px; border: 1px solid #bbf7d0; text-align: right; font-size: 0.8rem; }
+        .alerta { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 0.8rem; background: #dbeafe; color: #2563eb; border-left: 4px solid #2563eb; line-height: 1.4; }
+
+        .config-panel { display: none; margin-top: 15px; padding: 12px; background: #fef3c7; border: 2px solid #fcd34d; border-radius: 10px; }
+        .config-panel.show { display: block; animation: fadeIn 0.4s; }
+        .config-panel h4 { font-size: 0.9rem; color: #92400e; margin-bottom: 10px; }
+        .config-option { display: flex; align-items: center; gap: 10px; padding: 10px; background: white; border-radius: 8px; margin-bottom: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .config-option:hover { border-color: #fbbf24; background: #fffbeb; }
+        .config-option input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: #f59e0b; }
+        .config-option > div { flex: 1; font-size: 0.85rem; }
+        .config-option strong { display: block; color: #92400e; font-size: 0.9rem; margin-bottom: 2px; }
+        .config-option span { color: #64748b; font-size: 0.78rem; }
+        .config-nota { font-size: 0.72rem; color: #92400e; margin-top: 8px; font-style: italic; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 500px) { 
+            .form-row, .form-row-3 { grid-template-columns: 1fr; gap: 0; } 
+            .calc-container { padding: 15px; }
+            .res-item { flex-direction: column; align-items: flex-start; }
+            .res-item .value { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calc-container">
+        <div class="calc-header">
+            <h1>B&B <span>Calculadora Eléctrica</span></h1>
+            <p>Calcula todos los componentes de tu instalación.</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="cambiarModulo('casa', this)">🏠 Casa</button>
+            <button class="tab-btn" onclick="cambiarModulo('sistemas', this)">⚡ Sistemas (Solar)</button>
+        </div>
+
+        <!-- ==================== CASA ==================== -->
+        <div id="modulo-casa" class="modulo active">
+            <div class="form-group">
+                <label>Voltaje General de la Casa</label>
+                <select id="casa-voltaje">
+                    <option value="110">110 Voltios</option>
+                    <option value="220" selected>220 Voltios</option>
+                </select>
+            </div>
+            <div class="section-title">💡 Circuito de Luces</div>
+            <div class="form-row">
+                <div class="form-group"><label>Cant. Bombillos</label><input type="number" id="casa-luces-cant" value="10" min="0" /></div>
+                <div class="form-group"><label>Distancia (m)</label><input type="number" id="casa-luces-dist" value="20" min="0" /></div>
+            </div>
+            <div class="section-title">🔌 Tomas y Bajo Consumo</div>
+            <div class="form-row">
+                <div class="form-group"><label>Cant. Tomas</label><input type="number" id="casa-tomas-cant" value="8" min="0" /></div>
+                <div class="form-group"><label>Distancia (m)</label><input type="number" id="casa-tomas-dist" value="30" min="0" /></div>
+            </div>
+            <div class="section-title">🍳 Cocina</div>
+            <div class="form-row">
+                <div class="form-group"><label>Cant. Equipos</label><input type="number" id="casa-cocina-cant" value="2" min="0" /></div>
+                <div class="form-group"><label>Distancia (m)</label><input type="number" id="casa-cocina-dist" value="15" min="0" /></div>
+            </div>
+            <div class="section-title">❄️ Aires Acondicionados</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Cant. Aires</label><input type="number" id="casa-aire-cant" value="1" min="0" /></div>
+                <div class="form-group"><label>Voltaje Aire</label>
+                    <select id="casa-aire-voltaje"><option value="110">110V</option><option value="220" selected>220V</option></select>
+                </div>
+                <div class="form-group"><label>Distancia (m)</label><input type="number" id="casa-aire-dist" value="15" min="0" /></div>
+            </div>
+            <div class="section-title">⚡ Equipos de Alto Consumo</div>
+            <div class="form-row">
+                <div class="form-group"><label>Cant. Equipos</label><input type="number" id="casa-altos-cant" value="0" min="0" /></div>
+                <div class="form-group"><label>Distancia (m)</label><input type="number" id="casa-altos-dist" value="0" min="0" /></div>
+            </div>
+            <button class="btn-calcular" onclick="calcularCasa()">Calcular Materiales de Casa</button>
+
+            <div class="resultado-box" id="res-casa">
+                <h3>✅ Materiales y Cableado Estimado</h3>
+                <div class="res-item"><span class="label">Breaker Principal:</span><span class="value" id="casa-r-general">-</span></div>
+                <div class="section-title" style="font-size:0.85rem; margin-top:10px;">Breakers por Circuito</div>
+                <div class="res-item"><span class="label">Luces (15A):</span><span class="value" id="casa-r-luces">-</span></div>
+                <div class="res-item"><span class="label">Tomas/Bajo Consumo (20A):</span><span class="value" id="casa-r-tomas">-</span></div>
+                <div class="res-item"><span class="label">Cocina (20A):</span><span class="value" id="casa-r-cocina">-</span></div>
+                <div class="res-item"><span class="label">Aires (30A):</span><span class="value" id="casa-r-aires">-</span></div>
+                <div class="res-item"><span class="label">Altos Consumos (40A/50A):</span><span class="value" id="casa-r-altos">-</span></div>
+                <div class="section-title" style="font-size:0.85rem; margin-top:10px;">Cable Requerido (incluye 15% extra)</div>
+                <div class="res-item"><span class="label">Cable #14 AWG (Luces):</span><span class="value" id="casa-c-14">-</span></div>
+                <div class="res-item"><span class="label">Cable #12 AWG (Tomas/Cocina):</span><span class="value" id="casa-c-12">-</span></div>
+                <div class="res-item"><span class="label">Cable #10 AWG (Aires):</span><span class="value" id="casa-c-10">-</span></div>
+                <div class="res-item"><span class="label">Cable #8 AWG (Altos Consumos):</span><span class="value" id="casa-c-8">-</span></div>
+                <div class="section-title" style="font-size:0.85rem; margin-top:10px;">Accesorios</div>
+                <div class="res-item"><span class="label">Caja de Breakers:</span><span class="value" id="casa-r-caja">-</span></div>
+                <div class="alerta">💡 El cálculo de cable incluye un 15% extra por curvas y conexiones.</div>
+            </div>
+        </div>
+
+        <!-- ==================== SISTEMAS ==================== -->
+        <div id="modulo-sistemas" class="modulo">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="cambiarSubModulo('nada', this)">Cliente sin Nada</button>
+                <button class="sub-tab-btn" onclick="cambiarSubModulo('tiene', this)">Cliente ya tiene Equipo</button>
+            </div>
+
+            <!-- ============ SIN NADA ============ -->
+            <div id="sub-modulo-nada" class="sub-modulo active">
+                <div class="form-row">
+                    <div class="form-group"><label>Consumo Diario (kWh)</label><input type="number" id="sis-kwh" value="5" min="0" step="0.1" /></div>
+                    <div class="form-group"><label>Pico de Potencia (W)</label><input type="number" id="sis-pico" value="2000" min="0" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Voltaje del Sistema</label>
+                        <select id="sis-voltaje"><option value="12">12V</option><option value="24" selected>24V</option><option value="48">48V</option></select>
+                    </div>
+                    <div class="form-group"><label>Días Autonomía</label><input type="number" id="sis-dias" value="1" min="1" /></div>
+                </div>
+                <div class="section-title">📋 Datos del Panel Solar</div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Potencia (W)</label><input type="number" id="sis-panel-w" value="550" min="1" /></div>
+                    <div class="form-group"><label>Isc (A)</label><input type="number" id="sis-panel-isc" value="14" min="0.1" step="0.1" /></div>
+                    <div class="form-group"><label>Voc (V)</label><input type="number" id="sis-panel-voc" value="50" min="1" step="0.1" /></div>
+                </div>
+                <small style="display:block; font-size:0.72rem; color:#64748b; margin-top:-5px; margin-bottom:10px;">Estos datos están en la etiqueta del panel (parte trasera).</small>
+                <div class="form-group">
+                    <label>Cantidad de Paneles</label>
+                    <input type="number" id="sis-cant-paneles" placeholder="Auto (según consumo)" min="1" />
+                </div>
+                <div class="section-title">📏 Distancias</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Paneles → Inversor (m)</label><input type="number" id="sis-dist-solar" value="20" min="0" /></div>
+                    <div class="form-group"><label>Inversor → Contador (m)</label><input type="number" id="sis-dist-ac" value="15" min="0" /></div>
+                </div>
+                <button class="btn-calcular" onclick="calcularSistemasNada()">Calcular Sistema Completo</button>
+
+                <div class="config-panel" id="sis-configs-panel">
+                    <h4>⚙️ Configuraciones posibles (elige una):</h4>
+                    <div id="sis-configs-list"></div>
+                    <div class="config-nota">⚠️ Verifica que el MPPT soporte el voltaje de la configuración elegida.</div>
+                </div>
+
+                <div class="resultado-box" id="res-sis-nada">
+                    <h3>✅ Lista Completa de Materiales</h3>
+                    <div class="section-title" style="font-size:0.85rem;">🔆 Equipos Principales</div>
+                    <div class="res-item"><span class="label">Paneles Solares:</span><span class="value" id="sis-r-paneles">-</span></div>
+                    <div class="res-item"><span class="label">Baterías (200Ah):</span><span class="value" id="sis-r-baterias">-</span></div>
+                    <div class="res-item"><span class="label">Inversor Recomendado:</span><span class="value" id="sis-r-inversor">-</span></div>
+                    <div class="res-item"><span class="label">Controlador de Carga:</span><span class="value" id="sis-r-controlador">-</span></div>
+                    <div class="res-item"><span class="label">Transfer Switch:</span><span class="value" id="sis-r-transfer">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">🛡️ Protecciones</div>
+                    <div class="res-item"><span class="label">🔆 Breaker DC Paneles:</span><span class="value" id="sis-r-bdc-paneles">-</span></div>
+                    <div class="res-item"><span class="label">🔋 Breaker DC Batería:</span><span class="value" id="sis-r-bdc-bat">-</span></div>
+                    <div class="res-item"><span class="label">⚡ Breaker AC Principal:</span><span class="value" id="sis-r-bac">-</span></div>
+                    <div class="res-item"><span class="label">🔌 Fusibles (String Solar):</span><span class="value" id="sis-r-fusibles">-</span></div>
+                    <div class="res-item"><span class="label">⚡ Supresor de Picos (SPD):</span><span class="value" id="sis-r-spd">-</span></div>
+                    <div class="res-item"><span class="label">📦 Caja de Breakers:</span><span class="value" id="sis-r-caja">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">🔌 Cableado</div>
+                    <div class="res-item"><span class="label">Cable Solar (Paneles→Inversor):</span><span class="value" id="sis-r-csolar">-</span></div>
+                    <div class="res-item"><span class="label">Cable Baterías (Ctrl→Bat):</span><span class="value" id="sis-r-cbat">-</span></div>
+                    <div class="res-item"><span class="label">Cable AC (Inversor→Contador):</span><span class="value" id="sis-r-cac">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">⚙️ Accesorios de Montaje</div>
+                    <div class="res-item"><span class="label">Varilla de Cobre:</span><span class="value" id="sis-r-varilla">-</span></div>
+                    <div class="res-item"><span class="label">Conector de Tierra:</span><span class="value" id="sis-r-tierra">-</span></div>
+                    <div class="alerta">💡 Los breakers DC se calculan según la configuración elegida.</div>
+                </div>
+            </div>
+
+            <!-- ============ YA TIENE ============ -->
+            <div id="sub-modulo-tiene" class="sub-modulo">
+                <div class="form-row">
+                    <div class="form-group"><label>Potencia Inversor (W)</label><input type="number" id="sis-tiene-inv" value="3000" min="0" /></div>
+                    <div class="form-group"><label>Voltaje del Sistema</label>
+                        <select id="sis-tiene-voltaje"><option value="12">12V</option><option value="24" selected>24V</option><option value="48">48V</option></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Baterías (Ah c/u)</label><input type="number" id="sis-tiene-ah" value="200" min="0" /></div>
+                    <div class="form-group"><label>Cant. Baterías</label><input type="number" id="sis-tiene-cant-bat" value="2" min="0" /></div>
+                </div>
+                <div class="section-title">📋 Datos del Panel Solar</div>
+                <div class="form-row-3">
+                    <div class="form-group"><label>Potencia (W)</label><input type="number" id="sis-tiene-panel-w" value="550" min="1" /></div>
+                    <div class="form-group"><label>Isc (A)</label><input type="number" id="sis-tiene-panel-isc" value="14" min="0.1" step="0.1" /></div>
+                    <div class="form-group"><label>Voc (V)</label><input type="number" id="sis-tiene-panel-voc" value="50" min="1" step="0.1" /></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Paneles que YA Tiene</label><input type="number" id="sis-tiene-paneles" value="0" min="0" /></div>
+                    <div class="form-group"><label>Paneles Adicionales</label><input type="number" id="sis-tiene-adicionales" placeholder="Auto (según banco)" min="0" /></div>
+                </div>
+                <div class="section-title">📏 Distancias</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Paneles → Inversor (m)</label><input type="number" id="sis-tiene-dist-solar" value="20" min="0" /></div>
+                    <div class="form-group"><label>Inversor → Contador (m)</label><input type="number" id="sis-tiene-dist-ac" value="15" min="0" /></div>
+                </div>
+                <button class="btn-calcular" onclick="calcularSistemasTiene()">Calcular Ampliación Completa</button>
+
+                <div class="config-panel" id="sis-tiene-configs-panel">
+                    <h4>⚙️ Configuraciones posibles del array completo (elige una):</h4>
+                    <div id="sis-tiene-configs-list"></div>
+                    <div class="config-nota">⚠️ Verifica que el MPPT soporte el voltaje de la configuración elegida.</div>
+                </div>
+
+                <div class="resultado-box" id="res-sis-tiene">
+                    <h3>✅ Lista Completa para Ampliación</h3>
+                    <div class="section-title" style="font-size:0.85rem;">🔆 Equipos Principales</div>
+                    <div class="res-item"><span class="label">Paneles Adicionales:</span><span class="value" id="sis-t-paneles">-</span></div>
+                    <div class="res-item"><span class="label">Controlador de Carga:</span><span class="value" id="sis-t-controlador">-</span></div>
+                    <div class="res-item"><span class="label">Transfer Switch:</span><span class="value" id="sis-t-transfer">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">🛡️ Protecciones</div>
+                    <div class="res-item"><span class="label">🔆 Breaker DC Paneles:</span><span class="value" id="sis-t-bdc-paneles">-</span></div>
+                    <div class="res-item"><span class="label">🔋 Breaker DC Batería:</span><span class="value" id="sis-t-bdc-bat">-</span></div>
+                    <div class="res-item"><span class="label">⚡ Breaker AC Principal:</span><span class="value" id="sis-t-bac">-</span></div>
+                    <div class="res-item"><span class="label">🔌 Fusibles (String Solar):</span><span class="value" id="sis-t-fusibles">-</span></div>
+                    <div class="res-item"><span class="label">⚡ Supresor de Picos (SPD):</span><span class="value" id="sis-t-spd">-</span></div>
+                    <div class="res-item"><span class="label">📦 Caja de Breakers:</span><span class="value" id="sis-t-caja">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">🔌 Cableado</div>
+                    <div class="res-item"><span class="label">Cable Solar (Paneles→Inversor):</span><span class="value" id="sis-t-csolar">-</span></div>
+                    <div class="res-item"><span class="label">Cable Baterías (Ctrl→Bat):</span><span class="value" id="sis-t-cbat">-</span></div>
+                    <div class="res-item"><span class="label">Cable AC (Inversor→Contador):</span><span class="value" id="sis-t-cac">-</span></div>
+                    <div class="section-title" style="font-size:0.85rem; margin-top:10px;">⚙️ Accesorios de Montaje</div>
+                    <div class="res-item"><span class="label">Varilla de Cobre:</span><span class="value" id="sis-t-varilla">-</span></div>
+                    <div class="res-item"><span class="label">Conector de Tierra:</span><span class="value" id="sis-t-tierra">-</span></div>
+                    <div class="alerta">💡 Los breakers DC se calculan según la configuración elegida.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cambiarModulo(mod, btn) {
+            document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('modulo-' + mod).classList.add('active');
+            btn.classList.add('active');
+        }
+        function cambiarSubModulo(sub, btn) {
+            document.querySelectorAll('.sub-modulo').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sub-modulo-' + sub).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        const VOC_MAX = 500;
+
+        function generarConfiguraciones(numPaneles, isc, voc) {
+            const configs = [];
+            for (let s = 1; s <= numPaneles; s++) {
+                if (numPaneles % s !== 0) continue;
+                const p = numPaneles / s;
+                const vocTotal = s * voc;
+                if (vocTotal > VOC_MAX) continue;
+                const iscTotal = p * isc;
+                configs.push({
+                    serie: s, paralelo: p, vocTotal: vocTotal, iscTotal: iscTotal,
+                    descripcion: p === 1 ? `${s} en serie` : (s === 1 ? `${p} en paralelo (todos)` : `${s} en serie × ${p} strings`)
+                });
+            }
+            return configs;
+        }
+
+        function calcularBreakerArray(corriente) {
+            const sizes = [15, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 300];
+            return sizes.find(s => s >= corriente * 1.25) || 400;
+        }
+
+        function calcularCalibreSolar(iscTotal, distSolar) {
+            if (iscTotal > 30) return "4 AWG";
+            if (iscTotal > 20) return "6 AWG";
+            if (distSolar > 40) return "6 AWG";
+            if (distSolar > 20) return "8 AWG";
+            return "10 AWG";
+        }
+
+        function calcularCalibreBateria(corriente) {
+            if (corriente > 200) return "2/0 AWG";
+            if (corriente > 120) return "1/0 AWG";
+            if (corriente > 80) return "4 AWG";
+            if (corriente > 50) return "6 AWG";
+            return "8 AWG";
+        }
+
+        function calcularCalibreAC(corrienteAC, distAC) {
+            if (corrienteAC > 30) return "6 AWG";
+            if (corrienteAC > 20) return distAC > 20 ? "6 AWG" : "8 AWG";
+            return distAC > 20 ? "8 AWG" : "10 AWG";
+        }
+
+        function calcularCasa() {
+            const cantLuces = parseInt(document.getElementById('casa-luces-cant').value) || 0;
+            const distLuces = parseFloat(document.getElementById('casa-luces-dist').value) || 0;
+            const cantTomas = parseInt(document.getElementById('casa-tomas-cant').value) || 0;
+            const distTomas = parseFloat(document.getElementById('casa-tomas-dist').value) || 0;
+            const cantCocina = parseInt(document.getElementById('casa-cocina-cant').value) || 0;
+            const distCocina = parseFloat(document.getElementById('casa-cocina-dist').value) || 0;
+            const cantAires = parseInt(document.getElementById('casa-aire-cant').value) || 0;
+            const distAire = parseFloat(document.getElementById('casa-aire-dist').value) || 0;
+            const cantAltos = parseInt(document.getElementById('casa-altos-cant').value) || 0;
+            const distAltos = parseFloat(document.getElementById('casa-altos-dist').value) || 0;
+
+            const bLuces = cantLuces > 0 ? Math.ceil(cantLuces / 10) : 0;
+            const bTomas = cantTomas > 0 ? Math.ceil(cantTomas / 6) : 0;
+            const bCocina = cantCocina > 0 ? 1 : 0;
+            const bAires = cantAires;
+            const bAltos = cantAltos;
+            const totalBreakers = bLuces + bTomas + bCocina + bAires + bAltos;
+            let principal = 40;
+            if (totalBreakers > 4) principal = 60;
+            if (totalBreakers > 8) principal = 100;
+            const caja = totalBreakers <= 6 ? "Caja de 8 espacios" : (totalBreakers <= 12 ? "Caja de 16 espacios" : "Caja de 24 espacios");
+
+            const factor = 1.15;
+            const cable14 = Math.ceil(distLuces * factor);
+            const cable12 = Math.ceil((distTomas + distCocina) * factor);
+            const cable10 = Math.ceil(distAire * factor);
+            const cable8 = Math.ceil(distAltos * factor);
+
+            document.getElementById('casa-r-general').textContent = principal + " A";
+            document.getElementById('casa-r-luces').textContent = bLuces + " uds";
+            document.getElementById('casa-r-tomas').textContent = bTomas + " uds";
+            document.getElementById('casa-r-cocina').textContent = bCocina + " uds";
+            document.getElementById('casa-r-aires').textContent = bAires + " uds";
+            document.getElementById('casa-r-altos').textContent = bAltos + " uds";
+            document.getElementById('casa-c-14').textContent = cable14 + " m";
+            document.getElementById('casa-c-12').textContent = cable12 + " m";
+            document.getElementById('casa-c-10').textContent = cable10 + " m";
+            document.getElementById('casa-c-8').textContent = cable8 + " m";
+            document.getElementById('casa-r-caja').textContent = caja;
+            document.getElementById('res-casa').classList.add('show');
+        }
+
+        let configsNada = [], configsTiene = [], datosNada = {}, datosTiene = {};
+
+        function calcularSistemasNada() {
+            const kwh = parseFloat(document.getElementById('sis-kwh').value) || 0;
+            const pico = parseFloat(document.getElementById('sis-pico').value) || 0;
+            const voltaje = parseInt(document.getElementById('sis-voltaje').value);
+            const dias = parseFloat(document.getElementById('sis-dias').value) || 1;
+            const distSolar = parseFloat(document.getElementById('sis-dist-solar').value) || 0;
+            const distAC = parseFloat(document.getElementById('sis-dist-ac').value) || 0;
+            const panelW = parseFloat(document.getElementById('sis-panel-w').value) || 550;
+            const panelIsc = parseFloat(document.getElementById('sis-panel-isc').value) || 14;
+            const panelVoc = parseFloat(document.getElementById('sis-panel-voc').value) || 50;
+            const cantManual = parseInt(document.getElementById('sis-cant-paneles').value) || 0;
+
+            if (kwh <= 0 || pico <= 0) { alert('Ingresa consumo y pico de potencia válidos.'); return; }
+
+            const panelesAuto = Math.ceil(kwh / ((panelW / 1000) * 4));
+            const paneles = cantManual > 0 ? cantManual : panelesAuto;
+
+            const baterias = Math.ceil((kwh * dias) / ((200 * 12) / 1000));
+            let inversor = pico * 1.25;
+            let inversorTexto = inversor <= 1000 ? "1000W (1kW)" : inversor <= 2000 ? "2000W (2kW)" : inversor <= 3000 ? "3000W (3kW)" : inversor <= 5000 ? "5000W (5kW)" : "Mayor a 5kW";
+
+            const corrienteCtrl = (paneles * panelW) / voltaje;
+            const controlador = corrienteCtrl > 80 ? "MPPT de 80A o más" : (corrienteCtrl > 40 ? "MPPT de 60A" : "MPPT de 40A");
+            const transfer = inversor <= 2000 ? "Transfer de 20A (2kW)" : (inversor <= 3000 ? "Transfer de 30A (3kW)" : (inversor <= 5000 ? "Transfer de 50A (5kW)" : "Transfer de 63A o más"));
+
+            const corrienteBat = inversor / voltaje;
+            const breakerBat = "1 breaker DC de " + calcularBreakerArray(corrienteBat) + "A";
+            const corrienteAC = pico / 220;
+            const breakerAC = corrienteAC > 30 ? "Breaker AC 40A" : (corrienteAC > 20 ? "Breaker AC 32A" : "Breaker AC 20A");
+
+            const cableBat = "7 m de Cable " + calcularCalibreBateria(corrienteBat);
+            const cableAC = Math.ceil(distAC * 1.15) + " m de Cable " + calcularCalibreAC(corrienteAC, distAC) + " (AC)";
+
+            const configs = generarConfiguraciones(paneles, panelIsc, panelVoc);
+            if (configs.length === 0) { alert('Ninguna configuración válida (Voc máximo ' + VOC_MAX + 'V).'); return; }
+
+            datosNada = { paneles, panelW, panelIsc, panelVoc, baterias, inversorTexto, controlador, transfer, breakerBat, breakerAC, cableBat, cableAC, distSolar };
+            configsNada = configs;
+
+            renderConfigs('nada');
+            aplicarConfigNada(0);
+        }
+
+        function renderConfigs(tipo) {
+            const esNada = tipo === 'nada';
+            const configs = esNada ? configsNada : configsTiene;
+            const listId = esNada ? 'sis-configs-list' : 'sis-tiene-configs-list';
+            const panelId = esNada ? 'sis-configs-panel' : 'sis-tiene-configs-panel';
+            const fnName = esNada ? 'aplicarConfigNada' : 'aplicarConfigTiene';
+
+            const html = configs.map((c, i) => {
+                const brk = calcularBreakerArray(c.iscTotal);
+                return `<label class="config-option">
+                    <input type="radio" name="config-${tipo}" value="${i}" ${i === 0 ? 'checked' : ''} onchange="${fnName}(${i})">
+                    <div>
+                        <strong>${c.descripcion}</strong>
+                        <span>${c.vocTotal}V / ${c.iscTotal.toFixed(1)}A → Breaker ${brk}A DC</span>
+                    </div>
+                </label>`;
+            }).join('');
+
+            document.getElementById(listId).innerHTML = html;
+            document.getElementById(panelId).classList.add('show');
+        }
+
+        function aplicarConfigNada(idx) {
+            const c = configsNada[idx];
+            const d = datosNada;
+            const brk = calcularBreakerArray(c.iscTotal);
+            const voltMax = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+            const breakerPaneles = `1 breaker DC de ${brk}A / ${voltMax}V DC`;
+            const fusibleSize = calcularBreakerArray(d.panelIsc);
+            const fusibles = c.paralelo > 1 ? `${c.paralelo} fusibles de ${fusibleSize}A (1 por string)` : `1 fusible de ${fusibleSize}A`;
+            const cableSolar = `${Math.ceil(d.distSolar * 1.15)} m de Cable Solar ${calcularCalibreSolar(c.iscTotal, d.distSolar)}`;
+
+            document.getElementById('sis-r-paneles').textContent = `${d.paneles} uds de ${d.panelW}W — ${c.descripcion}`;
+            document.getElementById('sis-r-baterias').textContent = d.baterias + " uds de 200Ah";
+            document.getElementById('sis-r-inversor').textContent = d.inversorTexto;
+            document.getElementById('sis-r-controlador').textContent = d.controlador + ` (entrada ≥${voltMax}V)`;
+            document.getElementById('sis-r-transfer').textContent = d.transfer;
+            document.getElementById('sis-r-bdc-paneles').textContent = breakerPaneles;
+            document.getElementById('sis-r-bdc-bat').textContent = d.breakerBat;
+            document.getElementById('sis-r-bac').textContent = d.breakerAC;
+            document.getElementById('sis-r-fusibles').textContent = fusibles;
+            document.getElementById('sis-r-spd').textContent = "Supresor de Picos DC + AC (1 kit)";
+            document.getElementById('sis-r-caja').textContent = "Caja DC/AC combinada de 12 espacios";
+            document.getElementById('sis-r-csolar').textContent = cableSolar;
+            document.getElementById('sis-r-cbat').textContent = d.cableBat;
+            document.getElementById('sis-r-cac').textContent = d.cableAC;
+            document.getElementById('sis-r-varilla').textContent = "1 varilla de cobre 2.4m (5/8\")";
+            document.getElementById('sis-r-tierra').textContent = "1 conector de tierra + cable verde 6 AWG (5m)";
+            document.getElementById('res-sis-nada').classList.add('show');
+        }
+
+        function calcularSistemasTiene() {
+            const inv = parseFloat(document.getElementById('sis-tiene-inv').value) || 0;
+            const voltaje = parseInt(document.getElementById('sis-tiene-voltaje').value);
+            const ah = parseFloat(document.getElementById('sis-tiene-ah').value) || 0;
+            const cantBat = parseFloat(document.getElementById('sis-tiene-cant-bat').value) || 0;
+            const panelesExistentes = parseInt(document.getElementById('sis-tiene-paneles').value) || 0;
+            const distSolar = parseFloat(document.getElementById('sis-tiene-dist-solar').value) || 0;
+            const distAC = parseFloat(document.getElementById('sis-tiene-dist-ac').value) || 0;
+            const panelW = parseFloat(document.getElementById('sis-tiene-panel-w').value) || 550;
+            const panelIsc = parseFloat(document.getElementById('sis-tiene-panel-isc').value) || 14;
+            const panelVoc = parseFloat(document.getElementById('sis-tiene-panel-voc').value) || 50;
+            const adicionalesManual = parseInt(document.getElementById('sis-tiene-adicionales').value);
+
+            if (inv <= 0 || ah <= 0 || cantBat <= 0) { alert('Ingresa inversor y baterías válidos.'); return; }
+
+            const whBanco = ah * voltaje * cantBat;
+            const panelesTotalesAuto = Math.ceil((whBanco / 1000) / ((panelW / 1000) * 4 * 0.8));
+            const adicionalesAuto = Math.max(0, panelesTotalesAuto - panelesExistentes);
+            const adicionales = isNaN(adicionalesManual) ? adicionalesAuto : adicionalesManual;
+            const panelesTotal = panelesExistentes + adicionales;
+
+            if (panelesTotal <= 0) { alert('No hay paneles. Configura al menos 1.'); return; }
+
+            const corrienteCtrl = (panelesTotal * panelW) / voltaje;
+            const controlador = corrienteCtrl > 100 ? "MPPT de 100A o más" : (corrienteCtrl > 80 ? "MPPT de 80A" : (corrienteCtrl > 60 ? "MPPT de 60A" : "MPPT de 40A"));
+            const transfer = inv <= 2000 ? "Transfer de 20A (2kW)" : (inv <= 3000 ? "Transfer de 30A (3kW)" : (inv <= 5000 ? "Transfer de 50A (5kW)" : "Transfer de 63A o más"));
+
+            const corrienteMaxInv = inv / voltaje;
+            const breakerBat = "1 breaker DC de " + calcularBreakerArray(corrienteMaxInv) + "A";
+            const corrienteAC = inv / 220;
+            const breakerAC = corrienteAC > 40 ? "Breaker AC 50A" : (corrienteAC > 30 ? "Breaker AC 40A" : (corrienteAC > 20 ? "Breaker AC 32A" : "Breaker AC 20A"));
+
+            const cableBat = "7 m de Cable " + calcularCalibreBateria(corrienteMaxInv);
+            const cableAC = Math.ceil(distAC * 1.15) + " m de Cable " + calcularCalibreAC(corrienteAC, distAC) + " (AC)";
+
+            const configs = generarConfiguraciones(panelesTotal, panelIsc, panelVoc);
+            if (configs.length === 0) { alert('Ninguna configuración válida (Voc máximo ' + VOC_MAX + 'V).'); return; }
+
+            datosTiene = { panelesExistentes, adicionales, panelesTotal, panelW, panelIsc, panelVoc, controlador, transfer, breakerBat, breakerAC, cableBat, cableAC, distSolar };
+            configsTiene = configs;
+
+            renderConfigs('tiene');
+            aplicarConfigTiene(0);
+        }
+
+        function aplicarConfigTiene(idx) {
+            const c = configsTiene[idx];
+            const d = datosTiene;
+            const brk = calcularBreakerArray(c.iscTotal);
+            const voltMax = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+            const breakerPaneles = `1 breaker DC de ${brk}A / ${voltMax}V DC`;
+            const fusibleSize = calcularBreakerArray(d.panelIsc);
+            const fusibles = c.paralelo > 1 ? `${c.paralelo} fusibles de ${fusibleSize}A (1 por string)` : `1 fusible de ${fusibleSize}A`;
+            const cableSolar = `${Math.ceil(d.distSolar * 1.15)} m de Cable Solar ${calcularCalibreSolar(c.iscTotal, d.distSolar)}`;
+            const panelTexto = d.adicionales > 0 ? `${d.adicionales} uds de ${d.panelW}W (Total: ${d.panelesTotal} paneles — ${c.descripcion})` : `0 adicionales (solo reconfigurar — ${c.descripcion})`;
+
+            document.getElementById('sis-t-paneles').textContent = panelTexto;
+            document.getElementById('sis-t-controlador').textContent = d.controlador + ` (entrada ≥${voltMax}V)`;
+            document.getElementById('sis-t-transfer').textContent = d.transfer;
+            document.getElementById('sis-t-bdc-paneles').textContent = breakerPaneles;
+            document.getElementById('sis-t-bdc-bat').textContent = d.breakerBat;
+            document.getElementById('sis-t-bac').textContent = d.breakerAC;
+            document.getElementById('sis-t-fusibles').textContent = fusibles;
+            document.getElementById('sis-t-spd').textContent = "Supresor de Picos DC + AC (1 kit)";
+            document.getElementById('sis-t-caja').textContent = "Caja DC/AC combinada de 12 espacios";
+            document.getElementById('sis-t-csolar').textContent = cableSolar;
+            document.getElementById('sis-t-cbat').textContent = d.cableBat;
+            document.getElementById('sis-t-cac').textContent = d.cableAC;
+            document.getElementById('sis-t-varilla').textContent = "1 varilla de cobre 2.4m (5/8\")";
+            document.getElementById('sis-t-tierra').textContent = "1 conector de tierra + cable verde 6 AWG (5m)";
+            document.getElementById('res-sis-tiene').classList.add('show');
+        }
+    </script>
+</body>
+</html>
