@@ -40,7 +40,6 @@
         .res-item:last-child { border-bottom: none; }
         .res-item .label { font-weight: 500; color: #475569; }
         .res-item .value { font-weight: 700; color: #166534; background: white; padding: 2px 8px; border-radius: 6px; border: 1px solid #bbf7d0; text-align: right; font-size: 0.8rem; }
-        .alerta { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 0.8rem; background: #dbeafe; color: #2563eb; border-left: 4px solid #2563eb; line-height: 1.4; }
 
         .config-panel { display: none; margin-top: 15px; padding: 12px; background: #fef3c7; border: 2px solid #fcd34d; border-radius: 10px; }
         .config-panel.show { display: block; animation: fadeIn 0.4s; }
@@ -55,13 +54,23 @@
         .config-option.recomendada strong { color: #166534; }
         .config-option span { color: #64748b; font-size: 0.78rem; }
         .badge-recomendada { background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 5px; vertical-align: middle; }
-        .config-nota { font-size: 0.72rem; color: #92400e; margin-top: 8px; font-style: italic; }
         
-        .btn-guardar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; margin-top: 15px; cursor: pointer; display: none; }
-        .btn-guardar.show { display: block; }
+        .btn-guardar { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; margin-top: 15px; cursor: pointer; display: block; }
         .btn-guardar:hover { background: #059669; }
 
+        /* ESTILOS DEL MODAL (VENTANA FLOTANTE) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: white; width: 100%; max-width: 400px; border-radius: 16px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: zoomIn 0.3s; }
+        .modal-box h2 { font-size: 1.2rem; color: #1a252f; margin-bottom: 15px; text-align: center; }
+        .modal-box input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-size: 0.95rem; background: #f8fafc; }
+        .modal-box input:focus { border-color: #2980b9; background: white; }
+        .modal-botones { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-cancelar { flex: 1; padding: 10px; background: #e2e8f0; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-aceptar { flex: 1; padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @media (max-width: 500px) { 
             .form-row, .form-row-3 { grid-template-columns: 1fr; gap: 0; } 
             .calc-container { padding: 15px; }
@@ -137,7 +146,7 @@
                 <div class="res-item"><span class="label">Cable #8 AWG (Altos Consumos):</span><span class="value" id="casa-c-8">-</span></div>
                 <div class="section-title" style="font-size:0.85rem; margin-top:10px;">Accesorios</div>
                 <div class="res-item"><span class="label">Caja de Breakers:</span><span class="value" id="casa-r-caja">-</span></div>
-                <button class="btn-guardar" onclick="mostrarFormularioCliente('Casa')">💾 Guardar / Registrar Cliente</button>
+                <button class="btn-guardar" onclick="abrirModal('Casa')">💾 Guardar / Registrar Cliente</button>
             </div>
         </div>
 
@@ -203,7 +212,7 @@
                     <div class="section-title" style="font-size:0.85rem; margin-top:10px;">⚙️ Accesorios de Montaje</div>
                     <div class="res-item"><span class="label">Varilla de Cobre:</span><span class="value" id="sis-r-varilla">-</span></div>
                     <div class="res-item"><span class="label">Conector de Tierra:</span><span class="value" id="sis-r-tierra">-</span></div>
-                    <button class="btn-guardar" onclick="mostrarFormularioCliente('Sistema Solar Nuevo')">💾 Guardar / Registrar Cliente</button>
+                    <button class="btn-guardar" onclick="abrirModal('Sistema Solar Nuevo')">💾 Guardar / Registrar Cliente</button>
                 </div>
             </div>
 
@@ -260,8 +269,22 @@
                     <div class="section-title" style="font-size:0.85rem; margin-top:10px;">⚙️ Accesorios de Montaje</div>
                     <div class="res-item"><span class="label">Varilla de Cobre:</span><span class="value" id="sis-t-varilla">-</span></div>
                     <div class="res-item"><span class="label">Conector de Tierra:</span><span class="value" id="sis-t-tierra">-</span></div>
-                    <button class="btn-guardar" onclick="mostrarFormularioCliente('Sistema Solar Ampliación')">💾 Guardar / Registrar Cliente</button>
+                    <button class="btn-guardar" onclick="abrirModal('Sistema Solar Ampliación')">💾 Guardar / Registrar Cliente</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTANA MODAL (FORMULARIO DE REGISTRO) -->
+    <div class="modal-overlay" id="modalCliente">
+        <div class="modal-box">
+            <h2>📋 Datos del Cliente</h2>
+            <input type="text" id="modal-nombre" placeholder="Nombre y Apellidos" autocomplete="off" />
+            <input type="tel" id="modal-telefono" placeholder="Teléfono" autocomplete="off" />
+            <input type="text" id="modal-direccion" placeholder="Dirección" autocomplete="off" />
+            <div class="modal-botones">
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-aceptar" onclick="guardarClienteOnline()">Guardar</button>
             </div>
         </div>
     </div>
@@ -270,6 +293,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
@@ -282,8 +306,11 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        
         window.firebaseDb = db;
-        window.firebaseFns = { collection, addDoc, serverTimestamp };
+        window.firebaseAuth = auth;
+        window.firebaseFns = { collection, addDoc, serverTimestamp, signInWithEmailAndPassword };
     </script>
 
     <script>
@@ -571,22 +598,34 @@
             document.getElementById('res-sis-tiene').classList.add('show');
         }
 
-        // --- LÓGICA DE GUARDADO (ONLINE) ---
+        // --- LÓGICA DEL MODAL (GUARDADO ONLINE) ---
         let tipoServicioActual = '';
 
-        async function mostrarFormularioCliente(tipo) {
+        function abrirModal(tipo) {
             tipoServicioActual = tipo;
-            
-            const nombre = prompt("Nombre y Apellidos del Cliente:");
-            if (!nombre) return;
-            const telefono = prompt("Teléfono del Cliente:");
-            if (!telefono) return;
-            const direccion = prompt("Dirección del Cliente:");
-            if (!direccion) return;
+            document.getElementById('modal-nombre').value = '';
+            document.getElementById('modal-telefono').value = '';
+            document.getElementById('modal-direccion').value = '';
+            document.getElementById('modalCliente').classList.add('show');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalCliente').classList.remove('show');
+        }
+
+        async function guardarClienteOnline() {
+            const nombre = document.getElementById('modal-nombre').value.trim();
+            const telefono = document.getElementById('modal-telefono').value.trim();
+            const direccion = document.getElementById('modal-direccion').value.trim();
+
+            if (!nombre || !telefono || !direccion) {
+                alert('Por favor, llena todos los campos para registrar al cliente.');
+                return;
+            }
 
             let componentes = [];
             
-            if (tipo === 'Casa') {
+            if (tipoServicioActual === 'Casa') {
                 componentes = [
                     { nombre: "Breaker Principal", cantidad: 1, precio: 0 },
                     { nombre: "Breaker Luces (15A)", cantidad: extraerNumero('casa-r-luces'), precio: 0 },
@@ -600,7 +639,7 @@
                     { nombre: "Cable #8 AWG (Altos Consumos)", cantidad: extraerNumero('casa-c-8'), precio: 0 },
                     { nombre: "Caja de Breakers", cantidad: 1, precio: 0 }
                 ].filter(c => c.cantidad > 0);
-            } else if (tipo === 'Sistema Solar Nuevo') {
+            } else if (tipoServicioActual === 'Sistema Solar Nuevo') {
                 componentes = [
                     { nombre: document.getElementById('sis-r-paneles').textContent, cantidad: 1, precio: 0 },
                     { nombre: document.getElementById('sis-r-baterias').textContent, cantidad: 1, precio: 0 },
@@ -642,7 +681,7 @@
                 usuario_nombre: nombre,
                 usuario_telefono: telefono,
                 direccion: direccion,
-                servicio_nombre: "Instalación Eléctrica - " + tipo,
+                servicio_nombre: "Instalación Eléctrica - " + tipoServicioActual,
                 descripcion: "Calculado desde la App Online.",
                 estado: "Pendiente",
                 fecha_solicitud: window.firebaseFns.serverTimestamp(),
@@ -651,17 +690,22 @@
                 total_presupuesto: 0
             };
 
-            const btn = document.querySelector('.btn-guardar.show');
-            if(btn) { btn.disabled = true; btn.textContent = '⏳ Guardando en la nube...'; }
+            const btn = document.querySelector('.btn-aceptar');
+            if(btn) { btn.disabled = true; btn.textContent = '⏳...'; }
 
             try {
-                const { collection, addDoc } = window.firebaseFns;
+                const { signInWithEmailAndPassword, collection, addDoc } = window.firebaseFns;
+                
+                // Iniciar sesión en Firebase antes de guardar
+                await signInWithEmailAndPassword(window.firebaseAuth, "byb@gmail.com", "deniedcode");
+
                 await addDoc(collection(window.firebaseDb, 'SolicitudesServicios'), nuevoServicio);
                 alert('✅ ¡Servicio registrado con éxito en la base de datos! Ya puedes verlo en tu página de Servicios.');
-                if(btn) { btn.disabled = false; btn.textContent = '💾 Guardar / Registrar Cliente'; }
+                cerrarModal();
             } catch (e) {
                 alert('Error al guardar en Firebase: ' + e.message);
-                if(btn) { btn.disabled = false; btn.textContent = '💾 Guardar / Registrar Cliente'; }
+            } finally {
+                if(btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
             }
         }
 
