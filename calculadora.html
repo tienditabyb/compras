@@ -15,7 +15,7 @@
         .calc-header h1 { font-size: 1.5rem; color: #1a252f; font-weight: 800; }
         .calc-header span { color: #2980b9; }
         .calc-header p { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
-
+        
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #eef2f6; padding: 5px; border-radius: 12px; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; background: transparent; color: #64748b; transition: 0.3s; font-family: inherit; }
         .tab-btn.active { background: white; color: #2980b9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -43,7 +43,7 @@
         .equipo-row { display: grid; grid-template-columns: 2fr 60px 80px 30px; gap: 8px; margin-bottom: 8px; align-items: center; }
         .equipo-row input { padding: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; font-family: inherit; }
         .btn-remove-equipo { background: #fee2e2; color: #dc2626; border: none; border-radius: 4px; height: 30px; cursor: pointer; font-weight: bold; }
-        .btn-add-equipo { background: #e0e7ff; color: #4f46e5; border: 1px dashed #818cf8; border-radius: 6px; padding: 8px; width: 100%; font-weight: 600; font-size: 0.85rem; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
+        .btn-add-equipo { background: #e0e7ff; color: #4f46e5; border: 1px dashed #818cf8; border-radius: 6px; padding: 8px; width: 100%; font-weight: 600; font-size: 0.85rem; cursor: pointer; margin-bottom: 15px; transition: 0.2s; font-family: inherit; }
         .btn-add-equipo:hover { background: #c7d2fe; }
 
         .btn-calcular { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; margin-top: 15px; cursor: pointer; transition: 0.3s; font-family: inherit; }
@@ -141,7 +141,7 @@
 
             <div class="section-title">⚡ Acometida (Cable Principal)</div>
             <div class="form-row">
-                <div class="form-group"><label>Distancia Medidor → Caja Breakers (m)</label><input type="number" id="casa-principal-dist" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Distancia Medidor → Caja (m)</label><input type="number" id="casa-principal-dist" placeholder="0" min="0" /></div>
             </div>
             
             <div class="section-title">💡 Circuito de Luces</div>
@@ -161,9 +161,7 @@
                 <div class="form-group"><label>Distancia del Circuito (m)</label><input type="number" id="casa-cocina-dist" placeholder="0" min="0" /></div>
             </div>
             
-            <div class="lista-equipos" id="lista-cocina">
-                <!-- Aquí se inyectan las filas por JS -->
-            </div>
+            <div class="lista-equipos" id="lista-cocina"></div>
             <button class="btn-add-equipo" onclick="agregarEquipoCocina()">➕ Añadir Equipo de Cocina</button>
 
             <div class="section-title">❄️ Aires Acondicionados</div>
@@ -217,7 +215,6 @@
                 <button class="sub-tab-btn" onclick="cambiarSubModulo('tiene', this)">Cliente ya tiene Equipo</button>
             </div>
 
-            <!-- CONFIGURACIÓN GLOBAL SOLAR -->
             <div class="form-row" style="margin-bottom: 15px;">
                 <div class="form-group">
                     <label>Sistema de Conexión (Cables)</label>
@@ -260,9 +257,9 @@
 
                 <div class="section-title">📏 Distancias de Cables</div>
                 <div class="form-row-3">
-                    <div class="form-group"><label>Paneles → Inversor (m)</label><input type="number" id="sis-dist-solar" placeholder="0" min="0" /></div>
-                    <div class="form-group"><label>Baterías → Inversor (m)</label><input type="number" id="sis-dist-bat" placeholder="0" min="0" /></div>
-                    <div class="form-group"><label>Inversor → Contador (m)</label><input type="number" id="sis-dist-ac" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Paneles → Inv (m)</label><input type="number" id="sis-dist-solar" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Bat → Inv (m)</label><input type="number" id="sis-dist-bat" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Inv → Red (m)</label><input type="number" id="sis-dist-ac" placeholder="0" min="0" /></div>
                 </div>
                 <button class="btn-calcular" onclick="calcularSistemasNada()">Calcular Sistema Completo</button>
 
@@ -321,9 +318,9 @@
 
                 <div class="section-title">📏 Distancias de Cables</div>
                 <div class="form-row-3">
-                    <div class="form-group"><label>Paneles → Inversor (m)</label><input type="number" id="sis-tiene-dist-solar" placeholder="0" min="0" /></div>
-                    <div class="form-group"><label>Baterías → Inversor (m)</label><input type="number" id="sis-tiene-dist-bat" placeholder="0" min="0" /></div>
-                    <div class="form-group"><label>Inversor → Contador (m)</label><input type="number" id="sis-tiene-dist-ac" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Paneles → Inv (m)</label><input type="number" id="sis-tiene-dist-solar" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Bat → Inv (m)</label><input type="number" id="sis-tiene-dist-bat" placeholder="0" min="0" /></div>
+                    <div class="form-group"><label>Inv → Red (m)</label><input type="number" id="sis-tiene-dist-ac" placeholder="0" min="0" /></div>
                 </div>
                 <button class="btn-calcular" onclick="calcularSistemasTiene()">Calcular Ampliación Completa</button>
 
@@ -370,3 +367,580 @@
             </div>
         </div>
     </div>
+        <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
+            authDomain: "tiendita-byb.firebaseapp.com",
+            projectId: "tiendita-byb",
+            storageBucket: "tiendita-byb.firebasestorage.app",
+            messagingSenderId: "257958619653",
+            appId: "1:257958619653:web:0367858d644596c4b50a6c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        window.firebaseDb = db;
+        window.firebaseAuth = auth;
+        window.firebaseFns = { collection, addDoc, serverTimestamp, signInWithEmailAndPassword };
+        
+        window.addEventListener('load', () => {
+            agregarEquipoCocina();
+        });
+    </script>
+
+    <script>
+        function cambiarModulo(mod, btn) {
+            document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('modulo-' + mod).classList.add('active');
+            btn.classList.add('active');
+        }
+        function cambiarSubModulo(sub, btn) {
+            document.querySelectorAll('.sub-modulo').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('sub-modulo-' + sub).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function getVal(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : 0;
+        }
+
+        function agregarEquipoCocina() {
+            const container = document.getElementById('lista-cocina');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = 'equipo-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Ej: Nevera" class="eq-nombre" />
+                <input type="number" placeholder="Cant" class="eq-cant" value="1" min="1" />
+                <input type="number" placeholder="Watts" class="eq-watts" value="0" min="0" />
+                <button class="btn-remove-equipo" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function sumarWattsCocina() {
+            const filas = document.querySelectorAll('#lista-cocina .equipo-row');
+            let total = 0;
+            filas.forEach(fila => {
+                const cantInput = fila.querySelector('.eq-cant');
+                const wattsInput = fila.querySelector('.eq-watts');
+                if (cantInput && wattsInput) {
+                    const cant = parseFloat(cantInput.value) || 0;
+                    const watts = parseFloat(wattsInput.value) || 0;
+                    total += (cant * watts);
+                }
+            });
+            return total;
+        }
+
+        // --- LÓGICA CASA ---
+        function calcularCasa() {
+            const vGen = parseInt(getVal('casa-voltaje')) || 110;
+            const tipoCable = getVal('casa-tipo-cable') || 'sencillo';
+            const aterramiento = getVal('casa-aterramiento') || 'con';
+            
+            const principalDist = parseFloat(getVal('casa-principal-dist')) || 0;
+            const lucesCant = parseInt(getVal('casa-luces-cant')) || 0;
+            const lucesDist = parseFloat(getVal('casa-luces-dist')) || 0;
+            const tomasCant = parseInt(getVal('casa-tomas-cant')) || 0;
+            const tomasDist = parseFloat(getVal('casa-tomas-dist')) || 0;
+            const cocinaDist = parseFloat(getVal('casa-cocina-dist')) || 0;
+            const cocinaWattsTotal = sumarWattsCocina();
+            const aireCant = parseInt(getVal('casa-aire-cant')) || 0;
+            const aireVolt = parseInt(getVal('casa-aire-voltaje')) || 220;
+            const aireDist = parseFloat(getVal('casa-aire-dist')) || 0;
+            const aireWatts = parseFloat(getVal('casa-aire-watts')) || 0;
+            const altosCant = parseInt(getVal('casa-altos-cant')) || 0;
+            const altosDist = parseFloat(getVal('casa-altos-dist')) || 0;
+            const altosWatts = parseFloat(getVal('casa-altos-watts')) || 0;
+
+            function getBreakerYWire(amps) {
+                const ampsMargen = amps * 1.25;
+                const breakers = [15, 20, 30, 40, 50, 60, 70, 100];
+                let brk = breakers.find(b => b >= ampsMargen) || 100;
+                let cable = "#14 AWG";
+                if (brk <= 15) cable = "#14 AWG";
+                else if (brk <= 20) cable = "#12 AWG";
+                else if (brk <= 30) cable = "#10 AWG";
+                else if (brk <= 40) cable = "#8 AWG";
+                else if (brk <= 55) cable = "#6 AWG";
+                else if (brk <= 70) cable = "#4 AWG";
+                else cable = "#2 AWG";
+                return { breaker: brk, cable: cable };
+            }
+
+            let multiplicadorLuces = 1, multiplicadorTomas = 1, multiplicadorAires = 1;
+            let multiplicadorCocina = 1, multiplicadorAltos = 1, multiplicadorPrincipal = 1;
+            let textoCable = "";
+
+            if (tipoCable === 'sencillo') {
+                textoCable = " (Alambre)";
+                if (vGen === 110) {
+                    multiplicadorPrincipal = (aterramiento === 'con') ? 3 : 2;
+                    multiplicadorLuces = (aterramiento === 'con') ? 3 : 2;
+                    multiplicadorTomas = (aterramiento === 'con') ? 3 : 2;
+                } else {
+                    multiplicadorPrincipal = (aterramiento === 'con') ? 4 : 3;
+                    multiplicadorLuces = (aterramiento === 'con') ? 4 : 3;
+                    multiplicadorTomas = (aterramiento === 'con') ? 4 : 3;
+                }
+                multiplicadorAires = (aterramiento === 'con') ? 4 : 3;
+                multiplicadorCocina = (aterramiento === 'con') ? 4 : 3;
+                multiplicadorAltos = (aterramiento === 'con') ? 4 : 3;
+            } else {
+                textoCable = tipoCable === 'duplex' ? " (Dúplex)" : (tipoCable === 'triplex' ? " (Tríplex)" : " (Romex)");
+            }
+
+            const factorDist = 1.15;
+            let resLuces = { breaker: 0, cable: '-' };
+            let resTomas = { breaker: 0, cable: '-' };
+            let resCocina = { breaker: 0, cable: '-' };
+            let resAire = { breaker: 0, cable: '-' };
+            let resAltos = { breaker: 0, cable: '-' };
+
+            if (lucesCant > 0) { resLuces = getBreakerYWire((lucesCant * 20) / vGen); }
+            if (tomasCant > 0) { resTomas = getBreakerYWire((tomasCant * 200) / vGen); }
+            if (cocinaWattsTotal > 0) { 
+                resCocina = getBreakerYWire(cocinaWattsTotal / vGen); 
+                if (resCocina.breaker < 30) { resCocina.breaker = 30; resCocina.cable = "#10 AWG"; }
+            }
+            if (aireCant > 0 && aireWatts > 0) { resAire = getBreakerYWire((aireCant * aireWatts) / aireVolt); }
+            if (altosCant > 0 && altosWatts > 0) { resAltos = getBreakerYWire((altosCant * altosWatts) / vGen); }
+
+            let cargaTotalAmps = resLuces.breaker + resTomas.breaker + resCocina.breaker + (resAire.breaker * aireCant) + (resAltos.breaker * altosCant);
+            let circuitosActivos = 0;
+            if (resLuces.breaker > 0) circuitosActivos++;
+            if (resTomas.breaker > 0) circuitosActivos++;
+            if (resCocina.breaker > 0) circuitosActivos++;
+            circuitosActivos += aireCant;
+            circuitosActivos += altosCant;
+            circuitosActivos++;
+
+            let principal = 0, cablePrincipal = "-", caja = "-";
+            
+            // CÁLCULO ESTRICTO PRINCIPAL: Si hay distancia principal o alguna carga
+            if (cargaTotalAmps > 0 || principalDist > 0) {
+                principal = 40; // Base
+                if (cargaTotalAmps > 100) principal = 125;
+                else if (cargaTotalAmps > 60) principal = 100;
+                else if (cargaTotalAmps > 40) principal = 60;
+                
+                if (principal <= 40) cablePrincipal = "#8 AWG";
+                else if (principal <= 60) cablePrincipal = "#6 AWG";
+                else if (principal <= 100) cablePrincipal = "#2 AWG";
+                else cablePrincipal = "#1/0 AWG";
+
+                if (circuitosActivos <= 4) caja = "Caja de 6/8 espacios";
+                else if (circuitosActivos <= 12) caja = "Caja de 16 espacios";
+                else caja = "Caja de 24 espacios";
+            }
+
+            document.getElementById('casa-r-general').textContent = principal > 0 ? principal + " A" : "-";
+            document.getElementById('casa-r-luces').textContent = resLuces.breaker > 0 ? resLuces.breaker + " A" : "-";
+            document.getElementById('casa-r-tomas').textContent = resTomas.breaker > 0 ? resTomas.breaker + " A" : "-";
+            document.getElementById('casa-r-cocina').textContent = resCocina.breaker > 0 ? resCocina.breaker + " A" : "-";
+            document.getElementById('casa-r-aires').textContent = resAire.breaker > 0 ? (resAire.breaker * aireCant) + " A" : "-";
+            document.getElementById('casa-r-altos').textContent = resAltos.breaker > 0 ? (resAltos.breaker * altosCant) + " A" : "-";
+
+            const mPrincipal = (principalDist > 0 && principal > 0) ? Math.ceil(principalDist * factorDist * multiplicadorPrincipal) : 0;
+            const mLuces = (lucesDist > 0 && resLuces.breaker > 0) ? Math.ceil(lucesDist * factorDist * multiplicadorLuces) : 0;
+            const mTomas = (tomasDist > 0 && resTomas.breaker > 0) ? Math.ceil(tomasDist * factorDist * multiplicadorTomas) : 0;
+            const mCocina = (cocinaDist > 0 && cocinaWattsTotal > 0) ? Math.ceil(cocinaDist * factorDist * multiplicadorCocina) : 0;
+            const mAires = (aireDist > 0 && aireCant > 0) ? Math.ceil(aireDist * factorDist * multiplicadorAires) : 0;
+            const mAltos = (altosDist > 0 && altosCant > 0) ? Math.ceil(altosDist * factorDist * multiplicadorAltos) : 0;
+
+            document.getElementById('casa-c-principal').textContent = mPrincipal > 0 ? mPrincipal + " m " + cablePrincipal + textoCable : "-";
+            document.getElementById('casa-c-luces').textContent = mLuces > 0 ? mLuces + " m " + resLuces.cable + textoCable : "-";
+            document.getElementById('casa-c-tomas').textContent = mTomas > 0 ? mTomas + " m " + resTomas.cable + textoCable : "-";
+            document.getElementById('casa-c-cocina').textContent = mCocina > 0 ? mCocina + " m " + resCocina.cable + textoCable : "-";
+            document.getElementById('casa-c-aires').textContent = mAires > 0 ? mAires + " m " + resAire.cable + textoCable : "-";
+            document.getElementById('casa-c-altos').textContent = mAltos > 0 ? mAltos + " m " + resAltos.cable + textoCable : "-";
+
+            document.getElementById('casa-r-caja').textContent = caja;
+            document.getElementById('res-casa').classList.add('show');
+        }
+
+        // --- LÓGICA SISTEMAS (SOLAR) ---
+        const VOC_MAX = 500;
+
+        function generarConfiguraciones(numPaneles, isc, voc) {
+            const configs = [];
+            let maxVocSeguro = -1;
+            let idxRecomendada = -1;
+
+            for (let s = 1; s <= numPaneles; s++) {
+                if (numPaneles % s !== 0) continue;
+                const p = numPaneles / s;
+                const vocTotal = s * voc;
+                if (vocTotal > VOC_MAX) continue;
+                const iscTotal = p * isc;
+                
+                configs.push({
+                    serie: s, paralelo: p, vocTotal: vocTotal, iscTotal: iscTotal,
+                    descripcion: p === 1 ? `${s} en serie` : (s === 1 ? `${p} en paralelo (todos)` : `${s} en serie × ${p} strings`),
+                    esRecomendada: false
+                });
+
+                if (vocTotal > maxVocSeguro) {
+                    maxVocSeguro = vocTotal;
+                    idxRecomendada = configs.length - 1;
+                }
+            }
+            
+            if (idxRecomendada >= 0 && configs.length > 0) {
+                configs[idxRecomendada].esRecomendada = true;
+            }
+            return configs;
+        }
+
+        function calcularBreakerArray(corriente) {
+            const sizes = [15, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 300];
+            return sizes.find(s => s >= corriente * 1.25) || 400;
+        }
+
+        function calcularCalibreSolar(iscTotal, distSolar) {
+            if (iscTotal > 30) return "4 AWG";
+            if (iscTotal > 20) return "6 AWG";
+            if (distSolar > 40) return "6 AWG";
+            if (distSolar > 20) return "8 AWG";
+            return "10 AWG";
+        }
+        function calcularCalibreBateria(corriente, dist) {
+            let cable = "8 AWG";
+            if (corriente > 200) cable = "2/0 AWG";
+            else if (corriente > 120) cable = "1/0 AWG";
+            else if (corriente > 80) cable = "4 AWG";
+            else if (corriente > 50) cable = "6 AWG";
+            
+            if (dist > 10) {
+                if (cable === "8 AWG") cable = "6 AWG";
+                else if (cable === "6 AWG") cable = "4 AWG";
+                else if (cable === "4 AWG") cable = "2 AWG";
+            }
+            return cable;
+        }
+        function calcularCalibreAC(corrienteAC, distAC) {
+            if (corrienteAC > 30) return "6 AWG";
+            if (corrienteAC > 20) return distAC > 20 ? "6 AWG" : "8 AWG";
+            return distAC > 20 ? "8 AWG" : "10 AWG";
+        }
+
+        let configsNada = [], configsTiene = [], datosNada = {}, datosTiene = {};
+
+        function calcularSistemasNada() {
+            const kwh = parseFloat(getVal('sis-kwh')) || 0;
+            const pico = parseFloat(getVal('sis-pico')) || 0;
+            const voltaje = parseInt(getVal('sis-voltaje')) || 24;
+            const dias = parseFloat(getVal('sis-dias')) || 1;
+            const panelW = parseFloat(getVal('sis-panel-w')) || 550;
+            const panelIsc = parseFloat(getVal('sis-panel-isc')) || 14;
+            const panelVoc = parseFloat(getVal('sis-panel-voc')) || 50;
+            const cantManual = parseInt(getVal('sis-cant-paneles')) || 0;
+            
+            const distSolar = parseFloat(getVal('sis-dist-solar')) || 0;
+            const distBat = parseFloat(getVal('sis-dist-bat')) || 0;
+            const distAC = parseFloat(getVal('sis-dist-ac')) || 0;
+            const aterramiento = getVal('sis-aterramiento') || 'con';
+            const vAC = parseInt(getVal('sis-voltaje-ac')) || 220;
+
+            if (kwh <= 0 || pico <= 0) { alert('Ingresa consumo y pico de potencia válidos.'); return; }
+
+            const panelesAuto = Math.ceil(kwh / ((panelW / 1000) * 4));
+            const paneles = cantManual > 0 ? cantManual : panelesAuto;
+            const baterias = Math.ceil((kwh * dias) / ((200 * 12) / 1000));
+            
+            let inversor = pico * 1.25;
+            let inversorTexto = inversor <= 1000 ? "1000W (1kW)" : inversor <= 2000 ? "2000W (2kW)" : inversor <= 3000 ? "3000W (3kW)" : inversor <= 5000 ? "5000W (5kW)" : "Mayor a 5kW";
+
+            const corrienteCtrl = (paneles * panelW) / voltaje;
+            const controlador = corrienteCtrl > 80 ? "MPPT de 80A o más" : (corrienteCtrl > 40 ? "MPPT de 60A" : "MPPT de 40A");
+            const transfer = inversor <= 2000 ? "Transfer de 20A (2kW)" : (inversor <= 3000 ? "Transfer de 30A (3kW)" : (inversor <= 5000 ? "Transfer de 50A (5kW)" : "Transfer de 63A o más"));
+
+            const corrienteBat = inversor / voltaje;
+            const breakerBat = "1 breaker DC de " + calcularBreakerArray(corrienteBat) + "A";
+            const corrienteAC = pico / vAC;
+            const breakerAC = corrienteAC > 30 ? "Breaker AC 40A" : (corrienteAC > 20 ? "Breaker AC 32A" : "Breaker AC 20A");
+
+            const configs = generarConfiguraciones(paneles, panelIsc, panelVoc);
+            if (configs.length === 0) { alert('Ninguna configuración válida (Voc máximo ' + VOC_MAX + 'V).'); return; }
+
+            datosNada = { paneles, panelW, panelIsc, panelVoc, baterias, inversorTexto, controlador, transfer, breakerBat, breakerAC, distSolar, distBat, distAC, aterramiento, vAC, corrienteBat, inversor, corrienteAC };
+            configsNada = configs;
+
+            renderConfigs('nada');
+            const idxRec = configs.findIndex(c => c.esRecomendada);
+            aplicarConfigNada(idxRec >= 0 ? idxRec : 0);
+        }
+
+        function renderConfigs(tipo) {
+            const esNada = tipo === 'nada';
+            const configs = esNada ? configsNada : configsTiene;
+            const listId = esNada ? 'sis-configs-list' : 'sis-tiene-configs-list';
+            const panelId = esNada ? 'sis-configs-panel' : 'sis-tiene-configs-panel';
+            const fnName = esNada ? 'aplicarConfigNada' : 'aplicarConfigTiene';
+
+            const html = configs.map((c, i) => {
+                const brk = calcularBreakerArray(c.iscTotal);
+                const isRec = c.esRecomendada;
+                const badge = isRec ? '<span class="badge-recomendada">⭐ RECOMENDADA</span>' : '';
+                const claseRec = isRec ? 'recomendada' : '';
+                
+                return `<label class="config-option ${claseRec}">
+                    <input type="radio" name="config-${tipo}" value="${i}" ${isRec ? 'checked' : ''} onchange="${fnName}(${i})">
+                    <div>
+                        <strong>${c.descripcion} ${badge}</strong>
+                        <span>${c.vocTotal}V / ${c.iscTotal.toFixed(1)}A → Breaker ${brk}A DC</span>
+                    </div>
+                </label>`;
+            }).join('');
+
+            document.getElementById(listId).innerHTML = html;
+            document.getElementById(panelId).classList.add('show');
+        }
+
+        function aplicarConfigNada(idx) {
+            const c = configsNada[idx];
+            const d = datosNada;
+            const brk = calcularBreakerArray(c.iscTotal);
+            const voltMax = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+            const breakerPaneles = `1 breaker DC de ${brk}A / ${voltMax}V DC`;
+            const fusibleSize = calcularBreakerArray(d.panelIsc);
+            const fusibles = c.paralelo > 1 ? `${c.paralelo} fusibles de ${fusibleSize}A (1 por string)` : `1 fusible de ${fusibleSize}A`;
+            
+            const factorDist = 1.15;
+            const multDC = (d.aterramiento === 'con') ? 3 : 2;
+            const multAC = (d.vAC === 110) ? ((d.aterramiento === 'con') ? 3 : 2) : ((d.aterramiento === 'con') ? 4 : 3);
+
+            const mSolar = Math.ceil(d.distSolar * factorDist * multDC);
+            const mBat = Math.ceil(d.distBat * factorDist * multDC);
+            const mAC = Math.ceil(d.distAC * factorDist * multAC);
+
+            const cableSolar = mSolar > 0 ? `${mSolar} m de Alambre ${calcularCalibreSolar(c.iscTotal, d.distSolar)}` : "-";
+            const cableBat = mBat > 0 ? `${mBat} m de Alambre ${calcularCalibreBateria(d.corrienteBat, d.distBat)}` : "-";
+            const cableAC = mAC > 0 ? `${mAC} m de Alambre ${calcularCalibreAC(d.corrienteAC, d.distAC)}` : "-";
+
+            document.getElementById('sis-r-paneles').textContent = `${d.paneles} uds de ${d.panelW}W — ${c.descripcion}`;
+            document.getElementById('sis-r-baterias').textContent = d.baterias + " uds de 200Ah";
+            document.getElementById('sis-r-inversor').textContent = d.inversorTexto;
+            document.getElementById('sis-r-controlador').textContent = d.controlador + ` (entrada ≥${voltMax}V)`;
+            document.getElementById('sis-r-transfer').textContent = d.transfer;
+            document.getElementById('sis-r-bdc-paneles').textContent = breakerPaneles;
+            document.getElementById('sis-r-bdc-bat').textContent = d.breakerBat;
+            document.getElementById('sis-r-bac').textContent = d.breakerAC;
+            document.getElementById('sis-r-fusibles').textContent = fusibles;
+            document.getElementById('sis-r-spd').textContent = "Supresor de Picos DC + AC (1 kit)";
+            document.getElementById('sis-r-caja').textContent = "Caja DC/AC combinada de 12 espacios";
+            
+            document.getElementById('sis-r-csolar').textContent = cableSolar;
+            document.getElementById('sis-r-cbat').textContent = cableBat;
+            document.getElementById('sis-r-cac').textContent = cableAC;
+            
+            document.getElementById('sis-r-varilla').textContent = "1 varilla de cobre 2.4m (5/8\")";
+            document.getElementById('sis-r-tierra').textContent = "1 conector de tierra + cable verde 6 AWG (5m)";
+            document.getElementById('res-sis-nada').classList.add('show');
+        }
+
+        function calcularSistemasTiene() {
+            const inv = parseFloat(getVal('sis-tiene-inv')) || 0;
+            const voltaje = parseInt(getVal('sis-tiene-voltaje')) || 24;
+            const ah = parseFloat(getVal('sis-tiene-ah')) || 0;
+            const cantBat = parseFloat(getVal('sis-tiene-cant-bat')) || 0;
+            const panelesExistentes = parseInt(getVal('sis-tiene-paneles')) || 0;
+            const panelW = parseFloat(getVal('sis-tiene-panel-w')) || 550;
+            const panelIsc = parseFloat(getVal('sis-tiene-panel-isc')) || 14;
+            const panelVoc = parseFloat(getVal('sis-tiene-panel-voc')) || 50;
+            
+            const distSolar = parseFloat(getVal('sis-tiene-dist-solar')) || 0;
+            const distBat = parseFloat(getVal('sis-tiene-dist-bat')) || 0;
+            const distAC = parseFloat(getVal('sis-tiene-dist-ac')) || 0;
+            const aterramiento = getVal('sis-aterramiento') || 'con';
+            const vAC = parseInt(getVal('sis-voltaje-ac')) || 220;
+
+            if (inv <= 0 || ah <= 0 || cantBat <= 0) { alert('Ingresa inversor y baterías válidos.'); return; }
+            if (panelesExistentes <= 0) { alert('El cliente debe tener al menos 1 panel para calcular configuraciones.'); return; }
+
+            const panelesTotal = panelesExistentes;
+            const corrienteCtrl = (panelesTotal * panelW) / voltaje;
+            const controlador = corrienteCtrl > 100 ? "MPPT de 100A o más" : (corrienteCtrl > 80 ? "MPPT de 80A" : (corrienteCtrl > 60 ? "MPPT de 60A" : "MPPT de 40A"));
+            const transfer = inv <= 2000 ? "Transfer de 20A (2kW)" : (inv <= 3000 ? "Transfer de 30A (3kW)" : (inv <= 5000 ? "Transfer de 50A (5kW)" : "Transfer de 63A o más"));
+
+            const corrienteMaxInv = inv / voltaje;
+            const breakerBat = "1 breaker DC de " + calcularBreakerArray(corrienteMaxInv) + "A";
+            const corrienteAC = inv / vAC;
+            const breakerAC = corrienteAC > 40 ? "Breaker AC 50A" : (corrienteAC > 30 ? "Breaker AC 40A" : (corrienteAC > 20 ? "Breaker AC 32A" : "Breaker AC 20A"));
+
+            const configs = generarConfiguraciones(panelesTotal, panelIsc, panelVoc);
+            if (configs.length === 0) { alert('Ninguna configuración válida (Voc máximo ' + VOC_MAX + 'V).'); return; }
+
+            datosTiene = { panelesTotal, panelW, panelIsc, panelVoc, controlador, transfer, breakerBat, breakerAC, distSolar, distBat, distAC, aterramiento, vAC, corrienteMaxInv, corrienteAC };
+            configsTiene = configs;
+
+            renderConfigs('tiene');
+            const idxRec = configs.findIndex(c => c.esRecomendada);
+            aplicarConfigTiene(idxRec >= 0 ? idxRec : 0);
+        }
+
+        function aplicarConfigTiene(idx) {
+            const c = configsTiene[idx];
+            const d = datosTiene;
+            const brk = calcularBreakerArray(c.iscTotal);
+            const voltMax = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+            const breakerPaneles = `1 breaker DC de ${brk}A / ${voltMax}V DC`;
+            const fusibleSize = calcularBreakerArray(d.panelIsc);
+            const fusibles = c.paralelo > 1 ? `${c.paralelo} fusibles de ${fusibleSize}A (1 por string)` : `1 fusible de ${fusibleSize}A`;
+            
+            const factorDist = 1.15;
+            const multDC = (d.aterramiento === 'con') ? 3 : 2;
+            const multAC = (d.vAC === 110) ? ((d.aterramiento === 'con') ? 3 : 2) : ((d.aterramiento === 'con') ? 4 : 3);
+
+            const mSolar = Math.ceil(d.distSolar * factorDist * multDC);
+            const mBat = Math.ceil(d.distBat * factorDist * multDC);
+            const mAC = Math.ceil(d.distAC * factorDist * multAC);
+
+            const cableSolar = mSolar > 0 ? `${mSolar} m de Alambre ${calcularCalibreSolar(c.iscTotal, d.distSolar)}` : "-";
+            const cableBat = mBat > 0 ? `${mBat} m de Alambre ${calcularCalibreBateria(d.corrienteMaxInv, d.distBat)}` : "-";
+            const cableAC = mAC > 0 ? `${mAC} m de Alambre ${calcularCalibreAC(d.corrienteAC, d.distAC)}` : "-";
+            
+            document.getElementById('sis-t-paneles').textContent = `${d.panelesTotal} paneles de ${d.panelW}W — ${c.descripcion}`;
+            document.getElementById('sis-t-controlador').textContent = d.controlador + ` (entrada ≥${voltMax}V)`;
+            document.getElementById('sis-t-transfer').textContent = d.transfer;
+            document.getElementById('sis-t-bdc-paneles').textContent = breakerPaneles;
+            document.getElementById('sis-t-bdc-bat').textContent = d.breakerBat;
+            document.getElementById('sis-t-bac').textContent = d.breakerAC;
+            document.getElementById('sis-t-fusibles').textContent = fusibles;
+            document.getElementById('sis-t-spd').textContent = "Supresor de Picos DC + AC (1 kit)";
+            document.getElementById('sis-t-caja').textContent = "Caja DC/AC combinada de 12 espacios";
+            
+            document.getElementById('sis-t-csolar').textContent = cableSolar;
+            document.getElementById('sis-t-cbat').textContent = cableBat;
+            document.getElementById('sis-t-cac').textContent = cableAC;
+            
+            document.getElementById('sis-t-varilla').textContent = "1 varilla de cobre 2.4m (5/8\")";
+            document.getElementById('sis-t-tierra').textContent = "1 conector de tierra + cable verde 6 AWG (5m)";
+            document.getElementById('res-sis-tiene').classList.add('show');
+        }
+
+        // --- LÓGICA DEL MODAL (GUARDADO ONLINE) ---
+        let tipoServicioActual = '';
+
+        function abrirModal(tipo) {
+            tipoServicioActual = tipo;
+            document.getElementById('modal-nombre').value = '';
+            document.getElementById('modal-telefono').value = '';
+            document.getElementById('modal-direccion').value = '';
+            document.getElementById('modalCliente').classList.add('show');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalCliente').classList.remove('show');
+        }
+
+        async function guardarClienteOnline() {
+            const nombre = document.getElementById('modal-nombre').value.trim();
+            const telefono = document.getElementById('modal-telefono').value.trim();
+            const direccion = document.getElementById('modal-direccion').value.trim();
+
+            if (!nombre || !telefono || !direccion) {
+                alert('Por favor, llena todos los campos para registrar al cliente.');
+                return;
+            }
+
+            let componentes = [];
+            
+            if (tipoServicioActual === 'Casa') {
+                componentes = [
+                    { nombre: "Breaker Principal " + document.getElementById('casa-r-general').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Principal " + document.getElementById('casa-c-principal').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Breaker Luces " + document.getElementById('casa-r-luces').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Breaker Tomas Gral " + document.getElementById('casa-r-tomas').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Breaker Cocina " + document.getElementById('casa-r-cocina').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Breaker Aires " + document.getElementById('casa-r-aires').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Breaker Altos Cons " + document.getElementById('casa-r-altos').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Luces: " + document.getElementById('casa-c-luces').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Tomas Gral: " + document.getElementById('casa-c-tomas').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Cocina: " + document.getElementById('casa-c-cocina').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Aires: " + document.getElementById('casa-c-aires').textContent, cantidad: 1, precio: 0 },
+                    { nombre: "Cable Altos: " + document.getElementById('casa-c-altos').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('casa-r-caja').textContent, cantidad: 1, precio: 0 }
+                ].filter(c => !c.nombre.includes('-') && !c.nombre.includes('0 A') && !c.nombre.includes('0 m'));
+            } else if (tipoServicioActual === 'Sistema Solar Nuevo') {
+                componentes = [
+                    { nombre: document.getElementById('sis-r-paneles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-baterias').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-inversor').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-controlador').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-transfer').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-bdc-paneles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-bdc-bat').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-bac').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-fusibles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-spd').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-caja').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-csolar').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-cbat').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-cac').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-varilla').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-r-tierra').textContent, cantidad: 1, precio: 0 }
+                ].filter(c => c.nombre !== '-');
+            } else {
+                componentes = [
+                    { nombre: document.getElementById('sis-t-paneles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-controlador').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-transfer').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-bdc-paneles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-bdc-bat').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-bac').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-fusibles').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-spd').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-caja').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-csolar').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-cbat').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-cac').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-varilla').textContent, cantidad: 1, precio: 0 },
+                    { nombre: document.getElementById('sis-t-tierra').textContent, cantidad: 1, precio: 0 }
+                ].filter(c => c.nombre !== '-');
+            }
+
+            const nuevoServicio = {
+                usuario_nombre: nombre,
+                usuario_telefono: telefono,
+                direccion: direccion,
+                servicio_nombre: "Instalación Eléctrica - " + tipoServicioActual,
+                descripcion: "Calculado desde la App Online.",
+                estado: "Pendiente",
+                fecha_solicitud: window.firebaseFns.serverTimestamp(),
+                componentes: componentes,
+                mano_obra: 0,
+                total_presupuesto: 0
+            };
+
+            const btn = document.querySelector('.btn-aceptar');
+            if(btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+
+            try {
+                const { signInWithEmailAndPassword, collection, addDoc } = window.firebaseFns;
+                
+                await signInWithEmailAndPassword(window.firebaseAuth, "byb@gmail.com", "deniedcode");
+
+                await addDoc(collection(window.firebaseDb, 'SolicitudesServicios'), nuevoServicio);
+                alert('✅ ¡Servicio registrado con éxito en la base de datos! Ya puedes verlo en tu página de Servicios.');
+                cerrarModal();
+            } catch (e) {
+                alert('Error al guardar en Firebase: ' + e.message);
+            } finally {
+                if(btn) { btn.disabled = false; btn.textContent = 'Guardar'; }
+            }
+        }
+    </script>
+</body>
+</html>
