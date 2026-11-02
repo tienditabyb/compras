@@ -83,7 +83,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             cursor: pointer;
         }
-        /* Forzamos los colores para que el hover no los dañe */
         .special-btn.encargo, .special-btn.encargo:hover, .special-btn.encargo.active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; }
         .special-btn.servicio, .special-btn.servicio:hover, .special-btn.servicio.active { background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important; }
         
@@ -195,7 +194,6 @@
         .detail-page .detail-container .comentario-item .comentario-texto { color: #475569; font-size: 0.9rem; }
         .detail-page .detail-container .comentario-item .comentario-fecha { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
 
-        /* BOTÓN COMPARTIR */
         .btn-share { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; transition: 0.3s; color: #64748b; flex-shrink: 0; }
         .btn-share:hover { background: #e2e8f0; color: #1e272e; }
 
@@ -604,10 +602,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // CAMBIO 3: Se inicializa Firestore usando el host de tu Worker
+        // CAMBIO 3: Se inicializa Firestore usando el host de tu Worker y se fuerza Long Polling
         const db = initializeFirestore(app, {
             host: 'proxy-firebase-bb.natkrios.workers.dev',
-            ssl: true
+            ssl: true,
+            experimentalForceLongPolling: true, // 👈 Evita que Cloudflare bloquee la conexión
+            experimentalAutoDetectLongPolling: false // 👈 Refuerza la conexión normal
         });
 
         try {
