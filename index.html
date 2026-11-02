@@ -68,7 +68,6 @@
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
-        /* --- NUEVOS ESTILOS PARA CATEGORÍAS ESPECIALES --- */
         .special-btn {
             display: flex;
             align-items: center;
@@ -586,12 +585,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         
-        // CAMBIO 1: Se importa initializeFirestore en lugar de getFirestore
         import { initializeFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
-            // CAMBIO 2: El authDomain apunta a tu Worker de Cloudflare para evitar el bloqueo del login
             authDomain: "proxy-firebase-bb.natkrios.workers.dev", 
             projectId: "tiendita-byb",
             storageBucket: "tiendita-byb.firebasestorage.app",
@@ -602,12 +599,13 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // CAMBIO 3: Se inicializa Firestore usando el host de tu Worker y se fuerza Long Polling
+        // AQUI ESTA EL CAMBIO CLAVE PARA QUE NO DE ERROR 400
         const db = initializeFirestore(app, {
             host: 'proxy-firebase-bb.natkrios.workers.dev',
             ssl: true,
-            experimentalForceLongPolling: true, // 👈 Evita que Cloudflare bloquee la conexión
-            experimentalAutoDetectLongPolling: false // 👈 Refuerza la conexión normal
+            experimentalForceLongPolling: true, 
+            experimentalAutoDetectLongPolling: false,
+            useFetchStreams: false // 👈 Esto desactiva el WebChannel
         });
 
         try {
