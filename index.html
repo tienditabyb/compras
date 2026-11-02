@@ -17,12 +17,33 @@
         .header__container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; width: 100%; }
         .header__logo { font-size: 1.8rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; flex-shrink: 0; }
         .header__logo span { color: #74b9ff; }
-        .header__search { display: flex; flex: 1; max-width: 400px; min-width: 160px; }
+        
+        /* CONTENEDOR DEL BUSCADOR */
+        .header__search { display: flex; flex: 1; max-width: 400px; min-width: 160px; position: relative; }
         .header__search input { flex: 1; padding: 8px 16px; border: 2px solid #3a5068; border-radius: 30px 0 0 30px; font-size: 0.9rem; outline: none; background: #f1f5f9; color: #1e272e; transition: 0.3s; }
         .header__search input:focus { border-color: #74b9ff; }
         .header__search button { padding: 8px 20px; background-color: #74b9ff; color: #1e272e; border: none; border-radius: 0 30px 30px 0; font-weight: 600; font-size: 0.9rem; transition: 0.3s; white-space: nowrap; }
         .header__search button:hover { background-color: #5a9fd4; }
         .header__actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+        /* ESTILOS DEL DESPLEGABLE DE SUGERENCIAS */
+        .search-suggestions {
+            position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+            background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 350px; overflow-y: auto; z-index: 1000; display: none;
+        }
+        .search-suggestions.open { display: block; }
+        .search-suggestions .suggestion-item {
+            padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9;
+            display: flex; align-items: center; gap: 12px; transition: background 0.2s;
+        }
+        .search-suggestions .suggestion-item:hover { background: #f1f5f9; }
+        .search-suggestions .suggestion-item:last-child { border-bottom: none; }
+        .search-suggestions .suggestion-item img { width: 45px; height: 45px; object-fit: contain; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+        .search-suggestions .suggestion-info { flex: 1; min-width: 0; }
+        .search-suggestions .suggestion-name { font-size: 0.9rem; font-weight: 600; color: #1e272e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .search-suggestions .suggestion-price { font-size: 0.85rem; color: #2980b9; font-weight: 700; }
+        .search-suggestions .suggestion-empty { padding: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem; }
 
         .download-apk-btn { background: #2ecc71; color: #fff; padding: 6px 16px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s; white-space: nowrap; border: none; cursor: pointer; }
         .download-apk-btn:hover { background: #27ae60; transform: scale(1.02); }
@@ -68,23 +89,9 @@
         .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
         .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
 
-        .special-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 15px;
-            border-radius: 12px;
-            color: white !important;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
+        .special-btn { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border-radius: 12px; color: white !important; font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
         .special-btn.encargo, .special-btn.encargo:hover, .special-btn.encargo.active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; }
         .special-btn.servicio, .special-btn.servicio:hover, .special-btn.servicio.active { background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important; }
-        
         .special-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .special-btn.active { outline: 3px solid #1e272e; outline-offset: 2px; }
         
@@ -110,15 +117,7 @@
 
         .products-section { flex: 1 1 0%; min-width: 0; max-width: 100%; }
 
-        .products-grid {
-            display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            align-items: stretch;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-        }
+        .products-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); align-items: stretch; width: 100%; max-width: 100%; min-width: 0; }
         @media (min-width: 1500px) { .products-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
         @media (max-width: 1499px) and (min-width: 1250px) { .products-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
         @media (max-width: 1249px) and (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -141,7 +140,6 @@
         .btn-servicio:hover { background: #059669; transform: scale(1.02); }
         .product-card .encargo-badge { font-size: 0.65rem; background: #fef3c7; color: #d97706; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 600; margin-top: 4px; }
         .product-card .servicio-badge { font-size: 0.65rem; background: #dcfce7; color: #166534; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 700; margin-top: 4px; }
-
         .product-card .agotado-badge { font-size: 0.65rem; background: #fee2e2; color: #dc2626; padding: 2px 10px; border-radius: 20px; display: inline-block; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
         .product-card.agotado .foto-principal { filter: grayscale(0.6) brightness(0.9); opacity: 0.85; }
         .product-card.agotado .price { color: #94a3b8; }
@@ -328,10 +326,15 @@
     <header class="header">
         <div class="header__container">
             <a href="https://tienditabyb.github.io/compras/" class="header__logo">B<span>&amp;</span>B</a>
+            
+            <!-- BUSCADOR CON SUGERENCIAS -->
             <form class="header__search" id="searchForm" onsubmit="return false;">
-                <input type="text" id="searchInput" placeholder="Buscar productos..." oninput="buscarProductos()" />
+                <input type="text" id="searchInput" placeholder="Buscar productos..." autocomplete="off" oninput="manejarBusquedaInput(this.value)" onfocus="manejarBusquedaInput(this.value)" />
                 <button type="submit">Buscar</button>
+                <!-- Contenedor del despliegue -->
+                <div class="search-suggestions" id="searchSuggestions"></div>
             </form>
+
             <div class="header__actions">
                 <a href="https://drive.google.com/uc?export=download&id=1SqC8wMnojvS5VTlmXwz0fDDDnHgfMfsn" class="download-apk-btn" id="btnDescargaHeader" download>📲 Descargar APK</a>
                 <div class="account-dropdown" id="accountDropdown">
@@ -480,7 +483,7 @@
             <div class="about-content">
                 <p><strong>Tiendita B&amp;B</strong> es un proyecto familiar que nació en Santa Clara, Cuba, con el sueño de acercar a nuestros clientes los productos que necesitan, tanto de la tienda física como de encargos internacionales.</p>
                 <h3>🎯 Nuestra misión</h3>
-                <p>Brindar un servicio cercano, honesto y confiable, ofreciendo productos de calidad y un trato humano que haga sentir a cada cliente como en casa.</p>
+                <p>Brindar un servicio cercano, honesto y confiable, ofreciendo productos de calidad y un trato humano que haga sentir a cada cliente como en su casa.</p>
                 <h3>📦 ¿Qué ofrecemos?</h3>
                 <ul>
                     <li><strong>Productos en tienda:</strong> disponibilidad inmediata para entrega o retiro.</li>
@@ -599,13 +602,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // AQUI ESTA EL CAMBIO CLAVE PARA QUE NO DE ERROR 400
         const db = initializeFirestore(app, {
             host: 'proxy-firebase-bb.natkrios.workers.dev',
             ssl: true,
             experimentalForceLongPolling: true, 
             experimentalAutoDetectLongPolling: false,
-            useFetchStreams: false // 👈 Esto desactiva el WebChannel
+            useFetchStreams: false
         });
 
         try {
@@ -1030,6 +1032,67 @@
         }
         function fechaToDate(f) { if (!f) return null; if (f.seconds) return new Date(f.seconds * 1000); return new Date(f); }
         
+        // --- SISTEMA DE BÚSQUEDA CON SUGERENCIAS ---
+        function manejarBusquedaInput(valor) {
+            const q = valor.toLowerCase().trim();
+            
+            // Actualiza la grilla principal en tiempo real (como ya funcionaba)
+            buscarProductos(); 
+            
+            const cont = document.getElementById('searchSuggestions');
+            if (!q) {
+                cont.classList.remove('open');
+                return;
+            }
+
+            // Filtrar productos por nombre (máximo 8 sugerencias)
+            const filtrados = productos.filter(p => 
+                (p.Nombre || '').toLowerCase().includes(q) && 
+                !p.Es_Encargo && !p.Es_Servicio // Excluimos encargos y servicios de las sugerencias rápidas
+            ).slice(0, 8);
+
+            if (filtrados.length === 0) {
+                cont.innerHTML = '<div class="suggestion-empty">No se encontraron productos.</div>';
+                cont.classList.add('open');
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(p => {
+                const fotos = obtenerFotosProducto(p);
+                const fotoUrl = fotos.length > 0 ? fotos[0] : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E';
+                const precio = precioFinal(p).toFixed(2);
+                html += `
+                    <div class="suggestion-item" onclick="seleccionarSugerencia('${p.id}')">
+                        <img src="${fotoUrl}" alt="${p.Nombre}">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">${p.Nombre}</div>
+                            <div class="suggestion-price">$${precio}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            cont.innerHTML = html;
+            cont.classList.add('open');
+        }
+
+        // Ir al producto al hacer clic en una sugerencia
+        function seleccionarSugerencia(id) {
+            document.getElementById('searchSuggestions').classList.remove('open');
+            document.getElementById('searchInput').value = ''; // Limpiar buscador
+            window.history.pushState({ productoId: id }, '', `?id=${id}`);
+            mostrarDetalle(id);
+        }
+
+        // Cerrar sugerencias al hacer clic fuera del buscador
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.header__search');
+            const suggestions = document.getElementById('searchSuggestions');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                suggestions.classList.remove('open');
+            }
+        });
+
         async function renderizarCategorias() {
             const cats = await obtenerCategorias();
             const ulSpecial = document.getElementById('specialCategoryList');
