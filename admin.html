@@ -1329,11 +1329,11 @@
             const serv = s.servicio_nombre || 'Servicio';
             let m = '';
             switch (st) {
-                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos. 🔧`; break;
-                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n✅ Tu solicitud de *${serv}* está en proceso. En breve coordinamos la visita. 🔧`; break;
-                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n🎉 Tu servicio *${serv}* ha sido completado. ¡Gracias por confiar en B&B!`; break;
-                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo. 🙌`; break;
-                default: m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* cambió a: *${st}*.`;
+                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'},\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos.`; break;
+                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* está en proceso. En breve coordinamos la visita.`; break;
+                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu servicio *${serv}* ha sido completado. Gracias por confiar en B&B.`; break;
+                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo.`; break;
+                default: m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* cambió a: *${st}*.`;
             }
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
@@ -1381,17 +1381,17 @@
             const pv = p ? parseFloat(p.Precio_Venta || 0) : 0;
             const tt = pv * cant, mt = tt / 2;
             let m = '';
-            if (vencido) m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo de *${prod}* ha sido *CANCELADO*.\nSi aún te interesa, vuelve a solicitarlo. 🙌`;
+            if (vencido) m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* ha sido *CANCELADO*.\nSi aún te interesa, vuelve a solicitarlo.`;
             else {
                 switch (st) {
-                    case 'Nuevo Encargo': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de encargo: *${prod}* (x${cant}).\nPronto te contactamos. 🙌`; break;
-                    case 'Pendiente': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🛒 *${prod}*\n🔢 ${cant}\n💰 Total: $${tt.toFixed(2)}\n💵 Ingresa la mitad ($${mt.toFixed(2)}) antes de 24h en Tiendita B&B.\n📍 Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n\n¡Gracias! 🙌`; break;
-                    case 'En proceso': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Tu encargo de *${prod}* está en proceso. 📦`; break;
-                    case 'En camino': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🚚 Tu encargo está en camino.`; break;
-                    case 'Procesando en aduana de Cuba': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n📦 Tu encargo está en *Aduana de Cuba*.`; break;
-                    case 'En el local TienditaB&B lista para la entrega': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🎉 Tu encargo de *${prod}* está listo para retirar.`; break;
-                    case 'Entregado': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Encargo *ENTREGADO*. ¡Gracias! 🎉`; break;
-                    default: m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo cambió a: *${st}*.`;
+                    case 'Nuevo Encargo': m = `Hola ${e.usuario_nombre || 'Cliente'},\nRecibimos tu solicitud de encargo: *${prod}* (x${cant}).\nPronto te contactamos.`; break;
+                    case 'Pendiente': m = `Hola ${e.usuario_nombre || 'Cliente'},\n*${prod}*\nCant: ${cant}\nTotal: $${tt.toFixed(2)}\nIngresa la mitad ($${mt.toFixed(2)}) antes de 24h en Tiendita B&B.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\n\n¡Gracias!`; break;
+                    case 'En proceso': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* está en proceso.`; break;
+                    case 'En camino': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo está en camino.`; break;
+                    case 'Procesando en aduana de Cuba': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo está en *Aduana de Cuba*.`; break;
+                    case 'En el local TienditaB&B lista para la entrega': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* está listo para retirar.`; break;
+                    case 'Entregado': m = `Hola ${e.usuario_nombre || 'Cliente'},\nEncargo *ENTREGADO*. ¡Gracias!`; break;
+                    default: m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo cambió a: *${st}*.`;
                 }
             }
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
@@ -1468,12 +1468,12 @@
             tel = String(tel).trim();
             const es = d.Estado || 'Pendiente';
             const pid = d.id.slice(-6);
-            let m = `Hola ${d.Cliente_Nombre || 'Cliente'} 👋\nPedido #${pid} cambió a: *${es}*.\n`;
-            if (es === 'Pendiente') m += 'Preparando tu pedido. 📦';
-            else if (es === 'En camino') m += 'En camino. 🚚';
-            else if (es === 'Entregado') m += '¡Entregado! 🎉';
+            let m = `Hola ${d.Cliente_Nombre || 'Cliente'},\nPedido #${pid} cambió a: *${es}*.\n`;
+            if (es === 'Pendiente') m += 'Preparando tu pedido.';
+            else if (es === 'En camino') m += 'En camino.';
+            else if (es === 'Entregado') m += '¡Entregado!';
             else if (es === 'Cancelado') m += 'Tu pedido ha sido cancelado.';
-            m += '\n\nGracias por comprar en B&B. 🙌';
+            m += '\n\nGracias por comprar en B&B.';
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
         async function cambiarEstadoTienda(id, nuevo) {
@@ -1513,10 +1513,10 @@
             tel = String(tel).trim();
             const es = p.Estado || 'Pendiente';
             const pid = p.id.slice(-6);
-            let m = `Hola ${p.Cliente_Nombre || 'Cliente'} 👋\nPedido #${pid} cambió a: *${es}*.\n`;
-            if (es === 'Pendiente') m += 'Listo para retirar. 🏪\n📍 Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n⏳ 24h.';
-            else if (es === 'Vendido') m += '✅ ¡Vendido! 🎉';
-            m += '\n\nGracias. 🙌';
+            let m = `Hola ${p.Cliente_Nombre || 'Cliente'},\nPedido #${pid} cambió a: *${es}*.\n`;
+            if (es === 'Pendiente') m += 'Listo para retirar.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\n24h.';
+            else if (es === 'Vendido') m += '¡Vendido!';
+            m += '\n\nGracias.';
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
         function enviarWhatsAppTiendaCancelado(id) {
@@ -1526,7 +1526,7 @@
             if (tel == null) return;
             tel = String(tel).trim();
             const pid = p.id.slice(-6);
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${p.Cliente_Nombre || 'Cliente'} 👋\nTu pedido #${pid} ha sido *CANCELADO*.\n\nGracias. 🙌`)}`, '_blank');
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${p.Cliente_Nombre || 'Cliente'},\nTu pedido #${pid} ha sido *CANCELADO*.\n\nGracias.`)}`, '_blank');
         }
         async function verDetalleVenta(id) {
             const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'Ventas', id));
