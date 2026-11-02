@@ -1036,7 +1036,7 @@
         function manejarBusquedaInput(valor) {
             const q = valor.toLowerCase().trim();
             
-            // Actualiza la grilla principal en tiempo real (como ya funcionaba)
+            // Actualiza la grilla principal en tiempo real
             buscarProductos(); 
             
             const cont = document.getElementById('searchSuggestions');
@@ -1048,7 +1048,7 @@
             // Filtrar productos por nombre (máximo 8 sugerencias)
             const filtrados = productos.filter(p => 
                 (p.Nombre || '').toLowerCase().includes(q) && 
-                !p.Es_Encargo && !p.Es_Servicio // Excluimos encargos y servicios de las sugerencias rápidas
+                !p.Es_Encargo && !p.Es_Servicio 
             ).slice(0, 8);
 
             if (filtrados.length === 0) {
@@ -1742,6 +1742,12 @@
                 guardarCarritoLocal();
                 document.getElementById('cartSidebar').classList.remove('open');
                 alert('✅ Pedido realizado con éxito. ¡Gracias!');
+                
+                // MOSTRAR EL HISTORIAL AUTOMÁTICAMENTE
+                setTimeout(() => {
+                    abrirHistoryModal();
+                }, 300);
+
                 productos = await obtenerProductos();
                 renderizarProductos();
             } catch (e) {
