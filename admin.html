@@ -1505,6 +1505,7 @@
                 else enviarWhatsAppTienda(id);
             } catch (e) { alert('Error: ' + e.message); }
         }
+        
         function enviarWhatsAppTienda(id) {
             const p = tiendaCache.find(x => x.id === id);
             if (!p) return;
@@ -1513,10 +1514,31 @@
             tel = String(tel).trim();
             const es = p.Estado || 'Pendiente';
             const pid = p.id.slice(-6);
+            
             let m = `Hola ${p.Cliente_Nombre || 'Cliente'},\nPedido #${pid} cambió a: *${es}*.\n`;
-            if (es === 'Pendiente') m += 'Listo para retirar.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\n24h.';
-            else if (es === 'Vendido') m += '¡Vendido!';
-            m += '\n\nGracias.';
+            
+            if (es === 'Pendiente') {
+                m += 'Listo para retirar.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\nTiempo límite para recogerlo 24h.\n';
+
+                // Agregar productos
+                const pp = parsearProductosPedido(p.productos_pedido);
+                if (pp.length > 0) {
+                    m += '\n*Productos:*\n';
+                    pp.forEach(item => {
+                        const subtotal = (parseFloat(item.precio || 0) * (item.cantidad || 1)).toFixed(2);
+                        m += `- ${item.nombre} x${item.cantidad || 1} = $${subtotal}\n`;
+                    });
+                }
+
+                // Agregar total
+                const total = parseFloat(p.total || 0).toFixed(2);
+                m += `\n*Total:* $${total}\n`;
+                
+            } else if (es === 'Vendido') {
+                m += '¡Vendido!';
+            }
+            
+            m += '\nGracias.';
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
         function enviarWhatsAppTiendaCancelado(id) {
