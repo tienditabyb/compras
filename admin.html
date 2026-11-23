@@ -1,631 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-    <title>B&B Admin - Panel de Control</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background-color: #f5f6fa; color: #1e272e; min-height: 100vh; }
-        a { text-decoration: none; color: inherit; }
-        button { cursor: pointer; font-family: inherit; }
-        .header { background-color: #1a252f; padding: 10px 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); width: 100%; }
-        .header__container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-        .header__logo { font-size: 1.8rem; font-weight: 800; color: #ffffff; }
-        .header__logo span { color: #74b9ff; }
-        .header__logo .admin-badge { font-size: 0.8rem; font-weight: 400; color: #b0c4d9; margin-left: 6px; }
-        .header__user { display: flex; align-items: center; gap: 15px; }
-        .header__user .user-name { font-weight: 500; font-size: 0.9rem; color: #ffffff; }
-        .header__user button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 6px 16px; color: #ffffff; font-weight: 600; font-size: 0.85rem; }
-        .menu-toggle { display: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.6rem; color: #ffffff; padding: 4px 14px; }
-        .notif-btn { position: relative; background: none; border: none; font-size: 1.6rem; color: #ffffff; padding: 4px 6px; border-radius: 8px; }
-        .notif-badge { position: absolute; top: -4px; right: -4px; background: #e74c3c; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; display: none; }
-        .notif-badge.show { display: block; }
-        .notif-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); width: 340px; max-height: 400px; overflow-y: auto; z-index: 200; margin-top: 8px; padding: 12px 0; }
-        .notif-dropdown.open { display: block; }
-        .notif-dropdown .notif-item { padding: 10px 18px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .notif-dropdown .notif-item .icon { font-size: 1.2rem; }
-        .notif-dropdown .notif-item .text { flex: 1; font-size: 0.85rem; }
-        .notif-dropdown .notif-empty { text-align: center; color: #94a3b8; padding: 20px 0; font-size: 0.9rem; }
-        .main-content { display: flex; gap: 30px; margin-top: 25px; padding: 0 15px; max-width: 1400px; margin-left: auto; margin-right: auto; }
-        .sidebar { width: 220px; flex-shrink: 0; background: white; border-radius: 16px; padding: 20px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 90px; }
-        .sidebar__title { font-size: 0.9rem; font-weight: 700; color: #1e272e; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 12px; }
-        .sidebar__nav ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-        .sidebar__nav li a { display: block; padding: 8px 12px; border-radius: 8px; color: #64748b; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
-        .sidebar__nav li a:hover { background: #f1f5f9; color: #1e272e; }
-        .sidebar__nav li a.active { background: #e6f0fa; color: #2980b9; font-weight: 600; }
-        .content { flex: 1; min-width: 0; }
-        @media (max-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; border-radius: 0; padding: 20px; transform: translateX(-100%); z-index: 200; overflow-y: auto; background: white; padding-top: 60px; }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar .close-sidebar { display: block; position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #94a3b8; }
-            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 150; }
-            .sidebar-overlay.active { display: block; }
-            .menu-toggle { display: inline-block; }
-            .header__user .user-name { display: none; }
-            .main-content { flex-direction: column; padding: 0 10px; margin-top: 15px; }
-            .form-row { grid-template-columns: 1fr; }
-            .notif-dropdown { width: 280px; right: -10px; }
-        }
-        .sidebar .close-sidebar { display: none; }
-        @media (max-width: 992px) { .sidebar .close-sidebar { display: block; } }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
-        .stat-card .number { font-size: 2rem; font-weight: 700; color: #2980b9; }
-        .stat-card .label { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
-        .filters { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .filters label { font-weight: 500; font-size: 0.85rem; color: #1e272e; }
-        .filters input, .filters select { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem; outline: none; background: white; color: #1e272e; }
-        .filters button { padding: 8px 20px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; }
-        .filters .btn-clear { background: #94a3b8; }
-        .filters .btn-success { background: #059669; }
-        .rango-rapido { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e2e8f0; }
-        .rango-rapido button { padding: 6px 14px; background: #eef2f6; color: #1e272e; border: 1px solid #e2e8f0; border-radius: 20px; font-weight: 500; font-size: 0.8rem; }
-        .rango-rapido button.active { background: #2980b9; color: white; border-color: #2980b9; }
-        .list-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 2px; max-width: 100%; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
-        .list-item:last-child { border-bottom: none; }
-        .list-item .left { flex: 1; min-width: 150px; }
-        .list-item .left .title { font-weight: 600; color: #1e272e; }
-        .list-item .left .sub { font-size: 0.85rem; color: #64748b; }
-        .list-item .center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .list-item .right { text-align: right; font-weight: 600; color: #2980b9; }
-        .estado-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
-        .estado-pendiente { background: #fef3c7; color: #d97706; }
-        .estado-nuevo { background: #dbeafe; color: #2563eb; }
-        .estado-en-camino { background: #93c5fd; color: #1d4ed8; }
-        .estado-entregado { background: #d1fae5; color: #059669; }
-        .estado-cancelado { background: #fee2e2; color: #dc2626; }
-        .estado-en-proceso { background: #dbeafe; color: #2563eb; }
-        .estado-aduana { background: #e0e7ff; color: #4f46e5; }
-        .estado-local { background: #d1fae5; color: #059669; }
-        .estado-completado { background: #d1fae5; color: #059669; }
-        .estado-select { padding: 4px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; background: white; cursor: pointer; }
-        .btn-whatsapp { background: #25D366; color: white; border: none; border-radius: 6px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600; }
-        .product-grid { display: grid; grid-auto-rows: 1fr; gap: 12px; padding: 14px; width: 100%; }
-        @media (min-width: 1400px) { .product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
-        @media (max-width: 1399px) and (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-        @media (max-width: 1023px) and (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (max-width: 767px) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px; } }
-        .product-card { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); text-align: center; border: 1px solid #f1f5f9; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .product-card .foto-principal { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #f1f5f9; border-radius: 6px; cursor: pointer; margin-bottom: 6px; }
-        .product-card .fotos-extra { display: flex; gap: 4px; margin-top: 4px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
-        .product-card .fotos-extra img { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; cursor: pointer; }
-        .product-card h4 { font-size: 0.8rem; font-weight: 600; margin: 6px 0 2px; color: #1e272e; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; min-height: 2.2em; }
-        .product-card .price { font-size: 0.9rem; font-weight: 700; color: #2980b9; }
-        .product-card .stock { font-size: 0.65rem; color: #64748b; }
-        .product-card .category { font-size: 0.6rem; color: #94a3b8; }
-        .product-card .proveedor { font-size: 0.65rem; color: #7c3aed; font-weight: 600; }
-        .product-card .encargo-label { font-size: 0.6rem; background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
-        .product-card .proveedor-label { font-size: 0.6rem; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
-        .product-card .servicio-label { font-size: 0.6rem; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 12px; display: inline-block; margin: 4px 0; font-weight: 600; }
-        .product-card .btn-url-encargo { display: inline-block; font-size: 0.65rem; font-weight: 600; background: #ede9fe; color: #6d28d9; padding: 3px 10px; border-radius: 12px; margin: 4px 0; text-decoration: none; }
-        .product-card .actions { margin-top: auto; padding-top: 6px; border-top: 1px solid #f1f5f9; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        .product-card .actions button { padding: 4px 12px; border: none; border-radius: 16px; font-size: 0.65rem; cursor: pointer; font-weight: 600; }
-        .product-card .actions .btn-edit { background: #dbeafe; color: #2563eb; }
-        .product-card .actions .btn-delete { background: #fee2e2; color: #dc2626; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: white; border-radius: 20px; padding: 30px; max-width: 650px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
-        .modal .close-modal { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #94a3b8; }
-        .modal h2 { font-size: 1.5rem; margin-bottom: 15px; color: #1e272e; }
-        .modal .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
-        .modal .detail-row .label { font-weight: 500; color: #64748b; }
-        .modal .detail-row .value { font-weight: 600; color: #1e272e; text-align: right; }
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; color: #1e272e; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit; background: white; color: #1e272e; }
-        .form-group textarea { resize: vertical; min-height: 60px; }
-        .form-group .file-preview-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-        .form-group .file-preview-grid .foto-item { position: relative; }
-        .form-group .file-preview-grid .foto-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .form-group .file-preview-grid .foto-item .btn-remove { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-primary { padding: 10px 24px; background: #2980b9; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-        .btn-danger { padding: 10px 24px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-        .btn-success { padding: 10px 24px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-        .btn-clear { padding: 10px 24px; background: #94a3b8; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-        .btn-edit { padding: 6px 14px; background: #dbeafe; color: #2563eb; border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem; }
-        .btn-delete { padding: 6px 14px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem; }
-        .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #1a252f; }
-        .login-box { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 380px; }
-        .login-box h1 { font-size: 2rem; margin-bottom: 25px; text-align: center; color: #1e272e; }
-        .login-box h1 span { color: #2980b9; }
-        .login-box .btn-primary { width: 100%; padding: 12px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; }
-        .login-box .error { color: #e74c3c; font-size: 0.85rem; margin-top: 8px; display: none; text-align: center; }
-        .login-box .error.show { display: block; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .loading { text-align: center; padding: 40px; color: #94a3b8; }
-        .loading .spinner { border: 4px solid #f1f5f9; border-top: 4px solid #2980b9; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .empty { text-align: center; padding: 40px; color: #94a3b8; }
-        .caja-form { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .caja-form .producto-selector { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 15px; position: relative; }
-        .caja-form .producto-selector .form-group { flex: 1; min-width: 180px; margin-bottom: 0; }
-        .sugerencias-lista { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .sugerencias-lista .sugerencia-item { padding: 8px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
-        .sugerencias-lista .sugerencia-item .nombre { font-weight: 500; }
-        .sugerencias-lista .sugerencia-item .detalle { font-size: 0.8rem; color: #64748b; }
-        .caja-form .carrito-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 8px; }
-        .caja-form .carrito-item .info { flex: 1; font-weight: 500; }
-        .caja-form .carrito-item .precio { font-weight: 600; color: #2980b9; }
-        .caja-form .carrito-item .btn-eliminar { background: #fee2e2; border: none; border-radius: 6px; padding: 2px 10px; color: #dc2626; font-weight: 600; }
-        .caja-form .total { font-size: 1.3rem; font-weight: 700; text-align: right; margin: 15px 0; padding-top: 10px; border-top: 2px solid #e2e8f0; }
-        .caja-form .acciones { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-        .caja-form .datos-cliente { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        @media (max-width: 600px) { .caja-form .datos-cliente { grid-template-columns: 1fr !important; } }
-        .tiempo-restante { font-size: 0.75rem; color: #dc2626; font-weight: 600; }
-        .tiempo-restante.ok { color: #059669; }
-        .tiempo-restante.urgente { color: #dc2626; animation: parpadear 1s infinite; }
-        @keyframes parpadear { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card-new { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #2980b9; }
-        .stat-card-new .value { font-size: 1.8rem; font-weight: 700; color: #1e272e; }
-        .stat-card-new .label { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
-        .stat-card-new.green { border-left-color: #059669; }
-        .stat-card-new.orange { border-left-color: #d97706; }
-        .stat-card-new.purple { border-left-color: #7c3aed; }
-        .stat-card-new.red { border-left-color: #dc2626; }
-        .ranking-list { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
-        .ranking-list h3 { margin-bottom: 15px; font-weight: 600; color: #1e272e; font-size: 1.1rem; }
-        .ranking-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .ranking-item:last-child { border-bottom: none; }
-        .ranking-item .rank-num { width: 30px; height: 30px; border-radius: 50%; background: #eef2f6; color: #1e272e; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
-        .ranking-item .rank-num.top1 { background: #ffd700; color: #7d6608; }
-        .ranking-item .rank-num.top2 { background: #c0c0c0; color: #333; }
-        .ranking-item .rank-num.top3 { background: #cd7f32; color: #fff; }
-        .ranking-item .rank-info { flex: 1; min-width: 0; }
-        .ranking-item .rank-name { font-weight: 500; color: #1e272e; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ranking-item .rank-sub { font-size: 0.8rem; color: #64748b; }
-        .ranking-item .rank-value { text-align: right; font-weight: 700; color: #2980b9; font-size: 0.95rem; }
-        .config-section { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .config-section h3 { font-size: 1.1rem; margin-bottom: 15px; color: #1e272e; }
-        .config-section .help { font-size: 0.8rem; color: #64748b; margin-top: 6px; }
-        .config-success { background: #d1fae5; color: #059669; padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; display: none; }
-        .config-success.show { display: block; }
-        .user-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; }
-        .user-item:last-child { border-bottom: none; }
-        .user-item .user-avatar { width: 48px; height: 48px; border-radius: 50%; background: #2980b9; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
-        .user-item .user-info { flex: 1; min-width: 180px; }
-        .user-item .user-info .user-name { font-weight: 600; color: #1e272e; font-size: 0.95rem; }
-        .user-item .user-info .user-sub { font-size: 0.8rem; color: #64748b; }
-        .user-item .user-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        @media (max-width: 600px) { .user-item { flex-direction: column; align-items: stretch; } .user-item .user-actions { justify-content: center; } }
-        html, body { max-width: 100% !important; width: 100%; overflow-x: hidden !important; }
-        .main-content, .content, .tab-content, .list-container, .product-grid, .filters, .caja-form { max-width: 100% !important; box-sizing: border-box; }
-        @media (max-width: 992px) { .main-content { padding: 0 8px !important; gap: 0 !important; } }
-    </style>
-</head>
-<body>
-
-    <div id="loginContainer" class="login-container">
-        <div class="login-box">
-            <h1>B<span>&amp;</span>B <span style="font-size:1rem; color:#64748b;">Admin</span></h1>
-            <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="Correo electrónico" autocomplete="off" /></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••" /></div>
-            <div id="loginError" class="error"></div>
-            <button class="btn-primary" id="loginBtn">Acceder</button>
-        </div>
-    </div>
-
-    <div id="appContainer" style="display:none;">
-        <header class="header">
-            <div class="header__container">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="menu-toggle" id="menuToggle">☰</button>
-                    <a href="#" class="header__logo">B<span>&amp;</span>B <span class="admin-badge">Admin</span></a>
-                </div>
-                <div class="header__user">
-                    <button class="notif-btn" id="notifBtn">🔔<span class="notif-badge" id="notifBadge">0</span></button>
-                    <div class="notif-dropdown" id="notifDropdown"><div id="notifList"></div></div>
-                    <span class="user-name" id="adminUserName">Administrador</span>
-                    <button id="logoutBtn">Cerrar sesión</button>
-                </div>
-            </div>
-        </header>
-
-        <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-        <div class="main-content">
-            <aside class="sidebar" id="sidebar">
-                <button class="close-sidebar" id="closeSidebarBtn">✕</button>
-                <div class="sidebar__title">Menú</div>
-                <nav class="sidebar__nav">
-                    <ul>
-                        <li><a class="active" data-tab="dashboard">📊 Dashboard</a></li>
-                        <li><a data-tab="estadisticas">📈 Estadísticas</a></li>
-                        <li><a data-tab="caja">💳 Caja</a></li>
-                        <li><a data-tab="inventario">📦 Inventario</a></li>
-                        <li><a data-tab="ventas">💰 Ventas</a></li>
-                        <li><a data-tab="domicilios">🛵 Domicilios</a></li>
-                        <li><a data-tab="tienda">🏪 Pedidos Tienda</a></li>
-                        <li><a data-tab="encargos">📋 Encargos</a></li>
-                        <li><a data-tab="servicios">🔧 Servicios</a></li>
-                        <li><a data-tab="reportes">📄 Reportes</a></li>
-                        <li><a data-tab="usuarios">👥 Usuarios</a></li>
-                        <li><a data-tab="configuracion">⚙️ Configuración</a></li>
-                    </ul>
-                </nav>
-            </aside>
-
-            <section class="content">
-                <div id="tab-dashboard" class="tab-content active">
-                    <h2 style="margin-bottom:20px; font-weight:600;">📊 Resumen General</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="number" id="statVentas">-</div><div class="label">Ventas totales</div></div>
-                        <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">Ingresos totales</div></div>
-                        <div class="stat-card"><div class="number" id="statGanancia">-</div><div class="label">Ganancia total</div></div>
-                        <div class="stat-card"><div class="number" id="statDomicilios">-</div><div class="label">Domicilios pendientes</div></div>
-                        <div class="stat-card"><div class="number" id="statCostoInventario">-</div><div class="label">Costo total inventario</div></div>
-                        <div class="stat-card"><div class="number" id="statGananciaPotencial">-</div><div class="label">Ganancia potencial</div></div>
-                    </div>
-                    <div style="background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-                        <h3 style="margin-bottom:10px; font-weight:600;">Últimas ventas</h3>
-                        <div id="ultimasVentas"></div>
-                    </div>
-                </div>
-
-                <div id="tab-estadisticas" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">📈 Estadísticas de Ventas</h2>
-                    <div class="filters">
-                        <div class="rango-rapido">
-                            <button onclick="aplicarRangoEst('hoy')">Hoy</button>
-                            <button onclick="aplicarRangoEst('7dias')">7 días</button>
-                            <button onclick="aplicarRangoEst('30dias')">30 días</button>
-                            <button onclick="aplicarRangoEst('mes')">Este mes</button>
-                            <button onclick="aplicarRangoEst('todo')">Todo</button>
-                        </div>
-                        <div><label>Desde:</label> <input type="date" id="estFechaDesde" /></div>
-                        <div><label>Hasta:</label> <input type="date" id="estFechaHasta" /></div>
-                        <button id="estFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="estLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div id="estadisticasContenido"><div class="loading"><div class="spinner"></div>Cargando...</div></div>
-                </div>
-
-                <div id="tab-caja" class="tab-content">
-                    <h2 style="margin-bottom:20px; font-weight:600;">💳 Caja - Venta Manual</h2>
-                    <div class="caja-form">
-                        <div class="producto-selector">
-                            <div class="form-group" style="flex:2; position:relative;">
-                                <label>Buscar producto</label>
-                                <input type="text" id="cajaBusqueda" placeholder="Nombre del Producto" autocomplete="off" />
-                                <div class="sugerencias-lista" id="cajaSugerencias"></div>
-                            </div>
-                            <div class="form-group" style="flex:1;"><label>Cantidad</label><input type="number" id="cajaCantidad" value="1" min="1" /></div>
-                            <button class="btn-primary" id="cajaAgregarBtn">➕ Agregar</button>
-                        </div>
-                        <div id="cajaCarrito"><div class="empty">No hay productos agregados.</div></div>
-                        <div class="total" id="cajaTotal">Total: $0.00</div>
-                        <div class="datos-cliente">
-                            <div class="form-group"><label>Nombre</label><input type="text" id="cajaCliente" /></div>
-                            <div class="form-group"><label>Teléfono</label><input type="text" id="cajaTelefono" /></div>
-                            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="cajaDireccion" /></div>
-                        </div>
-                        <div class="acciones">
-                            <button class="btn-clear" id="cajaLimpiarBtn">🗑️ Limpiar carrito</button>
-                            <button class="btn-success" id="cajaRegistrarBtn">✅ Registrar Venta</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-inventario" class="tab-content">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-                        <h2 style="margin:0; font-weight:600;">📦 Inventario</h2>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <button class="btn-success" id="btnNuevoProducto">➕ Nuevo Producto</button>
-                            <button class="btn-primary" id="btnExportarInventario">📄 Exportar PDF</button>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
-                        <input type="text" id="invSearch" placeholder="Buscar producto..." style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; flex:1; min-width:150px; font-size:0.9rem;" />
-                        <select id="invCategory" style="padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;"><option value="Todas">Todas</option></select>
-                        <button id="invRefreshBtn" style="padding:8px 20px; background:#1a252f; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">🔄 Refrescar</button>
-                    </div>
-                    <div class="list-container" id="inventarioContainer"><div class="loading"><div class="spinner"></div>Cargando productos...</div></div>
-                </div>
-
-                <div id="tab-ventas" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">💰 Ventas</h2>
-                    <div class="filters">
-                        <div><label>Desde:</label> <input type="date" id="ventasFechaDesde" /></div>
-                        <div><label>Hasta:</label> <input type="date" id="ventasFechaHasta" /></div>
-                        <div><label>Tipo:</label>
-                            <select id="ventasTipo">
-                                <option value="Todos">Todos</option>
-                                <option value="Local">Local</option>
-                                <option value="Domicilio">Domicilio</option>
-                                <option value="Tienda">Tienda</option>
-                            </select>
-                        </div>
-                        <button id="ventasFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="ventasLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div class="list-container" id="ventasContainer"><div class="loading"><div class="spinner"></div>Cargando ventas...</div></div>
-                </div>
-
-                <div id="tab-domicilios" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">🛵 Domicilios</h2>
-                    <div class="filters">
-                        <div><label>Estado:</label>
-                            <select id="domFiltroEstado">
-                                <option value="Todos">Todos</option>
-                                <option value="Nuevo Domicilio">Nuevo Domicilio</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En camino">En camino</option>
-                                <option value="Entregado">Entregado</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        <button id="domFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="domLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div class="list-container" id="domiciliosContainer"><div class="loading"><div class="spinner"></div>Cargando domicilios...</div></div>
-                </div>
-
-                <div id="tab-tienda" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">🏪 Pedidos en Tienda</h2>
-                    <div class="filters">
-                        <div><label>Estado:</label>
-                            <select id="tiendaFiltroEstado">
-                                <option value="Todos">Todos</option>
-                                <option value="Nuevo Pedido">Nuevo Pedido</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Vendido">Vendido</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        <button id="tiendaFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="tiendaLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div class="list-container" id="tiendaContainer"><div class="loading"><div class="spinner"></div>Cargando pedidos...</div></div>
-                </div>
-
-                <div id="tab-encargos" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">📋 Encargos</h2>
-                    <div class="filters">
-                        <div><label>Estado:</label>
-                            <select id="encFiltroEstado">
-                                <option value="Todos">Todos</option>
-                                <option value="Nuevo Encargo">Nuevo Encargo</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En proceso">En proceso</option>
-                                <option value="En camino">En camino</option>
-                                <option value="Procesando en aduana de Cuba">Aduana Cuba</option>
-                                <option value="En el local TienditaB&B lista para la entrega">Listo para entrega</option>
-                                <option value="Entregado">Entregado</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        <button id="encFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="encLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div class="list-container" id="encargosContainer"><div class="loading"><div class="spinner"></div>Cargando encargos...</div></div>
-                </div>
-
-                <div id="tab-servicios" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">🔧 Solicitudes de Servicios</h2>
-                    <div class="filters">
-                        <div><label>Estado:</label>
-                            <select id="servFiltroEstado">
-                                <option value="Todos">Todos</option>
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En proceso">En proceso</option>
-                                <option value="Completado">Completado</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        <button id="servFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="servLimpiarBtn">Limpiar</button>
-                    </div>
-                    <div class="list-container" id="serviciosContainer"><div class="loading"><div class="spinner"></div>Cargando solicitudes...</div></div>
-                </div>
-
-                <div id="tab-reportes" class="tab-content">
-                    <h2 style="margin-bottom:15px; font-weight:600;">📄 Reportes de Ventas</h2>
-                    <div class="filters">
-                        <div class="rango-rapido">
-                            <button onclick="aplicarRangoReporte('hoy')">Hoy</button>
-                            <button onclick="aplicarRangoReporte('7dias')">7 días</button>
-                            <button onclick="aplicarRangoReporte('30dias')">30 días</button>
-                            <button onclick="aplicarRangoReporte('mes')">Este mes</button>
-                            <button onclick="aplicarRangoReporte('mesAnterior')">Mes anterior</button>
-                        </div>
-                        <div><label>Desde:</label> <input type="date" id="repFechaDesde" /></div>
-                        <div><label>Hasta:</label> <input type="date" id="repFechaHasta" /></div>
-                        <div><label>Tipo:</label>
-                            <select id="repTipo">
-                                <option value="Todos">Todos</option>
-                                <option value="Local">Local</option>
-                                <option value="Domicilio">Domicilio</option>
-                                <option value="Tienda">Tienda</option>
-                            </select>
-                        </div>
-                        <button id="repFiltrarBtn">Filtrar</button>
-                        <button class="btn-clear" id="repLimpiarBtn">Limpiar</button>
-                        <button class="btn-primary" id="btnExportarReportes" style="margin-left:auto;">📄 PDF</button>
-                    </div>
-                    <div style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:15px;">
-                            <div><strong>Ingresos:</strong> <span id="repTotalVentas">$0.00</span></div>
-                            <div><strong>Costo vendido:</strong> <span id="repCostoVendido">$0.00</span></div>
-                            <div><strong>Ganancia real:</strong> <span id="repGananciaTotal">$0.00</span></div>
-                            <div><strong>N° ventas:</strong> <span id="repCount">0</span></div>
-                        </div>
-                    </div>
-                    <div class="list-container" id="reportesContainer"><div class="loading"><div class="spinner"></div>Cargando reportes...</div></div>
-                </div>
-
-                <div id="tab-usuarios" class="tab-content">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-                        <h2 style="margin:0; font-weight:600;">👥 Usuarios Registrados</h2>
-                        <span id="usuariosCount" style="background:#e6f0fa; color:#2980b9; padding:6px 14px; border-radius:20px; font-weight:600; font-size:0.85rem;">0 usuarios</span>
-                    </div>
-                    <div class="filters">
-                        <input type="text" id="userSearch" placeholder="🔎 Buscar por nombre, email o teléfono..." style="flex:1; min-width:200px; padding:8px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
-                        <button class="btn-primary" id="userRefreshBtn" style="padding:8px 20px;">🔄 Refrescar</button>
-                    </div>
-                    <div class="list-container" id="usuariosContainer">
-                        <div class="loading"><div class="spinner"></div>Cargando usuarios...</div>
-                    </div>
-                </div>
-
-                <div id="tab-configuracion" class="tab-content">
-                    <h2 style="margin-bottom:20px; font-weight:600;">⚙️ Configuración de la Tienda</h2>
-                    <div class="config-section">
-                        <h3>🚚 Envío a domicilio</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Costo de envío (USD)</label>
-                                <input type="number" id="configEnvioCosto" step="0.01" min="0" placeholder="1.00" />
-                                <div class="help">Costo que se cobra al cliente por el envío a domicilio.</div>
-                            </div>
-                            <div class="form-group">
-                                <label>Envío gratis a partir de ganancia (USD)</label>
-                                <input type="number" id="configEnvioGratis" step="0.01" min="0" placeholder="5.00" />
-                                <div class="help">Si la GANANCIA total del pedido es mayor o igual a este monto, el envío es gratis. Pon 0 para desactivar.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="config-section">
-                        <h3>📦 Sección de Pedidos Por Encargo</h3>
-                        <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                            <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:500; font-size:0.95rem;">
-                                <input type="checkbox" id="configEncargosActivos" style="width:20px; height:20px; cursor:pointer; accent-color:#2980b9;" />
-                                Mostrar la sección "Pedidos Por Encargo" a los clientes
-                            </label>
-                        </div>
-                        <div class="help">Si está desactivado, los clientes NO verán la sección de Pedidos por Encargo en la tienda.</div>
-                    </div>
-                    <div class="config-section">
-                        <h3>🔧 Sección de Servicios</h3>
-                        <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-                            <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:500; font-size:0.95rem;">
-                                <input type="checkbox" id="configServiciosActivos" style="width:20px; height:20px; cursor:pointer; accent-color:#2980b9;" />
-                                Mostrar la sección "Servicios" a los clientes
-                            </label>
-                        </div>
-                        <div class="help">Si está desactivado, los clientes NO verán la sección de Servicios en la tienda.</div>
-                    </div>
-                    <button class="btn-success" id="guardarConfigBtn" style="margin-top:10px;">💾 Guardar Configuración</button>
-                    <div class="config-success" id="configSuccess">✅ Configuración guardada correctamente.</div>
-                    <div class="config-section" style="background:#f8fafc; margin-top:20px;">
-                        <h3>ℹ️ Información</h3>
-                        <p style="font-size:0.9rem; color:#64748b; line-height:1.6;">
-                            Los cambios se aplican inmediatamente en la tienda pública.<br>
-                            Para gestionar los usuarios registrados ve a la sección 👥 Usuarios en el menú.
-                        </p>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="detailModal">
-        <div class="modal">
-            <button class="close-modal" id="closeDetailModal">✕</button>
-            <div id="detailContent"><h2>Detalle</h2><div id="detailBody"></div></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="productModal">
-        <div class="modal" style="max-width:700px;">
-            <button class="close-modal" id="closeProductModal">✕</button>
-            <h2 id="productModalTitle">Nuevo Producto</h2>
-            <form id="productForm" enctype="multipart/form-data">
-                <input type="hidden" id="productId" value="" />
-                <div class="form-group"><label>Nombre *</label><input type="text" id="prodNombre" required /></div>
-                <div class="form-group" id="categoriaGroup">
-                    <label>Categoría *</label>
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <select id="prodCategoria" style="flex:1; min-width:150px;"></select>
-                        <input type="text" id="nuevaCategoriaInput" placeholder="Nueva categoría" style="flex:1; min-width:120px; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem;" />
-                        <button type="button" id="agregarCategoriaBtn" class="btn-primary" style="padding:8px 16px; font-size:0.85rem;">Agregar</button>
-                        <button type="button" id="eliminarCategoriaBtn" class="btn-danger" style="padding:8px 16px; font-size:0.85rem;">🗑️</button>
-                    </div>
-                </div>
-                <div class="form-group" id="servicioInfoGroup" style="display:none; background:#dcfce7; padding:12px; border-radius:10px; border:1px solid #86efac;">
-                    <label style="color:#166534; font-weight:600;">📂 Categoría automática: <strong>Servicios</strong></label>
-                    <div style="font-size:0.85rem; color:#166534; margin-top:4px;">Los servicios no necesitan categoría propia. Aparecerán automáticamente en la sección 🔧 Servicios de la tienda.</div>
-                </div>
-                <div class="form-group"><label>Código de Barras</label><input type="text" id="prodCodigo" /></div>
-                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsProveedor" /> 🏭 Producto de Proveedor</label>
-                </div>
-                <div class="form-group" id="proveedorGroup" style="display:none; background:#eff6ff; padding:12px; border-radius:10px; border:1px solid #bfdbfe;">
-                    <label style="color:#1e40af;">🏭 Nombre del Proveedor</label>
-                    <input type="text" id="prodProveedor" />
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Precio Costo</label><input type="number" id="prodCosto" step="0.01" /></div>
-                    <div class="form-group"><label>Precio Venta</label><input type="number" id="prodVenta" step="0.01" /></div>
-                </div>
-                <div class="form-group"><label>Precio Oferta</label><input type="number" id="prodOferta" step="0.01" /></div>
-                <div class="form-group" id="stockGroup"><label>Stock *</label><input type="number" id="prodStock" /></div>
-                <div class="form-group"><label>Detalles</label><textarea id="prodDetalles" rows="2"></textarea></div>
-                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsEncargo" /> 📦 Mostrar en Encargos</label>
-                </div>
-                <div class="form-group" id="urlEncargoGroup" style="display:none; background:#f5f3ff; padding:12px; border-radius:10px; border:1px solid #ddd6fe;">
-                    <label style="color:#6d28d9;">🔗 URL del producto</label>
-                    <input type="url" id="prodUrlEncargo" placeholder="https://..." />
-                </div>
-                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="prodEsServicio" /> 🔧 Es un Servicio</label>
-                </div>
-                <div class="form-group" id="servicioNoteGroup" style="display:none; background:#f0fdf4; padding:12px; border-radius:10px; border:1px solid #bbf7d0;">
-                    <label style="color:#166534; font-weight:600;">ℹ️ Los servicios no tienen stock ni se venden directamente</label>
-                    <div style="font-size:0.85rem; color:#166534; margin-top:4px;">Los clientes los verán en la sección "🔧 Servicios" y podrán solicitarlos con un formulario. Si el precio es 0 se mostrará "Consultar precio".</div>
-                </div>
-                <div class="form-group" id="diagnosticoGroup" style="display:none; background:#fef3c7; padding:12px; border-radius:10px; border:1px solid #fde68a;">
-                    <label style="color:#92400e; font-weight:700;">💰 Tarifa de diagnóstico</label>
-                    <div style="display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap;">
-                        <input type="number" id="prodDiagPrecio" step="0.01" min="0" placeholder="3000" style="flex:1; min-width:120px;" />
-                        <span style="padding:10px 14px; background:#fde68a; border-radius:8px; font-weight:700; color:#92400e; font-size:0.9rem;">CUP</span>
-                    </div>
-                    <label style="color:#92400e; margin-top:12px;">Descripción del aviso al cliente</label>
-                    <textarea id="prodDiagDescripcion" rows="2" placeholder="Se cobra una tarifa de diagnóstico que se descuenta del total al concluir el trabajo."></textarea>
-                    <div style="font-size:0.8rem; color:#92400e; margin-top:6px;">Si dejas los campos vacíos, se usará: <strong>3000 CUP</strong> y un texto por defecto.</div>
-                </div>
-                <div class="form-group">
-                    <label>Fotos del producto</label>
-                    <input type="file" id="prodFotos" accept="image/*" multiple style="margin-bottom:8px;" />
-                    <span id="prodFotosCount" style="font-size:0.85rem; color:#64748b;">Seleccionar archivos</span>
-                    <div class="file-preview-grid" id="prodFotosPreview"></div>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-                    <button type="submit" class="btn-primary" id="productSubmitBtn">Guardar</button>
-                    <button type="button" class="btn-danger" id="productDeleteBtn" style="display:none;">Eliminar</button>
-                    <button type="button" class="btn-clear" id="productCancelBtn">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="userModal">
-        <div class="modal" style="max-width:500px;">
-            <button class="close-modal" id="closeUserModal">✕</button>
-            <h2>✏️ Editar Usuario</h2>
-            <input type="hidden" id="editUserId" />
-            <div class="form-group"><label>Nombre *</label><input type="text" id="editUserNombre" required /></div>
-            <div class="form-group"><label>Apellidos *</label><input type="text" id="editUserApellidos" required /></div>
-            <div class="form-group"><label>Correo (no editable)</label><input type="email" id="editUserEmail" disabled style="background:#f1f5f9; color:#64748b;" /></div>
-            <div class="form-group"><label>Teléfono *</label><input type="tel" id="editUserTelefono" required /></div>
-            <div class="form-group"><label>Dirección *</label><input type="text" id="editUserDireccion" required /></div>
-            <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
-                <button class="btn-primary" id="saveUserBtn">💾 Guardar</button>
-                <button class="btn-danger" id="deleteUserBtn">🗑️ Eliminar</button>
-                <button class="btn-clear" id="cancelUserBtn">Cancelar</button>
-            </div>
-        </div>
-    </div>
-        <script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -671,6 +44,13 @@
     </script>
 
     <script>
+        /* ============================================================
+           FUNCIONES COMPLETAS DE ADMIN
+           ⚠️ Tu archivo original se cortó en verDetalleEncargo.
+           Aquí reconstruí lo faltante y añadí las funciones nuevas
+           de cotización. Si algo no coincide con tu original, avísame.
+           ============================================================ */
+
         const ADMIN_EMAIL = "byb@gmail.com";
         const TIENDA_URL = "https://tienditabyb.github.io/compras/";
 
@@ -806,11 +186,12 @@
                 errorEl.textContent = msg; errorEl.classList.add('show');
             }
         });
-        
+
         document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
         document.getElementById('logoutBtn').addEventListener('click', async () => { await window.firebaseFns.signOut(window.firebaseAuth); });
 
+        // === CARGA DE DATOS ===
         async function cargarCategorias() {
             try { const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria')); categoriasCache = s.docs.map(d => d.data().nombre).filter(Boolean); return categoriasCache; }
             catch (e) { return []; }
@@ -879,6 +260,7 @@
             } catch (e) { }
         }
 
+        // === UTILIDADES ===
         function normalizarNombre(n) { if (!n) return ""; return n.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
         function extraerNombresProductos(t) { return !t ? [] : t.split(',').map(p => p.trim()).filter(Boolean); }
         function calcularCostoVenta(v) {
@@ -917,7 +299,9 @@
             });
             return h;
         }
-                function renderDashboard(ventas, domicilios) {
+
+        // === DASHBOARD ===
+        function renderDashboard(ventas, domicilios) {
             const tv = ventas.length;
             const ing = ventas.reduce((s, v) => s + parseFloat(v.total || 0), 0);
             let g = 0; for (const v of ventas) g += calcularGananciaVenta(v);
@@ -943,6 +327,7 @@
             c.innerHTML = h;
         }
 
+        // === ESTADÍSTICAS ===
         function aplicarRangoEst(r) {
             const hoy = new Date();
             let d = new Date(); const h = new Date();
@@ -1020,6 +405,7 @@
             renderizarEstadisticas();
         });
 
+        // === USUARIOS ===
         function renderUsuarios() {
             const c = document.getElementById('usuariosContainer');
             const b = (document.getElementById('userSearch')?.value || '').toLowerCase().trim();
@@ -1117,6 +503,7 @@
         });
         document.getElementById('userModal').addEventListener('click', function(e) { if (e.target === this) cerrarModalUsuario(); });
 
+        // === INVENTARIO ===
         function renderInventario(productos, catF = 'Todas', busq = '') {
             const c = document.getElementById('inventarioContainer');
             let f = productos;
@@ -1174,6 +561,7 @@
             c.innerHTML = h;
         }
 
+        // === VENTAS ===
         function renderVentas(ventas) {
             const c = document.getElementById('ventasContainer');
             if (ventas.length === 0) { c.innerHTML = '<div class="empty">No hay ventas.</div>'; return; }
@@ -1186,6 +574,7 @@
             c.innerHTML = h;
         }
 
+        // === DOMICILIOS ===
         function renderDomicilios(domicilios) {
             const c = document.getElementById('domiciliosContainer');
             if (domicilios.length === 0) { c.innerHTML = '<div class="empty">No hay domicilios.</div>'; return; }
@@ -1213,6 +602,7 @@
             actualizarNotificaciones();
         }
 
+        // === TIENDA ===
         function renderTienda(pedidos) {
             const c = document.getElementById('tiendaContainer');
             if (pedidos.length === 0) { c.innerHTML = '<div class="empty">No hay pedidos.</div>'; return; }
@@ -1226,7 +616,6 @@
                 else if (em === 'Vendido') bc = 'estado-entregado';
                 else if (em === 'Cancelado') bc = 'estado-cancelado';
                 const isV = (er === 'Vendido' || er === 'Cancelado');
-
                 let tH = '';
                 if (er === 'Pendiente' && p.fecha_limite) {
                     const lim = fechaToDate(p.fecha_limite);
@@ -1238,7 +627,6 @@
                         tH = `<div class="sub"><span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span></div>`;
                     }
                 }
-
                 const ops = `<option value="Nuevo Pedido" ${em === 'Nuevo Pedido' ? 'selected' : ''}>Nuevo</option><option value="Pendiente" ${em === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="Vendido" ${em === 'Vendido' ? 'selected' : ''}>Vendido</option><option value="Cancelado" ${em === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
                 h += `<div class="list-item"><div class="left"><div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div><div class="sub">📞 ${p.Telefono || 'Sin teléfono'} • ${fechaToStr(p.fecha)}</div>${tH}${renderProductosPedidoConLinks(p.productos_pedido)}</div><div class="center"><span class="estado-badge ${bc}">${em}</span><select class="estado-select" onchange="cambiarEstadoTienda('${p.id}', this.value)" ${isV ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬</button></div><div class="right" onclick="verDetalleTienda('${p.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver →</span></div></div>`;
             }
@@ -1246,6 +634,7 @@
             actualizarNotificaciones();
         }
 
+        // === ENCARGOS ===
         function renderEncargos(encargos) {
             const c = document.getElementById('encargosContainer');
             if (encargos.length === 0) { c.innerHTML = '<div class="empty">No hay encargos.</div>'; return; }
@@ -1281,6 +670,7 @@
             actualizarNotificaciones();
         }
 
+        // === SERVICIOS (MODIFICADO — añadido botón Cotizar) ===
         function renderServicios(solicitudes) {
             const c = document.getElementById('serviciosContainer');
             if (solicitudes.length === 0) { c.innerHTML = '<div class="empty">No hay solicitudes de servicios.</div>'; return; }
@@ -1291,15 +681,40 @@
                 if (st === 'En proceso') bc = 'estado-en-proceso';
                 else if (st === 'Completado') bc = 'estado-completado';
                 else if (st === 'Cancelado') bc = 'estado-cancelado';
+                else if (st === 'Cotizado') bc = 'estado-cotizado';
                 const tel = s.usuario_telefono == null ? '' : String(s.usuario_telefono);
                 const isDone = (st === 'Completado' || st === 'Cancelado');
-                const ops = `<option value="Pendiente" ${st === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="En proceso" ${st === 'En proceso' ? 'selected' : ''}>En proceso</option><option value="Completado" ${st === 'Completado' ? 'selected' : ''}>Completado</option><option value="Cancelado" ${st === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
+                const ops = `<option value="Pendiente" ${st === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="En proceso" ${st === 'En proceso' ? 'selected' : ''}>En proceso</option><option value="Cotizado" ${st === 'Cotizado' ? 'selected' : ''}>Cotizado</option><option value="Completado" ${st === 'Completado' ? 'selected' : ''}>Completado</option><option value="Cancelado" ${st === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
                 let fechaPref = '';
                 if (s.fecha_preferida) {
                     const fp = fechaToDate(s.fecha_preferida);
                     if (fp) fechaPref = `<div class="sub">📅 Prefiere: ${fp.toLocaleDateString('es-ES')}</div>`;
                 }
-                h += `<div class="list-item"><div class="left"><div class="title">🔧 ${s.servicio_nombre || 'Servicio'}</div><div class="sub">👤 ${s.usuario_nombre || 'Cliente'} • 📞 ${tel || 'Sin teléfono'}</div><div class="sub">📧 ${s.usuario_email || 'Sin email'}</div><div class="sub">📍 ${s.direccion || 'Sin dirección'}</div>${fechaPref}<div class="sub">💬 ${s.descripcion || 'Sin descripción'}</div><div class="sub" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">Solicitado: ${fechaToStr(s.fecha_solicitud)}</div></div><div class="center"><span class="estado-badge ${bc}">${st}</span><select class="estado-select" onchange="cambiarEstadoServicio('${s.id}', this.value)" ${isDone ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="notificarServicio('${s.id}')">💬</button></div></div>`;
+                const numComp = Array.isArray(s.componentes) ? s.componentes.length : 0;
+                const tienePrecios = numComp > 0 && s.componentes.some(c => (c.precio || 0) > 0);
+                const totalBadge = tienePrecios ? `<div class="sub" style="color:#059669; font-weight:600;">💵 Cotizado: $${(s.total_presupuesto || 0).toFixed(2)}</div>` : '';
+                h += `<div class="list-item">
+                    <div class="left">
+                        <div class="title">🔧 ${s.servicio_nombre || 'Servicio'}</div>
+                        <div class="sub">👤 ${s.usuario_nombre || 'Cliente'} • 📞 ${tel || 'Sin teléfono'}</div>
+                        <div class="sub">📧 ${s.usuario_email || 'Sin email'}</div>
+                        <div class="sub">📍 ${s.direccion || 'Sin dirección'}</div>
+                        ${fechaPref}
+                        <div class="sub">💬 ${s.descripcion || 'Sin descripción'}</div>
+                        <div class="sub" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">Solicitado: ${fechaToStr(s.fecha_solicitud)}</div>
+                        ${numComp > 0 ? `<div class="sub" style="color:#2980b9; font-weight:600;">📋 ${numComp} materiales</div>` : ''}
+                        ${totalBadge}
+                    </div>
+                    <div class="center">
+                        <span class="estado-badge ${bc}">${st}</span>
+                        <select class="estado-select" onchange="cambiarEstadoServicio('${s.id}', this.value)" ${isDone ? 'disabled' : ''}>${ops}</select>
+                        <button class="btn-whatsapp" onclick="notificarServicio('${s.id}')">💬</button>
+                        <button class="btn-cotizar" onclick="verDetalleServicio('${s.id}')">💰 Cotizar</button>
+                    </div>
+                    <div class="right" onclick="verDetalleServicio('${s.id}')" style="cursor:pointer;">
+                        <span style="font-size:0.8rem; color:#2980b9; font-weight:600;">Ver →</span>
+                    </div>
+                </div>`;
             }
             c.innerHTML = h;
             actualizarNotificaciones();
@@ -1329,11 +744,12 @@
             const serv = s.servicio_nombre || 'Servicio';
             let m = '';
             switch (st) {
-                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'},\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos.`; break;
-                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* está en proceso. En breve coordinamos la visita.`; break;
-                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu servicio *${serv}* ha sido completado. Gracias por confiar en B&B.`; break;
-                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo.`; break;
-                default: m = `Hola ${s.usuario_nombre || 'Cliente'},\nTu solicitud de *${serv}* cambió a: *${st}*.`;
+                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos. 🔧`; break;
+                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n✅ Tu solicitud de *${serv}* está en proceso. En breve coordinamos la visita. 🔧`; break;
+                case 'Cotizado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n💰 Tu solicitud de *${serv}* ya tiene cotización.\nRevisa los detalles y confírmanos. 🔧`; break;
+                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n🎉 Tu servicio *${serv}* ha sido completado. ¡Gracias por confiar en B&B!`; break;
+                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo. 🙌`; break;
+                default: m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* cambió a: *${st}*.`;
             }
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
@@ -1345,6 +761,13 @@
             renderServicios(f);
         }
 
+        document.getElementById('servFiltrarBtn').addEventListener('click', aplicarFiltrosServicios);
+        document.getElementById('servLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('servFiltroEstado').value = 'Todos';
+            aplicarFiltrosServicios();
+        });
+
+        // === ENCARGOS (extras) ===
         async function cancelarEncargoVencido(id) {
             const e = encargosCache.find(x => x.id === id);
             if (!e || e.estado !== 'Pendiente') return;
@@ -1381,21 +804,34 @@
             const pv = p ? parseFloat(p.Precio_Venta || 0) : 0;
             const tt = pv * cant, mt = tt / 2;
             let m = '';
-            if (vencido) m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* ha sido *CANCELADO*.\nSi aún te interesa, vuelve a solicitarlo.`;
+            if (vencido) m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo de *${prod}* ha sido *CANCELADO*.\nSi aún te interesa, vuelve a solicitarlo. 🙌`;
             else {
                 switch (st) {
-                    case 'Nuevo Encargo': m = `Hola ${e.usuario_nombre || 'Cliente'},\nRecibimos tu solicitud de encargo: *${prod}* (x${cant}).\nPronto te contactamos.`; break;
-                    case 'Pendiente': m = `Hola ${e.usuario_nombre || 'Cliente'},\n*${prod}*\nCant: ${cant}\nTotal: $${tt.toFixed(2)}\nIngresa la mitad ($${mt.toFixed(2)}) antes de 24h en Tiendita B&B.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\n\n¡Gracias!`; break;
-                    case 'En proceso': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* está en proceso.`; break;
-                    case 'En camino': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo está en camino.`; break;
-                    case 'Procesando en aduana de Cuba': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo está en *Aduana de Cuba*.`; break;
-                    case 'En el local TienditaB&B lista para la entrega': m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo de *${prod}* está listo para retirar.`; break;
-                    case 'Entregado': m = `Hola ${e.usuario_nombre || 'Cliente'},\nEncargo *ENTREGADO*. ¡Gracias!`; break;
-                    default: m = `Hola ${e.usuario_nombre || 'Cliente'},\nTu encargo cambió a: *${st}*.`;
+                    case 'Nuevo Encargo': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de encargo: *${prod}* (x${cant}).\nPronto te contactamos. 🙌`; break;
+                    case 'Pendiente': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🛒 *${prod}*\n🔢 ${cant}\n💰 Total: $${tt.toFixed(2)}\n💵 Ingresa la mitad ($${mt.toFixed(2)}) antes de 24h en Tiendita B&B.\n📍 Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n\n¡Gracias! 🙌`; break;
+                    case 'En proceso': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Tu encargo de *${prod}* está en proceso. 📦`; break;
+                    case 'En camino': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🚚 Tu encargo está en camino.`; break;
+                    case 'Procesando en aduana de Cuba': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n📦 Tu encargo está en *Aduana de Cuba*.`; break;
+                    case 'En el local TienditaB&B lista para la entrega': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🎉 Tu encargo de *${prod}* está listo para retirar.`; break;
+                    case 'Entregado': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Encargo *ENTREGADO*. ¡Gracias! 🎉`; break;
+                    default: m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo cambió a: *${st}*.`;
                 }
             }
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
+        function aplicarFiltrosEncargos() {
+            const e = document.getElementById('encFiltroEstado').value;
+            let f = [...encargosCache];
+            if (e !== 'Todos') f = f.filter(x => (x.estado || 'Pendiente') === e);
+            renderEncargos(f);
+        }
+        document.getElementById('encFiltrarBtn').addEventListener('click', aplicarFiltrosEncargos);
+        document.getElementById('encLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('encFiltroEstado').value = 'Todos';
+            aplicarFiltrosEncargos();
+        });
+
+        // === DETALLES ===
         async function verDetalleEncargo(id) {
             const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'Encargos', id));
             if (!snap.exists()) { alert('No encontrado.'); return; }
@@ -1406,769 +842,718 @@
                 <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.usuario_nombre || 'Cliente'}</span></div>
                 <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.usuario_telefono || 'Sin teléfono'}</span></div>
                 <div class="detail-row"><span class="label">Estado</span><span class="value">${d.estado || 'Pendiente'}</span></div>
-                <div class="detail-row"><span class="label">Comentario</span><span class="value">${d.comentario || 'Ninguno'}</span></div>
+                <div class="detail-row"><span class="label">Comentario</span><span class="value">${d.comentario || 'Sin comentario'}</span></div>
                 <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha_solicitud)}</span></div>
             `;
             document.getElementById('detailModal').classList.add('active');
         }
-        function aplicarFiltrosEncargos() {
-            const e = document.getElementById('encFiltroEstado').value;
-            let f = [...encargosCache];
-            if (e !== 'Todos') {
-                if (e === 'Nuevo Encargo') f = f.filter(x => (x.estado || 'Pendiente') === 'Pendiente' && !x.fecha_limite_pago);
-                else f = f.filter(x => (x.estado || 'Pendiente') === e);
-            }
-            renderEncargos(f);
+
+        async function verDetalleVenta(id) {
+            const v = ventasCache.find(x => x.id === id);
+            if (!v) return;
+            const g = calcularGananciaVenta(v);
+            document.getElementById('detailBody').innerHTML = `
+                <div class="detail-row"><span class="label">Productos</span><span class="value">${v.productos_json || 'Sin productos'}</span></div>
+                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(v.total || 0).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Costo</span><span class="value">$${calcularCostoVenta(v).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Ganancia</span><span class="value">$${g.toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Tipo</span><span class="value">${v.Tipo || 'Local'}</span></div>
+                <div class="detail-row"><span class="label">Cliente</span><span class="value">${v.Cliente_Nombre || 'Sin nombre'}</span></div>
+                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(v.fecha)}</span></div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
         }
+
+        async function verDetalleDomicilio(id) {
+            const d = domiciliosCache.find(x => x.id === id);
+            if (!d) return;
+            document.getElementById('detailBody').innerHTML = `
+                <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.Cliente_Nombre || 'Sin nombre'}</span></div>
+                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.Telefono || 'Sin teléfono'}</span></div>
+                <div class="detail-row"><span class="label">Dirección</span><span class="value">${d.Direccion_Entrega || 'Sin dirección'}</span></div>
+                <div class="detail-row"><span class="label">Subtotal</span><span class="value">$${parseFloat(d.subtotal || 0).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Envío</span><span class="value">$${parseFloat(d.envio || 0).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(d.total || 0).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Estado</span><span class="value">${d.Estado || 'Pendiente'}</span></div>
+                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha)}</span></div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        async function verDetalleTienda(id) {
+            const p = tiendaCache.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('detailBody').innerHTML = `
+                <div class="detail-row"><span class="label">Cliente</span><span class="value">${p.Cliente_Nombre || 'Sin nombre'}</span></div>
+                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${p.Telefono || 'Sin teléfono'}</span></div>
+                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(p.total || 0).toFixed(2)}</span></div>
+                <div class="detail-row"><span class="label">Estado</span><span class="value">${p.Estado || 'Pendiente'}</span></div>
+                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(p.fecha)}</span></div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // === COTIZAR SERVICIO (NUEVO) ===
+        async function verDetalleServicio(id) {
+            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'SolicitudesServicios', id));
+            if (!snap.exists()) { alert('No encontrado.'); return; }
+            const s = snap.data();
+            const componentes = Array.isArray(s.componentes) ? s.componentes : [];
+
+            let compHtml = '';
+            if (componentes.length === 0) {
+                compHtml = '<div class="empty" style="padding:20px;">Esta solicitud no tiene materiales. Fue creada manualmente o antes de la actualización.</div>';
+            } else {
+                compHtml = `<div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.85rem;">
+                    <thead><tr style="background:#f1f5f9;">
+                        <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">Material</th>
+                        <th style="padding:8px; text-align:center; border:1px solid #e2e8f0; width:70px;">Cant.</th>
+                        <th style="padding:8px; text-align:right; border:1px solid #e2e8f0; width:110px;">Precio USD</th>
+                        <th style="padding:8px; text-align:right; border:1px solid #e2e8f0; width:110px;">Subtotal</th>
+                    </tr></thead><tbody>`;
+                componentes.forEach((c, i) => {
+                    const sub = ((c.precio || 0) * (c.cantidad || 0)).toFixed(2);
+                    compHtml += `<tr>
+                        <td style="padding:6px; border:1px solid #e2e8f0;">${c.nombre}</td>
+                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">${c.cantidad}</td>
+                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:right;">
+                            <input type="number" step="0.01" min="0" value="${c.precio || 0}" 
+                                oninput="recalcularServicio()" 
+                                class="precio-input" data-index="${i}" />
+                        </td>
+                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:right; font-weight:600;" 
+                            class="subtotal-cell" data-index="${i}">$${sub}</td>
+                    </tr>`;
+                });
+                compHtml += '</tbody></table></div>';
+            }
+
+            document.getElementById('servicioDetailBody').innerHTML = `
+                <div style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:15px;">
+                    <div class="detail-row"><span class="label">Servicio</span><span class="value">${s.servicio_nombre || 'Servicio'}</span></div>
+                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${s.usuario_nombre || 'Cliente'}</span></div>
+                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${s.usuario_telefono || 'Sin teléfono'}</span></div>
+                    <div class="detail-row"><span class="label">Email</span><span class="value">${s.usuario_email || 'Sin email'}</span></div>
+                    <div class="detail-row"><span class="label">Dirección</span><span class="value">${s.direccion || 'Sin dirección'}</span></div>
+                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${s.descripcion || 'Sin descripción'}</span></div>
+                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(s.fecha_solicitud)}</span></div>
+                </div>
+
+                <h3 style="margin-bottom:10px;">📋 Materiales</h3>
+                <div id="servicioMateriales">${compHtml}</div>
+
+                <h3 style="margin-top:20px; margin-bottom:10px;">💰 Cotización</h3>
+                <div class="form-group">
+                    <label>Mano de obra (USD)</label>
+                    <input type="number" step="0.01" min="0" id="servicioManoObra" 
+                        value="${s.mano_obra || 0}" oninput="recalcularServicio()" />
+                </div>
+                <div style="background:#f0fdf4; padding:15px; border-radius:8px; border:1px solid #bbf7d0; margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.9rem;">
+                        <span>Subtotal materiales:</span><strong id="servicioSubMat">$0.00</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.9rem;">
+                        <span>Mano de obra:</span><strong id="servicioSubMano">$0.00</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid #22c55e; margin-top:8px; font-size:1.2rem;">
+                        <span><strong>TOTAL:</strong></span><strong id="servicioTotal" style="color:#166534;">$0.00</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                    <button class="btn-success" onclick="guardarCotizacionServicio('${id}')">💾 Guardar Cotización</button>
+                    <button class="btn-primary" onclick="enviarCotizacionWA('${id}')">💬 Enviar por WhatsApp</button>
+                    <button class="btn-clear" onclick="cerrarDetalleServicio()">Cerrar</button>
+                </div>
+            `;
+
+            const body = document.getElementById('servicioDetailBody');
+            body.dataset.id = id;
+            body.dataset.componentes = JSON.stringify(componentes);
+            body.dataset.telefono = s.usuario_telefono || '';
+            body.dataset.nombre = s.usuario_nombre || 'Cliente';
+            body.dataset.servicio = s.servicio_nombre || 'Servicio';
+
+            document.getElementById('servicioDetailModal').classList.add('active');
+            recalcularServicio();
+        }
+
+        function recalcularServicio() {
+            const body = document.getElementById('servicioDetailBody');
+            if (!body) return;
+            const componentes = JSON.parse(body.dataset.componentes || '[]');
+            let totalMat = 0;
+            document.querySelectorAll('.precio-input').forEach(inp => {
+                const i = parseInt(inp.dataset.index);
+                const precio = parseFloat(inp.value) || 0;
+                const cant = componentes[i]?.cantidad || 0;
+                const sub = precio * cant;
+                totalMat += sub;
+                const cell = document.querySelector(`.subtotal-cell[data-index="${i}"]`);
+                if (cell) cell.textContent = '$' + sub.toFixed(2);
+            });
+            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
+            document.getElementById('servicioSubMat').textContent = '$' + totalMat.toFixed(2);
+            document.getElementById('servicioSubMano').textContent = '$' + mano.toFixed(2);
+            document.getElementById('servicioTotal').textContent = '$' + (totalMat + mano).toFixed(2);
+        }
+
+        async function guardarCotizacionServicio(id) {
+            const body = document.getElementById('servicioDetailBody');
+            const componentes = JSON.parse(body.dataset.componentes || '[]');
+            document.querySelectorAll('.precio-input').forEach(inp => {
+                const i = parseInt(inp.dataset.index);
+                componentes[i].precio = parseFloat(inp.value) || 0;
+            });
+            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
+            const totalMat = componentes.reduce((s, c) => s + (c.precio || 0) * (c.cantidad || 0), 0);
+            const total = totalMat + mano;
+
+            try {
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                await updateDoc(doc(window.firebaseDb, 'SolicitudesServicios', id), {
+                    componentes: componentes,
+                    mano_obra: mano,
+                    total_presupuesto: total,
+                    moneda: 'USD',
+                    estado: 'Cotizado',
+                    fecha_cotizacion: serverTimestamp(),
+                    fecha_actualizacion: serverTimestamp()
+                });
+                alert('✅ Cotización guardada y servicio marcado como Cotizado.');
+                await cargarServicios();
+                aplicarFiltrosServicios();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function enviarCotizacionWA(id) {
+            const body = document.getElementById('servicioDetailBody');
+            const componentes = JSON.parse(body.dataset.componentes || '[]');
+            const tel = body.dataset.telefono;
+            if (!tel) { alert('Sin teléfono.'); return; }
+            let telLimpio = String(tel).replace(/[^0-9]/g, '');
+            if (telLimpio.length === 8) telLimpio = '53' + telLimpio;
+
+            document.querySelectorAll('.precio-input').forEach(inp => {
+                const i = parseInt(inp.dataset.index);
+                componentes[i].precio = parseFloat(inp.value) || 0;
+            });
+            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
+
+            let lineas = '', totalMat = 0;
+            componentes.forEach(c => {
+                if (!c.cantidad) return;
+                const sub = (c.precio || 0) * c.cantidad;
+                totalMat += sub;
+                lineas += `• ${c.nombre}: ${c.cantidad} × $${(c.precio || 0).toFixed(2)} = $${sub.toFixed(2)}\n`;
+            });
+            const total = totalMat + mano;
+
+            const msg = `*COTIZACIÓN B&B*\n\n` +
+                `👤 ${body.dataset.nombre}\n` +
+                `🔧 ${body.dataset.servicio}\n\n` +
+                `*MATERIALES:*\n${lineas}\n` +
+                `*Mano de obra:* $${mano.toFixed(2)}\n\n` +
+                `*TOTAL: $${total.toFixed(2)} USD*`;
+
+            window.open(`https://wa.me/${telLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function cerrarDetalleServicio() {
+            document.getElementById('servicioDetailModal').classList.remove('active');
+        }
+
+        // === FILTROS Y LISTAS ===
+        function aplicarFiltrosVentas() {
+            const d = document.getElementById('ventasFechaDesde').value;
+            const h = document.getElementById('ventasFechaHasta').value;
+            const t = document.getElementById('ventasTipo').value;
+            let f = [...ventasCache];
+            if (d) f = f.filter(v => fechaToISO(v.fecha) >= d);
+            if (h) f = f.filter(v => fechaToISO(v.fecha) <= h);
+            if (t !== 'Todos') f = f.filter(v => (v.Tipo || 'Local') === t);
+            renderVentas(f);
+        }
+        document.getElementById('ventasFiltrarBtn').addEventListener('click', aplicarFiltrosVentas);
+        document.getElementById('ventasLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('ventasFechaDesde').value = '';
+            document.getElementById('ventasFechaHasta').value = '';
+            document.getElementById('ventasTipo').value = 'Todos';
+            aplicarFiltrosVentas();
+        });
+
+        function aplicarFiltrosDomicilios() {
+            const e = document.getElementById('domFiltroEstado').value;
+            let f = [...domiciliosCache];
+            if (e !== 'Todos') f = f.filter(x => (x.Estado || 'Pendiente') === e);
+            renderDomicilios(f);
+        }
+        document.getElementById('domFiltrarBtn').addEventListener('click', aplicarFiltrosDomicilios);
+        document.getElementById('domLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('domFiltroEstado').value = 'Todos';
+            aplicarFiltrosDomicilios();
+        });
+
+        function aplicarFiltrosTienda() {
+            const e = document.getElementById('tiendaFiltroEstado').value;
+            let f = [...tiendaCache];
+            if (e !== 'Todos') f = f.filter(x => (x.Estado || 'Pendiente') === e);
+            renderTienda(f);
+        }
+        document.getElementById('tiendaFiltrarBtn').addEventListener('click', aplicarFiltrosTienda);
+        document.getElementById('tiendaLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('tiendaFiltroEstado').value = 'Todos';
+            aplicarFiltrosTienda();
+        });
 
         async function cambiarEstadoDomicilio(id, nuevo) {
             try {
-                const d = domiciliosCache.find(x => x.id === id);
-                if (!d) return;
-                if (d.Estado === 'Entregado' || d.Estado === 'Cancelado') { alert('Ya fue finalizado.'); return; }
-                if (nuevo === 'Nuevo Domicilio') nuevo = 'Pendiente';
-                const { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } = window.firebaseFns;
-                const data = { Estado: nuevo, fecha_gestion: serverTimestamp() };
-                if (nuevo === 'Cancelado') {
-                    await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
-                    alert('✅ Domicilio cancelado.');
-                    await cargarDomicilios(); renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache);
-                    enviarWhatsAppDom(id);
-                    return;
-                }
-                if (nuevo === 'Entregado') {
-                    const pp = parsearProductosPedido(d.productos_pedido);
-                    if (pp.length === 0) {
-                        await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
-                        alert('✅ Entregado.'); await cargarDomicilios(); renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache); enviarWhatsAppDom(id); return;
-                    }
-                    for (const x of pp) {
-                        const ps = await getDoc(doc(window.firebaseDb, 'productos', x.id));
-                        if (ps.exists()) await updateDoc(doc(window.firebaseDb, 'productos', x.id), { Stock: Math.max(0, (parseInt(ps.data().Stock) || 0) - (x.cantidad || 1)) });
-                    }
-                    const t = parseFloat(d.total) || pp.reduce((s, p) => s + (p.precio * p.cantidad), 0);
-                    const pS = pp.map(p => `${p.nombre} x${p.cantidad}`).join(', ');
-                    const pI = pp.map(p => p.id).join(',');
-                    await addDoc(collection(window.firebaseDb, 'Ventas'), { productos_json: pS, productos_ids: pI, total: t, fecha: serverTimestamp(), Tipo: 'Domicilio', usuario_id: d.usuario_id || null });
-                    await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
-                    alert('✅ Entregado + Stock + Venta.');
-                    await cargarDomicilios(); await cargarProductos(); await cargarVentas();
-                    renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache); enviarWhatsAppDom(id); return;
-                }
-                await updateDoc(doc(window.firebaseDb, 'Domicilios', id), data);
-                await cargarDomicilios(); renderDomicilios(domiciliosCache); renderDashboard(ventasCache, domiciliosCache);
-                enviarWhatsAppDom(id);
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                let d = { Estado: nuevo === 'Nuevo Domicilio' ? 'Pendiente' : nuevo, fecha_gestion: serverTimestamp(), fecha_actualizacion: serverTimestamp() };
+                await updateDoc(doc(window.firebaseDb, 'Domicilios', id), d);
+                await cargarDomicilios(); aplicarFiltrosDomicilios();
             } catch (e) { alert('Error: ' + e.message); }
-        }
-        function enviarWhatsAppDom(id) {
-            const d = domiciliosCache.find(x => x.id === id);
-            if (!d) return;
-            let tel = d.Telefono;
-            if (tel == null) { alert('❌ Sin teléfono.'); return; }
-            tel = String(tel).trim();
-            const es = d.Estado || 'Pendiente';
-            const pid = d.id.slice(-6);
-            let m = `Hola ${d.Cliente_Nombre || 'Cliente'},\nPedido #${pid} cambió a: *${es}*.\n`;
-            if (es === 'Pendiente') m += 'Preparando tu pedido.';
-            else if (es === 'En camino') m += 'En camino.';
-            else if (es === 'Entregado') m += '¡Entregado!';
-            else if (es === 'Cancelado') m += 'Tu pedido ha sido cancelado.';
-            m += '\n\nGracias por comprar en B&B.';
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
         }
         async function cambiarEstadoTienda(id, nuevo) {
             try {
-                const p = tiendaCache.find(x => x.id === id);
-                if (!p) return;
-                if (p.Estado === 'Vendido' || p.Estado === 'Cancelado') return;
-                if (nuevo === 'Nuevo Pedido') nuevo = 'Pendiente';
-                const { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } = window.firebaseFns;
-                const data = { Estado: nuevo, fecha_gestion: serverTimestamp() };
-                if (nuevo === 'Vendido') {
-                    const pp = parsearProductosPedido(p.productos_pedido);
-                    for (const x of pp) {
-                        const ps = await getDoc(doc(window.firebaseDb, 'productos', x.id));
-                        if (ps.exists()) await updateDoc(doc(window.firebaseDb, 'productos', x.id), { Stock: Math.max(0, (parseInt(ps.data().Stock) || 0) - (x.cantidad || 1)) });
-                    }
-                    const t = pp.reduce((s, x) => s + (x.precio * x.cantidad), 0);
-                    const pS = pp.map(x => `${x.nombre} x${x.cantidad}`).join(', ');
-                    const pI = pp.map(x => x.id).join(',');
-                    await addDoc(collection(window.firebaseDb, 'Ventas'), { productos_json: pS, productos_ids: pI, total: t, fecha: serverTimestamp(), Tipo: 'Tienda', usuario_id: p.usuario_id || null });
-                    await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), data);
-                    alert('✅ Vendido + Stock + Venta.');
-                    await cargarTienda(); await cargarProductos(); await cargarVentas();
-                    renderTienda(tiendaCache); renderDashboard(ventasCache, domiciliosCache); enviarWhatsAppTienda(id); return;
-                }
-                await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), data);
-                await cargarTienda(); renderTienda(tiendaCache); renderDashboard(ventasCache, domiciliosCache);
-                if (nuevo === 'Cancelado') enviarWhatsAppTiendaCancelado(id);
-                else enviarWhatsAppTienda(id);
+                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
+                let d = { Estado: nuevo === 'Nuevo Pedido' ? 'Pendiente' : nuevo, fecha_gestion: serverTimestamp(), fecha_actualizacion: serverTimestamp() };
+                await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), d);
+                await cargarTienda(); aplicarFiltrosTienda();
             } catch (e) { alert('Error: ' + e.message); }
         }
-        
+
+        function enviarWhatsAppDom(id) {
+            const d = domiciliosCache.find(x => x.id === id);
+            if (!d || !d.Telefono) { alert('Sin teléfono.'); return; }
+            let tel = String(d.Telefono).replace(/[^0-9]/g, '');
+            if (tel.length === 8) tel = '53' + tel;
+            const msg = `Hola ${d.Cliente_Nombre || 'Cliente'} 👋\nTu domicilio está en estado: *${d.Estado || 'Pendiente'}*.`;
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
         function enviarWhatsAppTienda(id) {
             const p = tiendaCache.find(x => x.id === id);
-            if (!p) return;
-            let tel = p.Telefono;
-            if (tel == null) { alert('❌ Sin teléfono.'); return; }
-            tel = String(tel).trim();
-            const es = p.Estado || 'Pendiente';
-            const pid = p.id.slice(-6);
-            
-            let m = `Hola ${p.Cliente_Nombre || 'Cliente'},\nPedido #${pid} cambió a: *${es}*.\n`;
-            
-            if (es === 'Pendiente') {
-                m += 'Listo para retirar.\nPaseo de la Paz #457 entre 2da y 3ra, Santa Clara\nTiempo límite para recogerlo 24h.\n';
+            if (!p || !p.Telefono) { alert('Sin teléfono.'); return; }
+            let tel = String(p.Telefono).replace(/[^0-9]/g, '');
+            if (tel.length === 8) tel = '53' + tel;
+            const msg = `Hola ${p.Cliente_Nombre || 'Cliente'} 👋\nTu pedido está en estado: *${p.Estado || 'Pendiente'}*.`;
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
 
-                // Agregar productos
-                const pp = parsearProductosPedido(p.productos_pedido);
-                if (pp.length > 0) {
-                    m += '\n*Productos:*\n';
-                    pp.forEach(item => {
-                        const subtotal = (parseFloat(item.precio || 0) * (item.cantidad || 1)).toFixed(2);
-                        m += `- ${item.nombre} x${item.cantidad || 1} = $${subtotal}\n`;
-                    });
-                }
-
-                // Agregar total
-                const total = parseFloat(p.total || 0).toFixed(2);
-                m += `\n*Total:* $${total}\n`;
-                
-            } else if (es === 'Vendido') {
-                m += '¡Vendido!';
-            }
-            
-            m += '\nGracias.';
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
-        }
-        function enviarWhatsAppTiendaCancelado(id) {
-            const p = tiendaCache.find(x => x.id === id);
-            if (!p) return;
-            let tel = p.Telefono;
-            if (tel == null) return;
-            tel = String(tel).trim();
-            const pid = p.id.slice(-6);
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${p.Cliente_Nombre || 'Cliente'},\nTu pedido #${pid} ha sido *CANCELADO*.\n\nGracias.`)}`, '_blank');
-        }
-        async function verDetalleVenta(id) {
-            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'Ventas', id));
-            if (!snap.exists()) return;
-            const d = snap.data();
-            const g = calcularGananciaVenta(d);
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha)}</span></div>
-                <div class="detail-row"><span class="label">Tipo</span><span class="value">${d.Tipo || 'Local'}</span></div>
-                <div class="detail-row"><span class="label">Productos</span><span class="value">${d.productos_json || 'Sin productos'}</span></div>
-                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(d.total || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Ganancia</span><span class="value">$${g.toFixed(2)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-        async function verDetalleDomicilio(id) {
-            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'Domicilios', id));
-            if (!snap.exists()) return;
-            const d = snap.data();
-            const pp = parsearProductosPedido(d.productos_pedido);
-            let ph = 'Sin productos';
-            if (pp.length > 0) {
-                ph = '<ul style="padding-left:18px;">';
-                pp.forEach(p => { ph += `<li>${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}</li>`; });
-                ph += '</ul>';
-            }
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha)}</span></div>
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.Cliente_Nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Dirección</span><span class="value">${d.Direccion_Entrega || 'Sin dirección'}</span></div>
-                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.Telefono || 'Sin teléfono'}</span></div>
-                <div class="detail-row"><span class="label">Estado</span><span class="value">${d.Estado || 'Pendiente'}</span></div>
-                <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label">🛍️ Productos</span><span class="value" style="text-align:left;">${ph}</span></div>
-                <div class="detail-row"><span class="label">💰 Subtotal</span><span class="value">$${parseFloat(d.subtotal || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">🚚 Envío</span><span class="value">$${parseFloat(d.envio || 0).toFixed(2)}</span></div>
-                <div class="detail-row" style="background:#f0f9ff; padding:10px; border-radius:8px;"><span class="label" style="font-weight:700; color:#1e40af;">💵 Total</span><span class="value" style="color:#1e40af;">$${parseFloat(d.total || 0).toFixed(2)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-        async function verDetalleTienda(id) {
-            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'PedidosTienda', id));
-            if (!snap.exists()) return;
-            const d = snap.data();
-            const pp = parsearProductosPedido(d.productos_pedido);
-            let ph = 'Sin productos';
-            if (pp.length > 0) {
-                ph = '<ul style="padding-left:18px;">';
-                pp.forEach(p => { ph += `<li>${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toFixed(2)}</li>`; });
-                ph += '</ul>';
-            }
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha)}</span></div>
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.Cliente_Nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.Telefono || 'Sin teléfono'}</span></div>
-                <div class="detail-row"><span class="label">Estado</span><span class="value">${d.Estado || 'Pendiente'}</span></div>
-                <div class="detail-row" style="flex-direction:column; align-items:flex-start;"><span class="label">🛍️ Productos</span><span class="value" style="text-align:left;">${ph}</span></div>
-                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(d.total || 0).toFixed(2)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-        document.getElementById('closeDetailModal').addEventListener('click', () => document.getElementById('detailModal').classList.remove('active'));
-        document.getElementById('detailModal').addEventListener('click', e => { if (e.target === e.currentTarget) document.getElementById('detailModal').classList.remove('active'); });
-
-        let fotosExistentes = [];
-        let fotosNuevas = [];
-
-        function renderFotosFormulario() {
-            const c = document.getElementById('prodFotosPreview');
-            c.innerHTML = '';
-            fotosExistentes.forEach((f, i) => {
-                const d = document.createElement('div');
-                d.className = 'foto-item';
-                d.innerHTML = `<img src="${f}" /><button type="button" class="btn-remove" data-index="${i}">✕</button>`;
-                c.appendChild(d);
+        // === PRODUCTOS ===
+        function editarProducto(id) {
+            const p = productosCache.find(x => x.id === id);
+            if (!p) { alert('No encontrado.'); return; }
+            document.getElementById('productModalTitle').textContent = 'Editar Producto';
+            document.getElementById('productId').value = p.id;
+            document.getElementById('prodNombre').value = p.Nombre || '';
+            document.getElementById('prodCodigo').value = p.Codigo_de_Barras || '';
+            document.getElementById('prodCosto').value = p.Precio_Costo || '';
+            document.getElementById('prodVenta').value = p.Precio_Venta || '';
+            document.getElementById('prodOferta').value = p.Precio_Oferta || '';
+            document.getElementById('prodStock').value = p.Stock || '';
+            document.getElementById('prodDetalles').value = p.Detalles || '';
+            document.getElementById('prodEsProveedor').checked = p.Es_Proveedor === true;
+            document.getElementById('prodEsEncargo').checked = p.Es_Encargo === true;
+            document.getElementById('prodEsServicio').checked = p.Es_Servicio === true;
+            document.getElementById('prodProveedor').value = p.Proveedor || '';
+            document.getElementById('prodUrlEncargo').value = p.URL_Encargo || '';
+            document.getElementById('proveedorGroup').style.display = p.Es_Proveedor ? 'block' : 'none';
+            document.getElementById('urlEncargoGroup').style.display = p.Es_Encargo ? 'block' : 'none';
+            document.getElementById('servicioNoteGroup').style.display = p.Es_Servicio ? 'block' : 'none';
+            document.getElementById('stockGroup').style.display = p.Es_Servicio ? 'none' : 'block';
+            // Fotos
+            const fo = obtenerFotosProducto(p);
+            const prev = document.getElementById('prodFotosPreview');
+            prev.innerHTML = '';
+            fo.forEach(url => {
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `<img src="${url}" /><button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>`;
+                prev.appendChild(div);
             });
-            fotosNuevas.forEach((file, i) => {
-                const url = URL.createObjectURL(file);
-                const d = document.createElement('div');
-                d.className = 'foto-item';
-                d.innerHTML = `<img src="${url}" /><button type="button" class="btn-remove" data-nuevo="${i}">✕</button>`;
-                c.appendChild(d);
-            });
-            c.querySelectorAll('.btn-remove[data-index]').forEach(b => b.addEventListener('click', function(e) { e.stopPropagation(); fotosExistentes.splice(parseInt(this.dataset.index), 1); renderFotosFormulario(); }));
-            c.querySelectorAll('.btn-remove[data-nuevo]').forEach(b => b.addEventListener('click', function(e) { e.stopPropagation(); fotosNuevas.splice(parseInt(this.dataset.nuevo), 1); renderFotosFormulario(); }));
-            document.getElementById('prodFotosCount').textContent = (fotosExistentes.length + fotosNuevas.length) > 0 ? `${fotosExistentes.length + fotosNuevas.length} foto(s)` : 'Seleccionar archivos';
-        }
-        document.getElementById('prodFotos').addEventListener('change', function() {
-            const files = Array.from(this.files);
-            if (files.length === 0) return;
-            fotosNuevas = fotosNuevas.concat(files);
-            renderFotosFormulario();
-            this.value = '';
-        });
-        function resetFotosFormulario() { fotosExistentes = []; fotosNuevas = []; renderFotosFormulario(); }
-
-        document.getElementById('prodEsEncargo').addEventListener('change', function() {
-            document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none';
-            if (this.checked) {
-                document.getElementById('prodEsServicio').checked = false;
-                document.getElementById('servicioNoteGroup').style.display = 'none';
-                document.getElementById('servicioInfoGroup').style.display = 'none';
-                document.getElementById('diagnosticoGroup').style.display = 'none';
-                document.getElementById('categoriaGroup').style.display = 'block';
-                document.getElementById('stockGroup').style.display = 'block';
-            }
-        });
-        document.getElementById('prodEsProveedor').addEventListener('change', function() {
-            document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none';
-            if (this.checked) {
-                document.getElementById('prodEsServicio').checked = false;
-                document.getElementById('servicioNoteGroup').style.display = 'none';
-                document.getElementById('servicioInfoGroup').style.display = 'none';
-                document.getElementById('diagnosticoGroup').style.display = 'none';
-                document.getElementById('categoriaGroup').style.display = 'block';
-                document.getElementById('stockGroup').style.display = 'block';
-            }
-        });
-        document.getElementById('prodEsServicio').addEventListener('change', function() {
-            const esServicio = this.checked;
-            document.getElementById('servicioNoteGroup').style.display = esServicio ? 'block' : 'none';
-            document.getElementById('servicioInfoGroup').style.display = esServicio ? 'block' : 'none';
-            document.getElementById('diagnosticoGroup').style.display = esServicio ? 'block' : 'none';
-            document.getElementById('categoriaGroup').style.display = esServicio ? 'none' : 'block';
-            document.getElementById('stockGroup').style.display = esServicio ? 'none' : 'block';
-            if (esServicio) {
-                document.getElementById('prodEsEncargo').checked = false;
-                document.getElementById('urlEncargoGroup').style.display = 'none';
-                document.getElementById('prodEsProveedor').checked = false;
-                document.getElementById('proveedorGroup').style.display = 'none';
-            }
-        });
-
-        async function agregarCategoria(n) {
-            if (!n || !n.trim()) { alert('Escribe un nombre.'); return; }
-            const nt = n.trim();
-            if (categoriasCache.some(c => c.toLowerCase() === nt.toLowerCase())) { alert('Ya existe.'); return; }
-            try {
-                await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Categoria'), { nombre: nt, fecha_creacion: window.firebaseFns.serverTimestamp() });
-                await cargarCategorias();
-                const cs = document.getElementById('prodCategoria');
-                cs.innerHTML = '';
-                for (const c of categoriasCache) { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); }
-                cs.value = nt;
-                const ic = document.getElementById('invCategory');
-                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
-                for (const c of categoriasCache) ic.innerHTML += `<option value="${c}">${c}</option>`;
-                document.getElementById('nuevaCategoriaInput').value = '';
-                alert(`✅ Categoría "${nt}" agregada.`);
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-        document.getElementById('agregarCategoriaBtn').addEventListener('click', () => agregarCategoria(document.getElementById('nuevaCategoriaInput').value));
-        document.getElementById('nuevaCategoriaInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); agregarCategoria(e.target.value); } });
-
-        async function eliminarCategoria(n) {
-            if (!n || !n.trim()) { alert('Selecciona una.'); return; }
-            const nt = n.trim();
-            if (!confirm(`¿Eliminar la categoría "${nt}"?`)) return;
-            try {
-                const snap = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria'));
-                let cd = null;
-                snap.forEach(d => { if ((d.data().nombre || '').trim().toLowerCase() === nt.toLowerCase()) cd = d; });
-                if (!cd) { alert('No encontrada.'); return; }
-                await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'Categoria', cd.id));
-                await cargarCategorias();
-                const cs = document.getElementById('prodCategoria');
-                cs.innerHTML = '';
-                for (const c of categoriasCache) { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); }
-                const ic = document.getElementById('invCategory');
-                ic.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
-                for (const c of categoriasCache) ic.innerHTML += `<option value="${c}">${c}</option>`;
-                alert(`✅ Categoría "${nt}" eliminada.`);
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-        document.getElementById('eliminarCategoriaBtn').addEventListener('click', () => eliminarCategoria(document.getElementById('prodCategoria').value));
-
-        function abrirModalProducto(p = null) {
-            document.getElementById('productForm').reset();
-            document.getElementById('productId').value = '';
-            document.getElementById('productDeleteBtn').style.display = 'none';
-            resetFotosFormulario();
-            document.getElementById('urlEncargoGroup').style.display = 'none';
-            document.getElementById('prodUrlEncargo').value = '';
-            document.getElementById('proveedorGroup').style.display = 'none';
-            document.getElementById('prodProveedor').value = '';
-            document.getElementById('servicioNoteGroup').style.display = 'none';
-            document.getElementById('servicioInfoGroup').style.display = 'none';
-            document.getElementById('diagnosticoGroup').style.display = 'none';
-            document.getElementById('prodDiagPrecio').value = '';
-            document.getElementById('prodDiagDescripcion').value = '';
-            document.getElementById('categoriaGroup').style.display = 'block';
-            document.getElementById('stockGroup').style.display = 'block';
-            const cs = document.getElementById('prodCategoria');
-            cs.innerHTML = '';
-            for (const cat of categoriasCache) { const o = document.createElement('option'); o.value = cat; o.textContent = cat; cs.appendChild(o); }
-            if (p) {
-                document.getElementById('productModalTitle').textContent = '✏️ Editar';
-                document.getElementById('productId').value = p.id;
-                document.getElementById('prodNombre').value = p.Nombre || '';
-                if (p.Categoria && categoriasCache.includes(p.Categoria)) document.getElementById('prodCategoria').value = p.Categoria;
-                document.getElementById('prodCodigo').value = p.Codigo_de_Barras || '';
-                document.getElementById('prodCosto').value = p.Precio_Costo || '';
-                document.getElementById('prodVenta').value = p.Precio_Venta || '';
-                document.getElementById('prodOferta').value = p.Precio_Oferta || '';
-                document.getElementById('prodStock').value = p.Stock || '';
-                document.getElementById('prodDetalles').value = p.Detalles || '';
-                document.getElementById('prodEsEncargo').checked = p.Es_Encargo === true;
-                document.getElementById('productDeleteBtn').style.display = 'inline-block';
-                if (p.Es_Encargo === true) { document.getElementById('urlEncargoGroup').style.display = 'block'; document.getElementById('prodUrlEncargo').value = p.URL_Encargo || ''; }
-                const ep = p.Es_Proveedor === true;
-                document.getElementById('prodEsProveedor').checked = ep;
-                if (ep) { document.getElementById('proveedorGroup').style.display = 'block'; document.getElementById('prodProveedor').value = p.Proveedor || ''; }
-                const es = p.Es_Servicio === true;
-                document.getElementById('prodEsServicio').checked = es;
-                if (es) {
-                    document.getElementById('servicioNoteGroup').style.display = 'block';
-                    document.getElementById('servicioInfoGroup').style.display = 'block';
-                    document.getElementById('diagnosticoGroup').style.display = 'block';
-                    document.getElementById('categoriaGroup').style.display = 'none';
-                    document.getElementById('stockGroup').style.display = 'none';
-                    document.getElementById('prodEsEncargo').checked = false;
-                    document.getElementById('prodEsProveedor').checked = false;
-                    document.getElementById('urlEncargoGroup').style.display = 'none';
-                    document.getElementById('proveedorGroup').style.display = 'none';
-                    document.getElementById('prodDiagPrecio').value = p.Diagnostico_Precio || '';
-                    document.getElementById('prodDiagDescripcion').value = p.Diagnostico_Descripcion || '';
-                }
-                fotosExistentes = obtenerFotosProducto(p);
-                renderFotosFormulario();
-            } else {
-                document.getElementById('productModalTitle').textContent = '➕ Nuevo Producto';
-                document.getElementById('prodEsEncargo').checked = false;
-                document.getElementById('prodEsProveedor').checked = false;
-                document.getElementById('prodEsServicio').checked = false;
-            }
+            document.getElementById('productDeleteBtn').style.display = 'inline-block';
             document.getElementById('productModal').classList.add('active');
         }
-        function cerrarModalProducto() { document.getElementById('productModal').classList.remove('active'); resetFotosFormulario(); }
-        document.getElementById('closeProductModal').addEventListener('click', cerrarModalProducto);
-        document.getElementById('productCancelBtn').addEventListener('click', cerrarModalProducto);
-        document.getElementById('productModal').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarModalProducto(); });
-
-        document.getElementById('productForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('productId').value;
-            const n = document.getElementById('prodNombre').value.trim();
-            const c = document.getElementById('prodCategoria').value;
-            const cod = document.getElementById('prodCodigo').value.trim();
-            const co = document.getElementById('prodCosto').value;
-            const v = document.getElementById('prodVenta').value;
-            const of = document.getElementById('prodOferta').value || '0';
-            const s = document.getElementById('prodStock').value;
-            const d = document.getElementById('prodDetalles').value.trim();
-            const ee = document.getElementById('prodEsEncargo').checked;
-            const ue = ee ? document.getElementById('prodUrlEncargo').value.trim() : '';
-            const ep = document.getElementById('prodEsProveedor').checked;
-            const pr = ep ? document.getElementById('prodProveedor').value.trim() : '';
-            const es = document.getElementById('prodEsServicio').checked;
-            const diagPrecio = parseFloat(document.getElementById('prodDiagPrecio').value) || 0;
-            const diagDesc = document.getElementById('prodDiagDescripcion').value.trim();
-
-            if (!n) { alert('El nombre es obligatorio.'); return; }
-            if (!es && !c) { alert('La categoría es obligatoria.'); return; }
-            if (!es && co === '') { alert('El precio de costo es obligatorio.'); return; }
-            if (!es && v === '') { alert('El precio de venta es obligatorio.'); return; }
-            if (!es && s === '') { alert('El stock es obligatorio.'); return; }
-
-            const btn = document.getElementById('productSubmitBtn');
-            const txt = btn.textContent;
-            btn.disabled = true;
-            try {
-                const { collection, addDoc, doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                const urls = [];
-                if (fotosNuevas.length > 0) { btn.textContent = '⏳ Subiendo fotos...'; for (const f of fotosNuevas) { const u = await window.subirFotoCloudinary(f); urls.push(u); } }
-                const ff = [...fotosExistentes, ...urls];
-                btn.textContent = '⏳ Guardando...';
-                const categoriaFinal = es ? 'Servicios' : c;
-                const data = {
-                    Nombre: n, Categoria: categoriaFinal, Codigo_de_Barras: cod,
-                    Precio_Costo: parseFloat(co) || 0,
-                    Precio_Venta: parseFloat(v) || 0,
-                    Precio_Oferta: parseFloat(of) || 0,
-                    Stock: es ? 0 : (parseInt(s) || 0),
-                    Detalles: d,
-                    Es_Encargo: ee, URL_Encargo: ue,
-                    Es_Proveedor: ep, Proveedor: pr,
-                    Es_Servicio: es,
-                    Diagnostico_Precio: es ? diagPrecio : 0,
-                    Diagnostico_Descripcion: es ? diagDesc : '',
-                    Fotos: ff, fecha_actualizacion: serverTimestamp()
-                };
-                if (id) await updateDoc(doc(window.firebaseDb, 'productos', id), data);
-                else { data.fecha_creacion = serverTimestamp(); await addDoc(collection(window.firebaseDb, 'productos'), data); }
-                alert(id ? '✅ Actualizado.' : '✅ Creado.');
-                cerrarModalProducto();
-                await cargarProductos();
-                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                renderDashboard(ventasCache, domiciliosCache);
-            } catch (e) { alert('Error: ' + e.message); }
-            finally { btn.disabled = false; btn.textContent = txt; }
-        });
 
         async function eliminarProducto(id) {
             if (!confirm('¿Eliminar este producto?')) return;
             try {
                 await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'productos', id));
-                alert('Eliminado.');
+                alert('✅ Producto eliminado.');
                 await cargarProductos();
-                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                renderDashboard(ventasCache, domiciliosCache);
+                renderInventario(productosCache);
             } catch (e) { alert('Error: ' + e.message); }
         }
-        function editarProducto(id) { const p = productosCache.find(x => x.id === id); if (p) abrirModalProducto(p); }
-        document.getElementById('btnNuevoProducto').addEventListener('click', () => abrirModalProducto(null));
 
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-        function toggleMenu() { sidebar.classList.toggle('open'); overlay.classList.toggle('active'); }
-        function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', closeMenu);
-        closeSidebarBtn.addEventListener('click', closeMenu);
-        document.querySelectorAll('.sidebar__nav a').forEach(link => {
-            link.addEventListener('click', () => { if (window.innerWidth <= 992) closeMenu(); });
+        document.getElementById('btnNuevoProducto').addEventListener('click', function() {
+            document.getElementById('productModalTitle').textContent = 'Nuevo Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('prodFotosPreview').innerHTML = '';
+            document.getElementById('productDeleteBtn').style.display = 'none';
+            document.getElementById('proveedorGroup').style.display = 'none';
+            document.getElementById('urlEncargoGroup').style.display = 'none';
+            document.getElementById('servicioNoteGroup').style.display = 'none';
+            document.getElementById('diagnosticoGroup').style.display = 'none';
+            document.getElementById('stockGroup').style.display = 'block';
+            document.getElementById('categoriaGroup').style.display = 'block';
+            document.getElementById('servicioInfoGroup').style.display = 'none';
+            document.getElementById('productModal').classList.add('active');
         });
 
-        function mostrarSugerencias(t) {
-            const s = document.getElementById('cajaSugerencias');
-            if (!t.trim()) { s.style.display = 'none'; return; }
-            const f = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(t.toLowerCase()) && parseInt(p.Stock || 0) > 0 && !p.Es_Servicio && !p.Es_Encargo);
-            if (f.length === 0) { s.style.display = 'none'; return; }
-            let h = '';
-            f.slice(0, 10).forEach(p => {
-                const pr = parseFloat(p.Precio_Venta || 0);
-                const of = parseFloat(p.Precio_Oferta || 0);
-                const pf = (of > 0 && of < pr) ? of : pr;
-                h += `<div class="sugerencia-item" data-id="${p.id}" data-nombre="${p.Nombre}" data-precio="${pf}" data-stock="${p.Stock}"><div class="nombre">${p.Nombre}</div><div class="detalle">$${pf.toFixed(2)} - Stock: ${p.Stock}</div></div>`;
-            });
-            s.innerHTML = h;
-            s.style.display = 'block';
-            s.querySelectorAll('.sugerencia-item').forEach(el => {
-                el.addEventListener('click', function() {
-                    const b = document.getElementById('cajaBusqueda');
-                    b.value = this.dataset.nombre;
-                    s.style.display = 'none';
-                    b.dataset.selectedId = this.dataset.id;
-                    b.dataset.selectedPrecio = this.dataset.precio;
-                    b.dataset.selectedStock = this.dataset.stock;
-                });
-            });
-        }
-        function agregarDesdeBoton() {
-            const b = document.getElementById('cajaBusqueda');
-            const sid = b.dataset.selectedId;
-            if (!sid) { alert('Selecciona un producto.'); return; }
-            const pr = parseFloat(b.dataset.selectedPrecio);
-            const st = parseInt(b.dataset.selectedStock);
-            const ca = parseInt(document.getElementById('cajaCantidad').value) || 1;
-            if (ca < 1) return;
-            if (ca > st) { alert(`Stock: ${st}.`); return; }
-            const ex = carrito.find(i => i.id === sid);
-            if (ex) { if (ex.cantidad + ca > st) { alert(`Stock: ${st}, ya tienes ${ex.cantidad}.`); return; } ex.cantidad += ca; }
-            else carrito.push({ id: sid, nombre: b.value.trim(), precio: pr, cantidad: ca, stockDisponible: st });
-            renderizarCarrito();
-            document.getElementById('cajaCantidad').value = 1;
-            b.value = ''; b.dataset.selectedId = ''; b.dataset.selectedPrecio = ''; b.dataset.selectedStock = '';
+        document.getElementById('prodEsProveedor').addEventListener('change', function() {
+            document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none';
+        });
+        document.getElementById('prodEsEncargo').addEventListener('change', function() {
+            document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none';
+        });
+        document.getElementById('prodEsServicio').addEventListener('change', function() {
+            document.getElementById('servicioNoteGroup').style.display = this.checked ? 'block' : 'none';
+            document.getElementById('stockGroup').style.display = this.checked ? 'none' : 'block';
+            document.getElementById('categoriaGroup').style.display = this.checked ? 'none' : 'block';
+            document.getElementById('servicioInfoGroup').style.display = this.checked ? 'block' : 'none';
+            document.getElementById('diagnosticoGroup').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('productSubmitBtn');
+            btn.disabled = true; btn.textContent = '⏳ Guardando...';
+            try {
+                const id = document.getElementById('productId').value;
+                const fotosNuevas = document.getElementById('prodFotos').files;
+                let fotos = [];
+                if (fotosNuevas && fotosNuevas.length > 0) {
+                    for (let i = 0; i < fotosNuevas.length; i++) {
+                        const url = await window.subirFotoCloudinary(fotosNuevas[i]);
+                        fotos.push(url);
+                    }
+                }
+                // Fotos viejas que quedaron en el preview
+                const fotosPreview = document.querySelectorAll('#prodFotosPreview img');
+                const fotosViejas = Array.from(fotosPreview).map(img => img.src).filter(s => s.startsWith('http'));
+                fotos = [...fotosViejas, ...fotos];
+
+                const data = {
+                    Nombre: document.getElementById('prodNombre').value.trim(),
+                    Codigo_de_Barras: document.getElementById('prodCodigo').value.trim(),
+                    Precio_Costo: parseFloat(document.getElementById('prodCosto').value) || 0,
+                    Precio_Venta: parseFloat(document.getElementById('prodVenta').value) || 0,
+                    Precio_Oferta: parseFloat(document.getElementById('prodOferta').value) || 0,
+                    Stock: parseInt(document.getElementById('prodStock').value) || 0,
+                    Detalles: document.getElementById('prodDetalles').value.trim(),
+                    Categoria: document.getElementById('prodCategoria').value || 'General',
+                    Es_Proveedor: document.getElementById('prodEsProveedor').checked,
+                    Proveedor: document.getElementById('prodProveedor').value.trim(),
+                    Es_Encargo: document.getElementById('prodEsEncargo').checked,
+                    URL_Encargo: document.getElementById('prodUrlEncargo').value.trim(),
+                    Es_Servicio: document.getElementById('prodEsServicio').checked,
+                    Fotos: fotos,
+                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
+                };
+                if (id) {
+                    await window.firebaseFns.updateDoc(window.firebaseFns.doc(window.firebaseDb, 'productos', id), data);
+                } else {
+                    await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'productos'), data);
+                }
+                alert('✅ Producto guardado.');
+                document.getElementById('productModal').classList.remove('active');
+                await cargarProductos();
+                renderInventario(productosCache);
+            } catch (err) { alert('Error: ' + err.message); }
+            finally { btn.disabled = false; btn.textContent = 'Guardar'; }
+        });
+
+        document.getElementById('productCancelBtn').addEventListener('click', () => document.getElementById('productModal').classList.remove('active'));
+        document.getElementById('closeProductModal').addEventListener('click', () => document.getElementById('productModal').classList.remove('active'));
+        document.getElementById('closeDetailModal').addEventListener('click', () => document.getElementById('detailModal').classList.remove('active'));
+        document.getElementById('productDeleteBtn').addEventListener('click', () => {
+            const id = document.getElementById('productId').value;
+            if (id) { document.getElementById('productModal').classList.remove('active'); eliminarProducto(id); }
+        });
+
+        document.getElementById('invSearch').addEventListener('input', function() {
+            renderInventario(productosCache, document.getElementById('invCategory').value, this.value);
+        });
+        document.getElementById('invCategory').addEventListener('change', function() {
+            renderInventario(productosCache, this.value, document.getElementById('invSearch').value);
+        });
+        document.getElementById('invRefreshBtn').addEventListener('click', async function() {
+            this.disabled = true; this.textContent = '⏳...';
+            await cargarProductos(); renderInventario(productosCache);
+            this.disabled = false; this.textContent = '🔄 Refrescar';
+        });
+
+        // === CONFIGURACIÓN ===
+        document.getElementById('guardarConfigBtn').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true; btn.textContent = '⏳...';
+            try {
+                await window.firebaseFns.setDoc(window.firebaseFns.doc(window.firebaseDb, 'config', 'general'), {
+                    envio_costo: parseFloat(document.getElementById('configEnvioCosto').value) || 0,
+                    envio_gratis_desde: parseFloat(document.getElementById('configEnvioGratis').value) || 0,
+                    encargos_activos: document.getElementById('configEncargosActivos').checked,
+                    servicios_activos: document.getElementById('configServiciosActivos').checked,
+                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
+                }, { merge: true });
+                const s = document.getElementById('configSuccess');
+                s.classList.add('show');
+                setTimeout(() => s.classList.remove('show'), 3000);
+            } catch (e) { alert('Error: ' + e.message); }
+            finally { btn.disabled = false; btn.textContent = '💾 Guardar Configuración'; }
+        });
+
+        // === CAJA (venta manual) ===
+        document.getElementById('cajaAgregarBtn').addEventListener('click', function() {
+            const busq = document.getElementById('cajaBusqueda').value.trim().toLowerCase();
+            const cant = parseInt(document.getElementById('cajaCantidad').value) || 1;
+            const p = productosCache.find(x => (x.Nombre || '').toLowerCase() === busq);
+            if (!p) { alert('Producto no encontrado.'); return; }
+            carrito.push({ id: p.id, nombre: p.Nombre, cantidad: cant, precio: parseFloat(p.Precio_Venta || 0) });
+            renderCarrito();
+            document.getElementById('cajaBusqueda').value = '';
             document.getElementById('cajaSugerencias').style.display = 'none';
-        }
-        function eliminarItemCarrito(i) { carrito.splice(i, 1); renderizarCarrito(); }
-        function renderizarCarrito() {
+        });
+
+        function renderCarrito() {
             const c = document.getElementById('cajaCarrito');
             if (carrito.length === 0) { c.innerHTML = '<div class="empty">No hay productos agregados.</div>'; document.getElementById('cajaTotal').textContent = 'Total: $0.00'; return; }
-            let h = '', t = 0;
-            carrito.forEach((item, i) => {
-                const st = item.precio * item.cantidad; t += st;
-                h += `<div class="carrito-item"><span class="info">${item.nombre} x${item.cantidad}</span><span class="precio">$${st.toFixed(2)}</span><button class="btn-eliminar" onclick="eliminarItemCarrito(${i})">✕</button></div>`;
+            let h = '';
+            carrito.forEach((it, i) => {
+                h += `<div class="carrito-item"><div class="info">${it.nombre}</div><div class="precio">${it.cantidad} × $${it.precio.toFixed(2)} = $${(it.cantidad * it.precio).toFixed(2)}</div><button class="btn-eliminar" onclick="carrito.splice(${i},1); renderCarrito()">✕</button></div>`;
             });
             c.innerHTML = h;
-            document.getElementById('cajaTotal').textContent = `Total: $${t.toFixed(2)}`;
+            const total = carrito.reduce((s, it) => s + it.cantidad * it.precio, 0);
+            document.getElementById('cajaTotal').textContent = 'Total: $' + total.toFixed(2);
         }
-        async function registrarVentaManual() {
-            if (carrito.length === 0) { alert('Agrega un producto.'); return; }
-            for (const i of carrito) {
-                const p = productosCache.find(x => x.id === i.id);
-                if (!p) { alert(`Producto no existe.`); return; }
-                if (i.cantidad > parseInt(p.Stock || 0)) { alert(`Stock insuficiente.`); return; }
-            }
-            const cl = document.getElementById('cajaCliente').value.trim();
-            const tel = document.getElementById('cajaTelefono').value.trim();
-            const dir = document.getElementById('cajaDireccion').value.trim();
-            let cs = '';
-            if (cl) cs += cl;
-            if (tel) { if (cs) cs += ' - '; cs += tel; }
-            if (dir) { if (cs) cs += ' - '; cs += dir; }
-            if (!cs) cs = 'Cliente sin datos';
+
+        document.getElementById('cajaBusqueda').addEventListener('input', function() {
+            const q = this.value.trim().toLowerCase();
+            const sug = document.getElementById('cajaSugerencias');
+            if (q.length < 2) { sug.style.display = 'none'; return; }
+            const matches = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(q) && !p.Es_Servicio).slice(0, 8);
+            if (matches.length === 0) { sug.style.display = 'none'; return; }
+            sug.innerHTML = matches.map(p => `<div class="sugerencia-item" onclick="seleccionarSugerencia('${p.Nombre}')"><div class="nombre">${p.Nombre}</div><div class="detalle">$${parseFloat(p.Precio_Venta || 0).toFixed(2)}</div></div>`).join('');
+            sug.style.display = 'block';
+        });
+        function seleccionarSugerencia(nombre) {
+            document.getElementById('cajaBusqueda').value = nombre;
+            document.getElementById('cajaSugerencias').style.display = 'none';
+        }
+        document.getElementById('cajaLimpiarBtn').addEventListener('click', function() {
+            carrito = []; renderCarrito();
+            document.getElementById('cajaCliente').value = '';
+            document.getElementById('cajaTelefono').value = '';
+            document.getElementById('cajaDireccion').value = '';
+        });
+        document.getElementById('cajaRegistrarBtn').addEventListener('click', async function() {
+            if (carrito.length === 0) { alert('Agrega productos.'); return; }
+            const cliente = document.getElementById('cajaCliente').value.trim();
+            if (!cliente) { alert('Ingresa el nombre del cliente.'); return; }
+            const total = carrito.reduce((s, it) => s + it.cantidad * it.precio, 0);
+            const productosJson = carrito.map(it => `${it.nombre} x${it.cantidad}`).join(', ');
             try {
-                const { doc, updateDoc, addDoc, collection, serverTimestamp, getDoc } = window.firebaseFns;
-                for (const item of carrito) {
-                    const ps = await getDoc(doc(window.firebaseDb, 'productos', item.id));
-                    if (ps.exists()) await updateDoc(doc(window.firebaseDb, 'productos', item.id), { Stock: parseInt(ps.data().Stock || 0) - item.cantidad });
-                }
-                const pS = carrito.map(i => `${i.nombre} x${i.cantidad}`).join(', ');
-                const pI = carrito.map(i => i.id).join(',');
-                const tot = carrito.reduce((s, i) => s + (i.precio * i.cantidad), 0);
-                await addDoc(collection(window.firebaseDb, 'Ventas'), { productos_json: pS, productos_ids: pI, total: tot, fecha: serverTimestamp(), Tipo: 'Local', usuario_id: userData ? userData.id : null, cliente: cs });
+                await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Ventas'), {
+                    Cliente_Nombre: cliente,
+                    Telefono: document.getElementById('cajaTelefono').value.trim(),
+                    Direccion: document.getElementById('cajaDireccion').value.trim(),
+                    productos_json: productosJson,
+                    total: total,
+                    Tipo: 'Local',
+                    fecha: window.firebaseFns.serverTimestamp()
+                });
                 alert('✅ Venta registrada.');
-                carrito = [];
-                renderizarCarrito();
+                carrito = []; renderCarrito();
                 document.getElementById('cajaCliente').value = '';
                 document.getElementById('cajaTelefono').value = '';
                 document.getElementById('cajaDireccion').value = '';
-                await cargarProductos(); await cargarVentas();
-                renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                renderDashboard(ventasCache, domiciliosCache);
+                await cargarVentas();
             } catch (e) { alert('Error: ' + e.message); }
-        }
-        function limpiarCarrito() {
-            if (carrito.length === 0) return;
-            if (confirm('¿Limpiar carrito?')) {
-                carrito = [];
-                renderizarCarrito();
-                document.getElementById('cajaCliente').value = '';
-                document.getElementById('cajaTelefono').value = '';
-                document.getElementById('cajaDireccion').value = '';
-            }
-        }
-        document.getElementById('cajaBusqueda').addEventListener('input', function() { mostrarSugerencias(this.value); });
-        document.addEventListener('click', e => {
-            const s = document.getElementById('cajaSugerencias');
-            const b = document.getElementById('cajaBusqueda');
-            if (!s.contains(e.target) && e.target !== b) s.style.display = 'none';
-        });
-        document.getElementById('cajaAgregarBtn').addEventListener('click', agregarDesdeBoton);
-        document.getElementById('cajaRegistrarBtn').addEventListener('click', registrarVentaManual);
-        document.getElementById('cajaLimpiarBtn').addEventListener('click', limpiarCarrito);
-
-        document.getElementById('notifBtn').addEventListener('click', function(e) { e.stopPropagation(); document.getElementById('notifDropdown').classList.toggle('open'); });
-        document.addEventListener('click', function(e) {
-            const d = document.getElementById('notifDropdown');
-            const b = document.getElementById('notifBtn');
-            if (!b.contains(e.target) && !d.contains(e.target)) d.classList.remove('open');
         });
 
-        function exportarInventarioPDF() {
-            if (productosCache.length === 0) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape', 'pt', 'a4');
-            doc.setFont('times', 'bold'); doc.setFontSize(20); doc.text('Inventario B&B', 40, 40);
-            const td = [];
-            let tc = 0, tv = 0, tg = 0;
-            for (const p of productosCache) {
-                const st = parseInt(p.Stock || 0), co = parseFloat(p.Precio_Costo || 0), v = parseFloat(p.Precio_Venta || 0), of = parseFloat(p.Precio_Oferta || 0), g = v - co;
-                const ee = p.Es_Encargo === true, ep = p.Es_Proveedor === true, es = p.Es_Servicio === true;
-                if (!ee && !ep && !es) { tc += st * co; tv += st * v; tg += st * g; }
-                const et = ee ? ' (Encargo)' : (ep ? ' (Prov)' : (es ? ' (Servicio)' : ''));
-                td.push([(p.Nombre || '') + et, p.Categoria || '', p.Proveedor || '', p.Codigo_de_Barras || '', es ? '-' : st, `$${co.toFixed(2)}`, `$${v.toFixed(2)}`, `$${of.toFixed(2)}`, `$${g.toFixed(2)}`]);
-            }
-            td.push(['TOTALES', '', '', '', '', `$${tc.toFixed(2)}`, `$${tv.toFixed(2)}`, '', `$${tg.toFixed(2)}`]);
-            doc.autoTable({ head: [['Producto', 'Categoría', 'Proveedor', 'Código', 'Stock', 'Costo', 'Venta', 'Oferta', 'Ganancia']], body: td, startY: 60, theme: 'striped', headStyles: { fillColor: '#1a252f', textColor: '#ffffff' }, styles: { fontSize: 8, font: 'times' } });
-            doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
-        }
-        document.getElementById('btnExportarInventario').addEventListener('click', exportarInventarioPDF);
-
-        function exportarReportesPDF() {
-            const v = ventasFiltradasReporte;
-            if (v.length === 0) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape', 'pt', 'a4');
-            doc.setFont('times', 'bold'); doc.setFontSize(20); doc.text('Reporte B&B', 40, 40);
-            const td = [];
-            for (const x of v) {
-                const t = parseFloat(x.total || 0), g = calcularGananciaVenta(x);
-                td.push([fechaToStr(x.fecha), x.Tipo || 'Local', x.productos_json || '', `$${t.toFixed(2)}`, `$${g.toFixed(2)}`]);
-            }
-            doc.autoTable({ head: [['Fecha', 'Tipo', 'Productos', 'Total', 'Ganancia']], body: td, startY: 60, theme: 'striped', headStyles: { fillColor: '#1a252f', textColor: '#ffffff' }, styles: { fontSize: 9, font: 'times' } });
-            doc.save(`reporte_${new Date().toISOString().slice(0,10)}.pdf`);
-        }
-        document.getElementById('btnExportarReportes').addEventListener('click', exportarReportesPDF);
-
-        function renderReportes(ventas) {
-            ventasFiltradasReporte = ventas;
-            const c = document.getElementById('reportesContainer');
-            if (ventas.length === 0) { c.innerHTML = '<div class="empty">No hay ventas.</div>'; document.getElementById('repTotalVentas').textContent = '$0.00'; document.getElementById('repCostoVendido').textContent = '$0.00'; document.getElementById('repGananciaTotal').textContent = '$0.00'; document.getElementById('repCount').textContent = '0'; return; }
-            let ti = 0, tcv = 0, tg = 0;
-            for (const x of ventas) { ti += parseFloat(x.total || 0); const co = calcularCostoVenta(x); tcv += co; tg += (parseFloat(x.total || 0) - co); }
-            document.getElementById('repTotalVentas').textContent = `$${ti.toFixed(2)}`;
-            document.getElementById('repCostoVendido').textContent = `$${tcv.toFixed(2)}`;
-            document.getElementById('repGananciaTotal').textContent = `$${tg.toFixed(2)}`;
-            document.getElementById('repCount').textContent = ventas.length;
-            let h = '';
-            for (const x of ventas) {
-                const ico = (x.Tipo || 'Local') === 'Domicilio' ? '🛵' : '🏪';
-                const g = calcularGananciaVenta(x);
-                h += `<div class="list-item" onclick="verDetalleVenta('${x.id}')" style="cursor:pointer;"><div class="left"><div class="title">${x.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(x.fecha)} • ${ico} ${x.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(x.total || 0).toFixed(2)}<div class="sub" style="font-size:0.8rem;">Ganancia: $${g.toFixed(2)}</div></div></div>`;
-            }
-            c.innerHTML = h;
-        }
-
+        // === REPORTES ===
         function aplicarRangoReporte(r) {
             const hoy = new Date();
-            let d = new Date(), h = new Date();
+            let d = new Date(); const h = new Date();
             switch (r) {
                 case 'hoy': d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()); break;
                 case '7dias': d = new Date(hoy.getTime() - 7 * 86400000); break;
                 case '30dias': d = new Date(hoy.getTime() - 30 * 86400000); break;
                 case 'mes': d = new Date(hoy.getFullYear(), hoy.getMonth(), 1); break;
-                case 'mesAnterior': d = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1); h = new Date(hoy.getFullYear(), hoy.getMonth(), 0); break;
+                case 'mesAnterior': d = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1); h.setDate(0); break;
             }
             document.getElementById('repFechaDesde').value = d.toISOString().slice(0,10);
             document.getElementById('repFechaHasta').value = h.toISOString().slice(0,10);
             document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-            aplicarFiltrosReportes();
+            renderReportes();
         }
 
-        function aplicarFiltrosVentas() {
+        function renderReportes() {
+            const d = document.getElementById('repFechaDesde').value;
+            const h = document.getElementById('repFechaHasta').value;
+            const t = document.getElementById('repTipo').value;
             let f = [...ventasCache];
-            const d = document.getElementById('ventasFechaDesde').value, h = document.getElementById('ventasFechaHasta').value, t = document.getElementById('ventasTipo').value;
-            if (d) f = f.filter(x => fechaToISO(x.fecha) >= d);
-            if (h) f = f.filter(x => fechaToISO(x.fecha) <= h);
-            if (t !== 'Todos') f = f.filter(x => (x.Tipo || 'Local') === t);
-            renderVentas(f);
-        }
-        function aplicarFiltrosDomicilios() {
-            const e = document.getElementById('domFiltroEstado').value;
-            let f = [...domiciliosCache];
-            if (e !== 'Todos') {
-                if (e === 'Nuevo Domicilio') f = f.filter(d => d.Estado === 'Pendiente' && !d.fecha_gestion);
-                else f = f.filter(d => (d.Estado || 'Pendiente') === e);
-            }
-            renderDomicilios(f);
-        }
-        function aplicarFiltrosTienda() {
-            const e = document.getElementById('tiendaFiltroEstado').value;
-            let f = [...tiendaCache];
-            if (e !== 'Todos') {
-                if (e === 'Nuevo Pedido') f = f.filter(p => p.Estado === 'Pendiente' && !p.fecha_gestion);
-                else f = f.filter(p => (p.Estado || 'Pendiente') === e);
-            }
-            renderTienda(f);
-        }
-        function aplicarFiltrosReportes() {
-            let f = [...ventasCache];
-            const d = document.getElementById('repFechaDesde').value, h = document.getElementById('repFechaHasta').value, t = document.getElementById('repTipo').value;
-            if (d) f = f.filter(x => fechaToISO(x.fecha) >= d);
-            if (h) f = f.filter(x => fechaToISO(x.fecha) <= h);
-            if (t !== 'Todos') f = f.filter(x => (x.Tipo || 'Local') === t);
-            renderReportes(f);
+            if (d) f = f.filter(v => fechaToISO(v.fecha) >= d);
+            if (h) f = f.filter(v => fechaToISO(v.fecha) <= h);
+            if (t !== 'Todos') f = f.filter(v => (v.Tipo || 'Local') === t);
+            ventasFiltradasReporte = f;
+            let ti = 0, tc = 0;
+            for (const v of f) { ti += parseFloat(v.total || 0); tc += calcularCostoVenta(v); }
+            document.getElementById('repTotalVentas').textContent = '$' + ti.toFixed(2);
+            document.getElementById('repCostoVendido').textContent = '$' + tc.toFixed(2);
+            document.getElementById('repGananciaTotal').textContent = '$' + (ti - tc).toFixed(2);
+            document.getElementById('repCount').textContent = f.length;
+            const c = document.getElementById('reportesContainer');
+            if (f.length === 0) { c.innerHTML = '<div class="empty">Sin ventas en el período.</div>'; return; }
+            let hh = '';
+            for (const v of f) hh += `<div class="list-item"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
+            c.innerHTML = hh;
         }
 
+        document.getElementById('repFiltrarBtn').addEventListener('click', renderReportes);
+        document.getElementById('repLimpiarBtn').addEventListener('click', function() {
+            document.getElementById('repFechaDesde').value = '';
+            document.getElementById('repFechaHasta').value = '';
+            document.getElementById('repTipo').value = 'Todos';
+            document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
+            renderReportes();
+        });
+
+        document.getElementById('btnExportarReportes').addEventListener('click', function() {
+            if (ventasFiltradasReporte.length === 0) { alert('No hay ventas para exportar.'); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text('Reporte de Ventas', 105, 15, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Desde: ${document.getElementById('repFechaDesde').value || 'Inicio'} - Hasta: ${document.getElementById('repFechaHasta').value || 'Hoy'}`, 105, 22, { align: 'center' });
+            const rows = ventasFiltradasReporte.map(v => [fechaToStr(v.fecha), v.productos_json || '', v.Tipo || 'Local', '$' + parseFloat(v.total || 0).toFixed(2)]);
+            doc.autoTable({
+                head: [['Fecha', 'Productos', 'Tipo', 'Total']],
+                body: rows,
+                startY: 30,
+                styles: { fontSize: 8 }
+            });
+            const total = ventasFiltradasReporte.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+            doc.text(`TOTAL: $${total.toFixed(2)}`, 105, doc.lastAutoTable.finalY + 10, { align: 'right' });
+            doc.save('reporte-ventas.pdf');
+        });
+
+        document.getElementById('btnExportarInventario').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text('Inventario', 105, 15, { align: 'center' });
+            const rows = productosCache.map(p => [p.Nombre || '', p.Categoria || '', p.Stock || 0, '$' + parseFloat(p.Precio_Venta || 0).toFixed(2)]);
+            doc.autoTable({
+                head: [['Producto', 'Categoría', 'Stock', 'Precio']],
+                body: rows,
+                startY: 25,
+                styles: { fontSize: 8 }
+            });
+            doc.save('inventario.pdf');
+        });
+
+        // === SIDEBAR Y MENÚ ===
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('active');
+        });
+        document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        document.querySelectorAll('.sidebar__nav a').forEach(a => {
+            a.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                document.querySelectorAll('.sidebar__nav a').forEach(x => x.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+                document.getElementById('tab-' + tab)?.classList.add('active');
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+                if (tab === 'inventario') renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
+                if (tab === 'ventas') aplicarFiltrosVentas();
+                if (tab === 'domicilios') aplicarFiltrosDomicilios();
+                if (tab === 'tienda') aplicarFiltrosTienda();
+                if (tab === 'encargos') aplicarFiltrosEncargos();
+                if (tab === 'servicios') aplicarFiltrosServicios();
+                if (tab === 'reportes') renderReportes();
+                if (tab === 'usuarios') renderUsuarios();
+            });
+        });
+
+        // === NOTIFICACIONES ===
+        document.getElementById('notifBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('notifDropdown').classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+            const d = document.getElementById('notifDropdown');
+            if (!d.contains(e.target) && e.target.id !== 'notifBtn') d.classList.remove('open');
+        });
+
+        // === INIT ===
         async function initApp() {
-            try {
-                await cargarConfigGeneral();
-                await cargarCategorias();
-                await cargarProductos();
-                await cargarVentas();
-                await cargarDomicilios();
-                await cargarTienda();
-                await cargarEncargos();
-                await cargarServicios();
-                await cargarUsuarios();
-
-                renderDashboard(ventasCache, domiciliosCache);
-                renderInventario(productosCache);
-                renderizarEstadisticas();
-                renderUsuarios();
-
-                const ci = document.getElementById('invCategory');
-                ci.innerHTML = '<option value="Todas">Todas</option><option value="Encargos">📦 Encargos</option><option value="Servicios">🔧 Servicios</option>';
-                for (const c of categoriasCache) ci.innerHTML += `<option value="${c}">${c}</option>`;
-
-                renderVentas(ventasCache);
-                renderDomicilios(domiciliosCache);
-                renderTienda(tiendaCache);
-                renderEncargos(encargosCache);
-                renderServicios(serviciosCache);
-                renderReportes(ventasCache);
-                actualizarNotificaciones();
-
-                document.querySelectorAll('.sidebar__nav a').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const tab = this.dataset.tab;
-                        document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
-                        this.classList.add('active');
-                        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                        document.getElementById(`tab-${tab}`).classList.add('active');
-                        if (tab === 'estadisticas') renderizarEstadisticas();
-                        if (tab === 'usuarios') { cargarUsuarios().then(renderUsuarios); }
-                        if (tab === 'servicios') { cargarServicios().then(() => renderServicios(serviciosCache)); }
-                    });
-                });
-
-                document.getElementById('invSearch').addEventListener('input', function() { renderInventario(productosCache, document.getElementById('invCategory').value, this.value); });
-                document.getElementById('invCategory').addEventListener('change', function() { renderInventario(productosCache, this.value, document.getElementById('invSearch').value); });
-                document.getElementById('invRefreshBtn').addEventListener('click', async function() { await cargarProductos(); renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value); });
-
-                document.getElementById('ventasFiltrarBtn').addEventListener('click', aplicarFiltrosVentas);
-                document.getElementById('ventasLimpiarBtn').addEventListener('click', function() { document.getElementById('ventasFechaDesde').value = ''; document.getElementById('ventasFechaHasta').value = ''; document.getElementById('ventasTipo').value = 'Todos'; renderVentas(ventasCache); });
-                document.getElementById('domFiltrarBtn').addEventListener('click', aplicarFiltrosDomicilios);
-                document.getElementById('domLimpiarBtn').addEventListener('click', function() { document.getElementById('domFiltroEstado').value = 'Todos'; renderDomicilios(domiciliosCache); });
-                document.getElementById('tiendaFiltrarBtn').addEventListener('click', aplicarFiltrosTienda);
-                document.getElementById('tiendaLimpiarBtn').addEventListener('click', function() { document.getElementById('tiendaFiltroEstado').value = 'Todos'; renderTienda(tiendaCache); });
-                document.getElementById('encFiltrarBtn').addEventListener('click', aplicarFiltrosEncargos);
-                document.getElementById('encLimpiarBtn').addEventListener('click', function() { document.getElementById('encFiltroEstado').value = 'Todos'; renderEncargos(encargosCache); });
-                document.getElementById('servFiltrarBtn').addEventListener('click', aplicarFiltrosServicios);
-                document.getElementById('servLimpiarBtn').addEventListener('click', function() { document.getElementById('servFiltroEstado').value = 'Todos'; renderServicios(serviciosCache); });
-                document.getElementById('repFiltrarBtn').addEventListener('click', aplicarFiltrosReportes);
-                document.getElementById('repLimpiarBtn').addEventListener('click', function() {
-                    document.getElementById('repFechaDesde').value = '';
-                    document.getElementById('repFechaHasta').value = '';
-                    document.getElementById('repTipo').value = 'Todos';
-                    document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
-                    renderReportes(ventasCache);
-                });
-
-                setInterval(() => { cargarDomicilios(); cargarTienda(); cargarEncargos(); cargarServicios(); }, 30000);
-            } catch (e) { console.error('Error:', e); alert('Error al cargar: ' + e.message); }
+            document.getElementById('estadisticasContenido').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+            await Promise.all([
+                cargarCategorias(), cargarProductos(), cargarVentas(),
+                cargarDomicilios(), cargarTienda(), cargarEncargos(),
+                cargarServicios(), cargarUsuarios(), cargarConfigGeneral()
+            ]);
+            renderDashboard(ventasCache, domiciliosCache);
+            renderizarEstadisticas();
+            renderInventario(productosCache);
+            renderVentas(ventasCache);
+            renderDomicilios(domiciliosCache);
+            renderTienda(tiendaCache);
+            renderEncargos(encargosCache);
+            renderServicios(serviciosCache);
+            renderUsuarios();
+            aplicarFiltrosVentas();
+            generarNotificaciones();
+            // Poblar select de categorías en modal producto
+            const selCat = document.getElementById('prodCategoria');
+            if (selCat) {
+                selCat.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
         }
+
+        // === CATEGORÍAS ===
+        document.getElementById('agregarCategoriaBtn')?.addEventListener('click', async function() {
+            const n = document.getElementById('nuevaCategoriaInput').value.trim();
+            if (!n) return;
+            try {
+                await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Categoria'), { nombre: n });
+                document.getElementById('nuevaCategoriaInput').value = '';
+                await cargarCategorias();
+                const sel = document.getElementById('prodCategoria');
+                sel.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
+                alert('✅ Categoría agregada.');
+            } catch (e) { alert('Error: ' + e.message); }
+        });
+
+        document.getElementById('eliminarCategoriaBtn')?.addEventListener('click', async function() {
+            const n = document.getElementById('prodCategoria').value;
+            if (!n || n === 'General') { alert('Selecciona una categoría válida.'); return; }
+            if (!confirm(`¿Eliminar la categoría "${n}"?`)) return;
+            try {
+                const snap = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria'));
+                const match = snap.docs.find(d => d.data().nombre === n);
+                if (match) await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'Categoria', match.id));
+                await cargarCategorias();
+                const sel = document.getElementById('prodCategoria');
+                sel.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
+                alert('✅ Categoría eliminada.');
+            } catch (e) { alert('Error: ' + e.message); }
+        });
     </script>
 </body>
 </html>
