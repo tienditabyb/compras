@@ -1,1559 +1,939 @@
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora B&B Cuba</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{background:#f5f6fa;color:#1e272e;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:15px}
+.calc-container{background:#fff;padding:20px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.1);width:100%;max-width:760px}
+.calc-header{text-align:center;margin-bottom:15px}
+.calc-header h1{font-size:1.4rem;color:#1a252f;font-weight:800}
+.calc-header span{color:#2980b9}
+.offline-bar{display:none;background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:8px;border-radius:8px;text-align:center;font-size:.85rem;font-weight:600;margin-bottom:10px}
+.offline-bar.show{display:block}
+.btn-sync{width:100%;padding:10px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.9rem;margin-bottom:10px;cursor:pointer}
+.btn-sync:disabled{background:#94a3b8;cursor:not-allowed}
+.top-actions{display:flex;gap:8px;margin-bottom:15px}
+.btn-sm{flex:1;padding:9px;border:none;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer}
+.btn-hist{background:#e0e7ff;color:#4f46e5}
+.tabs{display:flex;gap:10px;margin-bottom:20px;background:#eef2f6;padding:5px;border-radius:12px}
+.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;font-weight:600;font-size:.9rem;cursor:pointer;background:transparent;color:#64748b}
+.tab-btn.active{background:#fff;color:#2980b9;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.modulo{display:none}.modulo.active{display:block}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-weight:600;font-size:.8rem;margin-bottom:4px;color:#1e272e}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;outline:none;font-size:.9rem;background:#f8fafc}
+.form-group input:focus{border-color:#2980b9;background:#fff}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.section-title{font-size:.9rem;font-weight:700;color:#2980b9;margin:15px 0 10px;border-bottom:1px solid #e2e8f0;padding-bottom:5px}
+.sub-tabs{display:flex;gap:5px;margin-bottom:15px}
+.sub-tab-btn{flex:1;padding:8px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;color:#64748b}
+.sub-tab-btn.active{background:#2980b9;color:#fff;border-color:#2980b9}
+.sub-modulo{display:none}.sub-modulo.active{display:block}
+.lista-equipos{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:10px}
+.equipo-row{display:grid;grid-template-columns:2fr 60px 80px 30px;gap:8px;margin-bottom:8px;align-items:center}
+.equipo-row input{padding:6px;font-size:.85rem;border:1px solid #cbd5e1;border-radius:4px;width:100%}
+.btn-remove-equipo{background:#fee2e2;color:#dc2626;border:none;border-radius:4px;height:30px;cursor:pointer;font-weight:bold}
+.btn-add-equipo{background:#e0e7ff;color:#4f46e5;border:1px dashed #818cf8;border-radius:6px;padding:8px;width:100%;font-weight:600;font-size:.85rem;cursor:pointer;margin-bottom:15px}
+.btn-calcular{width:100%;padding:12px;background:#1a252f;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.95rem;margin-top:15px;cursor:pointer}
+.btn-calcular:active{background:#2980b9}
+.resultado-box{display:none;margin-top:20px;padding:15px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px}
+.resultado-box.show{display:block}
+.resultado-box h3{font-size:1rem;color:#166534;margin-bottom:12px;text-align:center;border-bottom:1px dashed #bbf7d0;padding-bottom:8px}
+.res-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #dcfce7;font-size:.85rem;gap:8px}
+.res-item:last-child{border-bottom:none}
+.res-item .label{font-weight:500;color:#475569}
+.res-item .value{font-weight:700;color:#166534;background:#fff;padding:2px 8px;border-radius:6px;border:1px solid #bbf7d0;text-align:right}
+.res-item .value.warn{color:#b91c1c;border-color:#fca5a5;background:#fef2f2}
+.config-panel{display:none;margin-top:15px;padding:12px;background:#fef3c7;border:2px solid #fcd34d;border-radius:10px}
+.config-panel.show{display:block}
+.config-panel h4{font-size:.9rem;color:#92400e;margin-bottom:10px}
+.config-option{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;cursor:pointer;border:2px solid transparent}
+.config-option.recomendada{border-color:#22c55e;background:#f0fdf4}
+.config-option input[type="radio"]{width:18px;height:18px;flex-shrink:0;accent-color:#f59e0b}
+.config-option>div{flex:1;font-size:.85rem}
+.config-option strong{display:block;color:#92400e;font-size:.9rem;margin-bottom:2px}
+.config-option.recomendada strong{color:#166534}
+.config-option span{color:#64748b;font-size:.78rem}
+.badge-recomendada{background:#22c55e;color:#fff;padding:2px 6px;border-radius:4px;font-size:.65rem;margin-left:5px;vertical-align:middle}
+.btn-guardar{width:100%;padding:12px;background:#10b981;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:1rem;margin-top:15px;cursor:pointer;display:block}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:1000;justify-content:center;align-items:center;padding:20px;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;width:100%;max-width:520px;border-radius:16px;padding:25px;max-height:90vh;overflow-y:auto}
+.modal-box h2{font-size:1.2rem;color:#1a252f;margin-bottom:15px;text-align:center}
+.modal-box input{width:100%;padding:10px;margin-bottom:12px;border:1px solid #e2e8f0;border-radius:8px;outline:none;font-size:.95rem;background:#f8fafc}
+.modal-botones{display:flex;gap:10px;margin-top:10px}
+.btn-cancelar{flex:1;padding:10px;background:#e2e8f0;color:#475569;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+.btn-aceptar{flex:1;padding:10px;background:#10b981;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+.hist-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer}
+.hist-item .h-nom{font-weight:700;color:#1a252f;font-size:.9rem}
+.hist-item .h-meta{font-size:.75rem;color:#64748b;margin-top:2px}
+.info-note{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:8px;border-radius:6px;font-size:.75rem;margin-bottom:10px;line-height:1.4}
+.info-pendiente{background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:10px;border-radius:6px;font-size:.8rem;margin-top:12px;line-height:1.4}
+@media(max-width:600px){.form-row,.form-row-3,.form-row-4{grid-template-columns:1fr;gap:0}.equipo-row{grid-template-columns:1fr;gap:5px;background:#fff;padding:10px;border-radius:6px;border:1px solid #e2e8f0;position:relative;margin-bottom:10px}.btn-remove-equipo{position:absolute;top:-8px;right:-8px;border-radius:50%;width:24px;height:24px}.res-item{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="calc-container">
+    <div class="calc-header"><h1>B&B <span>Calculadora Eléctrica Cuba</span></h1></div>
+    <div class="offline-bar" id="offlineBar">📴 Sin conexión — trabajando en local</div>
+    <button id="btnSync" class="btn-sync" onclick="sincronizarManual()" disabled>☁️ Sincronizar (0)</button>
+    <div class="top-actions">
+        <button class="btn-sm btn-hist" onclick="verHistorial()">📋 Historial (<span id="histCount">0</span>)</button>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="cambiarModulo('casa', this)">🏠 Casa</button>
+        <button class="tab-btn" onclick="cambiarModulo('sistemas', this)">⚡ Sistemas (Solar)</button>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak",
-            authDomain: "tiendita-byb.firebaseapp.com",
-            projectId: "tiendita-byb",
-            storageBucket: "tiendita-byb.firebasestorage.app",
-            messagingSenderId: "257958619653",
-            appId: "1:257958619653:web:0367858d644596c4b50a6c"
-        };
+    <!-- ===================== CASA ===================== -->
+    <div id="modulo-casa" class="modulo active">
+        <div class="info-note">🔌 Acometida 110/220V. Breaker general calculado desde la carga. Caída de tensión máx 3% (ramal) / 2.5% (acometida). Los precios se agregan en el Panel Admin.</div>
+        <div class="form-row" style="margin-bottom:15px;">
+            <div class="form-group"><label>Voltaje</label><select id="casa-voltaje"><option value="110">110 V</option><option value="220" selected>220 V</option></select></div>
+            <div class="form-group"><label>Aterramiento</label><select id="casa-aterramiento"><option value="con" selected>Con Tierra</option><option value="sin">Sin Tierra</option></select></div>
+        </div>
+        <div class="section-title">⚡ Acometida</div>
+        <div class="form-row">
+            <div class="form-group"><label>Distancia contador (m)</label><input type="number" inputmode="decimal" id="casa-principal-dist" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Factor Demanda</label><select id="casa-factor-demanda"><option value="0.7">0.7</option><option value="0.8" selected>0.8</option><option value="0.9">0.9</option><option value="1">1.0</option></select></div>
+        </div>
+        <div class="section-title">💡 Luces</div>
+        <div class="form-row-3">
+            <div class="form-group"><label>Lámparas</label><input type="number" inputmode="numeric" id="casa-luces-cant" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Interruptores</label><input type="number" inputmode="numeric" id="casa-switches-cant" placeholder="Auto" min="0" /></div>
+            <div class="form-group"><label>Distancia (m)</label><input type="number" inputmode="decimal" id="casa-luces-dist" placeholder="0" min="0" /></div>
+        </div>
+        <div class="section-title">🔌 Tomas</div>
+        <div class="form-row">
+            <div class="form-group"><label>Cant.</label><input type="number" inputmode="numeric" id="casa-tomas-cant" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Distancia (m)</label><input type="number" inputmode="decimal" id="casa-tomas-dist" placeholder="0" min="0" /></div>
+        </div>
+        <div class="section-title">🍳 Cocina</div>
+        <div class="form-row" style="margin-bottom:10px;"><div class="form-group"><label>Distancia (m)</label><input type="number" inputmode="decimal" id="casa-cocina-dist" placeholder="0" min="0" /></div></div>
+        <div class="lista-equipos" id="lista-cocina"></div>
+        <button class="btn-add-equipo" onclick="agregarEquipoCocina()">➕ Añadir Equipo</button>
+        <div class="section-title">❄️ Aires</div>
+        <div class="form-row-4">
+            <div class="form-group"><label>Cant.</label><input type="number" inputmode="numeric" id="casa-aire-cant" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Voltaje</label><select id="casa-aire-voltaje"><option value="110">110V</option><option value="220" selected>220V</option></select></div>
+            <div class="form-group"><label>Distancia (m)</label><input type="number" inputmode="decimal" id="casa-aire-dist" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Watts c/u</label><input type="number" inputmode="decimal" id="casa-aire-watts" placeholder="1200" min="0" /></div>
+        </div>
+        <div class="section-title">⚡ Altos Consumos</div>
+        <div class="form-row-3">
+            <div class="form-group"><label>Cant.</label><input type="number" inputmode="numeric" id="casa-altos-cant" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Distancia (m)</label><input type="number" inputmode="decimal" id="casa-altos-dist" placeholder="0" min="0" /></div>
+            <div class="form-group"><label>Watts c/u</label><input type="number" inputmode="decimal" id="casa-altos-watts" placeholder="1500" min="0" /></div>
+        </div>
+        <button class="btn-calcular" onclick="calcularCasa()">🔍 Calcular Casa</button>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        <div class="resultado-box" id="res-casa">
+            <h3>✅ Resultados Casa</h3>
+            <div class="section-title" style="font-size:.85rem;margin-top:10px;">🔌 Breaker General</div>
+            <div class="res-item"><span class="label">Corriente de diseño:</span><span class="value" id="casa-r-idis">-</span></div>
+            <div class="res-item"><span class="label">Breaker general:</span><span class="value" id="casa-r-general">-</span></div>
+            <div class="res-item"><span class="label">Cable acometida:</span><span class="value" id="casa-c-principal">-</span></div>
+            <div class="res-item"><span class="label">Caída de tensión:</span><span class="value" id="casa-r-vd">-</span></div>
+            <div class="res-item"><span class="label">Conductor tierra:</span><span class="value" id="casa-r-tierra">-</span></div>
+            <div class="res-item"><span class="label">Diferencial:</span><span class="value" id="casa-r-dif">-</span></div>
+            <div class="section-title" style="font-size:.85rem;margin-top:10px;">🔀 Circuitos Ramales</div>
+            <div id="casa-r-circuitos"></div>
+            <div class="section-title" style="font-size:.85rem;margin-top:10px;">📦 Canalización</div>
+            <div class="res-item"><span class="label">Tubería:</span><span class="value" id="casa-r-tuberia">-</span></div>
+            <div class="res-item"><span class="label">Cajas octogonales:</span><span class="value" id="casa-r-cajas-octo">-</span></div>
+            <div class="res-item"><span class="label">Cajas rectangulares:</span><span class="value" id="casa-r-cajas-rect">-</span></div>
+            <div class="res-item"><span class="label">Panel/Caja breakers:</span><span class="value" id="casa-r-caja">-</span></div>
+            <div class="section-title" style="font-size:.85rem;margin-top:10px;">📋 Materiales a Cotizar</div>
+            <div id="casa-r-materiales"></div>
+            <div class="info-pendiente">💡 Los precios se agregan desde el <strong>Panel Admin</strong> (pestaña Servicios) después de sincronizar. Guarda al cliente y sincroniza.</div>
+            <button class="btn-guardar" onclick="abrirModal('Casa')">💾 Guardar Cliente</button>
+        </div>
+    </div>
 
-        try { await setPersistence(auth, browserSessionPersistence); } catch (e) { console.error('Persistencia:', e); }
+    <!-- ===================== SISTEMAS ===================== -->
+    <div id="modulo-sistemas" class="modulo">
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" onclick="cambiarSubModulo('nada', this)">Sin Nada</button>
+            <button class="sub-tab-btn" onclick="cambiarSubModulo('tiene', this)">Ya tiene Equipo</button>
+        </div>
+        <div class="form-row" style="margin-bottom:15px;">
+            <div class="form-group"><label>Aterramiento</label><select id="sis-aterramiento"><option value="con" selected>Con Tierra</option><option value="sin">Sin Tierra</option></select></div>
+            <div class="form-group"><label>Salida AC</label><select id="sis-voltaje-ac"><option value="110">110V</option><option value="220" selected>220V</option></select></div>
+        </div>
 
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firebaseFns = {
-            signInWithEmailAndPassword, signOut, onAuthStateChanged,
-            collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
-            query, where, orderBy, serverTimestamp, setDoc
-        };
+        <div id="sub-modulo-nada" class="sub-modulo active">
+            <div class="form-row">
+                <div class="form-group"><label>Consumo (kWh/día)</label><input type="number" inputmode="decimal" id="sis-kwh" placeholder="0" min="0" step="0.1" /></div>
+                <div class="form-group"><label>Pico (W)</label><input type="number" inputmode="decimal" id="sis-pico" placeholder="0" min="0" /></div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Voltaje Baterías</label><select id="sis-voltaje"><option value="12">12V</option><option value="24" selected>24V</option><option value="48">48V</option></select></div>
+                <div class="form-group"><label>Días Autonomía</label><input type="number" inputmode="numeric" id="sis-dias" placeholder="1" min="1" /></div>
+                <div class="form-group"><label>Tipo Batería</label><select id="sis-tipo-bat"><option value="litio">Litio (85%)</option><option value="agm" selected>AGM (50%)</option><option value="plomo">Plomo (50%)</option></select></div>
+            </div>
+            <div class="section-title">📋 Panel</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Potencia (W)</label><input type="number" inputmode="decimal" id="sis-panel-w" placeholder="550" min="1" /></div>
+                <div class="form-group"><label>Isc (A)</label><input type="number" inputmode="decimal" id="sis-panel-isc" placeholder="14" min="0.1" step="0.1" /></div>
+                <div class="form-group"><label>Voc (V)</label><input type="number" inputmode="decimal" id="sis-panel-voc" placeholder="50" min="1" step="0.1" /></div>
+            </div>
+            <div class="form-group"><label>Cant. Paneles (vacío=Auto)</label><input type="number" inputmode="numeric" id="sis-cant-paneles" placeholder="Auto" min="1" /></div>
+            <div class="section-title">📏 Distancias</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Paneles→Inv</label><input type="number" inputmode="decimal" id="sis-dist-solar" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Bat→Inv</label><input type="number" inputmode="decimal" id="sis-dist-bat" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Inv→Red</label><input type="number" inputmode="decimal" id="sis-dist-ac" placeholder="0" min="0" /></div>
+            </div>
+            <button class="btn-calcular" onclick="calcularSistemasNada()">🔍 Calcular</button>
+            <div class="config-panel" id="sis-configs-panel"><h4>⚙️ Config Paneles:</h4><div id="sis-configs-list"></div></div>
+            <div class="resultado-box" id="res-sis-nada">
+                <h3>✅ Materiales Sistema Nuevo</h3>
+                <div class="res-item"><span class="label">Paneles:</span><span class="value" id="sis-r-paneles">-</span></div>
+                <div class="res-item"><span class="label">Baterías:</span><span class="value" id="sis-r-baterias">-</span></div>
+                <div class="res-item"><span class="label">Inversor:</span><span class="value" id="sis-r-inversor">-</span></div>
+                <div class="res-item"><span class="label">Controlador:</span><span class="value" id="sis-r-controlador">-</span></div>
+                <div class="res-item"><span class="label">Transfer:</span><span class="value" id="sis-r-transfer">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">🛡️ Protecciones</div>
+                <div class="res-item"><span class="label">Breaker DC Paneles:</span><span class="value" id="sis-r-bdc-paneles">-</span></div>
+                <div class="res-item"><span class="label">Breaker DC Batería:</span><span class="value" id="sis-r-bdc-bat">-</span></div>
+                <div class="res-item"><span class="label">Breaker AC:</span><span class="value" id="sis-r-bac">-</span></div>
+                <div class="res-item"><span class="label">Fusibles:</span><span class="value" id="sis-r-fusibles">-</span></div>
+                <div class="res-item"><span class="label">SPD:</span><span class="value" id="sis-r-spd">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">🔌 Cables</div>
+                <div class="res-item"><span class="label">Solar:</span><span class="value" id="sis-r-csolar">-</span></div>
+                <div class="res-item"><span class="label">Baterías:</span><span class="value" id="sis-r-cbat">-</span></div>
+                <div class="res-item"><span class="label">AC:</span><span class="value" id="sis-r-cac">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">⚙️ Accesorios</div>
+                <div class="res-item"><span class="label">Varilla:</span><span class="value" id="sis-r-varilla">-</span></div>
+                <div class="res-item"><span class="label">Tierra:</span><span class="value" id="sis-r-tierra">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">📋 Materiales a Cotizar</div>
+                <div id="sis-r-materiales"></div>
+                <div class="info-pendiente">💡 Precios se agregan en el Panel Admin.</div>
+                <button class="btn-guardar" onclick="abrirModal('Solar Nuevo')">💾 Guardar Cliente</button>
+            </div>
+        </div>
 
-        window.CLOUDINARY_CLOUD_NAME = "natkrios";
-        window.CLOUDINARY_UPLOAD_PRESET = "tiendita_preset";
-
-        window.subirFotoCloudinary = async function(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', window.CLOUDINARY_UPLOAD_PRESET);
-            const url = `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`;
-            const resp = await fetch(url, { method: 'POST', body: formData });
-            if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.error?.message || 'Error Cloudinary'); }
-            const data = await resp.json();
-            return data.secure_url;
-        };
-
-        window.dispatchEvent(new Event('firebase-listo'));
-    </script>
-
-    <script>
-        /* ============================================================
-           FUNCIONES COMPLETAS DE ADMIN
-           ⚠️ Tu archivo original se cortó en verDetalleEncargo.
-           Aquí reconstruí lo faltante y añadí las funciones nuevas
-           de cotización. Si algo no coincide con tu original, avísame.
-           ============================================================ */
-
-        const ADMIN_EMAIL = "byb@gmail.com";
-        const TIENDA_URL = "https://tienditabyb.github.io/compras/";
-
-        let userData = null;
-        let productosCache = [];
-        let ventasCache = [];
-        let domiciliosCache = [];
-        let tiendaCache = [];
-        let encargosCache = [];
-        let serviciosCache = [];
-        let categoriasCache = [];
-        let usuariosCache = [];
-        let carrito = [];
-        let ventasFiltradasReporte = [];
-        let configGeneral = { envio_costo: 1.00, envio_gratis_desde: 5.00, encargos_activos: true, servicios_activos: true };
-
-        let notificaciones = [];
-        const NOTIF_STORAGE_KEY = 'admin_notificaciones_leidas';
-
-        function cargarNotificacionesLeidas() {
-            try { const d = localStorage.getItem(NOTIF_STORAGE_KEY); return d ? JSON.parse(d) : []; } catch { return []; }
-        }
-        function guardarNotificacionesLeidas(l) { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(l)); }
-
-        function generarNotificaciones() {
-            const n = [];
-            const l = cargarNotificacionesLeidas();
-            for (const d of domiciliosCache) {
-                if (d.Estado === 'Pendiente' && !d.fecha_gestion) {
-                    const id = `dom-${d.id}`;
-                    if (!l.includes(id)) n.push({ id, tipo: 'domicilio', texto: `Nuevo domicilio de <strong>${d.Cliente_Nombre || 'Cliente'}</strong>`, fecha: d.fecha });
-                }
-            }
-            for (const p of tiendaCache) {
-                if (p.Estado === 'Pendiente' && !p.fecha_gestion) {
-                    const id = `tienda-${p.id}`;
-                    if (!l.includes(id)) n.push({ id, tipo: 'tienda', texto: `Nuevo pedido tienda de <strong>${p.Cliente_Nombre || 'Cliente'}</strong>`, fecha: p.fecha });
-                }
-            }
-            for (const e of encargosCache) {
-                if (e.estado === 'Pendiente' && !e.fecha_limite_pago) {
-                    const id = `enc-${e.id}`;
-                    if (!l.includes(id)) n.push({ id, tipo: 'encargo', texto: `Nuevo encargo de <strong>${e.producto_nombre || 'Producto'}</strong>`, fecha: e.fecha_solicitud });
-                }
-            }
-            for (const s of serviciosCache) {
-                if (s.estado === 'Pendiente' && !s.fecha_gestion) {
-                    const id = `serv-${s.id}`;
-                    if (!l.includes(id)) n.push({ id, tipo: 'servicio', texto: `Nueva solicitud de servicio de <strong>${s.usuario_nombre || 'Cliente'}</strong>`, fecha: s.fecha_solicitud });
-                }
-            }
-            n.sort((a, b) => {
-                const fa = a.fecha ? (a.fecha.seconds ? a.fecha.seconds * 1000 : new Date(a.fecha).getTime()) : 0;
-                const fb = b.fecha ? (b.fecha.seconds ? b.fecha.seconds * 1000 : new Date(b.fecha).getTime()) : 0;
-                return fb - fa;
-            });
-            notificaciones = n;
-            const badge = document.getElementById('notifBadge');
-            if (n.length > 0) { badge.textContent = n.length > 99 ? '99+' : n.length; badge.classList.add('show'); }
-            else badge.classList.remove('show');
-            renderNotificaciones();
-        }
-
-        function renderNotificaciones() {
-            const list = document.getElementById('notifList');
-            if (notificaciones.length === 0) { list.innerHTML = '<div class="notif-empty">✨ No hay notificaciones nuevas</div>'; return; }
-            let html = '';
-            for (const n of notificaciones) {
-                let icon = '📦'; let tab = 'domicilios';
-                if (n.tipo === 'tienda') { icon = '🏪'; tab = 'tienda'; }
-                if (n.tipo === 'encargo') { icon = '📋'; tab = 'encargos'; }
-                if (n.tipo === 'servicio') { icon = '🔧'; tab = 'servicios'; }
-                html += `<div class="notif-item" data-id="${n.id}" data-tab="${tab}"><span class="icon">${icon}</span><span class="text">${n.texto}</span></div>`;
-            }
-            list.innerHTML = html;
-            list.querySelectorAll('.notif-item').forEach(el => {
-                el.addEventListener('click', function() {
-                    const id = this.dataset.id, tab = this.dataset.tab;
-                    const l = cargarNotificacionesLeidas();
-                    if (!l.includes(id)) { l.push(id); guardarNotificacionesLeidas(l); }
-                    notificaciones = notificaciones.filter(n => n.id !== id);
-                    generarNotificaciones();
-                    document.querySelectorAll('.sidebar__nav a').forEach(a => a.classList.remove('active'));
-                    document.querySelector(`.sidebar__nav a[data-tab="${tab}"]`)?.classList.add('active');
-                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                    document.getElementById(`tab-${tab}`)?.classList.add('active');
-                    document.getElementById('notifDropdown').classList.remove('open');
-                });
-            });
-        }
-        function actualizarNotificaciones() { generarNotificaciones(); }
-
-        function iniciarListenerAuth() {
-            window.firebaseFns.onAuthStateChanged(window.firebaseAuth, async (user) => {
-                if (user) {
-                    if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-                        await window.firebaseFns.signOut(window.firebaseAuth);
-                        document.getElementById('loginError').textContent = 'Acceso denegado.';
-                        document.getElementById('loginError').classList.add('show');
-                        return;
-                    }
-                    userData = { id: user.uid, email: user.email, name: user.displayName || user.email };
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'block';
-                    document.getElementById('adminUserName').textContent = userData.name || userData.email || 'Administrador';
-                    initApp();
-                } else {
-                    userData = null;
-                    document.getElementById('loginContainer').style.display = 'flex';
-                    document.getElementById('appContainer').style.display = 'none';
-                }
-            });
-        }
-
-        (function esperarFirebase() {
-            if (window.firebaseFns && window.firebaseAuth) iniciarListenerAuth();
-            else setTimeout(esperarFirebase, 100);
-        })();
-
-        document.getElementById('loginBtn').addEventListener('click', async function() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const errorEl = document.getElementById('loginError');
-            errorEl.classList.remove('show'); errorEl.textContent = '';
-            if (!email || !password) { errorEl.textContent = 'Ingresa email y contraseña.'; errorEl.classList.add('show'); return; }
-            try {
-                const { signInWithEmailAndPassword } = window.firebaseFns;
-                await signInWithEmailAndPassword(window.firebaseAuth, email, password);
-            } catch (e) {
-                let msg = 'Error de autenticación';
-                if (e.code === 'auth/user-not-found') msg = 'No existe una cuenta con este correo.';
-                else if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'Correo o contraseña incorrectos.';
-                errorEl.textContent = msg; errorEl.classList.add('show');
-            }
-        });
-
-        document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
-        document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
-        document.getElementById('logoutBtn').addEventListener('click', async () => { await window.firebaseFns.signOut(window.firebaseAuth); });
-
-        // === CARGA DE DATOS ===
-        async function cargarCategorias() {
-            try { const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria')); categoriasCache = s.docs.map(d => d.data().nombre).filter(Boolean); return categoriasCache; }
-            catch (e) { return []; }
-        }
-        async function cargarProductos() {
-            try { const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'productos')); productosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); return productosCache; }
-            catch (e) { return []; }
-        }
-        async function cargarVentas() {
-            try {
-                const { collection, getDocs, orderBy, query } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'Ventas'), orderBy('fecha', 'desc'));
-                const s = await getDocs(q); ventasCache = s.docs.map(d => ({ id: d.id, ...d.data() })); return ventasCache;
-            } catch (e) { return []; }
-        }
-        async function cargarDomicilios() {
-            try {
-                const { collection, getDocs, orderBy, query } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'Domicilios'), orderBy('fecha', 'desc'));
-                const s = await getDocs(q); domiciliosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return domiciliosCache;
-            } catch (e) { return []; }
-        }
-        async function cargarTienda() {
-            try {
-                const { collection, getDocs, orderBy, query } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'PedidosTienda'), orderBy('fecha', 'desc'));
-                const s = await getDocs(q); tiendaCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return tiendaCache;
-            } catch (e) { return []; }
-        }
-        async function cargarEncargos() {
-            try {
-                const { collection, getDocs, orderBy, query } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'Encargos'), orderBy('fecha_solicitud', 'desc'));
-                const s = await getDocs(q); encargosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return encargosCache;
-            } catch (e) { return []; }
-        }
-        async function cargarServicios() {
-            try {
-                const { collection, getDocs, orderBy, query } = window.firebaseFns;
-                const q = query(collection(window.firebaseDb, 'SolicitudesServicios'), orderBy('fecha_solicitud', 'desc'));
-                const s = await getDocs(q); serviciosCache = s.docs.map(d => ({ id: d.id, ...d.data() })); actualizarNotificaciones(); return serviciosCache;
-            } catch (e) { return []; }
-        }
-        async function cargarUsuarios() {
-            try {
-                const s = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'usuarios'));
-                usuariosCache = s.docs.map(d => ({ id: d.id, ...d.data() }));
-                usuariosCache.sort((a, b) => ((a.nombre || a.name || '').toLowerCase()).localeCompare((b.nombre || b.name || '').toLowerCase()));
-                return usuariosCache;
-            } catch (e) { return []; }
-        }
-        async function cargarConfigGeneral() {
-            try {
-                const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'config', 'general'));
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (typeof data.envio_costo === 'number') configGeneral.envio_costo = data.envio_costo;
-                    if (typeof data.envio_gratis_desde === 'number') configGeneral.envio_gratis_desde = data.envio_gratis_desde;
-                    if (typeof data.encargos_activos === 'boolean') configGeneral.encargos_activos = data.encargos_activos;
-                    if (typeof data.servicios_activos === 'boolean') configGeneral.servicios_activos = data.servicios_activos;
-                }
-                document.getElementById('configEnvioCosto').value = configGeneral.envio_costo;
-                document.getElementById('configEnvioGratis').value = configGeneral.envio_gratis_desde;
-                document.getElementById('configEncargosActivos').checked = configGeneral.encargos_activos;
-                document.getElementById('configServiciosActivos').checked = configGeneral.servicios_activos;
-            } catch (e) { }
-        }
-
-        // === UTILIDADES ===
-        function normalizarNombre(n) { if (!n) return ""; return n.replace(/\s*x\s*\d+/g, '').replace(/\s*\d+\s*uds?/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
-        function extraerNombresProductos(t) { return !t ? [] : t.split(',').map(p => p.trim()).filter(Boolean); }
-        function calcularCostoVenta(v) {
-            const n = extraerNombresProductos(v.productos_json || '');
-            let s = 0;
-            for (let x of n) { const c = normalizarNombre(x); const p = productosCache.find(p => normalizarNombre(p.Nombre) === c); if (p) s += parseFloat(p.Precio_Costo || 0); }
-            return s;
-        }
-        function calcularGananciaVenta(v) { return parseFloat(v.total || 0) - calcularCostoVenta(v); }
-        function obtenerFotosProducto(p) {
-            let f = [];
-            if (p.Fotos) {
-                if (Array.isArray(p.Fotos)) f = p.Fotos;
-                else if (typeof p.Fotos === 'string') { try { const x = JSON.parse(p.Fotos); if (Array.isArray(x)) f = x; } catch (e) { f = p.Fotos.split(',').map(s => s.trim()).filter(Boolean); } }
-            }
-            return f;
-        }
-        function parsearProductosPedido(v) {
-            if (!v) return [];
-            if (Array.isArray(v)) return v;
-            if (typeof v === 'string') { try { const p = JSON.parse(v); return Array.isArray(p) ? p : []; } catch (e) { return []; } }
-            return [];
-        }
-        function fechaToDate(f) { if (!f) return null; if (f.seconds) return new Date(f.seconds * 1000); return new Date(f); }
-        function fechaToStr(f) { const d = fechaToDate(f); return d ? d.toLocaleString('es-ES') : 'Sin fecha'; }
-        function fechaToISO(f) { const d = fechaToDate(f); return d ? d.toISOString().slice(0,10) : ''; }
-
-        function renderProductosPedidoConLinks(pp) {
-            const items = parsearProductosPedido(pp);
-            if (items.length === 0) return '';
-            let h = '<div class="sub" style="margin-top:6px;"><strong>🛍️ Productos:</strong></div>';
-            items.forEach(item => {
-                const l = `${TIENDA_URL}?id=${item.id}`;
-                const s = (parseFloat(item.precio || 0) * (item.cantidad || 1)).toFixed(2);
-                h += `<div class="sub" style="padding-left:12px;">• <a href="${l}" target="_blank" style="color:#2980b9; font-weight:600; text-decoration:underline;">${item.nombre || 'Producto'}</a> x${item.cantidad || 1} - $${s}</div>`;
-            });
-            return h;
-        }
-
-        // === DASHBOARD ===
-        function renderDashboard(ventas, domicilios) {
-            const tv = ventas.length;
-            const ing = ventas.reduce((s, v) => s + parseFloat(v.total || 0), 0);
-            let g = 0; for (const v of ventas) g += calcularGananciaVenta(v);
-            const p = domicilios.filter(d => d.Estado === 'Pendiente').length;
-            let ci = 0, vi = 0;
-            for (const x of productosCache) {
-                if (x.Es_Encargo || x.Es_Proveedor || x.Es_Servicio) continue;
-                const st = parseInt(x.Stock || 0);
-                ci += st * parseFloat(x.Precio_Costo || 0);
-                vi += st * parseFloat(x.Precio_Venta || 0);
-            }
-            document.getElementById('statVentas').textContent = tv;
-            document.getElementById('statTotal').textContent = `$${ing.toFixed(2)}`;
-            document.getElementById('statGanancia').textContent = `$${g.toFixed(2)}`;
-            document.getElementById('statDomicilios').textContent = p;
-            document.getElementById('statCostoInventario').textContent = `$${ci.toFixed(2)}`;
-            document.getElementById('statGananciaPotencial').textContent = `$${(vi - ci).toFixed(2)}`;
-            const u = ventas.slice(0, 5);
-            const c = document.getElementById('ultimasVentas');
-            if (u.length === 0) { c.innerHTML = '<div class="empty">No hay ventas recientes.</div>'; return; }
-            let h = '';
-            for (const v of u) h += `<div class="list-item" onclick="verDetalleVenta('${v.id}')" style="cursor:pointer;"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
-            c.innerHTML = h;
-        }
-
-        // === ESTADÍSTICAS ===
-        function aplicarRangoEst(r) {
-            const hoy = new Date();
-            let d = new Date(); const h = new Date();
-            switch (r) {
-                case 'hoy': d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()); break;
-                case '7dias': d = new Date(hoy.getTime() - 7 * 86400000); break;
-                case '30dias': d = new Date(hoy.getTime() - 30 * 86400000); break;
-                case 'mes': d = new Date(hoy.getFullYear(), hoy.getMonth(), 1); break;
-                case 'todo': document.getElementById('estFechaDesde').value = ''; document.getElementById('estFechaHasta').value = ''; document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); renderizarEstadisticas(); return;
-            }
-            document.getElementById('estFechaDesde').value = d.toISOString().slice(0,10);
-            document.getElementById('estFechaHasta').value = h.toISOString().slice(0,10);
-            document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderizarEstadisticas();
-        }
-
-        function renderizarEstadisticas() {
-            const d = document.getElementById('estFechaDesde').value;
-            const h = document.getElementById('estFechaHasta').value;
-            let f = [...ventasCache];
-            if (d) f = f.filter(v => fechaToISO(v.fecha) >= d);
-            if (h) f = f.filter(v => fechaToISO(v.fecha) <= h);
-            const c = document.getElementById('estadisticasContenido');
-            if (f.length === 0) { c.innerHTML = '<div class="empty">No hay ventas en el período.</div>'; return; }
-            let ti = 0, tg = 0, tc = 0;
-            const pC = {}, cC = {};
-            for (const v of f) {
-                ti += parseFloat(v.total || 0);
-                const co = calcularCostoVenta(v); tc += co; tg += (parseFloat(v.total || 0) - co);
-                const items = extraerNombresProductos(v.productos_json || '');
-                for (const n of items) {
-                    const m = n.match(/^(.+?)\s*x\s*(\d+)$/);
-                    let pn, ct;
-                    if (m) { pn = m[1].trim(); ct = parseInt(m[2]); } else { pn = n; ct = 1; }
-                    if (!pC[pn]) pC[pn] = { cantidad: 0, ingresos: 0 };
-                    pC[pn].cantidad += ct;
-                    const prod = productosCache.find(p => normalizarNombre(p.Nombre) === normalizarNombre(pn));
-                    const pr = prod ? parseFloat(prod.Precio_Venta || 0) : 0;
-                    pC[pn].ingresos += pr * ct;
-                    const cat = prod ? (prod.Categoria || 'General') : 'General';
-                    if (!cC[cat]) cC[cat] = { cantidad: 0, ingresos: 0 };
-                    cC[cat].cantidad += ct; cC[cat].ingresos += pr * ct;
-                }
-            }
-            const tp = Object.entries(pC).sort((a,b) => b[1].cantidad - a[1].cantidad).slice(0, 10);
-            const tca = Object.entries(cC).sort((a,b) => b[1].cantidad - a[1].cantidad).slice(0, 8);
-            const tk = ti / f.length;
-            let html = `<div class="stats-cards">
-                <div class="stat-card-new"><div class="value">${f.length}</div><div class="label">🛒 Ventas</div></div>
-                <div class="stat-card-new green"><div class="value">$${ti.toFixed(2)}</div><div class="label">💰 Ingresos</div></div>
-                <div class="stat-card-new orange"><div class="value">$${tg.toFixed(2)}</div><div class="label">📈 Ganancia</div></div>
-                <div class="stat-card-new purple"><div class="value">$${tk.toFixed(2)}</div><div class="label">🎫 Ticket</div></div>
-                <div class="stat-card-new red"><div class="value">$${tc.toFixed(2)}</div><div class="label">📦 Costo</div></div>
-            </div><div class="ranking-list"><h3>🏆 Top 10 productos</h3>`;
-            if (tp.length === 0) html += `<div class="empty">Sin datos.</div>`;
-            else tp.forEach(([n, x], i) => {
-                const rc = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-                html += `<div class="ranking-item"><div class="rank-num ${rc}">${i+1}</div><div class="rank-info"><div class="rank-name">${n}</div><div class="rank-sub">${x.cantidad} unidades</div></div><div class="rank-value">$${x.ingresos.toFixed(2)}</div></div>`;
-            });
-            html += `</div><div class="ranking-list"><h3>📂 Top categorías</h3>`;
-            if (tca.length === 0) html += `<div class="empty">Sin datos.</div>`;
-            else tca.forEach(([n, x], i) => {
-                html += `<div class="ranking-item"><div class="rank-num">${i+1}</div><div class="rank-info"><div class="rank-name">${n}</div><div class="rank-sub">${x.cantidad} unidades</div></div><div class="rank-value">$${x.ingresos.toFixed(2)}</div></div>`;
-            });
-            html += `</div>`;
-            c.innerHTML = html;
-        }
-
-        document.getElementById('estFiltrarBtn').addEventListener('click', renderizarEstadisticas);
-        document.getElementById('estLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('estFechaDesde').value = '';
-            document.getElementById('estFechaHasta').value = '';
-            document.querySelectorAll('#tab-estadisticas .rango-rapido button').forEach(b => b.classList.remove('active'));
-            renderizarEstadisticas();
-        });
-
-        // === USUARIOS ===
-        function renderUsuarios() {
-            const c = document.getElementById('usuariosContainer');
-            const b = (document.getElementById('userSearch')?.value || '').toLowerCase().trim();
-            let f = [...usuariosCache];
-            if (b) f = f.filter(u => (u.nombre || '').toLowerCase().includes(b) || (u.apellidos || '').toLowerCase().includes(b) || (u.email || '').toLowerCase().includes(b) || (u.telefono || '').toLowerCase().includes(b) || (u.name || '').toLowerCase().includes(b));
-            document.getElementById('usuariosCount').textContent = `${usuariosCache.length} usuario${usuariosCache.length === 1 ? '' : 's'}`;
-            if (f.length === 0) { c.innerHTML = '<div class="empty">No se encontraron usuarios.</div>'; return; }
-            let html = '';
-            for (const u of f) {
-                const nc = u.nombre && u.apellidos ? `${u.nombre} ${u.apellidos}` : (u.nombre || u.name || 'Sin nombre');
-                const ini = (u.nombre || u.name || '?').charAt(0).toUpperCase();
-                html += `
-                    <div class="user-item">
-                        <div class="user-avatar">${ini}</div>
-                        <div class="user-info">
-                            <div class="user-name">${nc}</div>
-                            <div class="user-sub">📧 ${u.email || 'Sin email'}</div>
-                            <div class="user-sub">📞 ${u.telefono || 'Sin teléfono'}</div>
-                            <div class="user-sub">📍 ${u.direccion || 'Sin dirección'}</div>
-                        </div>
-                        <div class="user-actions">
-                            <button class="btn-edit" onclick="abrirModalUsuario('${u.id}')">✏️ Editar</button>
-                            <button class="btn-delete" onclick="eliminarUsuario('${u.id}')">🗑️ Eliminar</button>
-                        </div>
-                    </div>
-                `;
-            }
-            c.innerHTML = html;
-        }
-
-        function abrirModalUsuario(id) {
-            const u = usuariosCache.find(x => x.id === id);
-            if (!u) { alert('No encontrado.'); return; }
-            document.getElementById('editUserId').value = u.id;
-            document.getElementById('editUserNombre').value = u.nombre || '';
-            document.getElementById('editUserApellidos').value = u.apellidos || '';
-            document.getElementById('editUserEmail').value = u.email || '';
-            document.getElementById('editUserTelefono').value = u.telefono || '';
-            document.getElementById('editUserDireccion').value = u.direccion || '';
-            document.getElementById('userModal').classList.add('active');
-        }
-        function cerrarModalUsuario() { document.getElementById('userModal').classList.remove('active'); }
-
-        async function guardarUsuarioEditado() {
-            const id = document.getElementById('editUserId').value;
-            const n = document.getElementById('editUserNombre').value.trim();
-            const a = document.getElementById('editUserApellidos').value.trim();
-            const t = document.getElementById('editUserTelefono').value.trim();
-            const d = document.getElementById('editUserDireccion').value.trim();
-            if (!n || n.length < 2) { alert('⚠️ El nombre es obligatorio (mín. 2 letras).'); return; }
-            if (!a || a.length < 2) { alert('⚠️ Los apellidos son obligatorios (mín. 2 letras).'); return; }
-            if (!t || t.length < 6) { alert('⚠️ El teléfono es obligatorio (mín. 6 dígitos).'); return; }
-            if (!d || d.length < 5) { alert('⚠️ La dirección es obligatoria (mín. 5 caracteres).'); return; }
-            const btn = document.getElementById('saveUserBtn');
-            btn.disabled = true; btn.textContent = '⏳ Guardando...';
-            try {
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                await updateDoc(doc(window.firebaseDb, 'usuarios', id), {
-                    nombre: n, apellidos: a, name: `${n} ${a}`.trim(), telefono: t, direccion: d,
-                    fecha_actualizacion: serverTimestamp()
-                });
-                alert('✅ Usuario actualizado.');
-                cerrarModalUsuario();
-                await cargarUsuarios();
-                renderUsuarios();
-            } catch (e) { alert('Error: ' + e.message); }
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar'; }
-        }
-
-        async function eliminarUsuario(id) {
-            const u = usuariosCache.find(x => x.id === id);
-            if (!u) return;
-            const nc = u.nombre && u.apellidos ? `${u.nombre} ${u.apellidos}` : (u.nombre || u.name || 'este usuario');
-            if (!confirm(`¿Eliminar a "${nc}"?\n\n⚠️ Se borrarán sus datos de Firestore.\n\nNota: La cuenta de acceso seguirá existiendo en Firebase Authentication.`)) return;
-            try {
-                await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'usuarios', id));
-                alert('✅ Usuario eliminado de Firestore.');
-                await cargarUsuarios();
-                renderUsuarios();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        document.getElementById('userSearch').addEventListener('input', renderUsuarios);
-        document.getElementById('userRefreshBtn').addEventListener('click', async function() {
-            this.disabled = true; this.textContent = '⏳...';
-            await cargarUsuarios(); renderUsuarios();
-            this.disabled = false; this.textContent = '🔄 Refrescar';
-        });
-        document.getElementById('closeUserModal').addEventListener('click', cerrarModalUsuario);
-        document.getElementById('cancelUserBtn').addEventListener('click', cerrarModalUsuario);
-        document.getElementById('saveUserBtn').addEventListener('click', guardarUsuarioEditado);
-        document.getElementById('deleteUserBtn').addEventListener('click', function() {
-            const id = document.getElementById('editUserId').value;
-            if (id) { cerrarModalUsuario(); eliminarUsuario(id); }
-        });
-        document.getElementById('userModal').addEventListener('click', function(e) { if (e.target === this) cerrarModalUsuario(); });
-
-        // === INVENTARIO ===
-        function renderInventario(productos, catF = 'Todas', busq = '') {
-            const c = document.getElementById('inventarioContainer');
-            let f = productos;
-            if (catF === 'Encargos') f = f.filter(p => p.Es_Encargo === true);
-            else if (catF === 'Servicios') f = f.filter(p => p.Es_Servicio === true);
-            else if (catF !== 'Todas') f = f.filter(p => (p.Categoria || 'General') === catF);
-            if (busq) {
-                const q = busq.toLowerCase();
-                f = f.filter(p => (p.Nombre || '').toLowerCase().includes(q) || (p.Codigo_de_Barras || '').includes(q) || (p.Proveedor || '').toLowerCase().includes(q));
-            }
-            if (f.length === 0) { c.innerHTML = '<div class="empty">No se encontraron productos.</div>'; return; }
-            let h = '<div class="product-grid">';
-            for (const p of f) {
-                const fo = obtenerFotosProducto(p);
-                const fu = fo.length > 0 ? fo[0] : '';
-                const pr = parseFloat(p.Precio_Venta || 0);
-                const of = parseFloat(p.Precio_Oferta || 0);
-                const pf = (of > 0 && of < pr) ? of : pr;
-                const st = parseInt(p.Stock || 0);
-                const ee = p.Es_Encargo === true;
-                const ep = p.Es_Proveedor === true;
-                const es = p.Es_Servicio === true;
-                const ue = (p.URL_Encargo || '').trim();
-                const prov = (p.Proveedor || '').trim();
-                let ex = '';
-                if (fo.length > 1) {
-                    ex = '<div class="fotos-extra">';
-                    fo.slice(1).forEach(x => { ex += `<img src="${x}" onclick="event.stopPropagation(); window.open('${x}','_blank')" />`; });
-                    ex += '</div>';
-                }
-                const ub = (ee && ue) ? `<a href="${ue}" target="_blank" class="btn-url-encargo" onclick="event.stopPropagation()">🔗 Ver</a>` : '';
-                const pl = ep ? '<div class="proveedor-label">🏭 Proveedor</div>' : '';
-                const sl = es ? '<div class="servicio-label">🔧 Servicio</div>' : '';
-                const pn = (ep && prov) ? `<div class="proveedor">${prov}</div>` : '';
-                const precioMostrar = (es && pf === 0) ? 'Consultar' : `$${pf.toFixed(2)}`;
-                h += `
-                    <div class="product-card">
-                        <img class="foto-principal" src="${fu || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2212%22%3ESin foto%3C/text%3E%3C/svg%3E'}" alt="${p.Nombre}" onclick="event.stopPropagation(); window.open('${fu}','_blank')" />
-                        ${ex}
-                        <h4>${p.Nombre || 'Sin nombre'}</h4>
-                        ${ee ? '<div class="encargo-label">📦 Encargo</div>' : ''}
-                        ${sl}${pl}${ub}
-                        <div class="price">${precioMostrar}</div>
-                        ${es ? '' : `<div class="stock">📦 ${st} uds</div>`}
-                        ${es ? '' : `<div class="category">${p.Categoria || 'General'}</div>`}
-                        ${pn}
-                        <div class="actions">
-                            <button class="btn-edit" onclick="editarProducto('${p.id}')">✏️</button>
-                            <button class="btn-delete" onclick="eliminarProducto('${p.id}')">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            }
-            h += '</div>';
-            c.innerHTML = h;
-        }
-
-        // === VENTAS ===
-        function renderVentas(ventas) {
-            const c = document.getElementById('ventasContainer');
-            if (ventas.length === 0) { c.innerHTML = '<div class="empty">No hay ventas.</div>'; return; }
-            let h = '';
-            for (const v of ventas) {
-                const ico = (v.Tipo || 'Local') === 'Domicilio' ? '🛵' : '🏪';
-                const g = calcularGananciaVenta(v);
-                h += `<div class="list-item" onclick="verDetalleVenta('${v.id}')" style="cursor:pointer;"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${ico} ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}<div class="sub" style="font-size:0.8rem;">Ganancia: $${g.toFixed(2)}</div></div></div>`;
-            }
-            c.innerHTML = h;
-        }
-
-        // === DOMICILIOS ===
-        function renderDomicilios(domicilios) {
-            const c = document.getElementById('domiciliosContainer');
-            if (domicilios.length === 0) { c.innerHTML = '<div class="empty">No hay domicilios.</div>'; return; }
-            let h = '';
-            for (const d of domicilios) {
-                let er = d.Estado || 'Pendiente'; let em = er;
-                if (er === 'Pendiente' && !d.fecha_gestion) em = 'Nuevo Domicilio';
-                let bc = 'estado-pendiente';
-                if (em === 'Nuevo Domicilio') bc = 'estado-nuevo';
-                else if (em === 'En camino') bc = 'estado-en-camino';
-                else if (em === 'Entregado') bc = 'estado-entregado';
-                else if (em === 'Cancelado') bc = 'estado-cancelado';
-                const tel = d.Telefono == null ? '' : String(d.Telefono);
-                const isE = (er === 'Entregado' || er === 'Cancelado');
-                const ops = `
-                    <option value="Nuevo Domicilio" ${em === 'Nuevo Domicilio' ? 'selected' : ''}>Nuevo</option>
-                    <option value="Pendiente" ${em === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                    <option value="En camino" ${em === 'En camino' ? 'selected' : ''}>En camino</option>
-                    <option value="Entregado" ${em === 'Entregado' ? 'selected' : ''}>Entregado</option>
-                    <option value="Cancelado" ${em === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
-                `;
-                h += `<div class="list-item"><div class="left"><div class="title">👤 ${d.Cliente_Nombre || 'Sin nombre'}</div><div class="sub">📍 ${d.Direccion_Entrega || 'Sin dirección'} • ${fechaToStr(d.fecha)}</div><div class="sub">📞 ${tel || 'Sin teléfono'}</div>${renderProductosPedidoConLinks(d.productos_pedido)}<div class="sub" style="margin-top:8px; padding:6px 10px; background:#f8fafc; border-radius:6px; display:inline-block;">💰 Sub: $${parseFloat(d.subtotal || 0).toFixed(2)}${(parseFloat(d.envio) || 0) > 0 ? ` • 🚚 $${parseFloat(d.envio).toFixed(2)}` : ''} • 💵 $${parseFloat(d.total || 0).toFixed(2)}</div></div><div class="center"><span class="estado-badge ${bc}">${em}</span><select class="estado-select" onchange="cambiarEstadoDomicilio('${d.id}', this.value)" ${isE ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="enviarWhatsAppDom('${d.id}')">💬</button></div><div class="right" onclick="verDetalleDomicilio('${d.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver →</span></div></div>`;
-            }
-            c.innerHTML = h;
-            actualizarNotificaciones();
-        }
-
-        // === TIENDA ===
-        function renderTienda(pedidos) {
-            const c = document.getElementById('tiendaContainer');
-            if (pedidos.length === 0) { c.innerHTML = '<div class="empty">No hay pedidos.</div>'; return; }
-            let h = '';
-            const ah = new Date();
-            for (const p of pedidos) {
-                let er = p.Estado || 'Pendiente'; let em = er;
-                if (er === 'Pendiente' && !p.fecha_gestion) em = 'Nuevo Pedido';
-                let bc = 'estado-pendiente';
-                if (em === 'Nuevo Pedido') bc = 'estado-nuevo';
-                else if (em === 'Vendido') bc = 'estado-entregado';
-                else if (em === 'Cancelado') bc = 'estado-cancelado';
-                const isV = (er === 'Vendido' || er === 'Cancelado');
-                let tH = '';
-                if (er === 'Pendiente' && p.fecha_limite) {
-                    const lim = fechaToDate(p.fecha_limite);
-                    const df = lim - ah;
-                    if (df > 0) {
-                        const hh = Math.floor(df / 3600000), mm = Math.floor((df % 3600000) / 60000), ss = Math.floor((df % 60000) / 1000);
-                        tH = `<div class="sub"><span class="tiempo-restante ${df < 3600000 ? 'urgente' : 'ok'}">⏳ Recoger en: ${hh}h ${mm}m ${ss}s</span></div>`;
-                    } else {
-                        tH = `<div class="sub"><span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span></div>`;
-                    }
-                }
-                const ops = `<option value="Nuevo Pedido" ${em === 'Nuevo Pedido' ? 'selected' : ''}>Nuevo</option><option value="Pendiente" ${em === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="Vendido" ${em === 'Vendido' ? 'selected' : ''}>Vendido</option><option value="Cancelado" ${em === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
-                h += `<div class="list-item"><div class="left"><div class="title">👤 ${p.Cliente_Nombre || 'Sin nombre'}</div><div class="sub">📞 ${p.Telefono || 'Sin teléfono'} • ${fechaToStr(p.fecha)}</div>${tH}${renderProductosPedidoConLinks(p.productos_pedido)}</div><div class="center"><span class="estado-badge ${bc}">${em}</span><select class="estado-select" onchange="cambiarEstadoTienda('${p.id}', this.value)" ${isV ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="enviarWhatsAppTienda('${p.id}')">💬</button></div><div class="right" onclick="verDetalleTienda('${p.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver →</span></div></div>`;
-            }
-            c.innerHTML = h;
-            actualizarNotificaciones();
-        }
-
-        // === ENCARGOS ===
-        function renderEncargos(encargos) {
-            const c = document.getElementById('encargosContainer');
-            if (encargos.length === 0) { c.innerHTML = '<div class="empty">No hay encargos.</div>'; return; }
-            let h = '';
-            const ah = new Date();
-            for (const e of encargos) {
-                let st = e.estado || 'Pendiente'; let em = st;
-                if (st === 'Pendiente' && !e.fecha_limite_pago) em = 'Nuevo Encargo';
-                let bc = 'estado-pendiente';
-                if (em === 'En proceso') bc = 'estado-en-proceso';
-                else if (em === 'En camino') bc = 'estado-en-camino';
-                else if (em === 'Procesando en aduana de Cuba') bc = 'estado-aduana';
-                else if (em === 'En el local TienditaB&B lista para la entrega') bc = 'estado-local';
-                else if (em === 'Entregado') bc = 'estado-entregado';
-                else if (em === 'Cancelado') bc = 'estado-cancelado';
-                let fL = ''; if (e.fecha_limite_pago) fL = `<div class="sub">⏳ Límite: ${fechaToStr(e.fecha_limite_pago)}</div>`;
-                let tH = '';
-                if (st === 'Pendiente' && e.fecha_limite_pago) {
-                    const lim = fechaToDate(e.fecha_limite_pago);
-                    const df = lim - ah;
-                    if (df > 0) {
-                        const hh = Math.floor(df / 3600000), mm = Math.floor((df % 3600000) / 60000), ss = Math.floor((df % 60000) / 1000);
-                        tH = `<span class="tiempo-restante ${df < 3600000 ? 'urgente' : 'ok'}">⏳ ${hh}h ${mm}m ${ss}s</span>`;
-                    } else {
-                        tH = `<span class="tiempo-restante" style="color:#dc2626;">⏰ Vencido</span>`;
-                        setTimeout(() => cancelarEncargoVencido(e.id), 2000);
-                    }
-                }
-                const ops = `<option value="Nuevo Encargo" ${em === 'Nuevo Encargo' ? 'selected' : ''}>Nuevo</option><option value="Pendiente" ${em === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="En proceso" ${em === 'En proceso' ? 'selected' : ''}>En proceso</option><option value="En camino" ${em === 'En camino' ? 'selected' : ''}>En camino</option><option value="Procesando en aduana de Cuba" ${em === 'Procesando en aduana de Cuba' ? 'selected' : ''}>Aduana Cuba</option><option value="En el local TienditaB&B lista para la entrega" ${em === 'En el local TienditaB&B lista para la entrega' ? 'selected' : ''}>Listo p/entrega</option><option value="Entregado" ${em === 'Entregado' ? 'selected' : ''}>Entregado</option><option value="Cancelado" ${em === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
-                h += `<div class="list-item"><div class="left"><div class="title">📦 ${e.producto_nombre || 'Producto'} (x${e.cantidad || 1})</div><div class="sub">👤 ${e.usuario_nombre || 'Cliente'} • 📞 ${e.usuario_telefono || 'Sin teléfono'}</div><div class="sub">📅 ${fechaToStr(e.fecha_solicitud)}</div>${fL}${e.comentario ? `<div class="sub">💬 ${e.comentario}</div>` : ''}${tH}</div><div class="center"><span class="estado-badge ${bc}">${em}</span><select class="estado-select" onchange="cambiarEstadoEncargo('${e.id}', this.value)" ${st === 'Entregado' || st === 'Cancelado' ? 'disabled' : ''}>${ops}</select><button class="btn-whatsapp" onclick="notificarEncargo('${e.id}')">💬</button></div><div class="right" onclick="verDetalleEncargo('${e.id}')" style="cursor:pointer;"><span style="font-size:0.8rem; color:#64748b;">Ver →</span></div></div>`;
-            }
-            c.innerHTML = h;
-            actualizarNotificaciones();
-        }
-
-        // === SERVICIOS (MODIFICADO — añadido botón Cotizar) ===
-        function renderServicios(solicitudes) {
-            const c = document.getElementById('serviciosContainer');
-            if (solicitudes.length === 0) { c.innerHTML = '<div class="empty">No hay solicitudes de servicios.</div>'; return; }
-            let h = '';
-            for (const s of solicitudes) {
-                const st = s.estado || 'Pendiente';
-                let bc = 'estado-pendiente';
-                if (st === 'En proceso') bc = 'estado-en-proceso';
-                else if (st === 'Completado') bc = 'estado-completado';
-                else if (st === 'Cancelado') bc = 'estado-cancelado';
-                else if (st === 'Cotizado') bc = 'estado-cotizado';
-                const tel = s.usuario_telefono == null ? '' : String(s.usuario_telefono);
-                const isDone = (st === 'Completado' || st === 'Cancelado');
-                const ops = `<option value="Pendiente" ${st === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option value="En proceso" ${st === 'En proceso' ? 'selected' : ''}>En proceso</option><option value="Cotizado" ${st === 'Cotizado' ? 'selected' : ''}>Cotizado</option><option value="Completado" ${st === 'Completado' ? 'selected' : ''}>Completado</option><option value="Cancelado" ${st === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
-                let fechaPref = '';
-                if (s.fecha_preferida) {
-                    const fp = fechaToDate(s.fecha_preferida);
-                    if (fp) fechaPref = `<div class="sub">📅 Prefiere: ${fp.toLocaleDateString('es-ES')}</div>`;
-                }
-                const numComp = Array.isArray(s.componentes) ? s.componentes.length : 0;
-                const tienePrecios = numComp > 0 && s.componentes.some(c => (c.precio || 0) > 0);
-                const totalBadge = tienePrecios ? `<div class="sub" style="color:#059669; font-weight:600;">💵 Cotizado: $${(s.total_presupuesto || 0).toFixed(2)}</div>` : '';
-                h += `<div class="list-item">
-                    <div class="left">
-                        <div class="title">🔧 ${s.servicio_nombre || 'Servicio'}</div>
-                        <div class="sub">👤 ${s.usuario_nombre || 'Cliente'} • 📞 ${tel || 'Sin teléfono'}</div>
-                        <div class="sub">📧 ${s.usuario_email || 'Sin email'}</div>
-                        <div class="sub">📍 ${s.direccion || 'Sin dirección'}</div>
-                        ${fechaPref}
-                        <div class="sub">💬 ${s.descripcion || 'Sin descripción'}</div>
-                        <div class="sub" style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">Solicitado: ${fechaToStr(s.fecha_solicitud)}</div>
-                        ${numComp > 0 ? `<div class="sub" style="color:#2980b9; font-weight:600;">📋 ${numComp} materiales</div>` : ''}
-                        ${totalBadge}
-                    </div>
-                    <div class="center">
-                        <span class="estado-badge ${bc}">${st}</span>
-                        <select class="estado-select" onchange="cambiarEstadoServicio('${s.id}', this.value)" ${isDone ? 'disabled' : ''}>${ops}</select>
-                        <button class="btn-whatsapp" onclick="notificarServicio('${s.id}')">💬</button>
-                        <button class="btn-cotizar" onclick="verDetalleServicio('${s.id}')">💰 Cotizar</button>
-                    </div>
-                    <div class="right" onclick="verDetalleServicio('${s.id}')" style="cursor:pointer;">
-                        <span style="font-size:0.8rem; color:#2980b9; font-weight:600;">Ver →</span>
-                    </div>
-                </div>`;
-            }
-            c.innerHTML = h;
-            actualizarNotificaciones();
-        }
-
-        async function cambiarEstadoServicio(id, nuevo) {
-            try {
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                await updateDoc(doc(window.firebaseDb, 'SolicitudesServicios', id), {
-                    estado: nuevo,
-                    fecha_gestion: serverTimestamp(),
-                    fecha_actualizacion: serverTimestamp()
-                });
-                await cargarServicios();
-                aplicarFiltrosServicios();
-                if (nuevo !== 'Cancelado') notificarServicio(id);
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        function notificarServicio(id) {
-            const s = serviciosCache.find(x => x.id === id);
-            if (!s) return;
-            let tel = s.usuario_telefono;
-            if (!tel || tel === 'Sin teléfono') { alert('❌ Sin teléfono.'); return; }
-            tel = String(tel).trim();
-            const st = s.estado || 'Pendiente';
-            const serv = s.servicio_nombre || 'Servicio';
-            let m = '';
-            switch (st) {
-                case 'Pendiente': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de servicio: *${serv}*.\nPronto te contactamos. 🔧`; break;
-                case 'En proceso': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n✅ Tu solicitud de *${serv}* está en proceso. En breve coordinamos la visita. 🔧`; break;
-                case 'Cotizado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n💰 Tu solicitud de *${serv}* ya tiene cotización.\nRevisa los detalles y confírmanos. 🔧`; break;
-                case 'Completado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\n🎉 Tu servicio *${serv}* ha sido completado. ¡Gracias por confiar en B&B!`; break;
-                case 'Cancelado': m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* ha sido *CANCELADA*. Si aún te interesa, vuelve a solicitarlo. 🙌`; break;
-                default: m = `Hola ${s.usuario_nombre || 'Cliente'} 👋\nTu solicitud de *${serv}* cambió a: *${st}*.`;
-            }
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
-        }
-
-        function aplicarFiltrosServicios() {
-            const e = document.getElementById('servFiltroEstado').value;
-            let f = [...serviciosCache];
-            if (e !== 'Todos') f = f.filter(x => (x.estado || 'Pendiente') === e);
-            renderServicios(f);
-        }
-
-        document.getElementById('servFiltrarBtn').addEventListener('click', aplicarFiltrosServicios);
-        document.getElementById('servLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('servFiltroEstado').value = 'Todos';
-            aplicarFiltrosServicios();
-        });
-
-        // === ENCARGOS (extras) ===
-        async function cancelarEncargoVencido(id) {
-            const e = encargosCache.find(x => x.id === id);
-            if (!e || e.estado !== 'Pendiente') return;
-            try {
-                await window.firebaseFns.updateDoc(window.firebaseFns.doc(window.firebaseDb, 'Encargos', id), { estado: 'Cancelado', fecha_actualizacion: window.firebaseFns.serverTimestamp() });
-                await cargarEncargos(); aplicarFiltrosEncargos(); notificarEncargo(id, true);
-            } catch (e) { console.error(e); }
-        }
-        async function cambiarEstadoEncargo(id, nuevo) {
-            try {
-                const e = encargosCache.find(x => x.id === id);
-                if (!e) return;
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                let d = {};
-                if (nuevo === 'Nuevo Encargo') { d.estado = 'Pendiente'; d.fecha_limite_pago = null; }
-                else if (nuevo === 'Pendiente') { d.estado = 'Pendiente'; if (!e.fecha_limite_pago) d.fecha_limite_pago = new Date(Date.now() + 86400000); }
-                else d.estado = nuevo;
-                d.fecha_actualizacion = serverTimestamp();
-                await updateDoc(doc(window.firebaseDb, 'Encargos', id), d);
-                await cargarEncargos(); aplicarFiltrosEncargos();
-                if (nuevo !== 'Nuevo Encargo' && nuevo !== 'Cancelado') notificarEncargo(id);
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-        function notificarEncargo(id, vencido = false) {
-            const e = encargosCache.find(x => x.id === id);
-            if (!e) return;
-            let tel = e.usuario_telefono;
-            if (!tel || tel === 'Sin teléfono') { alert('Sin teléfono.'); return; }
-            tel = String(tel).trim();
-            const st = e.estado || 'Pendiente';
-            const prod = e.producto_nombre || 'Producto';
-            const cant = e.cantidad || 1;
-            const p = productosCache.find(x => x.id === e.producto_id);
-            const pv = p ? parseFloat(p.Precio_Venta || 0) : 0;
-            const tt = pv * cant, mt = tt / 2;
-            let m = '';
-            if (vencido) m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo de *${prod}* ha sido *CANCELADO*.\nSi aún te interesa, vuelve a solicitarlo. 🙌`;
-            else {
-                switch (st) {
-                    case 'Nuevo Encargo': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nRecibimos tu solicitud de encargo: *${prod}* (x${cant}).\nPronto te contactamos. 🙌`; break;
-                    case 'Pendiente': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🛒 *${prod}*\n🔢 ${cant}\n💰 Total: $${tt.toFixed(2)}\n💵 Ingresa la mitad ($${mt.toFixed(2)}) antes de 24h en Tiendita B&B.\n📍 Paseo de la Paz #457 entre 2da y 3ra, Santa Clara\n\n¡Gracias! 🙌`; break;
-                    case 'En proceso': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Tu encargo de *${prod}* está en proceso. 📦`; break;
-                    case 'En camino': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🚚 Tu encargo está en camino.`; break;
-                    case 'Procesando en aduana de Cuba': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n📦 Tu encargo está en *Aduana de Cuba*.`; break;
-                    case 'En el local TienditaB&B lista para la entrega': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n🎉 Tu encargo de *${prod}* está listo para retirar.`; break;
-                    case 'Entregado': m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\n✅ Encargo *ENTREGADO*. ¡Gracias! 🎉`; break;
-                    default: m = `Hola ${e.usuario_nombre || 'Cliente'} 👋\nTu encargo cambió a: *${st}*.`;
-                }
-            }
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(m)}`, '_blank');
-        }
-        function aplicarFiltrosEncargos() {
-            const e = document.getElementById('encFiltroEstado').value;
-            let f = [...encargosCache];
-            if (e !== 'Todos') f = f.filter(x => (x.estado || 'Pendiente') === e);
-            renderEncargos(f);
-        }
-        document.getElementById('encFiltrarBtn').addEventListener('click', aplicarFiltrosEncargos);
-        document.getElementById('encLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('encFiltroEstado').value = 'Todos';
-            aplicarFiltrosEncargos();
-        });
-
-        // === DETALLES ===
-        async function verDetalleEncargo(id) {
-            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'Encargos', id));
-            if (!snap.exists()) { alert('No encontrado.'); return; }
-            const d = snap.data();
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Producto</span><span class="value">${d.producto_nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Cantidad</span><span class="value">${d.cantidad || 1}</span></div>
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.usuario_nombre || 'Cliente'}</span></div>
-                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.usuario_telefono || 'Sin teléfono'}</span></div>
-                <div class="detail-row"><span class="label">Estado</span><span class="value">${d.estado || 'Pendiente'}</span></div>
-                <div class="detail-row"><span class="label">Comentario</span><span class="value">${d.comentario || 'Sin comentario'}</span></div>
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha_solicitud)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-
-        async function verDetalleVenta(id) {
-            const v = ventasCache.find(x => x.id === id);
-            if (!v) return;
-            const g = calcularGananciaVenta(v);
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Productos</span><span class="value">${v.productos_json || 'Sin productos'}</span></div>
-                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(v.total || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Costo</span><span class="value">$${calcularCostoVenta(v).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Ganancia</span><span class="value">$${g.toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Tipo</span><span class="value">${v.Tipo || 'Local'}</span></div>
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${v.Cliente_Nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(v.fecha)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-
-        async function verDetalleDomicilio(id) {
-            const d = domiciliosCache.find(x => x.id === id);
-            if (!d) return;
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${d.Cliente_Nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${d.Telefono || 'Sin teléfono'}</span></div>
-                <div class="detail-row"><span class="label">Dirección</span><span class="value">${d.Direccion_Entrega || 'Sin dirección'}</span></div>
-                <div class="detail-row"><span class="label">Subtotal</span><span class="value">$${parseFloat(d.subtotal || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Envío</span><span class="value">$${parseFloat(d.envio || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(d.total || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Estado</span><span class="value">${d.Estado || 'Pendiente'}</span></div>
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(d.fecha)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-
-        async function verDetalleTienda(id) {
-            const p = tiendaCache.find(x => x.id === id);
-            if (!p) return;
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-row"><span class="label">Cliente</span><span class="value">${p.Cliente_Nombre || 'Sin nombre'}</span></div>
-                <div class="detail-row"><span class="label">Teléfono</span><span class="value">${p.Telefono || 'Sin teléfono'}</span></div>
-                <div class="detail-row"><span class="label">Total</span><span class="value">$${parseFloat(p.total || 0).toFixed(2)}</span></div>
-                <div class="detail-row"><span class="label">Estado</span><span class="value">${p.Estado || 'Pendiente'}</span></div>
-                <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(p.fecha)}</span></div>
-            `;
-            document.getElementById('detailModal').classList.add('active');
-        }
-
-        // === COTIZAR SERVICIO (NUEVO) ===
-        async function verDetalleServicio(id) {
-            const snap = await window.firebaseFns.getDoc(window.firebaseFns.doc(window.firebaseDb, 'SolicitudesServicios', id));
-            if (!snap.exists()) { alert('No encontrado.'); return; }
-            const s = snap.data();
-            const componentes = Array.isArray(s.componentes) ? s.componentes : [];
-
-            let compHtml = '';
-            if (componentes.length === 0) {
-                compHtml = '<div class="empty" style="padding:20px;">Esta solicitud no tiene materiales. Fue creada manualmente o antes de la actualización.</div>';
-            } else {
-                compHtml = `<div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:0.85rem;">
-                    <thead><tr style="background:#f1f5f9;">
-                        <th style="padding:8px; text-align:left; border:1px solid #e2e8f0;">Material</th>
-                        <th style="padding:8px; text-align:center; border:1px solid #e2e8f0; width:70px;">Cant.</th>
-                        <th style="padding:8px; text-align:right; border:1px solid #e2e8f0; width:110px;">Precio USD</th>
-                        <th style="padding:8px; text-align:right; border:1px solid #e2e8f0; width:110px;">Subtotal</th>
-                    </tr></thead><tbody>`;
-                componentes.forEach((c, i) => {
-                    const sub = ((c.precio || 0) * (c.cantidad || 0)).toFixed(2);
-                    compHtml += `<tr>
-                        <td style="padding:6px; border:1px solid #e2e8f0;">${c.nombre}</td>
-                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:center;">${c.cantidad}</td>
-                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:right;">
-                            <input type="number" step="0.01" min="0" value="${c.precio || 0}" 
-                                oninput="recalcularServicio()" 
-                                class="precio-input" data-index="${i}" />
-                        </td>
-                        <td style="padding:6px; border:1px solid #e2e8f0; text-align:right; font-weight:600;" 
-                            class="subtotal-cell" data-index="${i}">$${sub}</td>
-                    </tr>`;
-                });
-                compHtml += '</tbody></table></div>';
-            }
-
-            document.getElementById('servicioDetailBody').innerHTML = `
-                <div style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:15px;">
-                    <div class="detail-row"><span class="label">Servicio</span><span class="value">${s.servicio_nombre || 'Servicio'}</span></div>
-                    <div class="detail-row"><span class="label">Cliente</span><span class="value">${s.usuario_nombre || 'Cliente'}</span></div>
-                    <div class="detail-row"><span class="label">Teléfono</span><span class="value">${s.usuario_telefono || 'Sin teléfono'}</span></div>
-                    <div class="detail-row"><span class="label">Email</span><span class="value">${s.usuario_email || 'Sin email'}</span></div>
-                    <div class="detail-row"><span class="label">Dirección</span><span class="value">${s.direccion || 'Sin dirección'}</span></div>
-                    <div class="detail-row"><span class="label">Descripción</span><span class="value">${s.descripcion || 'Sin descripción'}</span></div>
-                    <div class="detail-row"><span class="label">Fecha</span><span class="value">${fechaToStr(s.fecha_solicitud)}</span></div>
+        <div id="sub-modulo-tiene" class="sub-modulo">
+            <div class="form-group"><label>Tipo Equipo</label><select id="sis-tiene-tipo" onchange="toggleEcoflow()"><option value="inversor" selected>Inversor Tradicional</option><option value="ecoflow">Ecoflow</option></select></div>
+            <div id="group-inversor" class="form-row">
+                <div class="form-group"><label>Potencia (W)</label><input type="number" inputmode="decimal" id="sis-tiene-inv" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Voltaje</label><select id="sis-tiene-voltaje"><option value="12">12V</option><option value="24" selected>24V</option><option value="48">48V</option></select></div>
+            </div>
+            <div id="group-ecoflow" style="display:none; background:#f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0; margin-bottom:12px;">
+                <div class="form-row-3">
+                    <div class="form-group"><label>Potencia (W)</label><input type="number" inputmode="decimal" id="sis-ecoflow-potencia" placeholder="1600" min="0" /></div>
+                    <div class="form-group"><label>Capacidad (Wh)</label><input type="number" inputmode="decimal" id="sis-ecoflow-capacidad" placeholder="1500" min="0" /></div>
+                    <div class="form-group"><label>Pico (W)</label><input type="number" inputmode="decimal" id="sis-ecoflow-pico" placeholder="3000" min="0" /></div>
                 </div>
-
-                <h3 style="margin-bottom:10px;">📋 Materiales</h3>
-                <div id="servicioMateriales">${compHtml}</div>
-
-                <h3 style="margin-top:20px; margin-bottom:10px;">💰 Cotización</h3>
-                <div class="form-group">
-                    <label>Mano de obra (USD)</label>
-                    <input type="number" step="0.01" min="0" id="servicioManoObra" 
-                        value="${s.mano_obra || 0}" oninput="recalcularServicio()" />
+            </div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Marca Inv/Ecoflow</label><input type="text" id="sis-tiene-marca-inv" /></div>
+                <div class="form-group" id="group-marca-bat"><label>Marca Baterías</label><input type="text" id="sis-tiene-marca-bat" /></div>
+                <div class="form-group"><label>Marca Paneles</label><input type="text" id="sis-tiene-marca-pan" /></div>
+            </div>
+            <div class="form-row" id="group-baterias">
+                <div class="form-group"><label>Baterías (Ah)</label><input type="number" inputmode="decimal" id="sis-tiene-ah" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Cant. Baterías</label><input type="number" inputmode="numeric" id="sis-tiene-cant-bat" placeholder="0" min="0" /></div>
+            </div>
+            <div class="section-title">📋 Paneles</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Potencia (W)</label><input type="number" inputmode="decimal" id="sis-tiene-panel-w" placeholder="550" min="1" /></div>
+                <div class="form-group"><label>Isc (A)</label><input type="number" inputmode="decimal" id="sis-tiene-panel-isc" placeholder="14" min="0.1" step="0.1" /></div>
+                <div class="form-group"><label>Voc (V)</label><input type="number" inputmode="decimal" id="sis-tiene-panel-voc" placeholder="50" min="1" step="0.1" /></div>
+            </div>
+            <div class="form-group"><label>Cant. Paneles</label><input type="number" inputmode="numeric" id="sis-tiene-paneles" placeholder="0" min="1" /></div>
+            <div class="section-title">📏 Distancias</div>
+            <div class="form-row-3">
+                <div class="form-group"><label>Paneles→Inv</label><input type="number" inputmode="decimal" id="sis-tiene-dist-solar" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Bat→Inv</label><input type="number" inputmode="decimal" id="sis-tiene-dist-bat" placeholder="0" min="0" /></div>
+                <div class="form-group"><label>Inv→Red</label><input type="number" inputmode="decimal" id="sis-tiene-dist-ac" placeholder="0" min="0" /></div>
+            </div>
+            <button class="btn-calcular" onclick="calcularSistemasTiene()">🔍 Calcular Ampliación</button>
+            <div class="config-panel" id="sis-tiene-configs-panel"><h4>⚙️ Config Paneles:</h4><div id="sis-tiene-configs-list"></div></div>
+            <div class="resultado-box" id="res-sis-tiene">
+                <h3>✅ Materiales Ampliación</h3>
+                <div class="res-item"><span class="label">Paneles:</span><span class="value" id="sis-t-paneles">-</span></div>
+                <div class="res-item"><span class="label">Controlador:</span><span class="value" id="sis-t-controlador">-</span></div>
+                <div class="res-item"><span class="label">Transfer:</span><span class="value" id="sis-t-transfer">-</span></div>
+                <div id="sis-t-res-ecoflow" style="display:none;">
+                    <div class="res-item"><span class="label">Tomacorriente:</span><span class="value" id="sis-t-tomacorriente">-</span></div>
+                    <div class="res-item"><span class="label">Espiga:</span><span class="value" id="sis-t-espiga">-</span></div>
                 </div>
-                <div style="background:#f0fdf4; padding:15px; border-radius:8px; border:1px solid #bbf7d0; margin-top:10px;">
-                    <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.9rem;">
-                        <span>Subtotal materiales:</span><strong id="servicioSubMat">$0.00</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.9rem;">
-                        <span>Mano de obra:</span><strong id="servicioSubMano">$0.00</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid #22c55e; margin-top:8px; font-size:1.2rem;">
-                        <span><strong>TOTAL:</strong></span><strong id="servicioTotal" style="color:#166534;">$0.00</strong>
-                    </div>
-                </div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">🛡️ Protecciones</div>
+                <div class="res-item"><span class="label">Breaker DC Paneles:</span><span class="value" id="sis-t-bdc-paneles">-</span></div>
+                <div class="res-item"><span class="label">Breaker DC Batería:</span><span class="value" id="sis-t-bdc-bat">-</span></div>
+                <div class="res-item"><span class="label">Breaker AC:</span><span class="value" id="sis-t-bac">-</span></div>
+                <div class="res-item"><span class="label">Fusibles:</span><span class="value" id="sis-t-fusibles">-</span></div>
+                <div class="res-item"><span class="label">SPD:</span><span class="value" id="sis-t-spd">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">🔌 Cables</div>
+                <div class="res-item"><span class="label">Solar:</span><span class="value" id="sis-t-csolar">-</span></div>
+                <div class="res-item"><span class="label">Baterías:</span><span class="value" id="sis-t-cbat">-</span></div>
+                <div class="res-item"><span class="label">AC:</span><span class="value" id="sis-t-cac">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">⚙️ Accesorios</div>
+                <div class="res-item"><span class="label">Varilla:</span><span class="value" id="sis-t-varilla">-</span></div>
+                <div class="res-item"><span class="label">Tierra:</span><span class="value" id="sis-t-tierra">-</span></div>
+                <div class="section-title" style="font-size:.85rem;margin-top:10px;">📋 Materiales a Cotizar</div>
+                <div id="sis-t-materiales"></div>
+                <div class="info-pendiente">💡 Precios se agregan en el Panel Admin.</div>
+                <button class="btn-guardar" onclick="abrirModal('Solar Ampliación')">💾 Guardar Cliente</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
-                    <button class="btn-success" onclick="guardarCotizacionServicio('${id}')">💾 Guardar Cotización</button>
-                    <button class="btn-primary" onclick="enviarCotizacionWA('${id}')">💬 Enviar por WhatsApp</button>
-                    <button class="btn-clear" onclick="cerrarDetalleServicio()">Cerrar</button>
-                </div>
-            `;
+<div class="modal-overlay" id="modalCliente">
+    <div class="modal-box">
+        <h2>📋 Datos del Cliente</h2>
+        <input type="text" id="modal-nombre" placeholder="Nombre y Apellidos" />
+        <input type="tel" inputmode="tel" id="modal-telefono" placeholder="Teléfono (WhatsApp)" />
+        <input type="email" inputmode="email" id="modal-email" placeholder="Email (opcional)" />
+        <input type="text" id="modal-direccion" placeholder="Dirección" />
+        <div class="modal-botones">
+            <button class="btn-cancelar" onclick="cerrarModal('modalCliente')">Cancelar</button>
+            <button class="btn-aceptar" onclick="guardarCliente()">Guardar</button>
+        </div>
+    </div>
+</div>
 
-            const body = document.getElementById('servicioDetailBody');
-            body.dataset.id = id;
-            body.dataset.componentes = JSON.stringify(componentes);
-            body.dataset.telefono = s.usuario_telefono || '';
-            body.dataset.nombre = s.usuario_nombre || 'Cliente';
-            body.dataset.servicio = s.servicio_nombre || 'Servicio';
+<div class="modal-overlay" id="modalHistorial">
+    <div class="modal-box">
+        <h2>📋 Historial</h2>
+        <div id="histList"></div>
+        <div class="modal-botones">
+            <button class="btn-cancelar" onclick="cerrarModal('modalHistorial')">Cerrar</button>
+        </div>
+    </div>
+</div>
 
-            document.getElementById('servicioDetailModal').classList.add('active');
-            recalcularServicio();
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    const firebaseConfig = { apiKey: "AIzaSyAs-6v3KND-ZMXOXv_5goBZ3NcvBEBN5Ak", authDomain: "tiendita-byb.firebaseapp.com", projectId: "tiendita-byb", storageBucket: "tiendita-byb.firebasestorage.app", messagingSenderId: "257958619653", appId: "1:257958619653:web:0367858d644596c4b50a6c" };
+    const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
+    window.firebaseDb = db; window.firebaseAuth = auth;
+    window.firebaseFns = { doc, getDoc, setDoc, serverTimestamp, signInWithEmailAndPassword };
+    window.addEventListener('load', () => { actualizarBotonSync(); });
+</script>
+
+<script>
+const RESISTENCIA = { '#14': 0.008286, '#12': 0.005211, '#10': 0.003277, '#8': 0.002061, '#6': 0.001296, '#4': 0.000815, '#2': 0.000513, '#1/0': 0.000323, '#2/0': 0.000256 };
+const AMPACIDAD = { '#14': 15, '#12': 20, '#10': 30, '#8': 40, '#6': 55, '#4': 70, '#2': 95, '#1/0': 125, '#2/0': 150 };
+const BREAKERS = [15, 16, 20, 25, 30, 32, 40, 50, 63, 70, 80, 100, 125, 160, 200];
+const TIERRA = { 15:'#14', 16:'#14', 20:'#12', 25:'#10', 30:'#10', 32:'#10', 40:'#10', 50:'#10', 63:'#8', 70:'#8', 80:'#8', 100:'#8', 125:'#6', 160:'#6', 200:'#4' };
+const CAIDA_MAX_RAMAL = 3.0, CAIDA_MAX_ACOMETIDA = 2.5;
+const DOD = { litio: 0.85, agm: 0.50, plomo: 0.50 };
+const ECOFLOW_PV = { maxVoc: 60, maxW: 800 };
+
+let configsNada = [], configsTiene = [], datosNada = {}, datosTiene = {};
+let tipoServ = '', ultimoCalculo = null;
+
+function getVal(id) { const el = document.getElementById(id); return el ? el.value : 0; }
+function getNum(id) { return parseFloat(getVal(id)) || 0; }
+function getInt(id) { return parseInt(getVal(id)) || 0; }
+
+function cambiarModulo(mod, btn) {
+    document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('modulo-' + mod).classList.add('active');
+    btn.classList.add('active');
+}
+function cambiarSubModulo(sub, btn) {
+    document.querySelectorAll('.sub-modulo').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sub-modulo-' + sub).classList.add('active');
+    btn.classList.add('active');
+}
+
+function calcularCableOptimo(corrienteCarga, corrienteBreaker, distancia, voltaje, esAcometida = false) {
+    const calibres = ['#14','#12','#10','#8','#6','#4','#2','#1/0','#2/0'];
+    const maxVd = esAcometida ? CAIDA_MAX_ACOMETIDA : CAIDA_MAX_RAMAL;
+    for (let awg of calibres) {
+        if (AMPACIDAD[awg] < corrienteBreaker) continue;
+        const vd = 2 * RESISTENCIA[awg] * distancia * corrienteCarga;
+        const vdPct = (vd / voltaje) * 100;
+        if (vdPct <= maxVd) return { awg, vd: vd.toFixed(2), vdPct: vdPct.toFixed(2), ok: true };
+    }
+    const mayor = calibres[calibres.length - 1];
+    const vd = 2 * RESISTENCIA[mayor] * distancia * corrienteCarga;
+    return { awg: mayor, vd: vd.toFixed(2), vdPct: ((vd / voltaje) * 100).toFixed(2), ok: false };
+}
+function siguienteBreaker(c) { return BREAKERS.find(b => b >= c) || 200; }
+function calcularGeneral(cargaTotalW, voltaje, distancia, factorDemanda) {
+    const iCarga = cargaTotalW / voltaje;
+    const iDiseno = iCarga * factorDemanda;
+    const breaker = siguienteBreaker(iDiseno * 1.25);
+    const cable = calcularCableOptimo(iCarga, breaker, distancia, voltaje, true);
+    return { iCarga: iCarga.toFixed(2), iDiseno: iDiseno.toFixed(2), breaker, cable: cable.awg, vd: cable.vd, vdPct: cable.vdPct, vdOk: cable.ok, tierra: TIERRA[breaker] || '#4' };
+}
+
+function agregarEquipoCocina() {
+    const c = document.getElementById('lista-cocina');
+    const d = document.createElement('div');
+    d.className = 'equipo-row';
+    d.innerHTML = `<input type="text" placeholder="Ej: Nevera" class="eq-nombre" /><input type="number" inputmode="numeric" placeholder="Cant" class="eq-cant" value="1" min="1" /><input type="number" inputmode="decimal" placeholder="Watts" class="eq-watts" value="0" min="0" /><button class="btn-remove-equipo" onclick="this.parentElement.remove(); guardarFormulario()">✕</button>`;
+    c.appendChild(d);
+}
+function sumarWattsCocina() {
+    let t = 0;
+    document.querySelectorAll('#lista-cocina .equipo-row').forEach(f => {
+        const c = f.querySelector('.eq-cant'), w = f.querySelector('.eq-watts');
+        if (c && w) t += (parseFloat(c.value) || 0) * (parseFloat(w.value) || 0);
+    });
+    return t;
+}
+
+// ============ CALCULAR CASA ============
+function calcularCasa() {
+    const V = getInt('casa-voltaje') || 220;
+    const distAcom = getNum('casa-principal-dist');
+    const fD = parseFloat(getVal('casa-factor-demanda')) || 0.8;
+    const conT = getVal('casa-aterramiento') === 'con';
+    const cL = getInt('casa-luces-cant'), dL = getNum('casa-luces-dist');
+    const cSw = getInt('casa-switches-cant') || Math.ceil(cL / 2);
+    const cT = getInt('casa-tomas-cant'), dT = getNum('casa-tomas-dist');
+    const dC = getNum('casa-cocina-dist'), wC = sumarWattsCocina();
+    const cA = getInt('casa-aire-cant'), V_A = getInt('casa-aire-voltaje') || 220;
+    const dA = getNum('casa-aire-dist'), wA = getNum('casa-aire-watts') || 1200;
+    const cAlt = getInt('casa-altos-cant'), dAlt = getNum('casa-altos-dist'), wAlt = getNum('casa-altos-watts') || 1500;
+
+    if (cL + cT + cA + cAlt === 0 && wC === 0) { alert('Ingresa al menos una carga.'); return; }
+
+    const circuitos = [];
+    let cargaW = 0;
+
+    if (cL > 0) {
+        const nC = Math.ceil(cL / 15), pC = Math.ceil(cL / nC);
+        for (let i = 0; i < nC; i++) {
+            const I = (pC * 20) / V, b = siguienteBreaker(I * 1.25);
+            const cab = calcularCableOptimo(I, b, dL, V);
+            circuitos.push({ tipo: 'Luces', desc: `Luces Ckt ${i+1} (${pC})`, breaker: b, cable: cab.awg, vd: cab.vdPct, vdOk: cab.ok, es220: false, dist: dL });
         }
-
-        function recalcularServicio() {
-            const body = document.getElementById('servicioDetailBody');
-            if (!body) return;
-            const componentes = JSON.parse(body.dataset.componentes || '[]');
-            let totalMat = 0;
-            document.querySelectorAll('.precio-input').forEach(inp => {
-                const i = parseInt(inp.dataset.index);
-                const precio = parseFloat(inp.value) || 0;
-                const cant = componentes[i]?.cantidad || 0;
-                const sub = precio * cant;
-                totalMat += sub;
-                const cell = document.querySelector(`.subtotal-cell[data-index="${i}"]`);
-                if (cell) cell.textContent = '$' + sub.toFixed(2);
-            });
-            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
-            document.getElementById('servicioSubMat').textContent = '$' + totalMat.toFixed(2);
-            document.getElementById('servicioSubMano').textContent = '$' + mano.toFixed(2);
-            document.getElementById('servicioTotal').textContent = '$' + (totalMat + mano).toFixed(2);
+        cargaW += cL * 20;
+    }
+    if (cT > 0) {
+        const nC = Math.ceil(cT / 10), pC = Math.ceil(cT / nC);
+        for (let i = 0; i < nC; i++) {
+            const I = (pC * 200) / V, b = siguienteBreaker(I * 1.25);
+            const cab = calcularCableOptimo(I, b, dT, V);
+            circuitos.push({ tipo: 'Tomas', desc: `Tomas Ckt ${i+1} (${pC})`, breaker: b, cable: cab.awg, vd: cab.vdPct, vdOk: cab.ok, es220: false, dist: dT });
         }
+        cargaW += cT * 200;
+    }
+    if (wC > 0) {
+        const I = wC / V;
+        let b = siguienteBreaker(I * 1.25);
+        if (b < 30) b = 30;
+        const cab = calcularCableOptimo(I, b, dC, V);
+        circuitos.push({ tipo: 'Cocina', desc: `Cocina (${wC}W)`, breaker: b, cable: cab.awg, vd: cab.vdPct, vdOk: cab.ok, es220: V === 220, dist: dC });
+        cargaW += wC;
+    }
+    if (cA > 0) {
+        for (let i = 0; i < cA; i++) {
+            const I = wA / V_A, b = siguienteBreaker(I * 1.25);
+            const cab = calcularCableOptimo(I, b, dA, V_A);
+            circuitos.push({ tipo: 'Aire', desc: `Aire ${i+1} (${wA}W @${V_A}V)`, breaker: b, cable: cab.awg, vd: cab.vdPct, vdOk: cab.ok, es220: V_A === 220, dist: dA });
+        }
+        cargaW += cA * wA;
+    }
+    if (cAlt > 0) {
+        for (let i = 0; i < cAlt; i++) {
+            const I = wAlt / V, b = siguienteBreaker(I * 1.25);
+            const cab = calcularCableOptimo(I, b, dAlt, V);
+            circuitos.push({ tipo: 'Alto', desc: `Alto ${i+1} (${wAlt}W)`, breaker: b, cable: cab.awg, vd: cab.vdPct, vdOk: cab.ok, es220: V === 220, dist: dAlt });
+        }
+        cargaW += cAlt * wAlt;
+    }
 
-        async function guardarCotizacionServicio(id) {
-            const body = document.getElementById('servicioDetailBody');
-            const componentes = JSON.parse(body.dataset.componentes || '[]');
-            document.querySelectorAll('.precio-input').forEach(inp => {
-                const i = parseInt(inp.dataset.index);
-                componentes[i].precio = parseFloat(inp.value) || 0;
-            });
-            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
-            const totalMat = componentes.reduce((s, c) => s + (c.precio || 0) * (c.cantidad || 0), 0);
-            const total = totalMat + mano;
+    const gen = calcularGeneral(cargaW, V, distAcom, fD);
+    const nCkt = circuitos.length;
+    const tub = gen.breaker > 63 ? '1"' : (gen.breaker > 40 ? '3/4"' : '1/2"');
+    const cOct = cL + cSw, cRect = cT;
+    const caja = nCkt + 1 <= 6 ? 'Caja de 6/8 espacios' : (nCkt + 1 <= 16 ? 'Caja de 16 espacios' : 'Caja de 24 espacios');
 
+    document.getElementById('casa-r-idis').textContent = gen.iDiseno + ' A';
+    document.getElementById('casa-r-general').textContent = gen.breaker + ' A';
+    document.getElementById('casa-c-principal').textContent = gen.cable + ' AWG';
+    const vdEl = document.getElementById('casa-r-vd');
+    vdEl.textContent = `${gen.vd} V (${gen.vdPct}%) ${gen.vdOk ? '✓' : '⚠️ EXCEDE'}`;
+    vdEl.className = 'value ' + (gen.vdOk ? '' : 'warn');
+    document.getElementById('casa-r-tierra').textContent = conT ? `${gen.tierra} AWG + varilla` : '⚠️ SIN TIERRA';
+    document.getElementById('casa-r-dif').textContent = '30 mA bipolar/tripolar';
+
+    let hCkt = '';
+    circuitos.forEach(c => {
+        hCkt += `<div class="res-item"><span class="label">${c.desc}</span><span class="value ${c.vdOk?'':'warn'}">${c.breaker}A / ${c.cable} (${c.vd}%)</span></div>`;
+    });
+    document.getElementById('casa-r-circuitos').innerHTML = hCkt;
+    document.getElementById('casa-r-tuberia').textContent = tub + ' PVC';
+    document.getElementById('casa-r-cajas-octo').textContent = cOct + ' und';
+    document.getElementById('casa-r-cajas-rect').textContent = cRect + ' und';
+    document.getElementById('casa-r-caja').textContent = caja;
+
+    const materiales = construirMaterialesCasa(gen, circuitos, tub, cOct, cRect, caja, cSw, cT, conT);
+    renderMaterialesLista('casa-r-materiales', materiales);
+    ultimoCalculo = {
+        tipo: 'Casa',
+        componentes: materiales,
+        descripcion: `Casa ${V}V — Breaker general ${gen.breaker}A — ${circuitos.length} circuitos — ${materiales.length} materiales`
+    };
+
+    document.getElementById('res-casa').classList.add('show');
+    document.getElementById('res-casa').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    guardarFormulario();
+}
+
+function construirMaterialesCasa(gen, circuitos, tub, cOct, cRect, caja, cSw, cT, conT) {
+    const mat = [];
+    const distAcom = getNum('casa-principal-dist');
+    mat.push({ nombre: `Breaker General ${gen.breaker}A`, cantidad: 1 });
+    mat.push({ nombre: `Cable ${gen.cable} AWG (acometida)`, cantidad: Math.ceil(distAcom * 1.15) });
+    if (conT) mat.push({ nombre: `Cable Tierra ${gen.tierra} AWG`, cantidad: Math.ceil(distAcom * 1.15) });
+    mat.push({ nombre: 'Diferencial 30 mA bipolar/tripolar', cantidad: 1 });
+    mat.push({ nombre: caja, cantidad: 1 });
+    circuitos.forEach(c => {
+        mat.push({ nombre: `Breaker ${c.breaker}A (${c.tipo})`, cantidad: 1 });
+        if (c.dist > 0) mat.push({ nombre: `Cable ${c.cable} AWG (${c.tipo})`, cantidad: Math.ceil(c.dist * 1.15) });
+    });
+    mat.push({ nombre: `Tubería ${tub} PVC`, cantidad: Math.ceil((distAcom + 20) * 1.15) });
+    if (cOct > 0) mat.push({ nombre: 'Caja octogonal', cantidad: cOct });
+    if (cRect > 0) mat.push({ nombre: 'Caja rectangular', cantidad: cRect });
+    if (cSw > 0) mat.push({ nombre: 'Interruptor', cantidad: cSw });
+    if (cT > 0) mat.push({ nombre: 'Tomacorriente', cantidad: cT });
+    if (conT) mat.push({ nombre: 'Varilla 2.4m + conector', cantidad: 1 });
+    return mat;
+}
+
+function renderMaterialesLista(idDiv, materiales) {
+    if (materiales.length === 0) {
+        document.getElementById(idDiv).innerHTML = '<div style="color:#94a3b8; text-align:center; padding:10px;">Sin materiales.</div>';
+        return;
+    }
+    let html = '';
+    materiales.forEach((m, i) => {
+        html += `<div class="res-item"><span class="label">${i + 1}. ${m.nombre}</span><span class="value">${m.cantidad} uds</span></div>`;
+    });
+    document.getElementById(idDiv).innerHTML = html;
+}
+
+// ============ SOLAR NADA ============
+function generarConfiguraciones(np, isc, voc) {
+    const cfgs = []; let m = -1, ir = -1;
+    for (let s = 1; s <= np; s++) {
+        if (np % s !== 0) continue;
+        const p = np / s, vt = s * voc;
+        if (vt > 500) continue;
+        cfgs.push({ serie: s, paralelo: p, vocTotal: vt, iscTotal: p * isc, descripcion: p === 1 ? `${s} en serie` : (s === 1 ? `${p} en paralelo` : `${s} serie × ${p} strings`), esRecomendada: false });
+        if (vt > m) { m = vt; ir = cfgs.length - 1; }
+    }
+    if (ir >= 0) cfgs[ir].esRecomendada = true;
+    return cfgs;
+}
+function breakerArray(c) {
+    const serie = [15, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 300];
+    return serie.find(x => x >= c * 1.25) || 400;
+}
+function calibreSolar(isc, dist) {
+    if (isc > 30) return '4 AWG'; if (isc > 20) return '6 AWG'; if (dist > 40) return '6 AWG'; if (dist > 20) return '8 AWG'; return '10 AWG';
+}
+function calibreBateria(c, dist) {
+    let cab = '8 AWG';
+    if (c > 200) cab = '2/0 AWG'; else if (c > 120) cab = '1/0 AWG'; else if (c > 80) cab = '4 AWG'; else if (c > 50) cab = '6 AWG';
+    if (dist > 10) { if (cab === '8 AWG') cab = '6 AWG'; else if (cab === '6 AWG') cab = '4 AWG'; else if (cab === '4 AWG') cab = '2 AWG'; }
+    return cab;
+}
+function calibreAC(c, dist) {
+    if (c > 30) return '6 AWG'; if (c > 20) return dist > 20 ? '6 AWG' : '8 AWG'; return dist > 20 ? '8 AWG' : '10 AWG';
+}
+
+function calcularSistemasNada() {
+    const kwh = getNum('sis-kwh'), pico = getNum('sis-pico'), vol = getInt('sis-voltaje') || 24, dias = getNum('sis-dias') || 1;
+    const tipoBat = getVal('sis-tipo-bat') || 'agm', pW = getNum('sis-panel-w') || 550, pIsc = getNum('sis-panel-isc') || 14, pVoc = getNum('sis-panel-voc') || 50;
+    const cMan = getInt('sis-cant-paneles'), dSol = getNum('sis-dist-solar'), dBat = getNum('sis-dist-bat'), dAC = getNum('sis-dist-ac');
+    const ater = getVal('sis-aterramiento') || 'con', vAC = getInt('sis-voltaje-ac') || 220;
+    if (kwh <= 0 || pico <= 0) { alert('Ingresa consumo y pico válidos.'); return; }
+    const panelesAuto = Math.ceil(kwh / ((pW / 1000) * 4));
+    const paneles = cMan > 0 ? cMan : panelesAuto;
+    const dod = DOD[tipoBat];
+    const bat = Math.ceil((kwh * 1000 * dias) / ((200 * 12) * dod));
+    const invReq = pico * 1.25;
+    const invTxt = invReq <= 1000 ? '1000W' : invReq <= 2000 ? '2000W' : invReq <= 3000 ? '3000W' : invReq <= 5000 ? '5000W' : '+5kW';
+    const cCtrl = (paneles * pW) / vol;
+    const ctrl = cCtrl > 80 ? 'MPPT 80A+' : (cCtrl > 40 ? 'MPPT 60A' : 'MPPT 40A');
+    const transf = invReq <= 2000 ? 'Transfer 20A' : invReq <= 3000 ? 'Transfer 30A' : invReq <= 5000 ? 'Transfer 50A' : 'Transfer 63A+';
+    const cBat = invReq / vol, bBat = 'Breaker DC ' + breakerArray(cBat) + 'A';
+    const cAC = pico / vAC, bAC = cAC > 30 ? 'Breaker AC 40A' : (cAC > 20 ? 'Breaker AC 32A' : 'Breaker AC 20A');
+    const cfgs = generarConfiguraciones(paneles, pIsc, pVoc);
+    if (cfgs.length === 0) { alert('Ninguna configuración válida.'); return; }
+    datosNada = { paneles, panelW: pW, panelIsc: pIsc, panelVoc: pVoc, baterias: bat, tipoBat, inversorTexto: invTxt, controlador: ctrl, transfer: transf, breakerBat: bBat, breakerAC: bAC, distSolar: dSol, distBat: dBat, distAC: dAC, aterramiento: ater, vAC, corrienteBat: cBat, inversor: invReq, corrienteAC: cAC, dod };
+    configsNada = cfgs; renderConfigs('nada');
+    const idxRec = cfgs.findIndex(c => c.esRecomendada);
+    aplicarConfigNada(idxRec >= 0 ? idxRec : 0);
+}
+
+function renderConfigs(tipo) {
+    const esN = tipo === 'nada', cfgs = esN ? configsNada : configsTiene;
+    const lId = esN ? 'sis-configs-list' : 'sis-tiene-configs-list';
+    const pId = esN ? 'sis-configs-panel' : 'sis-tiene-configs-panel';
+    const fN = esN ? 'aplicarConfigNada' : 'aplicarConfigTiene';
+    const html = cfgs.map((c, i) => {
+        const b = breakerArray(c.iscTotal), isR = c.esRecomendada;
+        return `<label class="config-option ${isR?'recomendada':''}"><input type="radio" name="config-${tipo}" value="${i}" ${isR?'checked':''} onchange="${fN}(${i})"><div><strong>${c.descripcion} ${isR?'<span class="badge-recomendada">⭐</span>':''}</strong><span>${c.vocTotal}V / ${c.iscTotal.toFixed(1)}A → Breaker ${b}A</span></div></label>`;
+    }).join('');
+    document.getElementById(lId).innerHTML = html;
+    document.getElementById(pId).classList.add('show');
+}
+
+function aplicarConfigNada(idx) {
+    const c = configsNada[idx], d = datosNada;
+    const b = breakerArray(c.iscTotal), vM = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+    const fS = breakerArray(d.panelIsc);
+    const fus = c.paralelo > 1 ? `${c.paralelo} fusibles ${fS}A` : `1 fusible ${fS}A`;
+    const fD = 1.15, mDC = (d.aterramiento === 'con') ? 3 : 2;
+    const mAC = (d.vAC === 110) ? ((d.aterramiento === 'con') ? 3 : 2) : ((d.aterramiento === 'con') ? 4 : 3);
+    const mSol = Math.ceil(d.distSolar * fD * mDC), mB = Math.ceil(d.distBat * fD * mDC), mA = Math.ceil(d.distAC * fD * mAC);
+    const cabSol = mSol > 0 ? `${mSol} m ${calibreSolar(c.iscTotal, d.distSolar)}` : '-';
+    const cabB = mB > 0 ? `${mB} m ${calibreBateria(d.corrienteBat, d.distBat)}` : '-';
+    const cabA = mA > 0 ? `${mA} m ${calibreAC(d.corrienteAC, d.distAC)}` : '-';
+
+    document.getElementById('sis-r-paneles').textContent = `${d.paneles} uds ${d.panelW}W — ${c.descripcion}`;
+    document.getElementById('sis-r-baterias').textContent = `${d.baterias} uds 200Ah (DoD ${(d.dod*100).toFixed(0)}%)`;
+    document.getElementById('sis-r-inversor').textContent = d.inversorTexto;
+    document.getElementById('sis-r-controlador').textContent = d.controlador + ` (≥${vM}V)`;
+    document.getElementById('sis-r-transfer').textContent = d.transfer;
+    document.getElementById('sis-r-bdc-paneles').textContent = `1 breaker DC ${b}A/${vM}V`;
+    document.getElementById('sis-r-bdc-bat').textContent = d.breakerBat;
+    document.getElementById('sis-r-bac').textContent = d.breakerAC;
+    document.getElementById('sis-r-fusibles').textContent = fus;
+    document.getElementById('sis-r-spd').textContent = 'Supresor DC+AC';
+    document.getElementById('sis-r-csolar').textContent = cabSol;
+    document.getElementById('sis-r-cbat').textContent = cabB;
+    document.getElementById('sis-r-cac').textContent = cabA;
+    document.getElementById('sis-r-varilla').textContent = 'Varilla 2.4m';
+    document.getElementById('sis-r-tierra').textContent = 'Conector + cable';
+
+    const materiales = construirMaterialesSolarNada(d, c, vM, cabSol, cabB, cabA);
+    renderMaterialesLista('sis-r-materiales', materiales);
+    ultimoCalculo = {
+        tipo: 'Solar Nuevo',
+        componentes: materiales,
+        descripcion: `Solar ${d.paneles} paneles ${d.panelW}W — ${d.inversorTexto} — ${d.baterias} baterías 200Ah — ${c.descripcion}`
+    };
+    document.getElementById('res-sis-nada').classList.add('show');
+}
+
+function construirMaterialesSolarNada(d, c, vM, cabSol, cabB, cabA) {
+    const mat = [];
+    mat.push({ nombre: `Panel ${d.panelW}W (${d.paneles} uds)`, cantidad: d.paneles });
+    mat.push({ nombre: `Batería 200Ah (${d.tipoBat})`, cantidad: d.baterias });
+    mat.push({ nombre: `Inversor ${d.inversorTexto}`, cantidad: 1 });
+    mat.push({ nombre: `Controlador ${d.controlador} (≥${vM}V)`, cantidad: 1 });
+    mat.push({ nombre: `Transfer ${d.transfer}`, cantidad: 1 });
+    mat.push({ nombre: `Breaker DC ${breakerArray(c.iscTotal)}A/${vM}V`, cantidad: 1 });
+    mat.push({ nombre: `Fusibles DC`, cantidad: c.paralelo || 1 });
+    mat.push({ nombre: 'SPD DC+AC', cantidad: 1 });
+    if (cabSol !== '-') mat.push({ nombre: `Cable solar ${calibreSolar(c.iscTotal, d.distSolar)}`, cantidad: Math.ceil(d.distSolar * 2 * 1.15) });
+    if (cabB !== '-') mat.push({ nombre: `Cable batería ${calibreBateria(d.corrienteBat, d.distBat)}`, cantidad: Math.ceil(d.distBat * 2 * 1.15) });
+    if (cabA !== '-') mat.push({ nombre: `Cable AC ${calibreAC(d.corrienteAC, d.distAC)}`, cantidad: Math.ceil(d.distAC * 2 * 1.15) });
+    mat.push({ nombre: 'Varilla 2.4m + conector', cantidad: 1 });
+    mat.push({ nombre: 'Caja DC/AC 12 espacios', cantidad: 1 });
+    return mat;
+}
+
+// ============ SOLAR TIENE ============
+function toggleEcoflow() {
+    const esEco = getVal('sis-tiene-tipo') === 'ecoflow';
+    document.getElementById('group-inversor').style.display = esEco ? 'none' : 'grid';
+    document.getElementById('group-ecoflow').style.display = esEco ? 'block' : 'none';
+    document.getElementById('group-marca-bat').style.display = esEco ? 'none' : 'block';
+    document.getElementById('group-baterias').style.display = esEco ? 'none' : 'grid';
+    document.getElementById('sis-t-res-ecoflow').style.display = esEco ? 'block' : 'none';
+    if (esEco) {
+        ['sis-tiene-inv','sis-tiene-ah','sis-tiene-cant-bat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    } else {
+        ['sis-ecoflow-potencia','sis-ecoflow-capacidad','sis-ecoflow-pico'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    }
+}
+
+function calcularSistemasTiene() {
+    const tipo = getVal('sis-tiene-tipo'), esEco = (tipo === 'ecoflow');
+    let inv = 0, ah = 0, cantBat = 1, capEco = 0, picoEco = 0;
+    if (esEco) {
+        inv = getNum('sis-ecoflow-potencia'); capEco = getNum('sis-ecoflow-capacidad'); picoEco = getNum('sis-ecoflow-pico') || inv;
+        if (inv <= 0 || capEco <= 0) { alert('Ingresa Potencia y Capacidad del Ecoflow.'); return; }
+    } else {
+        inv = getNum('sis-tiene-inv'); ah = getNum('sis-tiene-ah'); cantBat = getInt('sis-tiene-cant-bat');
+        if (inv <= 0 || ah <= 0 || cantBat <= 0) { alert('Ingresa inversor y baterías.'); return; }
+    }
+    const vol = getInt('sis-tiene-voltaje') || 24, pExt = getInt('sis-tiene-paneles');
+    const pW = getNum('sis-tiene-panel-w') || 550, pIsc = getNum('sis-tiene-panel-isc') || 14, pVoc = getNum('sis-tiene-panel-voc') || 50;
+    const dSol = getNum('sis-tiene-dist-solar'), dBat = getNum('sis-tiene-dist-bat'), dAC = getNum('sis-tiene-dist-ac');
+    const ater = getVal('sis-aterramiento') || 'con', vAC = getInt('sis-voltaje-ac') || 220;
+    if (pExt <= 0) { alert('El cliente debe tener al menos 1 panel.'); return; }
+    const cfgs = generarConfiguraciones(pExt, pIsc, pVoc);
+    if (cfgs.length === 0) { alert('Ninguna configuración válida.'); return; }
+    if (esEco) {
+        const cfgRec = cfgs.find(c => c.esRecomendada) || cfgs[0], wTot = pExt * pW;
+        if (cfgRec.vocTotal > ECOFLOW_PV.maxVoc) alert(`⚠️ Voc=${cfgRec.vocTotal}V excede máximo Ecoflow (${ECOFLOW_PV.maxVoc}V).`);
+        if (wTot > ECOFLOW_PV.maxW) alert(`⚠️ ${wTot}W excede máximo PV Ecoflow (${ECOFLOW_PV.maxW}W).`);
+    }
+    const cCtrl = (pExt * pW) / vol;
+    const ctrl = cCtrl > 100 ? 'MPPT 100A+' : (cCtrl > 80 ? 'MPPT 80A' : (cCtrl > 60 ? 'MPPT 60A' : 'MPPT 40A'));
+    const potMax = esEco ? picoEco : inv;
+    const transf = potMax <= 2000 ? 'Transfer 20A' : (potMax <= 3000 ? 'Transfer 30A' : (potMax <= 5000 ? 'Transfer 50A' : 'Transfer 63A+'));
+    const cInv = inv / (esEco ? 12 : vol);
+    const bBat = esEco ? 'N/A (Integrada)' : 'Breaker DC ' + breakerArray(cInv) + 'A';
+    const cAC = potMax / vAC;
+    const bAC = cAC > 40 ? 'Breaker AC 50A' : (cAC > 30 ? 'Breaker AC 40A' : (cAC > 20 ? 'Breaker AC 32A' : 'Breaker AC 20A'));
+    let ampCon = 15;
+    if (esEco) { if (cAC > 40) ampCon = 50; else if (cAC > 30) ampCon = 40; else if (cAC > 20) ampCon = 30; else if (cAC > 15) ampCon = 20; }
+    datosTiene = { panelesTotal: pExt, panelW: pW, panelIsc: pIsc, panelVoc: pVoc, controlador: ctrl, transfer: transf, breakerBat: bBat, breakerAC: bAC, distSolar: dSol, distBat: dBat, distAC: dAC, aterramiento: ater, vAC, corrienteMaxInv: cInv, corrienteAC: cAC, ampConector: ampCon, esEco, inv, capEco, picoEco };
+    configsTiene = cfgs; renderConfigs('tiene');
+    const idxRec = cfgs.findIndex(c => c.esRecomendada);
+    aplicarConfigTiene(idxRec >= 0 ? idxRec : 0);
+}
+
+function aplicarConfigTiene(idx) {
+    const c = configsTiene[idx], d = datosTiene;
+    const b = breakerArray(c.iscTotal), vM = Math.ceil((c.vocTotal * 1.2) / 50) * 50;
+    const fS = breakerArray(d.panelIsc);
+    const fus = c.paralelo > 1 ? `${c.paralelo} fusibles ${fS}A` : `1 fusible ${fS}A`;
+    const fD = 1.15, mDC = (d.aterramiento === 'con') ? 3 : 2;
+    const mAC = (d.vAC === 110) ? ((d.aterramiento === 'con') ? 3 : 2) : ((d.aterramiento === 'con') ? 4 : 3);
+    const mSol = Math.ceil(d.distSolar * fD * mDC), mB = Math.ceil(d.distBat * fD * mDC), mA = Math.ceil(d.distAC * fD * mAC);
+    const cabSol = mSol > 0 ? `${mSol} m ${calibreSolar(c.iscTotal, d.distSolar)}` : '-';
+    const cabB = mB > 0 ? `${mB} m ${calibreBateria(d.corrienteMaxInv, d.distBat)}` : '-';
+    const cabA = mA > 0 ? `${mA} m ${calibreAC(d.corrienteAC, d.distAC)}` : '-';
+
+    document.getElementById('sis-t-paneles').textContent = `${d.panelesTotal} paneles ${d.panelW}W — ${c.descripcion}`;
+    document.getElementById('sis-t-controlador').textContent = d.controlador + ` (≥${vM}V)`;
+    document.getElementById('sis-t-transfer').textContent = d.transfer;
+    document.getElementById('sis-t-bdc-paneles').textContent = `1 breaker DC ${b}A/${vM}V`;
+    document.getElementById('sis-t-bdc-bat').textContent = d.breakerBat;
+    document.getElementById('sis-t-bac').textContent = d.breakerAC;
+    document.getElementById('sis-t-fusibles').textContent = fus;
+    document.getElementById('sis-t-spd').textContent = 'Supresor DC+AC';
+    document.getElementById('sis-t-csolar').textContent = cabSol;
+    document.getElementById('sis-t-cbat').textContent = cabB;
+    document.getElementById('sis-t-cac').textContent = cabA;
+    document.getElementById('sis-t-varilla').textContent = 'Varilla 2.4m';
+    document.getElementById('sis-t-tierra').textContent = 'Conector + cable';
+    if (d.esEco) {
+        document.getElementById('sis-t-tomacorriente').textContent = d.ampConector + ' A';
+        document.getElementById('sis-t-espiga').textContent = d.ampConector + ' A';
+    }
+    const materiales = construirMaterialesSolarTiene(d, c, vM, cabSol, cabB, cabA);
+    renderMaterialesLista('sis-t-materiales', materiales);
+    ultimoCalculo = {
+        tipo: 'Solar Ampliación',
+        componentes: materiales,
+        descripcion: `Ampliación Solar — ${d.panelesTotal} paneles — ${d.esEco ? 'Ecoflow' : 'Inversor ' + d.inv + 'W'} — ${c.descripcion}`
+    };
+    document.getElementById('res-sis-tiene').classList.add('show');
+}
+
+function construirMaterialesSolarTiene(d, c, vM, cabSol, cabB, cabA) {
+    const mat = [];
+    mat.push({ nombre: `Panel ${d.panelW}W (${d.panelesTotal} uds)`, cantidad: d.panelesTotal });
+    mat.push({ nombre: `Controlador ${d.controlador} (≥${vM}V)`, cantidad: 1 });
+    mat.push({ nombre: `Transfer ${d.transfer}`, cantidad: 1 });
+    mat.push({ nombre: `Breaker DC ${breakerArray(c.iscTotal)}A/${vM}V`, cantidad: 1 });
+    mat.push({ nombre: `Fusibles DC`, cantidad: c.paralelo || 1 });
+    mat.push({ nombre: 'SPD DC+AC', cantidad: 1 });
+    if (cabSol !== '-') mat.push({ nombre: `Cable solar ${calibreSolar(c.iscTotal, d.distSolar)}`, cantidad: Math.ceil(d.distSolar * 2 * 1.15) });
+    if (cabB !== '-' && !d.esEco) mat.push({ nombre: `Cable batería ${calibreBateria(d.corrienteMaxInv, d.distBat)}`, cantidad: Math.ceil(d.distBat * 2 * 1.15) });
+    if (cabA !== '-') mat.push({ nombre: `Cable AC ${calibreAC(d.corrienteAC, d.distAC)}`, cantidad: Math.ceil(d.distAC * 2 * 1.15) });
+    mat.push({ nombre: 'Varilla 2.4m + conector', cantidad: 1 });
+    mat.push({ nombre: 'Caja DC/AC 12 espacios', cantidad: 1 });
+    if (d.esEco) {
+        mat.push({ nombre: `Tomacorriente ${d.ampConector}A`, cantidad: 1 });
+        mat.push({ nombre: `Espiga ${d.ampConector}A`, cantidad: 1 });
+    }
+    return mat;
+}
+
+// ============ GUARDAR CLIENTE (sin precios) ============
+function abrirModal(tipo) {
+    if (!ultimoCalculo) { alert('Primero calcula.'); return; }
+    tipoServ = tipo;
+    ['modal-nombre','modal-telefono','modal-email','modal-direccion'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('modalCliente').classList.add('show');
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function guardarCliente() {
+    const nom = document.getElementById('modal-nombre').value.trim();
+    const tel = document.getElementById('modal-telefono').value.trim();
+    const email = document.getElementById('modal-email').value.trim();
+    const dir = document.getElementById('modal-direccion').value.trim();
+    if (!nom || !tel || !dir) { alert('Llena nombre, teléfono y dirección.'); return; }
+
+    // 1) Historial local (sin precios)
+    const registro = {
+        id: 'CALC_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        nombre: nom, telefono: tel, email: email, direccion: dir,
+        servicio: tipoServ,
+        fecha: new Date().toISOString(),
+        componentes: ultimoCalculo.componentes,
+        descripcion: ultimoCalculo.descripcion
+    };
+    let hist = JSON.parse(localStorage.getItem('byb_historial') || '[]');
+    hist.unshift(registro);
+    localStorage.setItem('byb_historial', JSON.stringify(hist));
+    actualizarContadorHist();
+
+    // 2) Cola de sync (Firestore, sin precios)
+    const idU = "CALC_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    const nuevoSync = {
+        sync_id: idU,
+        usuario_nombre: nom,
+        usuario_telefono: tel,
+        usuario_email: email,
+        direccion: dir,
+        servicio_nombre: "Instalación Eléctrica - " + tipoServ,
+        descripcion: ultimoCalculo.descripcion,
+        estado: "Pendiente",
+        fecha_solicitud: new Date().toISOString(),
+        componentes: ultimoCalculo.componentes.map(c => ({ nombre: c.nombre, cantidad: c.cantidad, precio: 0 })),
+        mano_obra: 0,
+        total_presupuesto: 0,
+        moneda: 'USD',
+        requiere_cotizacion: true
+    };
+    let pend = JSON.parse(localStorage.getItem('byb_pendientes') || '[]');
+    pend.push(nuevoSync);
+    localStorage.setItem('byb_pendientes', JSON.stringify(pend));
+    actualizarBotonSync();
+
+    cerrarModal('modalCliente');
+    alert('✅ Guardado local.\n\nCuando sincronices, el admin podrá agregar precios desde el panel.');
+}
+
+// ============ SYNC FIREBASE ============
+function actualizarBotonSync() {
+    const p = JSON.parse(localStorage.getItem('byb_pendientes') || '[]');
+    const b = document.getElementById('btnSync');
+    if (!b) return;
+    b.disabled = p.length === 0;
+    b.textContent = p.length > 0 ? `☁️ Sincronizar (${p.length})` : '☁️ Sincronizar (0)';
+}
+
+async function sincronizarManual() {
+    if (!navigator.onLine) { alert('⚠️ Sin internet.'); return; }
+    let p = JSON.parse(localStorage.getItem('byb_pendientes') || '[]');
+    if (p.length === 0) { alert('No hay pendientes.'); return; }
+    const b = document.getElementById('btnSync');
+    b.disabled = true; b.textContent = '🔑 Conectando...';
+    try {
+        const { signInWithEmailAndPassword, doc, getDoc, setDoc, serverTimestamp } = window.firebaseFns;
+        await signInWithEmailAndPassword(window.firebaseAuth, "byb@gmail.com", "deniedcode");
+        b.textContent = '⏳ Sincronizando...';
+        let ex = 0, dup = 0, err = 0, rest = [];
+        for (let i = 0; i < p.length; i++) {
+            const it = p[i];
             try {
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                await updateDoc(doc(window.firebaseDb, 'SolicitudesServicios', id), {
-                    componentes: componentes,
-                    mano_obra: mano,
-                    total_presupuesto: total,
-                    moneda: 'USD',
-                    estado: 'Cotizado',
-                    fecha_cotizacion: serverTimestamp(),
-                    fecha_actualizacion: serverTimestamp()
-                });
-                alert('✅ Cotización guardada y servicio marcado como Cotizado.');
-                await cargarServicios();
-                aplicarFiltrosServicios();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        function enviarCotizacionWA(id) {
-            const body = document.getElementById('servicioDetailBody');
-            const componentes = JSON.parse(body.dataset.componentes || '[]');
-            const tel = body.dataset.telefono;
-            if (!tel) { alert('Sin teléfono.'); return; }
-            let telLimpio = String(tel).replace(/[^0-9]/g, '');
-            if (telLimpio.length === 8) telLimpio = '53' + telLimpio;
-
-            document.querySelectorAll('.precio-input').forEach(inp => {
-                const i = parseInt(inp.dataset.index);
-                componentes[i].precio = parseFloat(inp.value) || 0;
-            });
-            const mano = parseFloat(document.getElementById('servicioManoObra').value) || 0;
-
-            let lineas = '', totalMat = 0;
-            componentes.forEach(c => {
-                if (!c.cantidad) return;
-                const sub = (c.precio || 0) * c.cantidad;
-                totalMat += sub;
-                lineas += `• ${c.nombre}: ${c.cantidad} × $${(c.precio || 0).toFixed(2)} = $${sub.toFixed(2)}\n`;
-            });
-            const total = totalMat + mano;
-
-            const msg = `*COTIZACIÓN B&B*\n\n` +
-                `👤 ${body.dataset.nombre}\n` +
-                `🔧 ${body.dataset.servicio}\n\n` +
-                `*MATERIALES:*\n${lineas}\n` +
-                `*Mano de obra:* $${mano.toFixed(2)}\n\n` +
-                `*TOTAL: $${total.toFixed(2)} USD*`;
-
-            window.open(`https://wa.me/${telLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function cerrarDetalleServicio() {
-            document.getElementById('servicioDetailModal').classList.remove('active');
-        }
-
-        // === FILTROS Y LISTAS ===
-        function aplicarFiltrosVentas() {
-            const d = document.getElementById('ventasFechaDesde').value;
-            const h = document.getElementById('ventasFechaHasta').value;
-            const t = document.getElementById('ventasTipo').value;
-            let f = [...ventasCache];
-            if (d) f = f.filter(v => fechaToISO(v.fecha) >= d);
-            if (h) f = f.filter(v => fechaToISO(v.fecha) <= h);
-            if (t !== 'Todos') f = f.filter(v => (v.Tipo || 'Local') === t);
-            renderVentas(f);
-        }
-        document.getElementById('ventasFiltrarBtn').addEventListener('click', aplicarFiltrosVentas);
-        document.getElementById('ventasLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('ventasFechaDesde').value = '';
-            document.getElementById('ventasFechaHasta').value = '';
-            document.getElementById('ventasTipo').value = 'Todos';
-            aplicarFiltrosVentas();
-        });
-
-        function aplicarFiltrosDomicilios() {
-            const e = document.getElementById('domFiltroEstado').value;
-            let f = [...domiciliosCache];
-            if (e !== 'Todos') f = f.filter(x => (x.Estado || 'Pendiente') === e);
-            renderDomicilios(f);
-        }
-        document.getElementById('domFiltrarBtn').addEventListener('click', aplicarFiltrosDomicilios);
-        document.getElementById('domLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('domFiltroEstado').value = 'Todos';
-            aplicarFiltrosDomicilios();
-        });
-
-        function aplicarFiltrosTienda() {
-            const e = document.getElementById('tiendaFiltroEstado').value;
-            let f = [...tiendaCache];
-            if (e !== 'Todos') f = f.filter(x => (x.Estado || 'Pendiente') === e);
-            renderTienda(f);
-        }
-        document.getElementById('tiendaFiltrarBtn').addEventListener('click', aplicarFiltrosTienda);
-        document.getElementById('tiendaLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('tiendaFiltroEstado').value = 'Todos';
-            aplicarFiltrosTienda();
-        });
-
-        async function cambiarEstadoDomicilio(id, nuevo) {
-            try {
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                let d = { Estado: nuevo === 'Nuevo Domicilio' ? 'Pendiente' : nuevo, fecha_gestion: serverTimestamp(), fecha_actualizacion: serverTimestamp() };
-                await updateDoc(doc(window.firebaseDb, 'Domicilios', id), d);
-                await cargarDomicilios(); aplicarFiltrosDomicilios();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-        async function cambiarEstadoTienda(id, nuevo) {
-            try {
-                const { doc, updateDoc, serverTimestamp } = window.firebaseFns;
-                let d = { Estado: nuevo === 'Nuevo Pedido' ? 'Pendiente' : nuevo, fecha_gestion: serverTimestamp(), fecha_actualizacion: serverTimestamp() };
-                await updateDoc(doc(window.firebaseDb, 'PedidosTienda', id), d);
-                await cargarTienda(); aplicarFiltrosTienda();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        function enviarWhatsAppDom(id) {
-            const d = domiciliosCache.find(x => x.id === id);
-            if (!d || !d.Telefono) { alert('Sin teléfono.'); return; }
-            let tel = String(d.Telefono).replace(/[^0-9]/g, '');
-            if (tel.length === 8) tel = '53' + tel;
-            const msg = `Hola ${d.Cliente_Nombre || 'Cliente'} 👋\nTu domicilio está en estado: *${d.Estado || 'Pendiente'}*.`;
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-        function enviarWhatsAppTienda(id) {
-            const p = tiendaCache.find(x => x.id === id);
-            if (!p || !p.Telefono) { alert('Sin teléfono.'); return; }
-            let tel = String(p.Telefono).replace(/[^0-9]/g, '');
-            if (tel.length === 8) tel = '53' + tel;
-            const msg = `Hola ${p.Cliente_Nombre || 'Cliente'} 👋\nTu pedido está en estado: *${p.Estado || 'Pendiente'}*.`;
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        // === PRODUCTOS ===
-        function editarProducto(id) {
-            const p = productosCache.find(x => x.id === id);
-            if (!p) { alert('No encontrado.'); return; }
-            document.getElementById('productModalTitle').textContent = 'Editar Producto';
-            document.getElementById('productId').value = p.id;
-            document.getElementById('prodNombre').value = p.Nombre || '';
-            document.getElementById('prodCodigo').value = p.Codigo_de_Barras || '';
-            document.getElementById('prodCosto').value = p.Precio_Costo || '';
-            document.getElementById('prodVenta').value = p.Precio_Venta || '';
-            document.getElementById('prodOferta').value = p.Precio_Oferta || '';
-            document.getElementById('prodStock').value = p.Stock || '';
-            document.getElementById('prodDetalles').value = p.Detalles || '';
-            document.getElementById('prodEsProveedor').checked = p.Es_Proveedor === true;
-            document.getElementById('prodEsEncargo').checked = p.Es_Encargo === true;
-            document.getElementById('prodEsServicio').checked = p.Es_Servicio === true;
-            document.getElementById('prodProveedor').value = p.Proveedor || '';
-            document.getElementById('prodUrlEncargo').value = p.URL_Encargo || '';
-            document.getElementById('proveedorGroup').style.display = p.Es_Proveedor ? 'block' : 'none';
-            document.getElementById('urlEncargoGroup').style.display = p.Es_Encargo ? 'block' : 'none';
-            document.getElementById('servicioNoteGroup').style.display = p.Es_Servicio ? 'block' : 'none';
-            document.getElementById('stockGroup').style.display = p.Es_Servicio ? 'none' : 'block';
-            // Fotos
-            const fo = obtenerFotosProducto(p);
-            const prev = document.getElementById('prodFotosPreview');
-            prev.innerHTML = '';
-            fo.forEach(url => {
-                const div = document.createElement('div');
-                div.className = 'foto-item';
-                div.innerHTML = `<img src="${url}" /><button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>`;
-                prev.appendChild(div);
-            });
-            document.getElementById('productDeleteBtn').style.display = 'inline-block';
-            document.getElementById('productModal').classList.add('active');
-        }
-
-        async function eliminarProducto(id) {
-            if (!confirm('¿Eliminar este producto?')) return;
-            try {
-                await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'productos', id));
-                alert('✅ Producto eliminado.');
-                await cargarProductos();
-                renderInventario(productosCache);
-            } catch (e) { alert('Error: ' + e.message); }
-        }
-
-        document.getElementById('btnNuevoProducto').addEventListener('click', function() {
-            document.getElementById('productModalTitle').textContent = 'Nuevo Producto';
-            document.getElementById('productForm').reset();
-            document.getElementById('productId').value = '';
-            document.getElementById('prodFotosPreview').innerHTML = '';
-            document.getElementById('productDeleteBtn').style.display = 'none';
-            document.getElementById('proveedorGroup').style.display = 'none';
-            document.getElementById('urlEncargoGroup').style.display = 'none';
-            document.getElementById('servicioNoteGroup').style.display = 'none';
-            document.getElementById('diagnosticoGroup').style.display = 'none';
-            document.getElementById('stockGroup').style.display = 'block';
-            document.getElementById('categoriaGroup').style.display = 'block';
-            document.getElementById('servicioInfoGroup').style.display = 'none';
-            document.getElementById('productModal').classList.add('active');
-        });
-
-        document.getElementById('prodEsProveedor').addEventListener('change', function() {
-            document.getElementById('proveedorGroup').style.display = this.checked ? 'block' : 'none';
-        });
-        document.getElementById('prodEsEncargo').addEventListener('change', function() {
-            document.getElementById('urlEncargoGroup').style.display = this.checked ? 'block' : 'none';
-        });
-        document.getElementById('prodEsServicio').addEventListener('change', function() {
-            document.getElementById('servicioNoteGroup').style.display = this.checked ? 'block' : 'none';
-            document.getElementById('stockGroup').style.display = this.checked ? 'none' : 'block';
-            document.getElementById('categoriaGroup').style.display = this.checked ? 'none' : 'block';
-            document.getElementById('servicioInfoGroup').style.display = this.checked ? 'block' : 'none';
-            document.getElementById('diagnosticoGroup').style.display = this.checked ? 'block' : 'none';
-        });
-
-        document.getElementById('productForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('productSubmitBtn');
-            btn.disabled = true; btn.textContent = '⏳ Guardando...';
-            try {
-                const id = document.getElementById('productId').value;
-                const fotosNuevas = document.getElementById('prodFotos').files;
-                let fotos = [];
-                if (fotosNuevas && fotosNuevas.length > 0) {
-                    for (let i = 0; i < fotosNuevas.length; i++) {
-                        const url = await window.subirFotoCloudinary(fotosNuevas[i]);
-                        fotos.push(url);
-                    }
+                const dr = doc(window.firebaseDb, 'SolicitudesServicios', it.sync_id);
+                const ds = await getDoc(dr);
+                if (ds.exists()) { dup++; }
+                else {
+                    let data = { ...it };
+                    data.fecha_solicitud = serverTimestamp();
+                    delete data.sync_id;
+                    await setDoc(dr, data);
+                    ex++;
                 }
-                // Fotos viejas que quedaron en el preview
-                const fotosPreview = document.querySelectorAll('#prodFotosPreview img');
-                const fotosViejas = Array.from(fotosPreview).map(img => img.src).filter(s => s.startsWith('http'));
-                fotos = [...fotosViejas, ...fotos];
+            } catch (e) { err++; rest.push(it); }
+        }
+        localStorage.setItem('byb_pendientes', JSON.stringify(rest));
+        actualizarBotonSync();
+        let msg = "--- RESUMEN ---\n\n";
+        if (ex > 0) msg += `✅ ${ex} subidos.\n`;
+        if (dup > 0) msg += `⚠️ ${dup} duplicados.\n`;
+        if (err > 0) msg += `❌ ${err} errores.\n`;
+        alert(msg);
+    } catch (e) { alert('❌ Error: ' + e.message); }
+    finally { b.disabled = false; actualizarBotonSync(); }
+}
 
-                const data = {
-                    Nombre: document.getElementById('prodNombre').value.trim(),
-                    Codigo_de_Barras: document.getElementById('prodCodigo').value.trim(),
-                    Precio_Costo: parseFloat(document.getElementById('prodCosto').value) || 0,
-                    Precio_Venta: parseFloat(document.getElementById('prodVenta').value) || 0,
-                    Precio_Oferta: parseFloat(document.getElementById('prodOferta').value) || 0,
-                    Stock: parseInt(document.getElementById('prodStock').value) || 0,
-                    Detalles: document.getElementById('prodDetalles').value.trim(),
-                    Categoria: document.getElementById('prodCategoria').value || 'General',
-                    Es_Proveedor: document.getElementById('prodEsProveedor').checked,
-                    Proveedor: document.getElementById('prodProveedor').value.trim(),
-                    Es_Encargo: document.getElementById('prodEsEncargo').checked,
-                    URL_Encargo: document.getElementById('prodUrlEncargo').value.trim(),
-                    Es_Servicio: document.getElementById('prodEsServicio').checked,
-                    Fotos: fotos,
-                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
-                };
-                if (id) {
-                    await window.firebaseFns.updateDoc(window.firebaseFns.doc(window.firebaseDb, 'productos', id), data);
-                } else {
-                    await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'productos'), data);
-                }
-                alert('✅ Producto guardado.');
-                document.getElementById('productModal').classList.remove('active');
-                await cargarProductos();
-                renderInventario(productosCache);
-            } catch (err) { alert('Error: ' + err.message); }
-            finally { btn.disabled = false; btn.textContent = 'Guardar'; }
-        });
+// ============ HISTORIAL ============
+function verHistorial() {
+    const hist = JSON.parse(localStorage.getItem('byb_historial') || '[]');
+    let html = '';
+    if (hist.length === 0) html = '<p style="text-align:center;color:#64748b;padding:20px;">Sin cotizaciones guardadas.</p>';
+    else hist.forEach(r => {
+        html += `<div class="hist-item" onclick="verDetalleHist('${r.id}')"><div class="h-nom">${r.nombre}</div><div class="h-meta">${r.servicio} · ${new Date(r.fecha).toLocaleDateString('es-CU')}</div></div>`;
+    });
+    document.getElementById('histList').innerHTML = html;
+    document.getElementById('modalHistorial').classList.add('show');
+}
+function verDetalleHist(id) {
+    const hist = JSON.parse(localStorage.getItem('byb_historial') || '[]');
+    const r = hist.find(x => x.id === id);
+    if (!r) return;
+    let matTxt = r.componentes.map((c, i) => `${i+1}. ${c.nombre} — ${c.cantidad} uds`).join('\n');
+    alert(`Cliente: ${r.nombre}\nTeléfono: ${r.telefono}\nDirección: ${r.direccion}\nServicio: ${r.servicio}\n\nMateriales:\n${matTxt}\n\nLos precios se agregan en el Panel Admin.`);
+}
+function actualizarContadorHist() {
+    const hist = JSON.parse(localStorage.getItem('byb_historial') || '[]');
+    const el = document.getElementById('histCount');
+    if (el) el.textContent = hist.length;
+}
 
-        document.getElementById('productCancelBtn').addEventListener('click', () => document.getElementById('productModal').classList.remove('active'));
-        document.getElementById('closeProductModal').addEventListener('click', () => document.getElementById('productModal').classList.remove('active'));
-        document.getElementById('closeDetailModal').addEventListener('click', () => document.getElementById('detailModal').classList.remove('active'));
-        document.getElementById('productDeleteBtn').addEventListener('click', () => {
-            const id = document.getElementById('productId').value;
-            if (id) { document.getElementById('productModal').classList.remove('active'); eliminarProducto(id); }
+// ============ PERSISTENCIA ============
+function guardarFormulario() {
+    const datos = {};
+    document.querySelectorAll('input[id], select[id]').forEach(el => { if (el.id) datos[el.id] = el.value; });
+    const cocina = [];
+    document.querySelectorAll('#lista-cocina .equipo-row').forEach(f => {
+        cocina.push({ nombre: f.querySelector('.eq-nombre')?.value || '', cant: f.querySelector('.eq-cant')?.value || '1', watts: f.querySelector('.eq-watts')?.value || '0' });
+    });
+    datos._cocina = cocina;
+    localStorage.setItem('byb_form', JSON.stringify(datos));
+}
+function restaurarFormulario() {
+    const raw = localStorage.getItem('byb_form');
+    if (!raw) { agregarEquipoCocina(); return; }
+    try {
+        const datos = JSON.parse(raw);
+        Object.keys(datos).forEach(id => {
+            if (id === '_cocina') return;
+            const el = document.getElementById(id);
+            if (el) el.value = datos[id];
         });
-
-        document.getElementById('invSearch').addEventListener('input', function() {
-            renderInventario(productosCache, document.getElementById('invCategory').value, this.value);
-        });
-        document.getElementById('invCategory').addEventListener('change', function() {
-            renderInventario(productosCache, this.value, document.getElementById('invSearch').value);
-        });
-        document.getElementById('invRefreshBtn').addEventListener('click', async function() {
-            this.disabled = true; this.textContent = '⏳...';
-            await cargarProductos(); renderInventario(productosCache);
-            this.disabled = false; this.textContent = '🔄 Refrescar';
-        });
-
-        // === CONFIGURACIÓN ===
-        document.getElementById('guardarConfigBtn').addEventListener('click', async function() {
-            const btn = this;
-            btn.disabled = true; btn.textContent = '⏳...';
-            try {
-                await window.firebaseFns.setDoc(window.firebaseFns.doc(window.firebaseDb, 'config', 'general'), {
-                    envio_costo: parseFloat(document.getElementById('configEnvioCosto').value) || 0,
-                    envio_gratis_desde: parseFloat(document.getElementById('configEnvioGratis').value) || 0,
-                    encargos_activos: document.getElementById('configEncargosActivos').checked,
-                    servicios_activos: document.getElementById('configServiciosActivos').checked,
-                    fecha_actualizacion: window.firebaseFns.serverTimestamp()
-                }, { merge: true });
-                const s = document.getElementById('configSuccess');
-                s.classList.add('show');
-                setTimeout(() => s.classList.remove('show'), 3000);
-            } catch (e) { alert('Error: ' + e.message); }
-            finally { btn.disabled = false; btn.textContent = '💾 Guardar Configuración'; }
-        });
-
-        // === CAJA (venta manual) ===
-        document.getElementById('cajaAgregarBtn').addEventListener('click', function() {
-            const busq = document.getElementById('cajaBusqueda').value.trim().toLowerCase();
-            const cant = parseInt(document.getElementById('cajaCantidad').value) || 1;
-            const p = productosCache.find(x => (x.Nombre || '').toLowerCase() === busq);
-            if (!p) { alert('Producto no encontrado.'); return; }
-            carrito.push({ id: p.id, nombre: p.Nombre, cantidad: cant, precio: parseFloat(p.Precio_Venta || 0) });
-            renderCarrito();
-            document.getElementById('cajaBusqueda').value = '';
-            document.getElementById('cajaSugerencias').style.display = 'none';
-        });
-
-        function renderCarrito() {
-            const c = document.getElementById('cajaCarrito');
-            if (carrito.length === 0) { c.innerHTML = '<div class="empty">No hay productos agregados.</div>'; document.getElementById('cajaTotal').textContent = 'Total: $0.00'; return; }
-            let h = '';
-            carrito.forEach((it, i) => {
-                h += `<div class="carrito-item"><div class="info">${it.nombre}</div><div class="precio">${it.cantidad} × $${it.precio.toFixed(2)} = $${(it.cantidad * it.precio).toFixed(2)}</div><button class="btn-eliminar" onclick="carrito.splice(${i},1); renderCarrito()">✕</button></div>`;
+        if (datos._cocina && datos._cocina.length > 0) {
+            const cont = document.getElementById('lista-cocina');
+            cont.innerHTML = '';
+            datos._cocina.forEach(eq => {
+                const d = document.createElement('div');
+                d.className = 'equipo-row';
+                d.innerHTML = `<input type="text" class="eq-nombre" value="${eq.nombre}" /><input type="number" class="eq-cant" value="${eq.cant}" min="1" /><input type="number" class="eq-watts" value="${eq.watts}" min="0" /><button class="btn-remove-equipo" onclick="this.parentElement.remove(); guardarFormulario()">✕</button>`;
+                cont.appendChild(d);
             });
-            c.innerHTML = h;
-            const total = carrito.reduce((s, it) => s + it.cantidad * it.precio, 0);
-            document.getElementById('cajaTotal').textContent = 'Total: $' + total.toFixed(2);
-        }
+        } else { agregarEquipoCocina(); }
+    } catch (e) { agregarEquipoCocina(); }
+}
 
-        document.getElementById('cajaBusqueda').addEventListener('input', function() {
-            const q = this.value.trim().toLowerCase();
-            const sug = document.getElementById('cajaSugerencias');
-            if (q.length < 2) { sug.style.display = 'none'; return; }
-            const matches = productosCache.filter(p => (p.Nombre || '').toLowerCase().includes(q) && !p.Es_Servicio).slice(0, 8);
-            if (matches.length === 0) { sug.style.display = 'none'; return; }
-            sug.innerHTML = matches.map(p => `<div class="sugerencia-item" onclick="seleccionarSugerencia('${p.Nombre}')"><div class="nombre">${p.Nombre}</div><div class="detalle">$${parseFloat(p.Precio_Venta || 0).toFixed(2)}</div></div>`).join('');
-            sug.style.display = 'block';
-        });
-        function seleccionarSugerencia(nombre) {
-            document.getElementById('cajaBusqueda').value = nombre;
-            document.getElementById('cajaSugerencias').style.display = 'none';
-        }
-        document.getElementById('cajaLimpiarBtn').addEventListener('click', function() {
-            carrito = []; renderCarrito();
-            document.getElementById('cajaCliente').value = '';
-            document.getElementById('cajaTelefono').value = '';
-            document.getElementById('cajaDireccion').value = '';
-        });
-        document.getElementById('cajaRegistrarBtn').addEventListener('click', async function() {
-            if (carrito.length === 0) { alert('Agrega productos.'); return; }
-            const cliente = document.getElementById('cajaCliente').value.trim();
-            if (!cliente) { alert('Ingresa el nombre del cliente.'); return; }
-            const total = carrito.reduce((s, it) => s + it.cantidad * it.precio, 0);
-            const productosJson = carrito.map(it => `${it.nombre} x${it.cantidad}`).join(', ');
-            try {
-                await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Ventas'), {
-                    Cliente_Nombre: cliente,
-                    Telefono: document.getElementById('cajaTelefono').value.trim(),
-                    Direccion: document.getElementById('cajaDireccion').value.trim(),
-                    productos_json: productosJson,
-                    total: total,
-                    Tipo: 'Local',
-                    fecha: window.firebaseFns.serverTimestamp()
-                });
-                alert('✅ Venta registrada.');
-                carrito = []; renderCarrito();
-                document.getElementById('cajaCliente').value = '';
-                document.getElementById('cajaTelefono').value = '';
-                document.getElementById('cajaDireccion').value = '';
-                await cargarVentas();
-            } catch (e) { alert('Error: ' + e.message); }
-        });
+function actualizarOffline() {
+    const bar = document.getElementById('offlineBar');
+    if (!navigator.onLine) bar.classList.add('show');
+    else bar.classList.remove('show');
+}
 
-        // === REPORTES ===
-        function aplicarRangoReporte(r) {
-            const hoy = new Date();
-            let d = new Date(); const h = new Date();
-            switch (r) {
-                case 'hoy': d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()); break;
-                case '7dias': d = new Date(hoy.getTime() - 7 * 86400000); break;
-                case '30dias': d = new Date(hoy.getTime() - 30 * 86400000); break;
-                case 'mes': d = new Date(hoy.getFullYear(), hoy.getMonth(), 1); break;
-                case 'mesAnterior': d = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1); h.setDate(0); break;
-            }
-            document.getElementById('repFechaDesde').value = d.toISOString().slice(0,10);
-            document.getElementById('repFechaHasta').value = h.toISOString().slice(0,10);
-            document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderReportes();
-        }
-
-        function renderReportes() {
-            const d = document.getElementById('repFechaDesde').value;
-            const h = document.getElementById('repFechaHasta').value;
-            const t = document.getElementById('repTipo').value;
-            let f = [...ventasCache];
-            if (d) f = f.filter(v => fechaToISO(v.fecha) >= d);
-            if (h) f = f.filter(v => fechaToISO(v.fecha) <= h);
-            if (t !== 'Todos') f = f.filter(v => (v.Tipo || 'Local') === t);
-            ventasFiltradasReporte = f;
-            let ti = 0, tc = 0;
-            for (const v of f) { ti += parseFloat(v.total || 0); tc += calcularCostoVenta(v); }
-            document.getElementById('repTotalVentas').textContent = '$' + ti.toFixed(2);
-            document.getElementById('repCostoVendido').textContent = '$' + tc.toFixed(2);
-            document.getElementById('repGananciaTotal').textContent = '$' + (ti - tc).toFixed(2);
-            document.getElementById('repCount').textContent = f.length;
-            const c = document.getElementById('reportesContainer');
-            if (f.length === 0) { c.innerHTML = '<div class="empty">Sin ventas en el período.</div>'; return; }
-            let hh = '';
-            for (const v of f) hh += `<div class="list-item"><div class="left"><div class="title">${v.productos_json || 'Sin productos'}</div><div class="sub">${fechaToStr(v.fecha)} • ${v.Tipo || 'Local'}</div></div><div class="right">$${parseFloat(v.total || 0).toFixed(2)}</div></div>`;
-            c.innerHTML = hh;
-        }
-
-        document.getElementById('repFiltrarBtn').addEventListener('click', renderReportes);
-        document.getElementById('repLimpiarBtn').addEventListener('click', function() {
-            document.getElementById('repFechaDesde').value = '';
-            document.getElementById('repFechaHasta').value = '';
-            document.getElementById('repTipo').value = 'Todos';
-            document.querySelectorAll('#tab-reportes .rango-rapido button').forEach(b => b.classList.remove('active'));
-            renderReportes();
-        });
-
-        document.getElementById('btnExportarReportes').addEventListener('click', function() {
-            if (ventasFiltradasReporte.length === 0) { alert('No hay ventas para exportar.'); return; }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text('Reporte de Ventas', 105, 15, { align: 'center' });
-            doc.setFontSize(10);
-            doc.text(`Desde: ${document.getElementById('repFechaDesde').value || 'Inicio'} - Hasta: ${document.getElementById('repFechaHasta').value || 'Hoy'}`, 105, 22, { align: 'center' });
-            const rows = ventasFiltradasReporte.map(v => [fechaToStr(v.fecha), v.productos_json || '', v.Tipo || 'Local', '$' + parseFloat(v.total || 0).toFixed(2)]);
-            doc.autoTable({
-                head: [['Fecha', 'Productos', 'Tipo', 'Total']],
-                body: rows,
-                startY: 30,
-                styles: { fontSize: 8 }
-            });
-            const total = ventasFiltradasReporte.reduce((s, v) => s + parseFloat(v.total || 0), 0);
-            doc.text(`TOTAL: $${total.toFixed(2)}`, 105, doc.lastAutoTable.finalY + 10, { align: 'right' });
-            doc.save('reporte-ventas.pdf');
-        });
-
-        document.getElementById('btnExportarInventario').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text('Inventario', 105, 15, { align: 'center' });
-            const rows = productosCache.map(p => [p.Nombre || '', p.Categoria || '', p.Stock || 0, '$' + parseFloat(p.Precio_Venta || 0).toFixed(2)]);
-            doc.autoTable({
-                head: [['Producto', 'Categoría', 'Stock', 'Precio']],
-                body: rows,
-                startY: 25,
-                styles: { fontSize: 8 }
-            });
-            doc.save('inventario.pdf');
-        });
-
-        // === SIDEBAR Y MENÚ ===
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.add('open');
-            document.getElementById('sidebarOverlay').classList.add('active');
-        });
-        document.getElementById('closeSidebarBtn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('sidebarOverlay').classList.remove('active');
-        });
-        document.getElementById('sidebarOverlay').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('sidebarOverlay').classList.remove('active');
-        });
-
-        document.querySelectorAll('.sidebar__nav a').forEach(a => {
-            a.addEventListener('click', function() {
-                const tab = this.dataset.tab;
-                document.querySelectorAll('.sidebar__nav a').forEach(x => x.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-                document.getElementById('tab-' + tab)?.classList.add('active');
-                document.getElementById('sidebar').classList.remove('open');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-                if (tab === 'inventario') renderInventario(productosCache, document.getElementById('invCategory').value, document.getElementById('invSearch').value);
-                if (tab === 'ventas') aplicarFiltrosVentas();
-                if (tab === 'domicilios') aplicarFiltrosDomicilios();
-                if (tab === 'tienda') aplicarFiltrosTienda();
-                if (tab === 'encargos') aplicarFiltrosEncargos();
-                if (tab === 'servicios') aplicarFiltrosServicios();
-                if (tab === 'reportes') renderReportes();
-                if (tab === 'usuarios') renderUsuarios();
-            });
-        });
-
-        // === NOTIFICACIONES ===
-        document.getElementById('notifBtn').addEventListener('click', function(e) {
-            e.stopPropagation();
-            document.getElementById('notifDropdown').classList.toggle('open');
-        });
-        document.addEventListener('click', function(e) {
-            const d = document.getElementById('notifDropdown');
-            if (!d.contains(e.target) && e.target.id !== 'notifBtn') d.classList.remove('open');
-        });
-
-        // === INIT ===
-        async function initApp() {
-            document.getElementById('estadisticasContenido').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
-            await Promise.all([
-                cargarCategorias(), cargarProductos(), cargarVentas(),
-                cargarDomicilios(), cargarTienda(), cargarEncargos(),
-                cargarServicios(), cargarUsuarios(), cargarConfigGeneral()
-            ]);
-            renderDashboard(ventasCache, domiciliosCache);
-            renderizarEstadisticas();
-            renderInventario(productosCache);
-            renderVentas(ventasCache);
-            renderDomicilios(domiciliosCache);
-            renderTienda(tiendaCache);
-            renderEncargos(encargosCache);
-            renderServicios(serviciosCache);
-            renderUsuarios();
-            aplicarFiltrosVentas();
-            generarNotificaciones();
-            // Poblar select de categorías en modal producto
-            const selCat = document.getElementById('prodCategoria');
-            if (selCat) {
-                selCat.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
-            }
-        }
-
-        // === CATEGORÍAS ===
-        document.getElementById('agregarCategoriaBtn')?.addEventListener('click', async function() {
-            const n = document.getElementById('nuevaCategoriaInput').value.trim();
-            if (!n) return;
-            try {
-                await window.firebaseFns.addDoc(window.firebaseFns.collection(window.firebaseDb, 'Categoria'), { nombre: n });
-                document.getElementById('nuevaCategoriaInput').value = '';
-                await cargarCategorias();
-                const sel = document.getElementById('prodCategoria');
-                sel.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
-                alert('✅ Categoría agregada.');
-            } catch (e) { alert('Error: ' + e.message); }
-        });
-
-        document.getElementById('eliminarCategoriaBtn')?.addEventListener('click', async function() {
-            const n = document.getElementById('prodCategoria').value;
-            if (!n || n === 'General') { alert('Selecciona una categoría válida.'); return; }
-            if (!confirm(`¿Eliminar la categoría "${n}"?`)) return;
-            try {
-                const snap = await window.firebaseFns.getDocs(window.firebaseFns.collection(window.firebaseDb, 'Categoria'));
-                const match = snap.docs.find(d => d.data().nombre === n);
-                if (match) await window.firebaseFns.deleteDoc(window.firebaseFns.doc(window.firebaseDb, 'Categoria', match.id));
-                await cargarCategorias();
-                const sel = document.getElementById('prodCategoria');
-                sel.innerHTML = '<option value="General">General</option>' + categoriasCache.map(c => `<option value="${c}">${c}</option>`).join('');
-                alert('✅ Categoría eliminada.');
-            } catch (e) { alert('Error: ' + e.message); }
-        });
-    </script>
+document.addEventListener('DOMContentLoaded', () => {
+    restaurarFormulario();
+    actualizarContadorHist();
+    actualizarBotonSync();
+    actualizarOffline();
+    window.addEventListener('online', actualizarOffline);
+    window.addEventListener('offline', actualizarOffline);
+    document.body.addEventListener('input', guardarFormulario);
+    document.body.addEventListener('change', guardarFormulario);
+});
+</script>
 </body>
 </html>
