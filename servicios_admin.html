@@ -38,7 +38,7 @@
 
         /* SIDEBAR (LISTA DE SOLICITUDES) */
         .sidebar { width: 340px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-        
+
         .sidebar-top { padding: 15px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
         .btn-add-manual { width: 100%; padding: 10px; background: #1a252f; color: white; border: none; border-radius: 8px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; margin-bottom: 10px; }
         .btn-add-manual:hover { background: #2c3e50; transform: translateY(-2px); }
@@ -49,7 +49,7 @@
         .search-container { padding: 10px 15px; background: #f8fafc; position: relative; }
         .search-container input { width: 100%; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-size: 0.9rem; font-family: inherit; background: white; }
         .search-container input:focus { border-color: #2980b9; }
-        
+
         .sugerencias-dropdown {
             display: none;
             position: absolute;
@@ -96,15 +96,16 @@
         .badge-proceso { background: #dbeafe; color: #2563eb; }
         .badge-completado { background: #d1fae5; color: #059669; }
         .badge-cancelado { background: #fee2e2; color: #dc2626; }
+        .badge-total { background: #f1f5f9; color: #1e272e; margin-left: 6px; }
 
         /* PANEL DE TRABAJO (DERECHA) */
         .workspace { flex: 1; overflow-y: auto; padding: 20px; background: #f5f6fa; position: relative; }
         .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center; }
         .empty-state h2 { font-size: 1.5rem; margin-bottom: 10px; }
-        
+
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .card h3 { font-size: 1.1rem; font-weight: 600; color: #1e272e; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
-        
+
         .cliente-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; margin-bottom: 10px; }
         .cliente-info p { margin: 0; }
         .cliente-info strong { color: #1e272e; }
@@ -112,8 +113,8 @@
         .problema-box { background: #f8fafc; border-left: 4px solid #2980b9; padding: 10px; font-size: 0.9rem; border-radius: 4px; margin-top: 10px; }
 
         /* TABLA DE COMPONENTES */
-        .componentes-header { display: grid; grid-template-columns: 2fr 80px 100px 40px; gap: 10px; font-weight: 600; font-size: 0.85rem; color: #64748b; margin-bottom: 8px; padding: 0 5px; }
-        .componente-row { display: grid; grid-template-columns: 2fr 80px 100px 40px; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .componentes-header { display: grid; grid-template-columns: 2fr 80px 70px 100px 40px; gap: 10px; font-weight: 600; font-size: 0.85rem; color: #64748b; margin-bottom: 8px; padding: 0 5px; }
+        .componente-row { display: grid; grid-template-columns: 2fr 80px 70px 100px 40px; gap: 10px; margin-bottom: 10px; align-items: center; }
         .componente-row input { width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-family: inherit; outline: none; }
         .componente-row input:focus { border-color: #2980b9; }
         .btn-remove { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -125,13 +126,13 @@
         .totales-box { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
         .total-row { display: flex; justify-content: space-between; width: 250px; font-size: 0.95rem; }
         .total-row.gran-total { font-size: 1.3rem; font-weight: 700; color: #1e272e; margin-top: 5px; border-top: 2px solid #e2e8f0; padding-top: 10px; }
-        
+
         .acciones { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
         .btn-success { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .btn-success:hover { background: #059669; }
         .btn-whatsapp { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .btn-whatsapp:hover { background: #1da851; }
-        
+
         /* BOTONES DE ESTADO Y ELIMINAR */
         .btn-status { padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; border: none; display: flex; align-items: center; gap: 6px; }
         .btn-completar { background: #d1fae5; color: #059669; border: 1px solid #34d399; }
@@ -159,7 +160,7 @@
         .reporte-header { text-align: center; margin-bottom: 20px; }
         .reporte-header h3 { font-size: 1.2rem; color: #1e272e; }
         .reporte-header p { font-size: 0.9rem; color: #64748b; }
-        .reporte-resumen { display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; }
+        .reporte-resumen { display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; gap: 10px; flex-wrap: wrap; }
         .reporte-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; page-break-inside: avoid; }
         .reporte-item .rep-cliente { font-weight: 700; color: #2980b9; margin-bottom: 4px; }
         .reporte-item .rep-detalles { font-size: 0.85rem; color: #475569; margin-bottom: 10px; }
@@ -236,7 +237,7 @@
                     <button class="tab-btn" onclick="cambiarPestana('completados')">Complet.</button>
                     <button class="tab-btn" onclick="cambiarPestana('cancelados')">Cancel.</button>
                 </div>
-                
+
                 <div class="sidebar-list" id="listaSolicitudes">
                     <div style="text-align:center; padding:20px; color:#94a3b8;">Cargando...</div>
                 </div>
@@ -260,7 +261,7 @@
             <div class="form-group"><label>Nombre del Cliente *</label><input type="text" id="nuevoNombre" placeholder="Ej: Juan Pérez" /></div>
             <div class="form-group"><label>Teléfono *</label><input type="tel" id="nuevoTelefono" placeholder="Ej: +53 55555555" /></div>
             <div class="form-group"><label>Dirección *</label><input type="text" id="nuevoDireccion" placeholder="Calle, número, barrio..." /></div>
-            
+
             <div class="form-group">
                 <label>Tipo de Servicio *</label>
                 <select id="nuevoServicio">
@@ -278,10 +279,20 @@
         <div class="modal modal-lg">
             <button class="close-modal no-print" onclick="cerrarModalReportes()">✕</button>
             <h2 class="no-print">📊 Generar Reporte de Servicios</h2>
-            
-            <div class="form-row no-print" style="display:flex; gap:15px; margin-bottom:15px;">
-                <div class="form-group" style="flex:1;"><label>Desde:</label><input type="date" id="repFechaDesde" /></div>
-                <div class="form-group" style="flex:1;"><label>Hasta:</label><input type="date" id="repFechaHasta" /></div>
+
+            <div class="form-row no-print" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
+                <div class="form-group" style="flex:1; min-width:140px;"><label>Desde:</label><input type="date" id="repFechaDesde" /></div>
+                <div class="form-group" style="flex:1; min-width:140px;"><label>Hasta:</label><input type="date" id="repFechaHasta" /></div>
+                <div class="form-group" style="flex:1; min-width:140px;">
+                    <label>Estado:</label>
+                    <select id="repEstado">
+                        <option value="Completado" selected>Completados</option>
+                        <option value="En proceso">En proceso</option>
+                        <option value="Pendiente">Pendientes</option>
+                        <option value="Cancelado">Cancelados</option>
+                        <option value="Todos">Todos</option>
+                    </select>
+                </div>
             </div>
             <button class="btn-primary no-print" onclick="generarReporte()">Generar Reporte</button>
 
@@ -326,6 +337,33 @@
         let solicitudActual = null;
         let componentesTemporales = [];
         let pestañaActual = 'nuevos';
+        const PESTAÑAS = ['nuevos', 'proceso', 'completados', 'cancelados'];
+
+        // --- UTILIDADES ---
+        // Escapa texto antes de insertarlo en HTML (evita inyección de código desde datos de clientes)
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+        function aFecha(f) {
+            if (!f) return null;
+            if (typeof f.toDate === 'function') return f.toDate();
+            if (f.seconds) return new Date(f.seconds * 1000);
+            const d = new Date(f);
+            return isNaN(d.getTime()) ? null : d;
+        }
+        function fechaCorta(f) {
+            const d = aFecha(f);
+            return d ? d.toLocaleDateString('es-ES') : 'Sin fecha';
+        }
+        // YYYY-MM-DD en hora LOCAL (toISOString usa UTC y de noche daba el día siguiente)
+        function fechaLocalStr(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        function dinero(n) { return '$' + (parseFloat(n) || 0).toFixed(2); }
+        function unidadDe(c) { return (c && c.unidad) ? c.unidad : 'uds'; }
+        function totalMaterialesDe(comps) {
+            return (comps || []).reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+        }
 
         // --- AUTENTICACIÓN ---
         document.getElementById('loginBtn').addEventListener('click', async function() {
@@ -389,7 +427,7 @@
                 solicitudesCache = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderizarListaSolicitudes();
             } catch (e) {
-                lista.innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">Error al cargar: ${e.message}</div>`;
+                lista.innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">Error al cargar: ${esc(e.message)}</div>`;
             }
         }
 
@@ -408,7 +446,6 @@
                 return;
             }
 
-            // Extraer sugerencias únicas (nombres, servicios y teléfonos)
             const nombres = new Set();
             const servicios = new Set();
             const telefonos = new Set();
@@ -416,14 +453,13 @@
             solicitudesCache.forEach(sol => {
                 if (sol.usuario_nombre && sol.usuario_nombre.toLowerCase().includes(busq)) nombres.add(sol.usuario_nombre);
                 if (sol.servicio_nombre && sol.servicio_nombre.toLowerCase().includes(busq)) servicios.add(sol.servicio_nombre);
-                if (sol.usuario_telefono && sol.usuario_telefono.toLowerCase().includes(busq)) telefonos.add(sol.usuario_telefono);
+                if (sol.usuario_telefono && String(sol.usuario_telefono).toLowerCase().includes(busq)) telefonos.add(String(sol.usuario_telefono));
             });
 
-            // Crear la lista combinada (limitada a 8 resultados para no saturar)
             let items = [];
-            nombres.forEach(n => items.push({ tipo: 'nombre', valor: n, icon: '👤' }));
-            servicios.forEach(s => items.push({ tipo: 'servicio', valor: s, icon: '🔧' }));
-            telefonos.forEach(t => items.push({ tipo: 'telefono', valor: t, icon: '📞' }));
+            nombres.forEach(n => items.push({ valor: n, icon: '👤' }));
+            servicios.forEach(s => items.push({ valor: s, icon: '🔧' }));
+            telefonos.forEach(t => items.push({ valor: t, icon: '📞' }));
 
             items = items.slice(0, 8);
 
@@ -432,19 +468,20 @@
                 return;
             }
 
-            let html = '';
-            items.forEach(item => {
-                html += `
-                    <div class="sugerencia-item" onclick="seleccionarSugerencia('${item.valor.replace(/'/g, "\\'")}')">
-                        <span class="icon">${item.icon}</span>
-                        <span>${item.valor}</span>
-                    </div>
-                `;
-            });
-
-            dropdown.innerHTML = html;
+            // El valor va en un atributo data-* (escapado) y se lee con delegación de eventos: sin onclick armado con texto
+            dropdown.innerHTML = items.map(item => `
+                <div class="sugerencia-item" data-valor="${esc(item.valor)}">
+                    <span class="icon">${item.icon}</span>
+                    <span>${esc(item.valor)}</span>
+                </div>
+            `).join('');
             dropdown.classList.add('active');
         }
+
+        document.getElementById('sugerenciasDropdown').addEventListener('click', function(e) {
+            const it = e.target.closest('.sugerencia-item');
+            if (it) seleccionarSugerencia(it.dataset.valor);
+        });
 
         function seleccionarSugerencia(valor) {
             document.getElementById('searchInput').value = valor;
@@ -461,10 +498,14 @@
         });
 
         // --- LÓGICA DE PESTAÑAS ---
-        function cambiarPestana(tab) {
+        function activarPestana(tab) {
             pestañaActual = tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            const idx = PESTAÑAS.indexOf(tab);
+            document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+        }
+
+        function cambiarPestana(tab) {
+            activarPestana(tab);
             renderizarListaSolicitudes();
         }
 
@@ -487,7 +528,7 @@
                 filtradas = filtradas.filter(sol => {
                     const nombre = (sol.usuario_nombre || '').toLowerCase();
                     const servicio = (sol.servicio_nombre || '').toLowerCase();
-                    const telefono = (sol.usuario_telefono || '').toLowerCase();
+                    const telefono = String(sol.usuario_telefono || '').toLowerCase();
                     return nombre.includes(busqueda) || servicio.includes(busqueda) || telefono.includes(busqueda);
                 });
             }
@@ -504,28 +545,32 @@
                 else if (sol.estado === 'Completado') badgeClass = 'badge-completado';
                 else if (sol.estado === 'Cancelado') badgeClass = 'badge-cancelado';
 
-                const fechaObj = sol.fecha_solicitud;
-                const fechaStr = fechaObj ? (fechaObj.seconds ? new Date(fechaObj.seconds * 1000).toLocaleDateString('es-ES') : new Date(fechaObj).toLocaleDateString('es-ES')) : 'Sin fecha';
-
                 const isActive = solicitudActual && solicitudActual.id === sol.id ? 'active' : '';
+                const total = parseFloat(sol.total_presupuesto) || 0;
+                const totalBadge = total > 0 ? `<span class="badge badge-total">${dinero(total)}</span>` : '';
 
                 html += `
-                    <div class="solicitud-card ${isActive}" id="card-${sol.id}" onclick="seleccionarSolicitud('${sol.id}')">
-                        <div class="title">🔧 ${sol.servicio_nombre || 'Servicio'}</div>
-                        <div class="sub">👤 ${sol.usuario_nombre || 'Cliente'}</div>
-                        <div class="sub">📅 ${fechaStr}</div>
-                        <span class="badge ${badgeClass}">${sol.estado || 'Pendiente'}</span>
+                    <div class="solicitud-card ${isActive}" id="card-${esc(sol.id)}" data-id="${esc(sol.id)}">
+                        <div class="title">🔧 ${esc(sol.servicio_nombre || 'Servicio')}</div>
+                        <div class="sub">👤 ${esc(sol.usuario_nombre || 'Cliente')}</div>
+                        <div class="sub">📅 ${esc(fechaCorta(sol.fecha_solicitud))}</div>
+                        <span class="badge ${badgeClass}">${esc(sol.estado || 'Pendiente')}</span>${totalBadge}
                     </div>
                 `;
             });
             lista.innerHTML = html;
         }
 
+        // Delegación: el id viaja en data-id, no dentro de un onclick armado con texto
+        document.getElementById('listaSolicitudes').addEventListener('click', function(e) {
+            const card = e.target.closest('.solicitud-card');
+            if (card) seleccionarSolicitud(card.dataset.id);
+        });
+
         // --- SELECCIONAR SOLICITUD ---
         function seleccionarSolicitud(id) {
             document.querySelectorAll('.solicitud-card').forEach(c => c.classList.remove('active'));
-            const card = document.getElementById(`card-${id}`);
-            if (card) card.classList.add('active');
+            document.querySelectorAll('.solicitud-card').forEach(c => { if (c.dataset.id === id) c.classList.add('active'); });
 
             solicitudActual = solicitudesCache.find(s => s.id === id);
             if (!solicitudActual) return;
@@ -543,19 +588,20 @@
             
             const isReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'disabled' : '';
             const styleReadOnly = (est === 'Completado' || est === 'Cancelado') ? 'background:#f1f5f9; color:#94a3b8;' : '';
+            const descripcionHtml = esc(solicitudActual.descripcion || 'Sin descripción').replace(/\n/g, '<br>');
 
             let html = `
                 <div class="card">
                     <h3>👤 Datos del Cliente</h3>
                     <div class="cliente-info">
-                        <p><strong>Nombre:</strong> <span>${solicitudActual.usuario_nombre || 'Cliente'}</span></p>
-                        <p><strong>Teléfono:</strong> <span>${solicitudActual.usuario_telefono || 'Sin teléfono'}</span></p>
-                        <p><strong>Dirección:</strong> <span>${solicitudActual.direccion || 'Sin dirección'}</span></p>
-                        <p><strong>Servicio:</strong> <span>${solicitudActual.servicio_nombre || 'Servicio'}</span></p>
+                        <p><strong>Nombre:</strong> <span>${esc(solicitudActual.usuario_nombre || 'Cliente')}</span></p>
+                        <p><strong>Teléfono:</strong> <span>${esc(solicitudActual.usuario_telefono || 'Sin teléfono')}</span></p>
+                        <p><strong>Dirección:</strong> <span>${esc(solicitudActual.direccion || 'Sin dirección')}</span></p>
+                        <p><strong>Servicio:</strong> <span>${esc(solicitudActual.servicio_nombre || 'Servicio')}</span></p>
                     </div>
                     <div class="problema-box">
                         <strong>📝 Problema reportado:</strong><br>
-                        ${solicitudActual.descripcion || 'Sin descripción'}
+                        ${descripcionHtml}
                     </div>
                 </div>
 
@@ -565,6 +611,7 @@
                     <div class="componentes-header">
                         <div>Componente / Descripción</div>
                         <div>Cantidad</div>
+                        <div>Unidad</div>
                         <div>Precio Unit.</div>
                         <div></div>
                     </div>
@@ -578,7 +625,7 @@
                     <div class="totales-box">
                         <div class="total-row">
                             <span>Mano de Obra:</span>
-                            <input type="number" id="inputManoObra" value="${manoObraInicial}" step="0.01" min="0" style="width: 100px; padding: 5px; text-align: right; border: 1px solid #e2e8f0; border-radius: 5px; ${styleReadOnly}" oninput="calcularTotales()" ${isReadOnly} />
+                            <input type="number" id="inputManoObra" value="${parseFloat(manoObraInicial) || 0}" step="0.01" min="0" style="width: 100px; padding: 5px; text-align: right; border: 1px solid #e2e8f0; border-radius: 5px; ${styleReadOnly}" oninput="calcularTotales()" ${isReadOnly} />
                         </div>
                         <div class="total-row">
                             <span>Total Materiales:</span>
@@ -609,32 +656,53 @@
             
             ws.innerHTML = html;
             
-            componentesTemporales.forEach((comp, index) => {
-                agregarFilaDOM(comp, index, isReadOnly, styleReadOnly);
-            });
-            
+            renderizarComponentesLista();
             calcularTotales();
         }
 
         // --- LÓGICA DE COMPONENTES ---
         function agregarComponente() {
-            componentesTemporales.push({ nombre: '', cantidad: 1, precio: 0 });
+            componentesTemporales.push({ nombre: '', cantidad: 1, unidad: 'uds', precio: 0 });
             renderizarComponentesLista();
             calcularTotales();
         }
 
-        function agregarFilaDOM(comp, index, disabled = '', style = '') {
+        function crearInput(type, placeholder, value, soloLectura, style, extra) {
+            const i = document.createElement('input');
+            i.type = type;
+            i.placeholder = placeholder;
+            i.value = value;               // .value no interpreta HTML: no hace falta escapar
+            if (extra) Object.keys(extra).forEach(k => i.setAttribute(k, extra[k]));
+            if (soloLectura) i.disabled = true;
+            if (style) i.style.cssText = style;
+            return i;
+        }
+
+        function agregarFilaDOM(comp, index, disabled, style) {
             const contenedor = document.getElementById('contenedorComponentes');
-            const div = document.createElement('div');
-            div.className = 'componente-row';
-            div.id = `fila-comp-${index}`;
-            div.innerHTML = `
-                <input type="text" placeholder="Ej: Breaker 15A" value="${comp.nombre || ''}" oninput="actualizarComponente(${index}, 'nombre', this.value)" ${disabled} style="${style}" />
-                <input type="number" placeholder="1" value="${comp.cantidad || 1}" min="1" oninput="actualizarComponente(${index}, 'cantidad', this.value)" ${disabled} style="${style}" />
-                <input type="number" placeholder="0.00" value="${comp.precio || 0}" min="0" step="0.01" oninput="actualizarComponente(${index}, 'precio', this.value)" ${disabled} style="${style}" />
-                <button class="btn-remove" onclick="eliminarComponente(${index})" title="Eliminar" ${disabled} style="${disabled ? 'display:none;' : ''}">✕</button>
-            `;
-            contenedor.appendChild(div);
+            const ro = !!disabled;
+            const row = document.createElement('div');
+            row.className = 'componente-row';
+            row.id = `fila-comp-${index}`;
+
+            const iNombre = crearInput('text', 'Ej: Breaker 15A', comp.nombre || '', ro, style);
+            const iCant = crearInput('number', '1', comp.cantidad || 1, ro, style, { min: '0', step: 'any' });
+            const iUni = crearInput('text', 'uds', unidadDe(comp), ro, style);
+            const iPrecio = crearInput('number', '0.00', comp.precio || 0, ro, style, { min: '0', step: '0.01' });
+            iNombre.addEventListener('input', () => actualizarComponente(index, 'nombre', iNombre.value));
+            iCant.addEventListener('input', () => actualizarComponente(index, 'cantidad', iCant.value));
+            iUni.addEventListener('input', () => actualizarComponente(index, 'unidad', iUni.value));
+            iPrecio.addEventListener('input', () => actualizarComponente(index, 'precio', iPrecio.value));
+
+            const btn = document.createElement('button');
+            btn.className = 'btn-remove';
+            btn.title = 'Eliminar';
+            btn.textContent = '✕';
+            btn.addEventListener('click', () => eliminarComponente(index));
+            if (ro) { btn.disabled = true; btn.style.display = 'none'; }
+
+            [iNombre, iCant, iUni, iPrecio, btn].forEach(el => row.appendChild(el));
+            contenedor.appendChild(row);
         }
 
         function renderizarComponentesLista() {
@@ -666,24 +734,21 @@
         }
 
         function calcularTotales() {
-            let totalMateriales = 0;
-            componentesTemporales.forEach(c => {
-                totalMateriales += (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0));
-            });
-            
+            const totalMateriales = totalMaterialesDe(componentesTemporales);
             const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
             const totalFinal = totalMateriales + manoObra;
             
-            document.getElementById('spanTotalMateriales').textContent = `$${totalMateriales.toFixed(2)}`;
-            document.getElementById('spanTotalFinal').textContent = `$${totalFinal.toFixed(2)}`;
+            document.getElementById('spanTotalMateriales').textContent = dinero(totalMateriales);
+            document.getElementById('spanTotalFinal').textContent = dinero(totalFinal);
         }
-                    // --- GUARDAR PRESUPUESTO EN FIREBASE ---
+
+        // --- GUARDAR PRESUPUESTO EN FIREBASE ---
         async function guardarPresupuesto() {
             if (!solicitudActual) return;
             const btn = document.querySelector('.btn-success');
             btn.disabled = true; btn.textContent = '⏳ Guardando...';
             
-            const totalMateriales = componentesTemporales.reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+            const totalMateriales = totalMaterialesDe(componentesTemporales);
             const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
             const totalFinal = totalMateriales + manoObra;
 
@@ -701,13 +766,12 @@
                 
                 alert('✅ Presupuesto guardado correctamente. El estado pasó a "En proceso".');
                 
+                const idGuardado = solicitudActual.id;
                 await cargarSolicitudes();
                 
-                pestañaActual = 'proceso';
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                activarPestana('proceso');
                 renderizarListaSolicitudes();
-                seleccionarSolicitud(solicitudActual.id);
+                seleccionarSolicitud(idGuardado);
                 
             } catch (e) {
                 alert('Error al guardar: ' + e.message);
@@ -733,20 +797,14 @@
                 
                 alert(`✅ Servicio marcado como ${nuevoEstado}.`);
                 
+                const idActual = solicitudActual.id;
                 await cargarSolicitudes();
                 
-                if (nuevoEstado === 'Completado') {
-                    pestañaActual = 'completados';
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                } else if (nuevoEstado === 'Cancelado') {
-                    pestañaActual = 'cancelados';
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-btn')[3].classList.add('active');
-                }
+                if (nuevoEstado === 'Completado') activarPestana('completados');
+                else if (nuevoEstado === 'Cancelado') activarPestana('cancelados');
                 
                 renderizarListaSolicitudes();
-                seleccionarSolicitud(solicitudActual.id);
+                seleccionarSolicitud(idActual);
 
             } catch (e) {
                 alert('Error al cambiar estado: ' + e.message);
@@ -785,14 +843,16 @@
         function compartirWhatsApp() {
             if (!solicitudActual) return;
             
-            let tel = solicitudActual.usuario_telefono;
-            if (!tel || tel === 'Sin teléfono') { 
+            // wa.me solo acepta dígitos: se quitan +, espacios y guiones
+            let tel = String(solicitudActual.usuario_telefono || '').replace(/\D/g, '');
+            if (!tel) { 
                 alert('El cliente no tiene un teléfono registrado.'); 
                 return; 
             }
-            tel = String(tel).trim();
+            // Número cubano de 8 dígitos sin código de país → se antepone 53
+            if (tel.length === 8) tel = '53' + tel;
             
-            const totalMateriales = componentesTemporales.reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+            const totalMateriales = totalMaterialesDe(componentesTemporales);
             const manoObra = parseFloat(document.getElementById('inputManoObra').value) || 0;
             const totalFinal = totalMateriales + manoObra;
 
@@ -808,13 +868,13 @@
                 msg += `🛠️ *Materiales a utilizar:*\n`;
                 componentesTemporales.forEach(c => {
                     if (c.nombre && c.cantidad > 0) {
-                        msg += `- ${c.nombre} (x${c.cantidad})\n`;
+                        msg += `- ${c.nombre} (x${c.cantidad} ${unidadDe(c)})\n`;
                     }
                 });
                 msg += `\n`;
             }
             
-            msg += `💰 *TOTAL A PAGAR: $${totalFinal.toFixed(2)}*\n\n`;
+            msg += `💰 *TOTAL A PAGAR: ${dinero(totalFinal)}*\n\n`;
             msg += `Quedamos atentos para coordinar la visita. ¡Gracias por confiar en B&B! 🙌`;
 
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -893,9 +953,7 @@
 
                 await cargarSolicitudes();
                 
-                pestañaActual = 'nuevos';
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                activarPestana('nuevos');
                 renderizarListaSolicitudes();
                 
                 seleccionarSolicitud(docRef.id);
@@ -910,15 +968,13 @@
 
         // --- GENERADOR DE REPORTES ---
         function abrirModalReportes() {
-            // Poner fechas por defecto (este mes)
+            // Fechas por defecto: este mes (en hora local)
             const hoy = new Date();
             const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
             
-            // Formatear a YYYY-MM-DD
-            const formatDate = (date) => date.toISOString().split('T')[0];
-            
-            document.getElementById('repFechaDesde').value = formatDate(primerDia);
-            document.getElementById('repFechaHasta').value = formatDate(hoy);
+            document.getElementById('repFechaDesde').value = fechaLocalStr(primerDia);
+            document.getElementById('repFechaHasta').value = fechaLocalStr(hoy);
+            document.getElementById('repEstado').value = 'Completado';
             
             document.getElementById('reporteContenido').innerHTML = '';
             document.getElementById('modalReportes').classList.add('active');
@@ -931,6 +987,7 @@
         function generarReporte() {
             const desdeStr = document.getElementById('repFechaDesde').value;
             const hastaStr = document.getElementById('repFechaHasta').value;
+            const estadoSel = document.getElementById('repEstado').value;
 
             if (!desdeStr || !hastaStr) {
                 alert('Por favor, selecciona ambas fechas.');
@@ -940,32 +997,35 @@
             const desde = new Date(desdeStr + 'T00:00:00');
             const hasta = new Date(hastaStr + 'T23:59:59');
 
-            // Filtrar solicitudes por fecha (usamos fecha_solicitud o fecha_actualizacion)
+            // Filtrar por fecha (actualización o, si no hay, solicitud) y por estado
             const filtradas = solicitudesCache.filter(sol => {
-                const fecha = sol.fecha_actualizacion || sol.fecha_solicitud;
-                if (!fecha) return false;
-                const fechaObj = fecha.seconds ? new Date(fecha.seconds * 1000) : new Date(fecha);
-                return fechaObj >= desde && fechaObj <= hasta;
+                const fechaObj = aFecha(sol.fecha_actualizacion || sol.fecha_solicitud);
+                if (!fechaObj) return false;
+                if (!(fechaObj >= desde && fechaObj <= hasta)) return false;
+                if (estadoSel !== 'Todos' && (sol.estado || 'Pendiente') !== estadoSel) return false;
+                return true;
             });
 
             if (filtradas.length === 0) {
-                document.getElementById('reporteContenido').innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">No hay servicios registrados en este rango de fechas.</p>';
+                document.getElementById('reporteContenido').innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">No hay servicios registrados con esos filtros.</p>';
                 return;
             }
 
-            let totalCobradoGeneral = 0;
+            let totalCobradoGeneral = 0;   // solo servicios Completados
+            let completados = 0;
             let html = `
                 <div class="reporte-header">
-                    <h3>📋 REPORTE DE SERVICIOS - B&B</h3>
-                    <p>Período: ${desdeStr} al ${hastaStr}</p>
+                    <h3>📋 REPORTE DE SERVICIOS - B&amp;B</h3>
+                    <p>Período: ${esc(desdeStr)} al ${esc(hastaStr)} · Estado: ${esc(estadoSel === 'Todos' ? 'Todos' : estadoSel)}</p>
                 </div>
             `;
 
             filtradas.forEach((sol, index) => {
-                const totalMateriales = (sol.componentes || []).reduce((acc, c) => acc + (parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)), 0);
+                const totalMateriales = totalMaterialesDe(sol.componentes);
                 const manoObra = parseFloat(sol.mano_obra || 0);
                 const totalServicio = totalMateriales + manoObra;
-                totalCobradoGeneral += totalServicio;
+                const estado = sol.estado || 'Pendiente';
+                if (estado === 'Completado') { totalCobradoGeneral += totalServicio; completados++; }
 
                 let tablaMateriales = '';
                 if (sol.componentes && sol.componentes.length > 0) {
@@ -982,10 +1042,10 @@
                             <tbody>
                                 ${sol.componentes.map(c => `
                                     <tr>
-                                        <td>${c.nombre || '-'}</td>
-                                        <td>${c.cantidad || 0}</td>
-                                        <td>$${parseFloat(c.precio || 0).toFixed(2)}</td>
-                                        <td>$${(parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0)).toFixed(2)}</td>
+                                        <td>${esc(c.nombre || '-')}</td>
+                                        <td>${esc(c.cantidad || 0)} ${esc(unidadDe(c))}</td>
+                                        <td>${dinero(c.precio)}</td>
+                                        <td>${dinero(parseFloat(c.cantidad || 0) * parseFloat(c.precio || 0))}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -995,24 +1055,22 @@
                     tablaMateriales = '<p style="font-size:0.85rem; color:#64748b;">Sin materiales registrados.</p>';
                 }
 
-                const fechaSol = sol.fecha_solicitud ? (sol.fecha_solicitud.seconds ? new Date(sol.fecha_solicitud.seconds * 1000).toLocaleDateString('es-ES') : new Date(sol.fecha_solicitud).toLocaleDateString('es-ES')) : '-';
-
                 html += `
                     <div class="reporte-item">
-                        <div class="rep-cliente">${index + 1}. ${sol.usuario_nombre || 'Cliente'}</div>
+                        <div class="rep-cliente">${index + 1}. ${esc(sol.usuario_nombre || 'Cliente')} <span style="font-weight:400; color:#64748b; font-size:0.8rem;">[${esc(estado)}]</span></div>
                         <div class="rep-detalles">
-                            <strong>📅 Fecha:</strong> ${fechaSol} | 
-                            <strong>📞 Teléfono:</strong> ${sol.usuario_telefono || 'Sin teléfono'} | 
-                            <strong>📍 Dirección:</strong> ${sol.direccion || 'Sin dirección'}<br>
-                            <strong>🔧 Servicio:</strong> ${sol.servicio_nombre || 'Servicio'}
+                            <strong>📅 Fecha:</strong> ${esc(fechaCorta(sol.fecha_solicitud))} | 
+                            <strong>📞 Teléfono:</strong> ${esc(sol.usuario_telefono || 'Sin teléfono')} | 
+                            <strong>📍 Dirección:</strong> ${esc(sol.direccion || 'Sin dirección')}<br>
+                            <strong>🔧 Servicio:</strong> ${esc(sol.servicio_nombre || 'Servicio')}
                         </div>
                         
                         ${tablaMateriales}
                         
                         <div class="rep-totales">
-                            <div>Materiales: $${totalMateriales.toFixed(2)}</div>
-                            <div>Mano de obra: $${manoObra.toFixed(2)}</div>
-                            <div style="font-size:1.1rem; color:#10b981; margin-top:4px;">TOTAL: $${totalServicio.toFixed(2)}</div>
+                            <div>Materiales: ${dinero(totalMateriales)}</div>
+                            <div>Mano de obra: ${dinero(manoObra)}</div>
+                            <div style="font-size:1.1rem; color:#10b981; margin-top:4px;">TOTAL: ${dinero(totalServicio)}</div>
                         </div>
                     </div>
                 `;
@@ -1021,7 +1079,8 @@
             html += `
                 <div class="reporte-resumen">
                     <span>TOTAL SERVICIOS: ${filtradas.length}</span>
-                    <span>TOTAL COBRADO: $${totalCobradoGeneral.toFixed(2)}</span>
+                    <span>COMPLETADOS: ${completados}</span>
+                    <span>TOTAL COBRADO (completados): ${dinero(totalCobradoGeneral)}</span>
                 </div>
                 <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
             `;
